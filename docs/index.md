@@ -1,3 +1,3 @@
-## JARVIS for Systems Engineering
+# JARVIS for SE
 
-Just Another Rather Very Intelligent System (J.A.R.V.I.S) to help systems engineers to automate their modeling activities to speed up their impact analysis.
+Just Another Rather Very Intelligent System (JARVIS) to help systems engineers (SE) to automate their modeling activities and speed up their impact analysis.
