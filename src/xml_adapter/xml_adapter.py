@@ -5,7 +5,7 @@ import sys
 from lxml import etree
 
 # Modules
-import xml_writer # noqa
+from . import xml_writer # noqa
 sys.path.append("../datamodel")
 import datamodel # noqa
 

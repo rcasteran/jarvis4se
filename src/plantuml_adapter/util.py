@@ -161,31 +161,33 @@ class MakePlantUml:
     @staticmethod
     def get_url_from_local(string):
         """Generate unique .svg from string using plantuml.jar client"""
-        full_string = "@startuml\n" + string + "@enduml"
-        # Generate and set unique identifier of length 10 integers
-        identi = uuid.uuid4()
-        identi = str(identi.int)[:10]
-        current_file_path = str(pathlib.Path('./Diagrams/Diagram' + identi + '.txt'))
-        plantuml_jar_path = str(pathlib.Path('./plantuml.jar'))
-        with open(current_file_path, 'w+') as my_file:
-            my_file.write(full_string)
-            my_file.close()
-        out = ''
+        full_string = "@startuml\nskin rose\n" + string + "@enduml"
+        current_file_path = None
+        out = None
         if len(full_string) < 30000:
-            out = subprocess.check_output(
-                ['java', '-DPLANTUML_LIMIT_SIZE=15000', '-jar', plantuml_jar_path,
-                 '%s' % current_file_path, '-tsvg', '-encodeurl'])
-            out = str(out).replace("b'", "").replace("\\r\\n'", "")
-            out = 'http://www.plantuml.com/plantuml/svg/' + out
+            # Quickest by HTTP request to plantuml server (only for small diagrams)
+            server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
+                              basic_auth={},
+                              form_auth={}, http_opts={}, request_opts={})
+            out = server.get_url(full_string)
         else:
-            out = subprocess.check_output(
+            # Generate and set unique identifier of length 10 integers
+            identi = uuid.uuid4()
+            identi = str(identi.int)[:10]
+            current_file_path = str(pathlib.Path('./Diagrams/Diagram' + identi + '.txt'))
+            plantuml_jar_path = str(pathlib.Path('./plantuml.jar'))
+            with open(current_file_path, 'w+') as my_file:
+                my_file.write(full_string)
+                my_file.close()
+            subprocess.check_output(
                 ['java', '-DPLANTUML_LIMIT_SIZE=20000', '-jar', plantuml_jar_path,
                  '%s' % current_file_path, '-tsvg'])
             out = str(current_file_path).replace(".txt", ".svg")
             if os.path.isfile(out):
                 pass
         if out:
-            os.remove(current_file_path)
+            if current_file_path:
+                os.remove(current_file_path)
             return out
         else:
             print("Diagram not generated")

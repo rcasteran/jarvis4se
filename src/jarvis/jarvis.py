@@ -12,9 +12,10 @@ from IPython.core.magic import (Magics, magics_class, cell_magic)
 from IPython.display import display, HTML, Markdown
 
 # Modules
-import orchestrator
+from . import orchestrator
+from . import question_answer
 import xml_adapter
-import question_answer
+
 
 
 # The class MUST call this class decorator at creation time
@@ -108,21 +109,6 @@ class MyMagics(Magics):
     @classmethod
     def show_no_model_update_msg(cls, xml_name):
         print(f"No update for {xml_name}.xml")
-
-
-# In order to actually use these magics, you must register them with a
-# running IPython.
-def load_ipython_extension(ipython):
-    """
-    Any module file that define a function named `load_ipython_extension`
-    can be loaded via `%load_ext module.path` or be configured to be
-    autoloaded by IPython at startup time.
-    """
-    # You can register the class itself without instantiating it.  IPython will
-    # call the default constructor on it.
-    ipython.register_magics(MyMagics)
-    clean_diagram_folder()
-    greet_user()
 
 
 LOOKUPS = [
