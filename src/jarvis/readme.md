@@ -1,31 +1,8 @@
-# Intelligent assistant for system engineering activities
+# Package JARVIS
 
-This Python Project aims at developing an 'intelligent' assistant for system engineering activities called Jarvis
+## Content
 
-## Configuration & Dependencies
-This project has been developed and tested using :
-
- - Python (3.9.6+) : https://www.python.org/downloads/
- - IPython (7.27.0+) : ```pip install ipython```
- - lxml (4.6.3+) : ```pip install lxml```
- - Jupyter notebook (6.4.3+): ```pip install notebook```
- - Plantuml (0.3.0): ```pip install plantuml``` 
- - JDK(11.0.11+): tested on 11.0.11 & 15.0.2 (since used of plantuml.jar client to extend PLANTUML_LIMIT_SIZE)
- 
-## Usage
-Clone the MTC/deliverable/script repo from github, then start(cmd```jupyter notebook```) a new notebook within the "jarvis" folder.
-
-Open you Notebook, load JARVIS :
-```py
-%reload_ext jarvis
-```
-
-and then call Jarvis in each cell you want to chat with him using Jupyter's magic function syntax:
-```py
-%%jarvis
-```
-
-## JARVIS Commands
+## Commands
 
 ### Overview
 
@@ -255,6 +232,3 @@ Show the whole model Diagram:
 with <scope>
 show all
 ```
-
-## Development
-Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
