@@ -3,7 +3,7 @@
 # Libraries
 import re
 # Modules
-import orchestrator
+from . import orchestrator
 
 question_type = [
     (r"What is ([^\.\n]*) ", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),

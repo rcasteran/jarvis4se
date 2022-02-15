@@ -8,7 +8,7 @@ import tkinter as tk
 import tkinter.filedialog
 
 # Modules
-import util
+from . import util
 sys.path.append("../xml_adapter")
 import xml_adapter # noqa
 sys.path.append("../datamodel")

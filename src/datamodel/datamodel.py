@@ -4,7 +4,7 @@
 from enum import Enum
 
 # Modules
-import util
+from . import util
 
 
 # Function type

@@ -8,7 +8,7 @@ import sys
 import uuid
 
 # Modules
-import question_answer
+from . import question_answer
 sys.path.append("../plantuml_adapter")
 import plantuml_adapter # noqa
 if not os.path.exists("../datamodel"):
