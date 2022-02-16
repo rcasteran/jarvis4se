@@ -161,16 +161,17 @@ class MakePlantUml:
     @staticmethod
     def get_url_from_local(string):
         """Generate unique .svg from string using plantuml.jar client"""
-        full_string = "@startuml\nskin rose\n" + string + "@enduml"
         current_file_path = None
         out = None
-        if len(full_string) < 30000:
+        if len(string) < 30000:
+            full_string = "@startuml\nskin rose\n" + string + "@enduml"
             # Quickest by HTTP request to plantuml server (only for small diagrams)
             server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
                               basic_auth={},
                               form_auth={}, http_opts={}, request_opts={})
             out = server.get_url(full_string)
         else:
+            full_string = "@startuml\n" + string + "@enduml"
             # Generate and set unique identifier of length 10 integers
             identi = uuid.uuid4()
             identi = str(identi.int)[:10]
