@@ -65,6 +65,31 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
     return update_list
 
 
+def cut_string_list(string_tuple_list):
+    """From set of input command strings e.g for composition with input list as
+    {(Function_name, Function_name_A), (Function_name, [Function_name_B, Function_name_C])} : this
+    methods returns {(Function_name, Function_name_A), (Function_name, Function_name_B),
+    (Function_name, Function_name_C)}
+
+        Parameters:
+            string_tuple_list ({(str, str), ...}) : Lists of string tuple from jarvis cell
+        Returns:
+            output_list ([0/1]) : output list
+    """
+
+    output_list = set()
+    for parent, child in string_tuple_list:
+        if "," in child:
+            child_str = child.replace(" ", "")
+            child_list_str = re.split(r',(?![^[]*\])', child_str)
+            for elem in child_list_str:
+                output_list.add((parent, elem))
+        else:
+            output_list.add((parent, child))
+
+    return output_list
+
+
 def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_function_dict,
                     xml_state_list, xml_parent_state_dict, xml_fun_elem_list,
                     xml_parent_fun_elem_dict, output_xml):
@@ -102,7 +127,9 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
 
     concatenated_lists = [*xml_function_name_list, *xml_state_name_list, *xml_fun_elem_name_list]
 
-    for elem in parent_child_name_str_list:
+    cleaned_parent_child_list_str = cut_string_list(parent_child_name_str_list)
+
+    for elem in cleaned_parent_child_list_str:
         is_elem_found = True
         if not any(elem[0] in j for j in concatenated_lists) or \
                 not any(elem[1] in j for j in concatenated_lists):
@@ -311,12 +338,11 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
     data_predecessor_list = []
-    data_predecessor_str_list = []
+
     allocated_item_list = []
     # Filter input string
-    for p in data_predecessor_str_set:
-        blank_cleaned_str = p[1].replace(" ", "")
-        data_predecessor_str_list.append([p[0], re.split(r',(?![^[]*\])', blank_cleaned_str)])
+    data_predecessor_str_list = cut_string_list(data_predecessor_str_set)
+
     # Create data names list already in xml
     xml_data_name_list = get_object_name(xml_data_list)
 
