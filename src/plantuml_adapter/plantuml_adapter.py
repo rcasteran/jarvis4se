@@ -208,7 +208,6 @@ def check_child_allocation(fun_elem, function_list, out_str=None):
     if not out_str:
         out_str = ''
     for t in function_list:
-        print(t)
         if t.id in fun_elem.allocated_function_list:
             child_allocated_function_list = []
             for c in fun_elem.child_list:
@@ -273,17 +272,17 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     plantuml_text += util.MakePlantUml.close_component()
     # Write external(consumer or producer) functions and highest level functional
     # element allocated to it
-    for function in external_function_list:
-        check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
-        plantuml_text += fun_elem_txt
-        plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                               check)
+    #for function in external_function_list:
+        #check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+        #plantuml_text += fun_elem_txt
+        #plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
+                                               #check)
 
     # Write data flows
-    plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
-    plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
-    plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
-
+    #plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
+    #plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
+    #plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
+    #print(plantuml_text)
     diagram_url = util.MakePlantUml.get_url_from_local(plantuml_text)
     return diagram_url
 
@@ -348,49 +347,76 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
     return sequence_text, diagram_url
 
 
-def get_next_predecessor(message, message_object_list, sequence, sequence_list, idx):
-    for t in message_object_list:
-        for j in t[2].predecessor_list:
-            if message[2] == j:
-                if t not in sequence:
-                    t[3] = True
-                    sequence.insert(idx, t)
-                    idx += 1
-                    get_next_predecessor(t, message_object_list, sequence, sequence_list, idx)
+def get_predecessor_list(data):
+    predecessor_list = set()
+    if data.predecessor_list:
+        for predecessor in data.predecessor_list:
+            predecessor_list.add(predecessor)
+
+    return predecessor_list
+
+
+def check_sequence(predecessor_list, sequence):
+    count = len(predecessor_list)
+    check = False
+    if not predecessor_list:
+        return check
+    for pred in predecessor_list:
+        for elem in sequence:
+            if pred in elem:
+                count -= 1
+    if count == 0:
+        check = True
+    return check
+
+
+def clean_predecessor_list(message_object_list):
+
+    for message in message_object_list:
+        pred_list = get_predecessor_list(message[2])
+        for pred in pred_list:
+            if not any(pred in s for s in message_object_list):
+                message[2].predecessor_list.remove(pred)
+
+    return message_object_list
+
+
+def get_sequence(message, message_object_list, sequence_list, sequence=None, index=None):
+    if not sequence:
+        sequence = []
+        index = 0
+    if message not in sequence and not any(message in s for s in sequence_list) is True:
+        message[3] = True
+        sequence.insert(index, message)
+        index += 1
+        for mess in message_object_list:
+            if message[2] in mess[2].predecessor_list:
+                get_sequence(mess, message_object_list, sequence_list, sequence, index)
 
     return sequence
 
 
-def get_predecessor(message_object_list):
+def get_sequences(message_object_list):
     sequence_list = []
     for message in message_object_list:
-        sequence = []
-        index = 0
         if not message[2].predecessor_list:
-            for t in message_object_list:
-                if message[2] in t[2].predecessor_list:
-                    if not any(t in s for s in sequence_list):
-                        if message not in sequence:
-                            message[3] = True
-                            sequence.insert(index, message)
+            sequence = get_sequence(message, message_object_list, sequence_list)
+            sequence_list.append(sequence)
 
-                            index += 1
-                            sequence_list.append(get_next_predecessor(message,
-                                                                      message_object_list,
-                                                                      sequence,
-                                                                      sequence_list,
-                                                                      index))
+    return sequence_list
 
-    for mess in message_object_list:
-        if not any(mess in s for s in sequence_list):
-            for b in sequence_list:
-                for idx, elem in enumerate(b.copy()):
-                    if mess[2] in elem[2].predecessor_list:
-                        mess[3] = True
-                        b.insert(idx-1, mess)
+
+def get_sequence_list(message_object_list):
+    sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
+
     sequence_list = [item for sub in sequence_list for item in sub]
+
+    for (index, mess) in enumerate(sequence_list.copy()):
+        if not mess[2].predecessor_list:
+            sequence_list.remove(mess)
+            sequence_list.insert(0, mess)
 
     return sequence_list
 
@@ -405,25 +431,8 @@ def order_list(message_list, data_list):
             if i[2] == data.name:
                 message_object_list.append([i[0], i[1], data, False])
 
-    ordored_message_object_list = get_predecessor(message_object_list)
-
-    # Check if there are multiple instances of the same item, add them to a list
-    duplicated_item_list = []
-    for k in message_object_list:
-        if ordored_message_object_list.count(k) > 1:
-            duplicated_item_list.append(k)
-    # For each items that is repeated in multiple sequences, remove it
-    for idx, t in enumerate(ordored_message_object_list.copy()):
-        if duplicated_item_list:
-            if t in duplicated_item_list:
-                ordored_message_object_list.remove(t)
-
-    # Add elements that aren't predecessors and ones that were duplicated at the end of the list
-    for p in message_object_list:
-        if p in duplicated_item_list:
-            ordored_message_object_list.append(p)
-        if p not in ordored_message_object_list:
-            ordored_message_object_list.append(p)
+    message_object_list = clean_predecessor_list(message_object_list)
+    ordored_message_object_list = get_sequence_list(message_object_list)
 
     # Add index for each item within the list
     for idx, t in enumerate(ordored_message_object_list):
