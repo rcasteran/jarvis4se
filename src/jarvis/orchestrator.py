@@ -225,7 +225,7 @@ def get_allocated_child(i, xml_fun_elem_list):
     its child also (if not already allocated)
 
         Parameters:
-            i (State/Function) : parent object
+            i ([State/Function]) : parent object, child object
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
 
         Returns:
@@ -1317,10 +1317,42 @@ def filter_show_command(diagram_name_str, **kwargs):
         return
 
 
+def check_level_0_allocated_child(fun_elem, function):
+    if fun_elem.child_list == set():
+        return True
+    else:
+        for fun_elem_child in fun_elem.child_list:
+            if function.child_list != set():
+                for function_child in function.child_list:
+                    if function_child.id in fun_elem_child.allocated_function_list:
+                        return False
+                    elif function.id in fun_elem.allocated_function_list:
+                        return False
+                    else:
+                        check_level_0_allocated_child(fun_elem_child, function_child)
+
+            else:
+                return True
+
+
+def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
+    if allocated_function_list is None:
+        allocated_function_list = set()
+    for function_id in fun_elem.allocated_function_list:
+        for function in function_list:
+            if function.id == function_id and function not in allocated_function_list:
+                if check_level_0_allocated_child(fun_elem, function) is True:
+                    allocated_function_list.add(function)
+                if fun_elem.child_list != set():
+                    for child in fun_elem.child_list:
+                        get_level_0_function(child, function_list, allocated_function_list)
+
+    return allocated_function_list
+
+
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_fun_elem_list):
     main_fun_elem = None
-    allocated_function_list = set()
     # main_fun_elem_list = set()
     external_function_list = set()
     new_producer_list = []
@@ -1330,16 +1362,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
             fun_elem.parent = None
             main_fun_elem = fun_elem
             # main_fun_elem_list, main_parent_dict = get_children(fun_elem)
-            for function_id in fun_elem.allocated_function_list:
-                allocated_function_list.add(function_id)
 
-    for j in xml_function_list:
-        for idx, elem in enumerate(allocated_function_list.copy()):
-            if j.id == elem and j.parent is None:
-                allocated_function_list.remove(elem)
-                allocated_function_list.add(j)
-            else:
-                allocated_function_list.remove(elem)
+    allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 
     for allocated_function in allocated_function_list:
         for elem in xml_producer_function_list:
@@ -1354,14 +1378,16 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
             for t in xml_producer_function_list:
                 if t[0] == elem[0] and t[1].parent is None:
                     external_function_list.add(t[1])
-                    new_producer_list.append(t)
+                    if t not in new_producer_list:
+                        new_producer_list.append(t)
 
     for elem in new_producer_list:
         if not any(elem[0] in s for s in new_consumer_list):
             for t in xml_consumer_function_list:
                 if t[0] == elem[0] and t[1].parent is None:
                     external_function_list.add(t[1])
-                    new_consumer_list.append(t)
+                    if t not in new_consumer_list:
+                        new_consumer_list.append(t)
 
     url_diagram = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
                                                               allocated_function_list,
@@ -1384,10 +1410,10 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
                 state_name = state.name
                 for s in state.allocated_function_list:
                     allocated_function_id_list.add(s)
-    for j in function_list:
-        if j.id in allocated_function_id_list.copy():
-            allocated_function_id_list.remove(j.id)
-            allocated_function_id_list.add(j.name)
+    for function in function_list:
+        if function.id in allocated_function_id_list.copy():
+            allocated_function_id_list.remove(function.id)
+            allocated_function_id_list.add(function.name)
 
     diagram_str = show_functions_sequence(allocated_function_id_list, function_list,
                                           xml_consumer_function_list, xml_producer_function_list,
@@ -2243,16 +2269,10 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == fun.name or elem[1] == fun.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(fun, xml_fun_elem_list)
-                                if not check_allocation:
+                                if check_allocation is None:
                                     fun_elem.add_allocated_function(fun.id)
                                     fun_elem_allocated_function_list.append([fun_elem, fun])
-                                elif check_allocation:
-                                    if fun_elem.parent:
-                                        if any(fun_elem.parent.name in s for s in check_allocation)\
-                                                and not \
-                                                any(fun_elem.name in s for s in check_allocation):
-                                            fun_elem.add_allocated_function(fun.id)
-                                            fun_elem_allocated_function_list.append([fun_elem, fun])
+
             elif result_fun_elem_state:
                 for fun_elem in xml_fun_elem_list:
                     if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
@@ -2260,16 +2280,10 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == state.name or elem[1] == state.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(state, xml_fun_elem_list)
-                                if not check_allocation:
+                                if check_allocation is None:
                                     fun_elem.add_allocated_state(state.id)
                                     fun_elem_allocated_state_list.append([fun_elem, state])
-                                elif check_allocation:
-                                    if fun_elem.parent:
-                                        if any(fun_elem.parent.name in s for s in check_allocation)\
-                                                and not \
-                                                any(fun_elem.name in s for s in check_allocation):
-                                            fun_elem.add_allocated_state(state.id)
-                                            fun_elem_allocated_state_list.append([fun_elem, state])
+
             elif result_state_function:
                 for state in xml_state_list:
                     if elem[0] == state.name or elem[0] == state.alias:
@@ -2408,12 +2422,10 @@ def recursive_allocation(elem, output_xml):
                         return recursive_allocation(e, output_xml)
     else:
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
-            output_xml.write_allocated_state([elem])
             elem[0].add_allocated_state(elem[1].id)
             print(f"State {elem[1].name} allocated to functional "
                   f"element {elem[0].name} (added)")
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
-            output_xml.write_allocated_function([elem])
             elem[0].add_allocated_function(elem[1].id)
             print(f"Function {elem[1].name} allocated to functional "
                   f"element {elem[0].name} (added)")
