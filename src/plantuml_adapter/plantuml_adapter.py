@@ -692,35 +692,3 @@ def match_transition_states(transition, xml_state_list):
         out = [n, destination_state, transition[2]]
 
     return out
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        filename_input = sys.argv[1]
-
-        if len(sys.argv) > 2:
-            filename_output = sys.argv[2]
-        else:
-            filename_output = ''
-    else:
-        # Prevent main window to be displayed
-        tk.Tk().withdraw()
-
-        filename_input = tk.filedialog.askopenfilename(initialdir=sys.path[0],
-                                                       title="Select input file",
-                                                       filetypes=(("XML files", "*.xml"),
-                                                                  ("All files", "*.*")))
-
-        filename_output = tk.filedialog.askopenfilename(initialdir=sys.path[0],
-                                                        title="Select output file",
-                                                        filetypes=(("Text files", "*.txt")
-                                                                   , ("All files", "*.*")))
-        # Check file
-    if len(filename_input) > 0:
-        function_list_xml, consumer_function_list_xml, producer_function_list_xml, parent_child_dict_xml, data_list_xml = \
-            xml_adapter.parse_xml(filename_input)
-        plantuml_string, url_diagram = plantuml_binder(function_list_xml, consumer_function_list_xml,
-                                                       producer_function_list_xml, parent_child_dict_xml)
-        # Instance for the output file
-        output_file = util.MakePlantUml(filename_output)
-        output_file.generate_diagram_output(plantuml_string)
