@@ -192,8 +192,9 @@ def lookup(string, lookups, **kwargs):
         elif regex == r"(?<= |\n)show (.*?)\n":
             result = re.search(regex, string, re.MULTILINE)
         else:
-            # Transform to set : to avoid duplicated function's declaration within jarvis command
-            result = set(re.findall(regex, string, re.MULTILINE))
+            # Transform to avoid duplicated function's declaration within jarvis command
+            result = []
+            [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
 
         if result and not result_chain:
             update = values(result, **kwargs)
