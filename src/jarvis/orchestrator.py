@@ -155,6 +155,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (fu.id, parent_id)
                                 if child_parent_tuple not in xml_parent_function_dict.items():
                                     fu.set_parent(function)
+                                    function.add_child(fu)
                                     parent_child_function_list.append([function, fu])
 
             elif result_state:
@@ -166,6 +167,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (sta.id, parent_id)
                                 if child_parent_tuple not in xml_parent_state_dict.items():
                                     sta.set_parent(state)
+                                    state.add_child(sta)
                                     parent_child_state_list.append([state, sta])
 
             elif result_fun_elem:
@@ -177,6 +179,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (fe.id, parent_id)
                                 if child_parent_tuple not in xml_parent_fun_elem_dict.items():
                                     fe.set_parent(fun_elem)
+                                    fun_elem.add_child(fe)
                                     parent_child_fun_elem_list.append([fun_elem, fe])
 
             else:
@@ -349,23 +352,16 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
     is_elem_found = False
     for elem in data_predecessor_str_list:
         is_elem_found = True
-        bad_list = []
         if elem[0] not in xml_data_name_list:
             is_elem_found = False
-            for i in elem[1]:
-                if i not in xml_data_name_list:
-                    bad_list.append(i)
-            if not bad_list:
+            if elem[1] not in xml_data_name_list:
+                print(f"{elem[0]} and {elem[1]} do not exist")
+            else:
                 print(f"{elem[0]} does not exist")
-            if bad_list:
-                print(f"{elem[0]} and {bad_list} do not exist")
         if elem[0] in xml_data_name_list:
-            for i in elem[1]:
-                if i not in xml_data_name_list:
-                    bad_list.append(i)
-                    is_elem_found = False
-            if bad_list:
-                print(f"{bad_list} do(es) not exist")
+            if elem[1] not in xml_data_name_list:
+                is_elem_found = False
+                print(f"{elem[1]} does not exist")
 
     if is_elem_found:
         for d, p in data_predecessor_str_list:
@@ -377,19 +373,17 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
                     selected_data = data
                     for existing_predecessor in data.predecessor_list:
                         existing_predecessor_id_list.append(existing_predecessor.id)
-            for future_predecessor in p:
-                for da in xml_data_list:
-                    if future_predecessor == da.name and da.id not in existing_predecessor_id_list:
-                        predecessor = da
-                if predecessor is not None and selected_data is not None:
-                    data_predecessor_list.append([selected_data, predecessor])
+            for da in xml_data_list:
+                if p == da.name and da.id not in existing_predecessor_id_list:
+                    predecessor = da
+            if predecessor is not None and selected_data is not None:
+                data_predecessor_list.append([selected_data, predecessor])
             allocation_chain_1 = check_add_allocated_item(d, xml_data_list, xml_chain_list)
             if allocation_chain_1:
                 allocated_item_list.append(allocation_chain_1)
-            for elem in p:
-                allocation_chain_2 = check_add_allocated_item(elem, xml_data_list, xml_chain_list)
-                if allocation_chain_2:
-                    allocated_item_list.append(allocation_chain_2)
+            allocation_chain_2 = check_add_allocated_item(p, xml_data_list, xml_chain_list)
+            if allocation_chain_2:
+                allocated_item_list.append(allocation_chain_2)
 
     update_list = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
     add_allocation([0, 0, 0, allocated_item_list], output_xml)
@@ -475,25 +469,16 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_consumer_function_list:
                         if [elem[0], function] not in xml_producer_function_list:
-                            add_parent_for_data(elem[0], function,
-                                                xml_consumer_function_list,
-                                                new_consumer_list)
+                            new_consumer_list.append([elem[0], function])
+                            parent = add_parent_for_data(elem[0], function,
+                                                         xml_consumer_function_list,
+                                                         xml_producer_function_list,
+                                                         new_consumer_list,
+                                                         output_xml, "consumer")
+                            if parent is not None:
+                                new_consumer_list.append(parent)
                         elif [elem[0], function] in xml_producer_function_list:
-                            # TODO: Delete producer function, check if the flow isn't already
-                            #  produces by another function and add consumer function if not
-                            out = input(
-                                f"Do you want to replace '{function.name} produces {elem[0]}' "
-                                f"by '{function.name} consumes {elem[0]}' ? (Y/N) ")
-                            if out == 'Y':
-                                # output_xml.delete_single_consumer_producer(elem[0], function,
-                                # relationship_type)
-                                print('Not implemented yet')
-                                # print(f"{function.name} consumes {elem[0]} (not added)")
-                            elif out == 'N':
-                                # print(f"{function.name} consumes {elem[0]} (not added)")
-                                None
-                            else:
-                                print(f"'{out}' is not a valid command")
+                            None
 
     update_list = add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml)
 
@@ -528,24 +513,65 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     return update_list
 
 
-def add_parent_for_data(flow, function, current_list, new_list):
+def add_parent_for_data(flow, function, current_list, opposite_list, new_list, output_xml,
+                        relationship_str):
     """
     Add direct parent's function of consumer/producer and delete internal flow if the case
 
         Parameters:
             flow (Data_name_str) : Data's name
-            function (Function) : Current function
-            current_list ([Data_name_str, function_name_str]) : 'Current' list
+            function (Function) : Current function's parent
+            current_list ([Data_name_str, function_name_str]) : 'Current' list (producer or consumer)
+            opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
             new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
-
+            output_xml (GenerateXML object) : XML's file object
+            relationship_str (str) : "consumer" or "producer"
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            elem ([data, Function]) : Return parent
     """
-    new_list.append([flow, function])
-    if function.parent is not None:
-        elem = [flow, function.parent]
-        if elem not in current_list and elem not in new_list:
-            new_list.append(elem)
+    elem = [flow, function.parent]
+    toto = set()
+    check = False
+
+    if function.parent is not None and elem not in [*current_list, *new_list]:
+        parent_child_list, parent_child_dict = get_children(function.parent)
+
+        current_loop_check = False
+        for current_loop_data in [*current_list, *new_list]:
+            if current_loop_data[0] == flow and current_loop_data[1] not in parent_child_list:
+                current_loop_check = True
+        for data_function in opposite_list:
+            if data_function[0] == flow:
+                toto.add(data_function[1])
+        length = len(toto)
+        if toto == set():
+            check = True
+        else:
+            for fun in toto:
+                if fun not in parent_child_list:
+                    check = True
+                    delete_opposite(flow, function.parent, output_xml, relationship_str)
+                if fun in parent_child_list:
+                    length -= 1
+        if length == 0 and not current_loop_check:
+            delete_opposite(flow, function.parent, output_xml, relationship_str)
+    if check:
+        return elem
+
+
+def delete_opposite(data, function, output_xml, relationship_type):
+
+    if relationship_type == "producer":
+        output_xml.delete_single_consumer_producer(data,
+                                                   function,
+                                                   "consumer")
+        print(f"{function.name} consumes {data} (deleted)")
+    elif relationship_type == "consumer":
+
+        output_xml.delete_single_consumer_producer(data,
+                                                   function,
+                                                   "producer")
+        print(f"{function.name} consumes {data} (deleted)")
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -594,28 +620,15 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_producer_function_list:
                         if [elem[0], function] not in xml_consumer_function_list:
-                            add_parent_for_data(elem[0], function,
-                                                xml_producer_function_list,
-                                                new_producer_list)
+                            new_producer_list.append([elem[0], function])
+                            parent = add_parent_for_data(elem[0], function,
+                                                         xml_producer_function_list,
+                                                         xml_consumer_function_list,
+                                                         new_producer_list, output_xml, "producer")
+                            if parent is not None:
+                                new_producer_list.append(parent)
                         elif [elem[0], function] in xml_consumer_function_list:
-                            # TODO: Delete consumer function, check if the flow isn't already
-                            #  produces by another function and add producer function if not
-                            out = input(
-                                f"Do you want to replace '{function.name} consumes {elem[0]}' "
-                                f"by '{function.name} produces {elem[0]}' ? (Y/N) ")
-                            if out == 'Y':
-                                # output_xml.delete_single_consumer_producer(elem[0], function,
-                                # relationship_type)
-                                print('Not implemented yet')
-                                # print(f"{function.name} produces {elem[0]} (not added)")
-                            elif out == 'N':
-                                # print(f"{function.name} produces {elem[0]} (not added)")
-                                None
-                            else:
-                                print(f"'{out}' is not a valid command")
-                    else:
-                        # print(f"{function.name} already produces {elem[0]} (not added)")
-                        None
+                            None
 
     update_list = add_producer_function(new_producer_list, xml_producer_function_list, output_xml)
 
