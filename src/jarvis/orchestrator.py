@@ -1369,7 +1369,6 @@ def check_level_0_allocated_child(fun_elem, function):
                         return False
                     else:
                         check_level_0_allocated_child(fun_elem_child, function_child)
-
             else:
                 return True
 
@@ -2419,14 +2418,14 @@ def recursive_parent_allocation(elem, output_xml):
         object_type = get_object_type(elem[1])
         fun_elem_item = [elem[0].parent, elem[1]]
         if object_type == "state":
-            if elem[1] not in elem[0].parent.allocated_state_list:
+            if elem[1].id not in elem[0].parent.allocated_state_list:
                 output_xml.write_allocated_state([fun_elem_item])
                 elem[0].parent.add_allocated_state(elem[1].id)
                 print(f"State {elem[1].name} allocated to functional "
                       f"element {elem[0].parent.name} (added)")
                 return recursive_parent_allocation([elem[0].parent, elem[1]], output_xml)
         elif object_type == "function":
-            if elem[1] not in elem[0].parent.allocated_function_list:
+            if elem[1].id not in elem[0].parent.allocated_function_list:
                 output_xml.write_allocated_function([fun_elem_item])
                 elem[0].parent.add_allocated_function(elem[1].id)
                 print(f"Function {elem[1].name} allocated to functional "
@@ -2458,7 +2457,8 @@ def recursive_allocation(elem, output_xml):
                         print(f"Function {e[1].name} allocated to functional "
                               f"element {e[0].name} (added)")
                     if e[1].child_list:
-                        return recursive_allocation(e, output_xml)
+                        recursive_allocation(e, output_xml)
+
     else:
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             elem[0].add_allocated_state(elem[1].id)
