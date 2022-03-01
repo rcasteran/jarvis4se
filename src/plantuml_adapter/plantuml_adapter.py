@@ -260,9 +260,11 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
             diagram_url (url_str) : Url can be local(big diagram) or hosted by plantuml server
     """
     # Filter output flows
-    output_flow_list = get_output_flows(consumer_list, producer_list)
+    #output_flow_list = get_output_flows(consumer_list, producer_list)
+    output_flow_list = []
     # Filter input flows
-    input_flow_list = get_input_flows(consumer_list, producer_list)
+    #input_flow_list = get_input_flows(consumer_list, producer_list)
+    input_flow_list = []
     # Filter consumers and producers list in order to create data flow
     data_flow_list = get_exchanged_flows(consumer_list, producer_list,
                                          {}, 1)
@@ -272,16 +274,16 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     plantuml_text += util.MakePlantUml.close_component()
     # Write external(consumer or producer) functions and highest level functional
     # element allocated to it
-    #for function in external_function_list:
-        #check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
-        #plantuml_text += fun_elem_txt
-        #plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                               #check)
+    for function in external_function_list:
+        check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+        plantuml_text += fun_elem_txt
+        plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
+                                               check)
 
     # Write data flows
     #plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
     #plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
-    #plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
+    plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
     #print(plantuml_text)
     diagram_url = util.MakePlantUml.get_url_from_local(plantuml_text)
     return diagram_url
@@ -411,12 +413,26 @@ def get_sequence_list(message_object_list):
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
 
-    sequence_list = [item for sub in sequence_list for item in sub]
+    for (index, i) in enumerate(sequence_list):
+        main_list = sequence_list[0]
+        if index > 0:
+            start = 0
+            for j in i.copy():
+                if not j[2].predecessor_list:
+                    i.remove(j)
+                    main_list.insert(start, j)
+                    start += 1
+                else:
+                    for (idx, elem) in enumerate(main_list.copy()):
+                        pred = get_predecessor_list(j[2])
+                        next_pred = get_predecessor_list(main_list[idx][2])
+                        next_check = check_sequence(next_pred, main_list[:idx-1])
+                        if check_sequence(pred, main_list[:idx-1]) is True and j not in main_list and next_check is True:
+                            i.remove(j)
+                            main_list.insert(idx, j)
+                            idx += 1
 
-    for (index, mess) in enumerate(sequence_list.copy()):
-        if not mess[2].predecessor_list:
-            sequence_list.remove(mess)
-            sequence_list.insert(0, mess)
+    sequence_list = [item for sub in sequence_list for item in sub]
 
     return sequence_list
 
