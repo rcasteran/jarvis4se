@@ -1359,16 +1359,23 @@ def filter_show_command(diagram_name_str, **kwargs):
 def check_level_0_allocated_child(fun_elem, function):
     if fun_elem.child_list == set():
         return True
+    elif function.child_list == set() and function.parent.id not in fun_elem.allocated_function_list:
+        return True
     else:
+        allocated_function_id_list = []
+        child_id_list = []
         for fun_elem_child in fun_elem.child_list:
-            if function.child_list != set():
-                for function_child in function.child_list:
-                    if function_child.id in fun_elem_child.allocated_function_list:
-                        return False
-                    elif function.id in fun_elem.allocated_function_list:
-                        return False
-                    else:
-                        check_level_0_allocated_child(fun_elem_child, function_child)
+            for elem in fun_elem_child.allocated_function_list:
+                allocated_function_id_list.append(elem)
+        child_list, child_dict = get_children(function)
+        for elem in child_list:
+            child_id_list.append(elem.id)
+        if any(t in child_id_list for t in allocated_function_id_list) or not child_id_list:
+            return False
+        else:
+            if function.parent is not None:
+                if function.parent.id not in fun_elem.allocated_function_list:
+                    return True
             else:
                 return True
 
@@ -1404,6 +1411,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
     allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 
     for allocated_function in allocated_function_list:
+        allocated_function.child_list.clear()
+        allocated_function.parent = None
         for elem in xml_producer_function_list:
             if allocated_function in elem:
                 new_producer_list.append(elem)
@@ -2413,30 +2422,44 @@ def get_object_type(object_to_check):
     return object_type
 
 
-def recursive_parent_allocation(elem, output_xml):
-    if elem[0].parent is not None:
+def check_parent_allocation(elem, output_xml):
+    if elem[0].parent is not None and elem[1].parent is not None:
+        fun_elem_parent = elem[0].parent
+        object_parent = elem[1].parent
         object_type = get_object_type(elem[1])
-        fun_elem_item = [elem[0].parent, elem[1]]
+        check = False
         if object_type == "state":
-            if elem[1].id not in elem[0].parent.allocated_state_list:
-                output_xml.write_allocated_state([fun_elem_item])
-                elem[0].parent.add_allocated_state(elem[1].id)
-                print(f"State {elem[1].name} allocated to functional "
-                      f"element {elem[0].parent.name} (added)")
-                return recursive_parent_allocation([elem[0].parent, elem[1]], output_xml)
+            if object_parent.id in fun_elem_parent.allocated_state_list:
+                check = True
         elif object_type == "function":
-            if elem[1].id not in elem[0].parent.allocated_function_list:
-                output_xml.write_allocated_function([fun_elem_item])
-                elem[0].parent.add_allocated_function(elem[1].id)
-                print(f"Function {elem[1].name} allocated to functional "
-                      f"element {elem[0].parent.name} (added)")
-                return recursive_parent_allocation([elem[0].parent, elem[1]], output_xml)
+            if object_parent.id in fun_elem_parent.allocated_function_list:
+                check = True
+        if not check:
+            answer = input(f"Do you also want to allocate parents(i.e. {object_parent.name} "
+                           f"to {fun_elem_parent.name}) ?(Y/N)")
+            if answer.lower() == "y":
+                if object_type == "state":
+                    output_xml.write_allocated_state([[fun_elem_parent, object_parent]])
+                    fun_elem_parent.add_allocated_state(object_parent.id)
+                    print(f"State {object_parent.name} allocated to functional "
+                          f"element {fun_elem_parent.name} (added)")
+                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+                elif object_type == "function":
+                    output_xml.write_allocated_function([[fun_elem_parent, object_parent]])
+                    fun_elem_parent.add_allocated_function(object_parent.id)
+                    print(f"Function {object_parent.name} allocated to functional "
+                          f"element {fun_elem_parent.name} (added)")
+                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+            else:
+                print(f"Error: {object_parent.name} is not allocated despite at least one "
+                      f"of its child is")
+                return
     else:
         return
 
 
 def recursive_allocation(elem, output_xml):
-    recursive_parent_allocation(elem, output_xml)
+    check_parent_allocation(elem, output_xml)
     object_type = get_object_type(elem[1])
     if elem[1].child_list:
         for i in elem[1].child_list:
@@ -2483,7 +2506,7 @@ def get_object_name(xml_object_list):
                 object_name_list.append(xml_object.alias)
         except AttributeError:
             # To avoid error when there is no alias attribute for the object
-            None
+            pass
 
     return object_name_list
 
