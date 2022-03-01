@@ -118,7 +118,7 @@ LOOKUPS = [
     (r"(?<= |\n)(.*?) is a function\b(?=.|\n)",
      lambda matched_str, **kwargs: matched_function(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) is a data(?=. |\n)",
+    (r"(?<= |\n)(.*?) is a data(?=.\s|\n|.\n)",
      lambda matched_str, **kwargs: matched_data(matched_str, **kwargs)),
 
     (r"(?<= |\n)(.*?) is a state(?=.|\n)",
@@ -133,42 +133,43 @@ LOOKUPS = [
     (r"The alias of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_alias(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) is composed of ([^\.\n]*)",
+    (r"([^\. \.\n]*) is composed of ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_composition(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) composes (.*?)(?=. |\n)",
+    (r"([^\. \.\n]*) composes ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_composition(reverse(matched_str), **kwargs)),
 
-    (r"(?<= |\n)(.*?) consumes (.*?)(?=. |\n)",
+    (r"([^\. \.\n]*) consumes ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_consumer(reverse(matched_str), **kwargs)),
 
-    (r"(?<= |\n)(.*?) is an input of (.*?)(?=. |\n)",
+    (r"([^\. \.\n]*) is an input of ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_consumer(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) produces (.*?)(?=. |\n)",
+    (r"([^\. \.\n]*) produces ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_producer(reverse(matched_str), **kwargs)),
 
-    (r"(?<= |\n)(.*?) is an output of (.*?)(?=. |\n)",
+    (r"([^\. \.\n]*) is an output of ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_producer(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) is allocated to (.*?)(?=. |\n)",
+    (r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_allocation(reverse(matched_str), **kwargs)),
 
-    (r"(?<= |\n)(.*?) allocates (.*?)(?=. |\n)",
+    (r"(?<= |\n)(.*?) allocates ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_allocation(matched_str, **kwargs)),
-    (r"(?<= |\n)delete (.*?)(?=. |\n)",
+
+    (r"(?<= |\n)delete ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_delete(matched_str, **kwargs)),
 
     (r"The type of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_type(matched_str, **kwargs)),
 
-    (r"(?<= |\n)(.*?) implies ([^\.\n]*)",
+    (r"([^\. \.\n]*) implies ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_implies(matched_str, **kwargs)),
 
     (r"Condition for (.*?) is:([^\.\n]*)",
      lambda matched_str, **kwargs: matched_condition(matched_str, **kwargs)),
 
-    (r"The (source|destination) of (.*?) is (.*?)(?=. |\n)",
+    (r"The (source|destination) of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_src_dest(matched_str, **kwargs)),
 
     (r"(?<= |\n)show (.*?)\n",
