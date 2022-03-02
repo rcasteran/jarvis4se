@@ -359,17 +359,22 @@ def get_predecessor_list(data):
 
 
 def check_sequence(predecessor_list, sequence):
-    count = len(predecessor_list)
     check = False
-    if not predecessor_list:
+    if predecessor_list == set():
+        check = None
         return check
-    for pred in predecessor_list:
+    else:
+        pred_set = set()
+        seq_set = set()
+        for pred in predecessor_list:
+            pred_set.add(pred.name)
         for elem in sequence:
-            if pred in elem:
-                count -= 1
-    if count == 0:
-        check = True
-    return check
+            seq_set.add(elem[2].name)
+        if pred_set.issubset(seq_set):
+            check = True
+            return check
+        else:
+            return check
 
 
 def clean_predecessor_list(message_object_list):
@@ -408,11 +413,38 @@ def get_sequences(message_object_list):
     return sequence_list
 
 
+def post_check_sequence(sequence_list):
+
+    for (idx, i) in enumerate(sequence_list):
+        pred = i[2].predecessor_list
+        if check_sequence(pred, sequence_list[:idx]) is True:
+            pass
+        elif check_sequence(pred, sequence_list[:idx]) is False:
+            for (index, elem) in enumerate(sequence_list.copy()):
+                curr_pred = elem[2].predecessor_list
+                if check_sequence(curr_pred, sequence_list[:index]) is True:
+                    sequence_list.remove(i)
+                    sequence_list.insert(index+1, i)
+                    index += 1
+                else:
+                    continue
+        elif check_sequence(pred, sequence_list[:idx]) is None:
+            pass
+        idx += 1
+
+    for (new_idx, message) in enumerate(sequence_list):
+        new_pred = message[2].predecessor_list
+        if check_sequence(new_pred, sequence_list[:new_idx]) is False:
+            post_check_sequence(sequence_list)
+
+    return sequence_list
+
+
 def get_sequence_list(message_object_list):
     sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
-
+    # Could be possible ot implement this part within
     for (index, i) in enumerate(sequence_list):
         main_list = sequence_list[0]
         if index > 0:
@@ -422,17 +454,9 @@ def get_sequence_list(message_object_list):
                     i.remove(j)
                     main_list.insert(start, j)
                     start += 1
-                else:
-                    for (idx, elem) in enumerate(main_list.copy()):
-                        pred = get_predecessor_list(j[2])
-                        next_pred = get_predecessor_list(main_list[idx][2])
-                        next_check = check_sequence(next_pred, main_list[:idx-1])
-                        if check_sequence(pred, main_list[:idx-1]) is True and j not in main_list and next_check is True:
-                            i.remove(j)
-                            main_list.insert(idx, j)
-                            idx += 1
 
     sequence_list = [item for sub in sequence_list for item in sub]
+    sequence_list = post_check_sequence(sequence_list)
 
     return sequence_list
 
