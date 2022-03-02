@@ -441,7 +441,7 @@ def get_sequence_list(message_object_list):
     sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
-    # Could be possible ot implement this part within
+    # Could be possible ot implement this part within post_check_sequence()
     for (index, i) in enumerate(sequence_list):
         main_list = sequence_list[0]
         if index > 0:
