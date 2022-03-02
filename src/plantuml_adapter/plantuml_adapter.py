@@ -3,9 +3,6 @@
 # Libraries
 import inspect
 import sys
-import os
-import tkinter as tk
-import tkinter.filedialog
 
 # Modules
 from . import util
