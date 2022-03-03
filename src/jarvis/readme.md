@@ -11,7 +11,19 @@
 |-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
 | scope definition              | -        | -    | -     | -                  | -                    | -                | -                  |
 
+#### View definition
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
+| view definition               | -        | -    | -     | -                  | -                    | -                | -                  |
+
+##### Object association to a view
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
+| object association to a view  | X        | X    | X     | X                  | X                    | X                | X                  |
+
 #### Objects modification
+Only object creation allows to associate the object to a view
+
 |                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
 |-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
 | function creation             | X        | -    | -     | -                  | -                    | -                | -                  |
@@ -26,6 +38,8 @@
 | object deletion               | X        | X    | X     | X                  | X                    | X                | X                  |
 
 #### Objects relationship
+Relationship are not affected by a view
+
 |                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
 |-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
 | object composition            | X        | -    | X     | X                  | -                    | X                | -                  |
@@ -34,6 +48,8 @@
 | object allocation             | X        | -    | X     | X                  | -                    | -                | -                  |
 
 #### Diagrams generation
+Diagram generation depends on the selected view
+
 |                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
 |-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
 | context diagram               | X        | -    | X     | X                  | -                    | X                | -                  |
@@ -48,6 +64,23 @@ Specify the scope of your system engineering activities :
 ```py
 %%jarvis
 with <scope>
+```
+
+### View definition
+Specify a view for the scope of your system engineering activities :
+```py
+%%jarvis
+with <scope>
+under <view>
+```
+
+#### Object association to a view
+Associate a created object to a view :
+```py
+%%jarvis
+with <scope>
+under <view>
+consider <object name>
 ```
 
 ### Objects modification
@@ -130,7 +163,7 @@ Delete an element (only if it has no consumption/production relationship):
 ```py
 %%jarvis
 with <scope>
-Delete <object name or alias>
+delete <object name or alias>
 ```
 
 ### Objects relationship
@@ -201,11 +234,29 @@ with <scope>
 show context <object name or alias>
 ```
 
+#### Context diagram under a specific view
+Show Context Diagram for an object under a specific view:
+```py
+%%jarvis
+with <scope>
+under <view>
+show context <object name or alias>
+```
+
 #### Decomposition diagram
 Show Decomposition Diagram for an object:
 ```py
 %%jarvis
 with <scope>
+show decomposition <object name or alias>
+```
+
+#### Decomposition diagram under a specific view
+Show Decomposition Diagram for an object under a specific view:
+```py
+%%jarvis
+with <scope>
+under <view>
 show decomposition <object name or alias>
 ```
 
@@ -217,6 +268,15 @@ with <scope>
 show sequence <object1 name or alias>, <object2 name or alias>
 ```
 
+#### Sequence diagram under a specific view
+Show Sequence Diagram of a list of object under a specific view:
+```py
+%%jarvis
+with <scope>
+under <view>
+show sequence <object1 name or alias>, <object2 name or alias>
+```
+
 #### State diagram
 Show State Diagram of an object:
 ```py
@@ -225,8 +285,17 @@ with <scope>
 show state <object1 name or alias>
 ```
 
+#### State diagram under a specific view
+Show State Diagram of an object under a specific view:
+```py
+%%jarvis
+with <scope>
+udner <view>
+show state <object1 name or alias>
+```
+
 #### Overall diagram
-Show the whole model Diagram:
+Show the whole model diagram:
 ```py
 %%jarvis
 with <scope>

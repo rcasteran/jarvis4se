@@ -65,6 +65,31 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
     return update_list
 
 
+def cut_string_list(string_tuple_list):
+    """From set of input command strings e.g for composition with input list as
+    {(Function_name, Function_name_A), (Function_name, [Function_name_B, Function_name_C])} : this
+    methods returns {(Function_name, Function_name_A), (Function_name, Function_name_B),
+    (Function_name, Function_name_C)}
+
+        Parameters:
+            string_tuple_list ({(str, str), ...}) : Lists of string tuple from jarvis cell
+        Returns:
+            output_list ([0/1]) : output list
+    """
+
+    output_list = set()
+    for parent, child in string_tuple_list:
+        if "," in child:
+            child_str = child.replace(" ", "")
+            child_list_str = re.split(r',(?![^[]*\])', child_str)
+            for elem in child_list_str:
+                output_list.add((parent, elem))
+        else:
+            output_list.add((parent, child))
+
+    return output_list
+
+
 def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_function_dict,
                     xml_state_list, xml_parent_state_dict, xml_fun_elem_list,
                     xml_parent_fun_elem_dict, output_xml):
@@ -102,7 +127,9 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
 
     concatenated_lists = [*xml_function_name_list, *xml_state_name_list, *xml_fun_elem_name_list]
 
-    for elem in parent_child_name_str_list:
+    cleaned_parent_child_list_str = cut_string_list(parent_child_name_str_list)
+
+    for elem in cleaned_parent_child_list_str:
         is_elem_found = True
         if not any(elem[0] in j for j in concatenated_lists) or \
                 not any(elem[1] in j for j in concatenated_lists):
@@ -128,6 +155,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (fu.id, parent_id)
                                 if child_parent_tuple not in xml_parent_function_dict.items():
                                     fu.set_parent(function)
+                                    function.add_child(fu)
                                     parent_child_function_list.append([function, fu])
 
             elif result_state:
@@ -139,6 +167,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (sta.id, parent_id)
                                 if child_parent_tuple not in xml_parent_state_dict.items():
                                     sta.set_parent(state)
+                                    state.add_child(sta)
                                     parent_child_state_list.append([state, sta])
 
             elif result_fun_elem:
@@ -150,6 +179,7 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
                                 child_parent_tuple = (fe.id, parent_id)
                                 if child_parent_tuple not in xml_parent_fun_elem_dict.items():
                                     fe.set_parent(fun_elem)
+                                    fun_elem.add_child(fe)
                                     parent_child_fun_elem_list.append([fun_elem, fe])
 
             else:
@@ -225,7 +255,7 @@ def get_allocated_child(i, xml_fun_elem_list):
     its child also (if not already allocated)
 
         Parameters:
-            i (State/Function) : parent object
+            i ([State/Function]) : parent object, child object
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
 
         Returns:
@@ -311,35 +341,27 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
     data_predecessor_list = []
-    data_predecessor_str_list = []
+
     allocated_item_list = []
     # Filter input string
-    for p in data_predecessor_str_set:
-        blank_cleaned_str = p[1].replace(" ", "")
-        data_predecessor_str_list.append([p[0], re.split(r',(?![^[]*\])', blank_cleaned_str)])
+    data_predecessor_str_list = cut_string_list(data_predecessor_str_set)
+
     # Create data names list already in xml
     xml_data_name_list = get_object_name(xml_data_list)
 
     is_elem_found = False
     for elem in data_predecessor_str_list:
         is_elem_found = True
-        bad_list = []
         if elem[0] not in xml_data_name_list:
             is_elem_found = False
-            for i in elem[1]:
-                if i not in xml_data_name_list:
-                    bad_list.append(i)
-            if not bad_list:
+            if elem[1] not in xml_data_name_list:
+                print(f"{elem[0]} and {elem[1]} do not exist")
+            else:
                 print(f"{elem[0]} does not exist")
-            if bad_list:
-                print(f"{elem[0]} and {bad_list} do not exist")
         if elem[0] in xml_data_name_list:
-            for i in elem[1]:
-                if i not in xml_data_name_list:
-                    bad_list.append(i)
-                    is_elem_found = False
-            if bad_list:
-                print(f"{bad_list} do(es) not exist")
+            if elem[1] not in xml_data_name_list:
+                is_elem_found = False
+                print(f"{elem[1]} does not exist")
 
     if is_elem_found:
         for d, p in data_predecessor_str_list:
@@ -351,19 +373,17 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
                     selected_data = data
                     for existing_predecessor in data.predecessor_list:
                         existing_predecessor_id_list.append(existing_predecessor.id)
-            for future_predecessor in p:
-                for da in xml_data_list:
-                    if future_predecessor == da.name and da.id not in existing_predecessor_id_list:
-                        predecessor = da
-                if predecessor is not None and selected_data is not None:
-                    data_predecessor_list.append([selected_data, predecessor])
+            for da in xml_data_list:
+                if p == da.name and da.id not in existing_predecessor_id_list:
+                    predecessor = da
+            if predecessor is not None and selected_data is not None:
+                data_predecessor_list.append([selected_data, predecessor])
             allocation_chain_1 = check_add_allocated_item(d, xml_data_list, xml_chain_list)
             if allocation_chain_1:
                 allocated_item_list.append(allocation_chain_1)
-            for elem in p:
-                allocation_chain_2 = check_add_allocated_item(elem, xml_data_list, xml_chain_list)
-                if allocation_chain_2:
-                    allocated_item_list.append(allocation_chain_2)
+            allocation_chain_2 = check_add_allocated_item(p, xml_data_list, xml_chain_list)
+            if allocation_chain_2:
+                allocated_item_list.append(allocation_chain_2)
 
     update_list = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
     add_allocation([0, 0, 0, allocated_item_list], output_xml)
@@ -449,25 +469,16 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_consumer_function_list:
                         if [elem[0], function] not in xml_producer_function_list:
-                            add_parent_for_data(elem[0], function,
-                                                xml_consumer_function_list,
-                                                new_consumer_list)
+                            new_consumer_list.append([elem[0], function])
+                            parent = add_parent_for_data(elem[0], function,
+                                                         xml_consumer_function_list,
+                                                         xml_producer_function_list,
+                                                         new_consumer_list,
+                                                         output_xml, "consumer")
+                            if parent is not None:
+                                new_consumer_list.append(parent)
                         elif [elem[0], function] in xml_producer_function_list:
-                            # TODO: Delete producer function, check if the flow isn't already
-                            #  produces by another function and add consumer function if not
-                            out = input(
-                                f"Do you want to replace '{function.name} produces {elem[0]}' "
-                                f"by '{function.name} consumes {elem[0]}' ? (Y/N) ")
-                            if out == 'Y':
-                                # output_xml.delete_single_consumer_producer(elem[0], function,
-                                # relationship_type)
-                                print('Not implemented yet')
-                                # print(f"{function.name} consumes {elem[0]} (not added)")
-                            elif out == 'N':
-                                # print(f"{function.name} consumes {elem[0]} (not added)")
-                                None
-                            else:
-                                print(f"'{out}' is not a valid command")
+                            None
 
     update_list = add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml)
 
@@ -502,24 +513,65 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     return update_list
 
 
-def add_parent_for_data(flow, function, current_list, new_list):
+def add_parent_for_data(flow, function, current_list, opposite_list, new_list, output_xml,
+                        relationship_str):
     """
     Add direct parent's function of consumer/producer and delete internal flow if the case
 
         Parameters:
             flow (Data_name_str) : Data's name
-            function (Function) : Current function
-            current_list ([Data_name_str, function_name_str]) : 'Current' list
+            function (Function) : Current function's parent
+            current_list ([Data_name_str, function_name_str]) : 'Current' list (producer or consumer)
+            opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
             new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
-
+            output_xml (GenerateXML object) : XML's file object
+            relationship_str (str) : "consumer" or "producer"
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            elem ([data, Function]) : Return parent
     """
-    new_list.append([flow, function])
-    if function.parent is not None:
-        elem = [flow, function.parent]
-        if elem not in current_list and elem not in new_list:
-            new_list.append(elem)
+    elem = [flow, function.parent]
+    toto = set()
+    check = False
+
+    if function.parent is not None and elem not in [*current_list, *new_list]:
+        parent_child_list, parent_child_dict = get_children(function.parent)
+
+        current_loop_check = False
+        for current_loop_data in [*current_list, *new_list]:
+            if current_loop_data[0] == flow and current_loop_data[1] not in parent_child_list:
+                current_loop_check = True
+        for data_function in opposite_list:
+            if data_function[0] == flow:
+                toto.add(data_function[1])
+        length = len(toto)
+        if toto == set():
+            check = True
+        else:
+            for fun in toto:
+                if fun not in parent_child_list:
+                    check = True
+                    delete_opposite(flow, function.parent, output_xml, relationship_str)
+                if fun in parent_child_list:
+                    length -= 1
+        if length == 0 and not current_loop_check:
+            delete_opposite(flow, function.parent, output_xml, relationship_str)
+    if check:
+        return elem
+
+
+def delete_opposite(data, function, output_xml, relationship_type):
+
+    if relationship_type == "producer":
+        output_xml.delete_single_consumer_producer(data,
+                                                   function,
+                                                   "consumer")
+        print(f"{function.name} consumes {data} (deleted)")
+    elif relationship_type == "consumer":
+
+        output_xml.delete_single_consumer_producer(data,
+                                                   function,
+                                                   "producer")
+        print(f"{function.name} consumes {data} (deleted)")
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -568,28 +620,15 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_producer_function_list:
                         if [elem[0], function] not in xml_consumer_function_list:
-                            add_parent_for_data(elem[0], function,
-                                                xml_producer_function_list,
-                                                new_producer_list)
+                            new_producer_list.append([elem[0], function])
+                            parent = add_parent_for_data(elem[0], function,
+                                                         xml_producer_function_list,
+                                                         xml_consumer_function_list,
+                                                         new_producer_list, output_xml, "producer")
+                            if parent is not None:
+                                new_producer_list.append(parent)
                         elif [elem[0], function] in xml_consumer_function_list:
-                            # TODO: Delete consumer function, check if the flow isn't already
-                            #  produces by another function and add producer function if not
-                            out = input(
-                                f"Do you want to replace '{function.name} consumes {elem[0]}' "
-                                f"by '{function.name} produces {elem[0]}' ? (Y/N) ")
-                            if out == 'Y':
-                                # output_xml.delete_single_consumer_producer(elem[0], function,
-                                # relationship_type)
-                                print('Not implemented yet')
-                                # print(f"{function.name} produces {elem[0]} (not added)")
-                            elif out == 'N':
-                                # print(f"{function.name} produces {elem[0]} (not added)")
-                                None
-                            else:
-                                print(f"'{out}' is not a valid command")
-                    else:
-                        # print(f"{function.name} already produces {elem[0]} (not added)")
-                        None
+                            None
 
     update_list = add_producer_function(new_producer_list, xml_producer_function_list, output_xml)
 
@@ -1317,10 +1356,48 @@ def filter_show_command(diagram_name_str, **kwargs):
         return
 
 
+def check_level_0_allocated_child(fun_elem, function):
+    if fun_elem.child_list == set():
+        return True
+    elif function.child_list == set() and function.parent.id not in fun_elem.allocated_function_list:
+        return True
+    else:
+        allocated_function_id_list = []
+        child_id_list = []
+        for fun_elem_child in fun_elem.child_list:
+            for elem in fun_elem_child.allocated_function_list:
+                allocated_function_id_list.append(elem)
+        child_list, child_dict = get_children(function)
+        for elem in child_list:
+            child_id_list.append(elem.id)
+        if any(t in child_id_list for t in allocated_function_id_list) or not child_id_list:
+            return False
+        else:
+            if function.parent is not None:
+                if function.parent.id not in fun_elem.allocated_function_list:
+                    return True
+            else:
+                return True
+
+
+def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
+    if allocated_function_list is None:
+        allocated_function_list = set()
+    for function_id in fun_elem.allocated_function_list:
+        for function in function_list:
+            if function.id == function_id and function not in allocated_function_list:
+                if check_level_0_allocated_child(fun_elem, function) is True:
+                    allocated_function_list.add(function)
+                if fun_elem.child_list != set():
+                    for child in fun_elem.child_list:
+                        get_level_0_function(child, function_list, allocated_function_list)
+
+    return allocated_function_list
+
+
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_fun_elem_list):
     main_fun_elem = None
-    allocated_function_list = set()
     # main_fun_elem_list = set()
     external_function_list = set()
     new_producer_list = []
@@ -1330,18 +1407,12 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
             fun_elem.parent = None
             main_fun_elem = fun_elem
             # main_fun_elem_list, main_parent_dict = get_children(fun_elem)
-            for function_id in fun_elem.allocated_function_list:
-                allocated_function_list.add(function_id)
 
-    for j in xml_function_list:
-        for idx, elem in enumerate(allocated_function_list.copy()):
-            if j.id == elem and j.parent is None:
-                allocated_function_list.remove(elem)
-                allocated_function_list.add(j)
-            else:
-                allocated_function_list.remove(elem)
+    allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 
     for allocated_function in allocated_function_list:
+        allocated_function.child_list.clear()
+        allocated_function.parent = None
         for elem in xml_producer_function_list:
             if allocated_function in elem:
                 new_producer_list.append(elem)
@@ -1354,14 +1425,16 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
             for t in xml_producer_function_list:
                 if t[0] == elem[0] and t[1].parent is None:
                     external_function_list.add(t[1])
-                    new_producer_list.append(t)
+                    if t not in new_producer_list:
+                        new_producer_list.append(t)
 
     for elem in new_producer_list:
         if not any(elem[0] in s for s in new_consumer_list):
             for t in xml_consumer_function_list:
                 if t[0] == elem[0] and t[1].parent is None:
                     external_function_list.add(t[1])
-                    new_consumer_list.append(t)
+                    if t not in new_consumer_list:
+                        new_consumer_list.append(t)
 
     url_diagram = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
                                                               allocated_function_list,
@@ -1384,10 +1457,10 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
                 state_name = state.name
                 for s in state.allocated_function_list:
                     allocated_function_id_list.add(s)
-    for j in function_list:
-        if j.id in allocated_function_id_list.copy():
-            allocated_function_id_list.remove(j.id)
-            allocated_function_id_list.add(j.name)
+    for function in function_list:
+        if function.id in allocated_function_id_list.copy():
+            allocated_function_id_list.remove(function.id)
+            allocated_function_id_list.add(function.name)
 
     diagram_str = show_functions_sequence(allocated_function_id_list, function_list,
                                           xml_consumer_function_list, xml_producer_function_list,
@@ -2243,16 +2316,10 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == fun.name or elem[1] == fun.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(fun, xml_fun_elem_list)
-                                if not check_allocation:
+                                if check_allocation is None:
                                     fun_elem.add_allocated_function(fun.id)
                                     fun_elem_allocated_function_list.append([fun_elem, fun])
-                                elif check_allocation:
-                                    if fun_elem.parent:
-                                        if any(fun_elem.parent.name in s for s in check_allocation)\
-                                                and not \
-                                                any(fun_elem.name in s for s in check_allocation):
-                                            fun_elem.add_allocated_function(fun.id)
-                                            fun_elem_allocated_function_list.append([fun_elem, fun])
+
             elif result_fun_elem_state:
                 for fun_elem in xml_fun_elem_list:
                     if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
@@ -2260,16 +2327,10 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == state.name or elem[1] == state.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(state, xml_fun_elem_list)
-                                if not check_allocation:
+                                if check_allocation is None:
                                     fun_elem.add_allocated_state(state.id)
                                     fun_elem_allocated_state_list.append([fun_elem, state])
-                                elif check_allocation:
-                                    if fun_elem.parent:
-                                        if any(fun_elem.parent.name in s for s in check_allocation)\
-                                                and not \
-                                                any(fun_elem.name in s for s in check_allocation):
-                                            fun_elem.add_allocated_state(state.id)
-                                            fun_elem_allocated_state_list.append([fun_elem, state])
+
             elif result_state_function:
                 for state in xml_state_list:
                     if elem[0] == state.name or elem[0] == state.alias:
@@ -2361,30 +2422,44 @@ def get_object_type(object_to_check):
     return object_type
 
 
-def recursive_parent_allocation(elem, output_xml):
-    if elem[0].parent is not None:
+def check_parent_allocation(elem, output_xml):
+    if elem[0].parent is not None and elem[1].parent is not None:
+        fun_elem_parent = elem[0].parent
+        object_parent = elem[1].parent
         object_type = get_object_type(elem[1])
-        fun_elem_item = [elem[0].parent, elem[1]]
+        check = False
         if object_type == "state":
-            if elem[1] not in elem[0].parent.allocated_state_list:
-                output_xml.write_allocated_state([fun_elem_item])
-                elem[0].parent.add_allocated_state(elem[1].id)
-                print(f"State {elem[1].name} allocated to functional "
-                      f"element {elem[0].parent.name} (added)")
-                return recursive_parent_allocation([elem[0].parent, elem[1]], output_xml)
+            if object_parent.id in fun_elem_parent.allocated_state_list:
+                check = True
         elif object_type == "function":
-            if elem[1] not in elem[0].parent.allocated_function_list:
-                output_xml.write_allocated_function([fun_elem_item])
-                elem[0].parent.add_allocated_function(elem[1].id)
-                print(f"Function {elem[1].name} allocated to functional "
-                      f"element {elem[0].parent.name} (added)")
-                return recursive_parent_allocation([elem[0].parent, elem[1]], output_xml)
+            if object_parent.id in fun_elem_parent.allocated_function_list:
+                check = True
+        if not check:
+            answer = input(f"Do you also want to allocate parents(i.e. {object_parent.name} "
+                           f"to {fun_elem_parent.name}) ?(Y/N)")
+            if answer.lower() == "y":
+                if object_type == "state":
+                    output_xml.write_allocated_state([[fun_elem_parent, object_parent]])
+                    fun_elem_parent.add_allocated_state(object_parent.id)
+                    print(f"State {object_parent.name} allocated to functional "
+                          f"element {fun_elem_parent.name} (added)")
+                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+                elif object_type == "function":
+                    output_xml.write_allocated_function([[fun_elem_parent, object_parent]])
+                    fun_elem_parent.add_allocated_function(object_parent.id)
+                    print(f"Function {object_parent.name} allocated to functional "
+                          f"element {fun_elem_parent.name} (added)")
+                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+            else:
+                print(f"Error: {object_parent.name} is not allocated despite at least one "
+                      f"of its child is")
+                return
     else:
         return
 
 
 def recursive_allocation(elem, output_xml):
-    recursive_parent_allocation(elem, output_xml)
+    check_parent_allocation(elem, output_xml)
     object_type = get_object_type(elem[1])
     if elem[1].child_list:
         for i in elem[1].child_list:
@@ -2405,15 +2480,14 @@ def recursive_allocation(elem, output_xml):
                         print(f"Function {e[1].name} allocated to functional "
                               f"element {e[0].name} (added)")
                     if e[1].child_list:
-                        return recursive_allocation(e, output_xml)
+                        recursive_allocation(e, output_xml)
+
     else:
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
-            output_xml.write_allocated_state([elem])
             elem[0].add_allocated_state(elem[1].id)
             print(f"State {elem[1].name} allocated to functional "
                   f"element {elem[0].name} (added)")
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
-            output_xml.write_allocated_function([elem])
             elem[0].add_allocated_function(elem[1].id)
             print(f"Function {elem[1].name} allocated to functional "
                   f"element {elem[0].name} (added)")
@@ -2432,7 +2506,7 @@ def get_object_name(xml_object_list):
                 object_name_list.append(xml_object.alias)
         except AttributeError:
             # To avoid error when there is no alias attribute for the object
-            None
+            pass
 
     return object_name_list
 

@@ -3,9 +3,6 @@
 # Libraries
 import inspect
 import sys
-import os
-import tkinter as tk
-import tkinter.filedialog
 
 # Modules
 from . import util
@@ -208,7 +205,6 @@ def check_child_allocation(fun_elem, function_list, out_str=None):
     if not out_str:
         out_str = ''
     for t in function_list:
-        print(t)
         if t.id in fun_elem.allocated_function_list:
             child_allocated_function_list = []
             for c in fun_elem.child_list:
@@ -261,9 +257,11 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
             diagram_url (url_str) : Url can be local(big diagram) or hosted by plantuml server
     """
     # Filter output flows
-    output_flow_list = get_output_flows(consumer_list, producer_list)
+    #output_flow_list = get_output_flows(consumer_list, producer_list)
+    output_flow_list = []
     # Filter input flows
-    input_flow_list = get_input_flows(consumer_list, producer_list)
+    #input_flow_list = get_input_flows(consumer_list, producer_list)
+    input_flow_list = []
     # Filter consumers and producers list in order to create data flow
     data_flow_list = get_exchanged_flows(consumer_list, producer_list,
                                          {}, 1)
@@ -280,10 +278,10 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                                check)
 
     # Write data flows
-    plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
-    plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
+    #plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
+    #plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
     plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
-
+    #print(plantuml_text)
     diagram_url = util.MakePlantUml.get_url_from_local(plantuml_text)
     return diagram_url
 
@@ -348,49 +346,114 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
     return sequence_text, diagram_url
 
 
-def get_next_predecessor(message, message_object_list, sequence, sequence_list, idx):
-    for t in message_object_list:
-        for j in t[2].predecessor_list:
-            if message[2] == j:
-                if t not in sequence:
-                    t[3] = True
-                    sequence.insert(idx, t)
-                    idx += 1
-                    get_next_predecessor(t, message_object_list, sequence, sequence_list, idx)
+def get_predecessor_list(data):
+    predecessor_list = set()
+    if data.predecessor_list:
+        for predecessor in data.predecessor_list:
+            predecessor_list.add(predecessor)
+
+    return predecessor_list
+
+
+def check_sequence(predecessor_list, sequence):
+    check = False
+    if predecessor_list == set():
+        check = None
+        return check
+    else:
+        pred_set = set()
+        seq_set = set()
+        for pred in predecessor_list:
+            pred_set.add(pred.name)
+        for elem in sequence:
+            seq_set.add(elem[2].name)
+        if pred_set.issubset(seq_set):
+            check = True
+            return check
+        else:
+            return check
+
+
+def clean_predecessor_list(message_object_list):
+
+    for message in message_object_list:
+        pred_list = get_predecessor_list(message[2])
+        for pred in pred_list:
+            if not any(pred in s for s in message_object_list):
+                message[2].predecessor_list.remove(pred)
+
+    return message_object_list
+
+
+def get_sequence(message, message_object_list, sequence_list, sequence=None, index=None):
+    if not sequence:
+        sequence = []
+        index = 0
+    if message not in sequence and not any(message in s for s in sequence_list) is True:
+        message[3] = True
+        sequence.insert(index, message)
+        index += 1
+        for mess in message_object_list:
+            if message[2] in mess[2].predecessor_list:
+                get_sequence(mess, message_object_list, sequence_list, sequence, index)
 
     return sequence
 
 
-def get_predecessor(message_object_list):
+def get_sequences(message_object_list):
     sequence_list = []
     for message in message_object_list:
-        sequence = []
-        index = 0
         if not message[2].predecessor_list:
-            for t in message_object_list:
-                if message[2] in t[2].predecessor_list:
-                    if not any(t in s for s in sequence_list):
-                        if message not in sequence:
-                            message[3] = True
-                            sequence.insert(index, message)
+            sequence = get_sequence(message, message_object_list, sequence_list)
+            sequence_list.append(sequence)
 
-                            index += 1
-                            sequence_list.append(get_next_predecessor(message,
-                                                                      message_object_list,
-                                                                      sequence,
-                                                                      sequence_list,
-                                                                      index))
+    return sequence_list
 
-    for mess in message_object_list:
-        if not any(mess in s for s in sequence_list):
-            for b in sequence_list:
-                for idx, elem in enumerate(b.copy()):
-                    if mess[2] in elem[2].predecessor_list:
-                        mess[3] = True
-                        b.insert(idx-1, mess)
+
+def post_check_sequence(sequence_list):
+
+    for (idx, i) in enumerate(sequence_list):
+        pred = i[2].predecessor_list
+        if check_sequence(pred, sequence_list[:idx]) is True:
+            pass
+        elif check_sequence(pred, sequence_list[:idx]) is False:
+            for (index, elem) in enumerate(sequence_list.copy()):
+                curr_pred = elem[2].predecessor_list
+                if check_sequence(curr_pred, sequence_list[:index]) is True:
+                    sequence_list.remove(i)
+                    sequence_list.insert(index+1, i)
+                    index += 1
+                else:
+                    continue
+        elif check_sequence(pred, sequence_list[:idx]) is None:
+            pass
+        idx += 1
+
+    for (new_idx, message) in enumerate(sequence_list):
+        new_pred = message[2].predecessor_list
+        if check_sequence(new_pred, sequence_list[:new_idx]) is False:
+            post_check_sequence(sequence_list)
+
+    return sequence_list
+
+
+def get_sequence_list(message_object_list):
+    sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
+    # Could be possible ot implement this part within post_check_sequence()
+    for (index, i) in enumerate(sequence_list):
+        main_list = sequence_list[0]
+        if index > 0:
+            start = 0
+            for j in i.copy():
+                if not j[2].predecessor_list:
+                    i.remove(j)
+                    main_list.insert(start, j)
+                    start += 1
+
     sequence_list = [item for sub in sequence_list for item in sub]
+    sequence_list = post_check_sequence(sequence_list)
 
     return sequence_list
 
@@ -405,25 +468,8 @@ def order_list(message_list, data_list):
             if i[2] == data.name:
                 message_object_list.append([i[0], i[1], data, False])
 
-    ordored_message_object_list = get_predecessor(message_object_list)
-
-    # Check if there are multiple instances of the same item, add them to a list
-    duplicated_item_list = []
-    for k in message_object_list:
-        if ordored_message_object_list.count(k) > 1:
-            duplicated_item_list.append(k)
-    # For each items that is repeated in multiple sequences, remove it
-    for idx, t in enumerate(ordored_message_object_list.copy()):
-        if duplicated_item_list:
-            if t in duplicated_item_list:
-                ordored_message_object_list.remove(t)
-
-    # Add elements that aren't predecessors and ones that were duplicated at the end of the list
-    for p in message_object_list:
-        if p in duplicated_item_list:
-            ordored_message_object_list.append(p)
-        if p not in ordored_message_object_list:
-            ordored_message_object_list.append(p)
+    message_object_list = clean_predecessor_list(message_object_list)
+    ordored_message_object_list = get_sequence_list(message_object_list)
 
     # Add index for each item within the list
     for idx, t in enumerate(ordored_message_object_list):
@@ -683,35 +729,3 @@ def match_transition_states(transition, xml_state_list):
         out = [n, destination_state, transition[2]]
 
     return out
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        filename_input = sys.argv[1]
-
-        if len(sys.argv) > 2:
-            filename_output = sys.argv[2]
-        else:
-            filename_output = ''
-    else:
-        # Prevent main window to be displayed
-        tk.Tk().withdraw()
-
-        filename_input = tk.filedialog.askopenfilename(initialdir=sys.path[0],
-                                                       title="Select input file",
-                                                       filetypes=(("XML files", "*.xml"),
-                                                                  ("All files", "*.*")))
-
-        filename_output = tk.filedialog.askopenfilename(initialdir=sys.path[0],
-                                                        title="Select output file",
-                                                        filetypes=(("Text files", "*.txt")
-                                                                   , ("All files", "*.*")))
-        # Check file
-    if len(filename_input) > 0:
-        function_list_xml, consumer_function_list_xml, producer_function_list_xml, parent_child_dict_xml, data_list_xml = \
-            xml_adapter.parse_xml(filename_input)
-        plantuml_string, url_diagram = plantuml_binder(function_list_xml, consumer_function_list_xml,
-                                                       producer_function_list_xml, parent_child_dict_xml)
-        # Instance for the output file
-        output_file = util.MakePlantUml(filename_output)
-        output_file.generate_diagram_output(plantuml_string)
