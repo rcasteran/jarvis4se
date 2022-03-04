@@ -2318,7 +2318,13 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == fun.name or elem[1] == fun.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(fun, xml_fun_elem_list)
-                                if check_allocation is None:
+                                count = None
+                                if check_allocation is not None:
+                                    count = len(check_allocation)
+                                    for item in check_allocation:
+                                        if check_parentality(item, fun_elem):
+                                            count -= 1
+                                if count in (None, 0):
                                     fun_elem.add_allocated_function(fun.id)
                                     fun_elem_allocated_function_list.append([fun_elem, fun])
 
@@ -2329,7 +2335,13 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == state.name or elem[1] == state.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(state, xml_fun_elem_list)
-                                if check_allocation is None:
+                                count = None
+                                if check_allocation is not None:
+                                    count = len(check_allocation)
+                                    for item in check_allocation:
+                                        if check_parentality(item, fun_elem):
+                                            count -= 1
+                                if count in (None, 0):
                                     fun_elem.add_allocated_state(state.id)
                                     fun_elem_allocated_state_list.append([fun_elem, state])
 
@@ -2340,11 +2352,11 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                             if elem[1] == fun.name or elem[1] == fun.alias:
                                 check_allocation = \
                                     question_answer.get_allocation_object(fun, xml_state_list)
-                                if not check_allocation:
+                                if check_allocation is None:
                                     state.add_allocated_function(fun.id)
                                     state_allocated_function_list.append([state, fun])
-                                elif check_allocation:
-                                    if not any(state.name in s for s in check_allocation):
+                                else:
+                                    if not any(state in s for s in check_allocation):
                                         state.add_allocated_function(fun.id)
                                         state_allocated_function_list.append([state, fun])
             else:

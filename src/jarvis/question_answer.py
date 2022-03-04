@@ -215,7 +215,7 @@ def matched_allocated(object_str, **kwargs):
             allocation_list = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
             if allocation_list:
                 object_info += f'"{wanted_object.name}" is allocated to ' \
-                               + ", ".join(list(allocation_list))
+                               + ", ".join([elem.name for elem in allocation_list])
                 return object_info
 
     return None
@@ -229,11 +229,11 @@ def get_allocation_object(wanted_object, fun_elem_list):
     if object_type == 'function':
         for fun_elem in fun_elem_list:
             if any(wanted_object.id in s for s in fun_elem.allocated_function_list):
-                allocation_list.add(fun_elem.name)
+                allocation_list.add(fun_elem)
     elif object_type == 'state':
         for fun_elem in fun_elem_list:
             if any(wanted_object.id in s for s in fun_elem.allocated_state_list):
-                allocation_list.add(fun_elem.name)
+                allocation_list.add(fun_elem)
     if allocation_list:
         return allocation_list
 
