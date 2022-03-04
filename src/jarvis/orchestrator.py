@@ -1383,6 +1383,8 @@ def check_level_0_allocated_child(fun_elem, function):
 def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
     if allocated_function_list is None:
         allocated_function_list = set()
+        if fun_elem.child_list == set():
+            return allocated_function_list
     for function_id in fun_elem.allocated_function_list:
         for function in function_list:
             if function.id == function_id and function not in allocated_function_list:
