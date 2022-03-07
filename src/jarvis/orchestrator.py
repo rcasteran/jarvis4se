@@ -2356,7 +2356,7 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                                     state.add_allocated_function(fun.id)
                                     state_allocated_function_list.append([state, fun])
                                 else:
-                                    if not any(state in s for s in check_allocation):
+                                    if state not in check_allocation:
                                         state.add_allocated_function(fun.id)
                                         state_allocated_function_list.append([state, fun])
             else:

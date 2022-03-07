@@ -17,7 +17,6 @@ from . import question_answer
 import xml_adapter
 
 
-
 # The class MUST call this class decorator at creation time
 @magics_class
 class MyMagics(Magics):
@@ -31,6 +30,8 @@ class MyMagics(Magics):
         input_str = sio.getvalue()
         # Delete the '"' from input string, to avoid xml to plantuml errors.
         input_str = input_str.replace('"', "")
+        # Delete extra whitespaces
+        input_str = re.sub(' +', ' ', input_str)
         # Get model's declaration, need a space after "with" otherwise print a message
         xml_name_str = re.match(r"^with (.*)(?=.|\n)", input_str, re.MULTILINE)
         if xml_name_str:
