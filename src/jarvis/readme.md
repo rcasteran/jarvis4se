@@ -7,56 +7,58 @@
 ### Overview
 
 #### Scope definition
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| scope definition              | -        | -    | -     | -                  | -                    | -                | -                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| scope definition              | -        | -    | -     | -                  | -                    | -                | -                  | -         |
 
 #### View definition
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| view definition               | -        | -    | -     | -                  | -                    | -                | -                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| view definition               | -        | -    | -     | -                  | -                    | -                | -                  | -         |
 
 ##### Object association to a view
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| object association to a view  | X        | X    | X     | X                  | X                    | X                | X                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| object association to a view  | X        | X    | X     | X                  | X                    | X                | X                  | -         |
 
 #### Objects modification
 Only object creation allows to associate the object to a view
 
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| function creation             | X        | -    | -     | -                  | -                    | -                | -                  |
-| data creation                 | -        | X    | -     | -                  | -                    | -                | -                  |
-| state creation                | -        | -    | X     | -                  | -                    | -                | -                  |
-| functional element creation   | -        | -    | -     | X                  | -                    | -                | -                  |
-| functional interface creation | -        | -    | -     | -                  | X                    | -                | -                  |
-| physical element creation     | -        | -    | -     | -                  | -                    | X                | -                  |
-| physical interface creation   | -        | -    | -     | -                  | -                    | -                | X                  |
-| object type                   | X        | X    | X     | X                  | X                    | X                | X                  |
-| object alias                  | X        | X    | X     | X                  | X                    | X                | X                  |
-| object deletion               | X        | X    | X     | X                  | X                    | X                | X                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| function creation             | X        | -    | -     | -                  | -                    | -                | -                  | -         |
+| data creation                 | -        | X    | -     | -                  | -                    | -                | -                  | -         |
+| state creation                | -        | -    | X     | -                  | -                    | -                | -                  | -         |
+| functional element creation   | -        | -    | -     | X                  | -                    | -                | -                  | -         |
+| functional interface creation | -        | -    | -     | -                  | X                    | -                | -                  | -         |
+| physical element creation     | -        | -    | -     | -                  | -                    | X                | -                  | -         |
+| physical interface creation   | -        | -    | -     | -                  | -                    | -                | X                  | -         |
+| object attribute              | -        | -    | -     | -                  | -                    | -                | -                  | X         |
+| object attribute type         | -        | -    | -     | -                  | -                    | -                | -                  | X         |
+| object type                   | X        | X    | X     | X                  | X                    | X                | X                  | -         |
+| object alias                  | X        | X    | X     | X                  | X                    | X                | X                  | -         |
+| object deletion               | X        | X    | X     | X                  | X                    | X                | X                  | -         |
 
 #### Objects relationship
 Relationship are not affected by a view
 
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| object composition            | X        | -    | X     | X                  | -                    | X                | -                  |
-| object consumption            | -        | X    | -     | -                  | X                    | -                | X                  |
-| object production             | -        | X    | -     | -                  | X                    | -                | X                  |
-| object allocation             | X        | -    | X     | X                  | -                    | -                | -                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| object composition            | X        | -    | X     | X                  | -                    | X                | -                  | -         |
+| object consumption            | -        | X    | -     | -                  | X                    | -                | X                  | -         |
+| object production             | -        | X    | -     | -                  | X                    | -                | X                  | -         |
+| object allocation             | X        | -    | X     | X                  | -                    | -                | -                  | -         |
 
 #### Diagrams generation
 Diagram generation depends on the selected view
 
-|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface |
-|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|
-| context diagram               | X        | -    | X     | X                  | -                    | X                | -                  |
-| decomposition diagram         | X        | -    | X     | X                  | -                    | X                | -                  |
-| sequence diagram              | X        | -    | -     | X                  | -                    | X                | -                  |
-| state diagram                 | -        | -    | X     | X                  | -                    | X                | -                  |
-| overall diagram               | -        | -    | -     | -                  | -                    | -                | -                  |
+|                               | Function | Data | State | Functional element | Functional interface | Physical element | Physical interface | Attribute |
+|-------------------------------|:--------:|:----:|:-----:|:------------------:|:--------------------:|:----------------:|:------------------:|:---------:|
+| context diagram               | X        | -    | X     | X                  | -                    | X                | -                  | X         |
+| decomposition diagram         | X        | -    | X     | X                  | -                    | X                | -                  | X         |
+| sequence diagram              | X        | -    | -     | X                  | -                    | X                | -                  | -         |
+| state diagram                 | -        | -    | X     | X                  | -                    | X                | -                  | X         |
+| overall diagram               | -        | -    | -     | -                  | -                    | -                | -                  | -         |
 
 
 ### Scope definition
@@ -142,13 +144,31 @@ with <scope>
 ```
 
 #### Object type
-Specify the type of an object:
 ```py
 %%jarvis
 with <scope>
-<object name or alias> is <object type>
+The type of <object name or alias> is <object type>
 ```
+
 NB: The type depend on the object and the metamodel used.
+
+#### Object attribute creation
+Add an object attribute:
+```py
+%%jarvis
+with <scope>
+<attribute name> is an attribute
+```
+
+#### Object attribute type
+Add an object attribute:
+```py
+%%jarvis
+with <scope>
+The type of <attribute name> is <attribute type>
+```
+
+NB: The type depend on the attribute and the metamodel used.
 
 #### Object alias
 Specify the alias of an object:
