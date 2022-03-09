@@ -29,7 +29,7 @@ def find_question(string, **kwargs):
     return out
 
 
-def matched_what(question_str, **kwargs):
+def check_get_object(object_str, **kwargs):
     # Create object names/aliases lists
     xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
     xml_data_name_list = orchestrator.get_object_name(kwargs['xml_data_list'])
@@ -38,24 +38,29 @@ def matched_what(question_str, **kwargs):
     xml_transition_name_list = orchestrator.get_object_name(kwargs['xml_transition_list'])
     whole_objects_name_list = [*xml_function_name_list, *xml_data_name_list, *xml_state_name_list,
                                *xml_fun_elem_name_list, *xml_transition_name_list]
-    object_str = question_str[0].strip()
-
-    if not any(str(object_str) in s for s in whole_objects_name_list):
+    if not [object_str in whole_objects_name_list]:
         print(f"{object_str} does not exist")
+    else:
+        result_function = [object_str in xml_function_name_list]
+        resul_state = [object_str in xml_state_name_list]
+        result_data = [object_str in xml_data_name_list]
+        result_fun_elem = [object_str in xml_fun_elem_name_list]
+        result_transition = [object_str in xml_transition_name_list]
+        result = [*result_function, *result_data, *resul_state,  *result_fun_elem,
+                  *result_transition]
+        wanted_object = match_object(object_str, result, **kwargs)
+        return wanted_object
 
-    result_function = any(object_str in s for s in xml_function_name_list)
-    resul_state = any(object_str in s for s in xml_state_name_list)
-    result_data = any(object_str in s for s in xml_data_name_list)
-    result_fun_elem = any(object_str in s for s in xml_fun_elem_name_list)
-    result_transition = any(object_str in s for s in xml_transition_name_list)
-    result = [result_function, result_data, resul_state,  result_fun_elem, result_transition]
-    wanted_object = match_object(object_str, result, **kwargs)
+
+def matched_what(question_str, **kwargs):
+    # TODO: Handle multiple questions ? => TBC
+    object_str = question_str[0].strip()
+    wanted_object = check_get_object(object_str, **kwargs)
+
     if wanted_object:
         object_info = get_object_info(wanted_object, **kwargs)
         if object_info:
             return object_info
-
-    return None
 
 
 def match_object(object_str, result, **kwargs):
@@ -79,7 +84,6 @@ def match_object(object_str, result, **kwargs):
         for transition in kwargs['xml_transition_list']:
             if object_str in (transition.name, transition.alias):
                 return transition
-    return None
 
 
 def get_object_info(wanted_object, **kwargs):
@@ -111,7 +115,7 @@ def get_object_info(wanted_object, **kwargs):
     if object_info:
         return object_info
 
-    return None
+    return
 
 
 def get_function_info(wanted_object, object_info, **kwargs):
@@ -141,14 +145,13 @@ def get_consumes_produces_info(wanted_object, relationship_list):
     if object_relationship:
         return object_relationship
 
-    return None
 
 
 def get_child_name_list(parent_object, object_list):
     child_list = set()
     for child in object_list:
         if child in parent_object.child_list:
-            child_list.add(child.name)
+            child_list.add((child.name, "Child"))
     return child_list
 
 
@@ -218,7 +221,7 @@ def matched_allocated(object_str, **kwargs):
                                + ", ".join([elem.name for elem in allocation_list])
                 return object_info
 
-    return None
+    return
 
 
 def get_allocation_object(wanted_object, fun_elem_list):
@@ -237,5 +240,108 @@ def get_allocation_object(wanted_object, fun_elem_list):
     if allocation_list:
         return allocation_list
 
-    return None
+    return
 
+
+def get_object_list(object_str, **kwargs):
+    answer_list = []
+    for elem in object_str:
+        wanted_object = check_get_object(elem[1], **kwargs)
+        object_type = orchestrator.get_object_type(wanted_object)
+        if object_type in ("state", "function", "Functional element"):
+            if elem[0] == "input":
+                list_name = f"Input list for {wanted_object.name}:"
+                input_list = get_input(wanted_object, **kwargs)
+                if input_list:
+                    input_list.insert(0, list_name)
+                    answer_list.append(input_list)
+            elif elem[0] == "output":
+                list_name = f"Output list for {wanted_object.name}:"
+                output_list = get_output(wanted_object, **kwargs)
+                if output_list:
+                    output_list.insert(0, list_name)
+                    answer_list.append(output_list)
+            elif elem[0] == "child":
+                list_name = f"Child list for {wanted_object.name}:"
+                child_list = None
+                if object_type == "function":
+                    child_list = list(get_child_name_list(wanted_object,
+                                                          kwargs['xml_function_list']))
+                elif object_type == "state":
+                    child_list = list(get_child_name_list(wanted_object,
+                                                          kwargs['xml_state_list']))
+                    for allocated_fun in wanted_object.allocated_function_list:
+                        for fun in kwargs['xml_function_list']:
+                            if fun.id == allocated_fun:
+                                child_list.append((fun.name, "Function allocation"))
+                elif object_type == "Functional element":
+                    child_list = list(get_child_name_list(wanted_object,
+                                                          kwargs['xml_fun_elem_list']))
+                    for allocated_fun in wanted_object.allocated_function_list:
+                        for fun in kwargs['xml_function_list']:
+                            if fun.id == allocated_fun:
+                                child_list.append((fun.name, "Function allocation"))
+                    for allocated_state in wanted_object.allocated_state_list:
+                        for state in kwargs['xml_state_list']:
+                            if state.id == allocated_state:
+                                child_list.append((state.name, "State allocation"))
+
+                child_list.insert(0, list_name)
+                answer_list.append(child_list)
+        else:
+            if wanted_object is None:
+                print(f"Object '{elem[1]}' does not exist")
+            else:
+                print(f"No list available for object '{wanted_object.name}' of type "
+                      f"'{object_type.capitalize()}', possible types are: Function, "
+                      f"State and Functional element.")
+
+    return answer_list
+
+
+def get_input(wanted_object, **kwargs):
+    object_type = orchestrator.get_object_type(wanted_object)
+    if object_type in ("state", "Functional element"):
+        print(f"No input list available for object's type "
+              f"{object_type.capitalize()}({wanted_object.name}).")
+    else:
+        input_list = []
+        flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_consumer_function_list'])
+        for data in flow_list:
+            if not any(data in s for s in kwargs['xml_producer_function_list']):
+                input_list.append([data, None])
+            else:
+                for elem in kwargs['xml_producer_function_list']:
+                    check = True
+                    if elem[0] == data:
+                        for child in elem[1].child_list:
+                            if [elem[0], child] in kwargs['xml_producer_function_list']:
+                                check = False
+                        if check:
+                            input_list.append([elem[0], elem[1].name])
+
+        return input_list
+
+
+def get_output(wanted_object, **kwargs):
+    object_type = orchestrator.get_object_type(wanted_object)
+    if object_type in ("state", "Functional element"):
+        print(f"No output list available for object's type "
+              f"{object_type.capitalize()}({wanted_object.name}).")
+    else:
+        output_list = []
+        flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_producer_function_list'])
+        for data in flow_list:
+            if not any(data in s for s in kwargs['xml_consumer_function_list']):
+                output_list.append([data, None])
+            else:
+                for elem in kwargs['xml_consumer_function_list']:
+                    check = True
+                    if elem[0] == data:
+                        for child in elem[1].child_list:
+                            if [elem[0], child] in kwargs['xml_consumer_function_list']:
+                                check = False
+                        if check:
+                            output_list.append([elem[0], elem[1].name])
+
+        return output_list

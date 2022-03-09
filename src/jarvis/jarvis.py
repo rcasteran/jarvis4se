@@ -5,6 +5,7 @@ import re
 import os
 import shutil
 import getpass
+import pandas as pd
 from datetime import datetime
 from io import StringIO
 
@@ -178,6 +179,9 @@ LOOKUPS = [
 
     (r"\s([A-Za-z\s].*\?)",
      lambda matched_str, **kwargs: matched_question_mark(matched_str, **kwargs)),
+
+    (r"list (input|output|child) ([^\.\n]*)",
+     lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
 ]
 
 
@@ -395,6 +399,33 @@ def matched_question_mark(question_str, **kwargs):
                 print(elem)
             else:
                 display(elem)
+
+
+def matched_list(object_str, **kwargs):
+    """Gets list declaration"""
+    out = question_answer.get_object_list(object_str, **kwargs)
+    if out:
+        for i in out:
+            if "Child" in i[0]:
+                title = i.pop(0)
+                df = pd.DataFrame(i, columns=["Object's name", "Relationship's type"])
+                df = df.T
+                # Could be usefull to add it with button next to table bu needs ipywidgets ...
+                # df.to_clipboard(excel=True)
+                df = df.style.set_caption(title)
+                display(df)
+            elif "Input" in i[0]:
+                title = i.pop(0)
+                df = pd.DataFrame(i, columns=["Data's name", "Producer"])
+                df = df.T
+                df = df.style.set_caption(title)
+                display(df)
+            elif "Output" in i[0]:
+                title = i.pop(0)
+                df = pd.DataFrame(i, columns=["Data's name", "Consumer"])
+                df = df.T
+                df = df.style.set_caption(title)
+                display(df)
 
 
 def reverse(inverted_list):
