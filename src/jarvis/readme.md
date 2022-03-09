@@ -313,11 +313,3 @@ with <scope>
 udner <view>
 show state <object1 name or alias>
 ```
-
-#### Overall diagram
-Show the whole model diagram:
-```py
-%%jarvis
-with <scope>
-show all
-```
