@@ -13,7 +13,7 @@ def readme():
 
 
 setup(
-    name="circleci",
+    name="jarvis4se",
     version=VERSION,
     description="Jarvis 4 Systems Engineers",
     long_description=readme(),
