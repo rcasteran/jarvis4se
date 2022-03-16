@@ -1,5 +1,7 @@
-pytest
+pytest~=7.1.0
 ipython >= 7.27.0
 lxml >= 4.6.3
 notebook >= 6.4.3
 plantuml == 0.3.0
+pandas~=1.4.1
+setuptools~=56.0.0
