@@ -305,7 +305,7 @@ jobs:
                 description: Name of the requirements file that needs to be installed with pip. Prepended with `app-dir`. If using pipenv or poetry, this is ignored.
                 type: string
             pkg-manager:
-                default: auto
+                default: pipenv
                 description: Select the package manager to use. Default is pip
                 enum:
                     - auto
