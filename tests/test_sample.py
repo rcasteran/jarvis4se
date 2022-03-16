@@ -2,9 +2,9 @@ import pytest
 import os
 from IPython import get_ipython
 from pathlib import Path
-from src import xml_adapter
-from src import jarvis
-from src import plantuml_adapter
+import xml_adapter
+import jarvis
+import plantuml_adapter
 
 
 def test_generate_xml_file_template():
