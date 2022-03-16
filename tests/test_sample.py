@@ -2,7 +2,8 @@ import pytest
 import os
 from IPython import get_ipython
 from pathlib import Path
-import xml_adapter
+#import xml_adapter
+from xml_adapter import xml_adapter
 import jarvis
 import plantuml_adapter
 
