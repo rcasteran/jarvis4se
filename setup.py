@@ -29,6 +29,6 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     keywords='',
-    packages=find_packages(),
+    packages=find_packages(include=['jarvis4se', 'jarvis4se.*']),
     python_requires='>=3.7.6',
 )
