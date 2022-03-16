@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: circleci/python:3.8.4
+      - image: cimg/python:3.8.4
 
     working_directory: ~/project
 
