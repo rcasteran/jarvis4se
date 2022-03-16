@@ -30,6 +30,6 @@ setup(
     ],
     keywords='',
     packages=find_packages(include=['jarvis4se', 'jarvis4se.*']),
-    install_requires=['pytest'],
+    install_requires=['pytest', 'pytest_mock'],
     python_requires='>=3.7.6',
 )
