@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # jarvis4se version
 VERSION = "1.1.2"
@@ -29,6 +29,6 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     keywords='',
-    packages=['src'],
+    packages=find_packages(),
     python_requires='>=3.7.6',
 )
