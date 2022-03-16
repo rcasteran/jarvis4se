@@ -23,7 +23,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest
+            pytest .
 
 workflows:
   main:
