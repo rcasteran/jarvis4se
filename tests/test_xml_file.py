@@ -1,17 +1,14 @@
-import pytest
-from pytest_mock import mocker
 import os
 from IPython import get_ipython
 from pathlib import Path
 import xml_adapter
 import jarvis
-import plantuml_adapter
 
 
 def test_generate_xml_file_template():
     """Notebook equivalent:
      %%jarvis
-     with xml_file
+     with generate_xml_file_template
 
      """
     ip = get_ipython()
@@ -39,12 +36,9 @@ def test_generate_xml_file_template():
 def test_simple_function_within_xml():
     """Notebook equivalent:
      %%jarvis
-     with simple_function
+     with simple_function_within_xml
      F1 is a function
 
-     NB: Id for functions are changing everytime so comparing directly strings can not be done.
-     Is it possible to put id's attribute to not assert ?
-     Or keep it this way by testing also the parse_xml()
      """
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
@@ -62,30 +56,4 @@ def test_simple_function_within_xml():
         os.remove(path)
 
 
-def test_simple_function_context(mocker):
-    """Notebook equivalent:
-     %%jarvis
-     with output_string
-     F1 is a function
-     show context F1
 
-     """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
-    ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
-    file_name = "simple_function_context"
-    my_magic.jarvis("", "with %s\n" % file_name +
-                    "F1 is a function\n"
-                    "show context F1\n")
-    # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
-    expected = 'object "F1" as f1 <<unknown>>'
-    assert expected in result
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
-
-    # TODO: This test isn't well covered since i'm only checking that result contains what i want,
-    #       but it can also contains other char and this should not be the case.
-    #       Can use difflib or other conditions on result to fully covered the test case.
