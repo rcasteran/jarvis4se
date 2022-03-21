@@ -1891,6 +1891,7 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
                     if check:
                         if [xml_producer_flow, xml_producer] not in new_producer_list:
                             new_producer_list.append([xml_producer_flow, xml_producer])
+
                     if not any(xml_producer_flow in s for s in xml_consumer_function_list):
                         if [xml_producer_flow, xml_producer] not in new_producer_list:
                             new_producer_list.append([xml_producer_flow, xml_producer])
@@ -1914,9 +1915,10 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
                 if check:
                     if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
                         new_consumer_list.append([xml_consumer_flow, xml_consumer])
+
                 if not any(xml_consumer_flow in s for s in xml_producer_function_list):
-                    if [xml_consumer_flow, xml_consumer] not in new_producer_list:
-                        new_producer_list.append([xml_consumer_flow, xml_consumer])
+                    if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
+                        new_consumer_list.append([xml_consumer_flow, xml_consumer])
 
     for f in new_function_list:
         f.child_list.clear()
