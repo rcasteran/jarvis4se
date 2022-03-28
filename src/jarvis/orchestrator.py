@@ -451,16 +451,18 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
     # Loop to filter consumer and create a new list
     for elem in consumer_str_list:
         is_elem_found = True
-        if elem[1] not in xml_function_name_list and elem[0] not in xml_data_name_list:
+        if not any(item == elem[1] for item in xml_function_name_list) and \
+                not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             print(f"{elem[1]} and {elem[0]} do not exist")
-        elif elem[1] not in xml_function_name_list or elem[0] not in xml_data_name_list:
+        elif not any(item == elem[1] for item in xml_function_name_list) or \
+                not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
-            if any(elem[1] in j for j in xml_function_name_list) and not any(
-                        elem[0] in j for j in xml_data_name_list):
+            if any(item == elem[1] for item in xml_function_name_list) and \
+                    not any(item == elem[0] for item in xml_data_name_list):
                 print(f"{elem[0]} does not exist")
-            elif any(elem[0] in j for j in xml_data_name_list) and not any(
-                    elem[1] in j for j in xml_function_name_list):
+            elif any(item == elem[0] for item in xml_data_name_list) and \
+                    not any(item == elem[1] for item in xml_function_name_list):
                 print(f"{elem[1]} does not exist")
 
         if is_elem_found:
@@ -530,7 +532,7 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
             elem ([data, Function]) : Return parent
     """
     elem = [flow, function.parent]
-    toto = set()
+    temp_set = set()
     check = False
 
     if function.parent is not None and elem not in [*current_list, *new_list]:
@@ -542,12 +544,12 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
                 current_loop_check = True
         for data_function in opposite_list:
             if data_function[0] == flow:
-                toto.add(data_function[1])
-        length = len(toto)
-        if toto == set():
+                temp_set.add(data_function[1])
+        length = len(temp_set)
+        if temp_set == set():
             check = True
         else:
-            for fun in toto:
+            for fun in temp_set:
                 if fun not in parent_child_list:
                     check = True
                     delete_opposite(flow, function.parent, output_xml, relationship_str)
@@ -560,6 +562,17 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
 
 
 def delete_opposite(data, function, output_xml, relationship_type):
+    """
+    Delete specific consumer/producer relationship within xml's file.
+
+        Parameters:
+            data (Data_name_str) : Data's name
+            function (Function) : Current Function object
+            output_xml (GenerateXML object) : XML's file object
+            relationship_type (str) : Type of relationship (i.e. consumer or producer)
+        Returns:
+            None
+    """
 
     if relationship_type == "producer":
         output_xml.delete_single_consumer_producer(data,
@@ -602,16 +615,18 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
     # Loop to filter producer and create a new list
     for elem in producer_str_list:
         is_elem_found = True
-        if elem[1] not in xml_function_name_list and elem[0] not in xml_data_name_list:
+        if not any(item == elem[1] for item in xml_function_name_list) and \
+                not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             print(f"{elem[1]} and {elem[0]} do not exist")
-        elif elem[1] not in xml_function_name_list or elem[0] not in xml_data_name_list:
+        elif not any(item == elem[1] for item in xml_function_name_list) or \
+                not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
-            if any(elem[1] in j for j in xml_function_name_list) and not any(
-                    elem[0] in j for j in xml_data_name_list):
+            if any(item == elem[1] for item in xml_function_name_list) and \
+                    not any(item == elem[0] for item in xml_data_name_list):
                 print(f"{elem[0]} does not exist")
-            elif any(elem[0] in j for j in xml_data_name_list) and not any(
-                    elem[1] in j for j in xml_function_name_list):
+            elif any(item == elem[0] for item in xml_data_name_list) and \
+                    not any(item == elem[1] for item in xml_function_name_list):
                 print(f"{elem[1]} does not exist")
 
         if is_elem_found:
