@@ -380,12 +380,8 @@ def matched_src_dest(src_dest_str, **kwargs):
 def matched_show(diagram_name_str, **kwargs):
     out = orchestrator.filter_show_command(diagram_name_str, **kwargs)
     if out:
-        print("Click on the link to open in new tab : ")
-        if out[:4] == 'http':
-            print(out)
-        else:
-            hyper = get_hyperlink_from_file(out)
-            display(HTML(hyper))
+        hyper = get_hyperlink(out)
+        display(HTML(hyper))
         print("Overview :")
         return display(Markdown(f'![figure]({out})'))
 
@@ -410,7 +406,7 @@ def matched_list(object_str, **kwargs):
                 title = i.pop(0)
                 df = pd.DataFrame(i, columns=["Object's name", "Relationship's type"])
                 df = df.T
-                # Could be usefull to add it with button next to table bu needs ipywidgets ...
+                # Could be usefull to add it with button next to table but needs ipywidgets ...
                 # df.to_clipboard(excel=True)
                 df = df.style.set_caption(title)
                 display(df)
@@ -470,9 +466,8 @@ def clean_diagram_folder():
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
-def get_hyperlink_from_file(path):
+def get_hyperlink(path):
     """Convert file path into clickable form."""
-    # returns the final component of a url
-    f_url = os.path.basename(path)
+    text = "Click to open in new tab"
     # convert the url into link
-    return '<a href="{}" target="_blank">{}</a>'.format(path, f_url)
+    return '<a href="{}" target="_blank">{}</a>'.format(path, text)
