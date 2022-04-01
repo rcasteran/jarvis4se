@@ -3,11 +3,9 @@
 # Libraries
 import sys
 import os
-import os.path
 import pathlib
 import uuid
 import subprocess
-from os.path import abspath
 
 from plantuml import PlantUML
 
@@ -132,35 +130,11 @@ class MakePlantUml:
                                                       new_prod_cons_flow_list)
         return flow_str
 
-    def generate_diagram_output(self, string):
-        full_string = "@startuml\n" + string + "@enduml"
-        self.write(full_string)
-        self.output_file.close()
-
-        # create a server object to call for your computations
-        server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
-                          basic_auth={},
-                          form_auth={}, http_opts={}, request_opts={})
-        # send and compile your diagram files to/with the PlantUML server
-        output_svg = os.path.splitext(self.file)[0] + ".svg"
-        server.processes_file(abspath(self.file), output_svg)
-
-    # TODO: To be deleted if not necessary at all
-    @staticmethod
-    def get_plantuml_svg_url_from_string(string):
-        """Generate the url using Plantuml package through HTTP requests"""
-        full_string = "@startuml\n" + string + "@enduml"
-
-        # create a server object to call for your computations
-        server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
-                          basic_auth={},
-                          form_auth={}, http_opts={}, request_opts={})
-        url = server.get_url(full_string)
-        return url
-
     @staticmethod
     def get_url_from_local(string):
-        """Generate unique .svg from string using plantuml.jar client"""
+        """Generate unique .svg from string using  plantuml default server or plantuml.jar client,
+        depending on the diagram's size (limit around 30000 char.)
+        """
         current_file_path = None
         out = None
         if len(string) < 30000:
@@ -212,8 +186,7 @@ class MakePlantUml:
                 sequence_message_str += "activate " + val[1].replace(" ", "_").replace("-", "") \
                                         + "\n"
             relationship_str = val[0].replace(" ", "_").replace("-", "") + ' -> ' \
-                               + val[1].replace(" ", "_").replace(
-                "-", "")
+                               + val[1].replace(" ", "_").replace("-", "")
             if val[3]:
                 seq_number = str(idx+1) + "- "
             else:
