@@ -1190,11 +1190,12 @@ def case_context_diagram(**kwargs):
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+
     if kwargs['diagram_object_str'] in xml_function_name_list:
         filename = show_function_context(kwargs['diagram_object_str'], kwargs['xml_function_list'],
                                          kwargs['xml_consumer_function_list'],
                                          kwargs['xml_producer_function_list'],
-                                         kwargs['xml_data_list'])
+                                         kwargs['xml_data_list'], kwargs['xml_attribute_list'])
         return filename
     elif kwargs['diagram_object_str'] in xml_state_name_list:
         filename = show_states_chain([kwargs['diagram_object_str']], kwargs['xml_state_list'],
@@ -1204,7 +1205,8 @@ def case_context_diagram(**kwargs):
         filename = show_fun_elem_context(kwargs['diagram_object_str'], kwargs['xml_fun_elem_list'],
                                          kwargs['xml_function_list'],
                                          kwargs['xml_consumer_function_list'],
-                                         kwargs['xml_producer_function_list'])
+                                         kwargs['xml_producer_function_list'],
+                                         kwargs['xml_attribute_list'])
         return filename
     else:
         print(f"Jarvis does not know the function {kwargs['diagram_object_str']}")
@@ -1219,14 +1221,16 @@ def case_decomposition_diagram(**kwargs):
         filename = show_function_decomposition(kwargs['diagram_object_str'],
                                                kwargs['xml_function_list'],
                                                kwargs['xml_consumer_function_list'],
-                                               kwargs['xml_producer_function_list'])
+                                               kwargs['xml_producer_function_list'],
+                                               kwargs['xml_attribute_list'])
         return filename
     elif kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         filename = show_fun_elem_decomposition(kwargs['diagram_object_str'],
                                                kwargs['xml_function_list'],
                                                kwargs['xml_consumer_function_list'],
                                                kwargs['xml_producer_function_list'],
-                                               kwargs['xml_fun_elem_list'])
+                                               kwargs['xml_fun_elem_list'],
+                                               kwargs['xml_attribute_list'])
         return filename
     else:
         print(f"Jarvis does not know the object {kwargs['diagram_object_str']}"
@@ -1413,7 +1417,7 @@ def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
 
 
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_fun_elem_list):
+                                xml_producer_function_list, xml_fun_elem_list, xml_attribute_list):
     main_fun_elem = None
     # main_fun_elem_list = set()
     external_function_list = set()
@@ -1457,7 +1461,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                                               allocated_function_list,
                                                               new_consumer_list,
                                                               new_producer_list,
-                                                              external_function_list)
+                                                              external_function_list,
+                                                              xml_attribute_list)
     print("Decomposition Diagram for " + fun_elem_str + " generated")
     return url_diagram
 
@@ -1538,7 +1543,8 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
 
 
 def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
-                          xml_consumer_function_list, xml_producer_function_list):
+                          xml_consumer_function_list, xml_producer_function_list,
+                          xml_attribute_list):
     allocated_function_id_list = set()
     allocated_function_list = set()
     new_function_list = set()
@@ -1562,7 +1568,8 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
         if i.parent is None:
             returned_list = show_function_context(i.name, allocated_function_list,
                                                   xml_consumer_function_list,
-                                                  xml_producer_function_list, set(), list_out=True)
+                                                  xml_producer_function_list, set(),
+                                                  set(), list_out=True)
             for k in returned_list[0]:
                 new_function_list.add(k)
             for c in returned_list[1]:
@@ -1577,6 +1584,7 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                                                                    prod,
                                                                    {},
                                                                    set(),
+                                                                   xml_attribute_list,
                                                                    xml_fun_elem_list)
     print("Context Diagram for " + fun_elem_str + " generated")
     return url_diagram
@@ -1753,7 +1761,8 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
 
 # TODO: Clean/organize this method by creating sub
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, str_out=False, xml_fun_elem_list=None):
+                                xml_producer_function_list, xml_attribute_list,
+                                str_out=False, xml_fun_elem_list=None):
     main_function_list = set()
     ext_prod_fun_list = set()
     ext_cons_fun_list = set()
@@ -1831,6 +1840,7 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                                    new_producer_list,
                                                                    new_parent_dict,
                                                                    None,
+                                                                   xml_attribute_list,
                                                                    xml_fun_elem_list)
     if str_out:
         out = plant_uml_text
@@ -1877,7 +1887,8 @@ def check_get_child_flows(function_list, xml_flow_list, new_flow_list=None):
 
 
 def show_function_context(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                          xml_producer_function_list, xml_data_list, list_out=False):
+                          xml_producer_function_list, xml_data_list, xml_attribute_list,
+                          list_out=False):
     new_function_list = set()
     new_parent_dict = {}
     new_producer_list = []
@@ -1945,7 +1956,8 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
                                                                        new_consumer_list,
                                                                        new_producer_list,
                                                                        new_parent_dict,
-                                                                       xml_data_list)
+                                                                       xml_data_list,
+                                                                       xml_attribute_list)
 
         out = url_diagram
         print("Context Diagram " + diagram_function_str + " generated")
@@ -2625,3 +2637,145 @@ def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
                     if item.id in j.allocated_item_list:
                         filtered_items_list.append(item)
         return filtered_items_list
+
+
+def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
+    """
+    Check if each string in xml_attribute_list is not already corresponding to an actual object's
+    name/alias, create new Attribute() object, instantiate it, write it within XML and then returns
+    update_list.
+
+        Parameters:
+            attribute_str_list ([str]) : Lists of string from jarvis cell
+            xml_attribute_list ([Attribute]) : Attribute list from xml parsing
+            output_xml (GenerateXML object) : XML's file object
+
+        Returns:
+            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+    """
+    update_list = []
+    new_attribute_list = set()
+    # Create attribute names list already in xml
+    xml_attribute_name_list = get_object_name(xml_attribute_list)
+    # Filter attribute_list, keeping only the the ones not already in the xml
+    for attribute_name in attribute_str_list:
+        if attribute_name not in xml_attribute_name_list:
+            new_attribute = datamodel.Attribute()
+            new_attribute.set_name(str(attribute_name))
+            # Generate and set unique identifier of length 10 integers
+            identifier = uuid.uuid4()
+            new_attribute.set_id(str(identifier.int)[:10])
+            # Not needed, by default unknown
+            # new_data.set_type(datamodel.DataType.UNKNOWN)
+            # alias is 'none' by default
+            new_attribute_list.add(new_attribute)
+
+    if not new_attribute_list:
+        update_list.append(0)
+    else:
+        output_xml.write_attribute(new_attribute_list)
+        for attribute in new_attribute_list:
+            xml_attribute_list.add(attribute)
+            print(attribute.name + " is an attribute" + " (added)")
+        update_list.append(1)
+
+    return update_list
+
+
+def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml_function_list,
+                               xml_fun_elem_list, output_xml):
+    """
+    Check if each string in described_attribute_list are corresponding to an actual object and
+    attribute, create new [Attribute, (Object, value)] objects list for object's type : Function
+    and Functional Element.
+    Send lists to add_object_attribute() to write them within xml and then returns update_list
+    from it.
+
+        Parameters:
+            described_attribute_list ([str]) : Lists of string from jarvis cell
+            xml_attribute_list ([Attribute]) : Attribute's list from xml
+            xml_function_list ([Function]) : Function list from xml parsing
+            xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
+            output_xml (GenerateXML object) : XML's file object
+
+        Returns:
+            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+    """
+    new_described_attribute_list = []
+    # Create objects names/aliases list
+    xml_attribute_name_list = get_object_name(xml_attribute_list)
+
+    xml_function_name_list = get_object_name(xml_function_list)
+    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
+    whole_list = xml_function_name_list + xml_fun_elem_name_list
+
+    # Loop to filter attributes and create a new list
+    for elem in described_attribute_list:
+        is_elem_found = True
+        if not any(item == elem[1] for item in whole_list) and \
+                not any(item == elem[0] for item in xml_attribute_name_list):
+            is_elem_found = False
+            print(f"{elem[1]} and {elem[0]} do not exist")
+        elif not any(item == elem[1] for item in whole_list) or \
+                not any(item == elem[0] for item in xml_attribute_name_list):
+            is_elem_found = False
+            if any(item == elem[1] for item in whole_list) and \
+                    not any(item == elem[0] for item in xml_attribute_name_list):
+                print(f"{elem[0]} does not exist")
+            elif any(item == elem[0] for item in xml_attribute_name_list) and not \
+                    any(item == elem[1] for item in whole_list):
+                print(f"{elem[1]} does not exist")
+
+        if is_elem_found:
+            current_attrib = None
+            for attribute in xml_attribute_list:
+                if elem[0] == attribute.name or elem[0] == attribute.alias:
+                    current_attrib = attribute
+            # Loop to filter attribute and create a new list
+            result_function = any(item == elem[1] for item in xml_function_name_list)
+            result_fun_elem = any(item == elem[1]for item in xml_fun_elem_name_list)
+
+            if result_function and current_attrib:
+                for function in xml_function_list:
+                    if elem[1] == function.name or elem[1] == function.alias:
+                        if (function.id, elem[2]) not in current_attrib.described_item_list:
+                            new_described_attribute_list.append(
+                                [current_attrib, (function, str(elem[2]))])
+
+            if result_fun_elem and current_attrib:
+                for fun_elem in xml_fun_elem_list:
+                    if elem[1] == fun_elem.name or elem[1] == fun_elem.alias:
+                        if (fun_elem.id, elem[2]) not in current_attrib.described_item_list:
+                            new_described_attribute_list.append(
+                                [current_attrib, (fun_elem, str(elem[2]))])
+
+    update_list = add_object_attribute(new_described_attribute_list, output_xml)
+
+    return update_list
+
+
+def add_object_attribute(new_obj_attribute_list, output_xml):
+    """
+    Check if input list is not empty, write in xml for each element and return update list if some
+    updates has been made
+
+        Parameters:
+            new_obj_attribute_list ([Attribute, (Object, value)]) : New described attributes
+            output_xml (GenerateXML object) : XML's file object
+
+        Returns:
+            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+    """
+    update_list = []
+    if not new_obj_attribute_list:
+        update_list.append(0)
+    else:
+        output_xml.write_described_attribute_item(new_obj_attribute_list)
+        # Warn the user once added within xml
+        for described_attribute in new_obj_attribute_list:
+            described_attribute[0].add_described_item(described_attribute[1])
+            print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
+                  f"with value {described_attribute[1][1]} (added)")
+        update_list.append(1)
+
+    return update_list
