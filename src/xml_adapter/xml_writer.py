@@ -15,6 +15,7 @@ class GenerateXML:
         etree.SubElement(root, "transitionList")
         etree.SubElement(root, "functionalElementList")
         etree.SubElement(root, "chainList")
+        etree.SubElement(root, "attributeList")
         self.tree = etree.ElementTree(root)
 
         if len(xml_file) > 0:
@@ -474,3 +475,35 @@ class GenerateXML:
                         allocated_item_tag.tail = "\n\t\t\t"  # Go to next line, indent 3 tab
         self.write()
 
+    # Method to write attributes from attribute's list
+    def write_attribute(self, attribute_list):
+        with open(self.file, 'rb') as file:
+            root = self.tree.parse(file)
+            for attribute_list_tag in root.findall("./attributeList"):
+                for attribute in attribute_list:
+                    attribute_list_tag.text = "\n\t\t"
+                    attribute_tag = etree.SubElement(attribute_list_tag, "attribute",
+                                                     {'id': attribute.id, 'name': attribute.name,
+                                                      'type': str(attribute.type),
+                                                      'alias': attribute.alias})
+                    attribute_tag.text = "\n\t\t\t"
+                    attribute_tag.tail = "\n\t\t"
+                    described_item_list_tag = etree.SubElement(attribute_tag,
+                                                               "describedItemList")
+                    described_item_list_tag.tail = "\n\t\t"
+        self.write()
+
+    # Method to write described item by list [attribute, (described_item, value)]
+    def write_described_attribute_item(self, attribute_item_list):
+        with open(self.file, 'rb') as file:
+            root = self.tree.parse(file)
+            # Loop on each attribute
+            for attribute_element in root.findall(".//attribute"):
+                for attribute, item in attribute_item_list:
+                    if attribute_element.get('id') == attribute.id:
+                        tag = attribute_element.find('describedItemList')
+                        tag.text = "\n\t\t\t\t"  # Go to next line and indent 4 tab
+                        allocated_item_tag = etree.SubElement(tag, "describedItem",
+                                                              {'id': item[0].id, 'value': item[1]})
+                        allocated_item_tag.tail = "\n\t\t\t"  # Go to next line, indent 3 tab
+        self.write()
