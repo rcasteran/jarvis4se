@@ -195,6 +195,7 @@ LOOKUPS = [
 
 
 def lookup(string, lookups, **kwargs):
+    """Lookup table with conditions depending on the match"""
     update_list = []
     for regex, values in lookups:
         result_chain = None
@@ -207,7 +208,7 @@ def lookup(string, lookups, **kwargs):
         elif regex == r"(?<= |\n)show (.*?)\n":
             result = re.search(regex, string, re.MULTILINE)
         else:
-            # Transform to avoid duplicated function's declaration within jarvis command
+            # Transform to avoid duplicated function's declaration within cells input
             result = []
             [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
 
@@ -224,6 +225,7 @@ def lookup(string, lookups, **kwargs):
 
 
 def matched_under(chain_name_str, **kwargs):
+    """Get "under" declaration"""
     out = []
     for a, b in zip(chain_name_str[::2], chain_name_str[1::2]):
         a = a.replace("under ", "")
@@ -237,47 +239,47 @@ def matched_under(chain_name_str, **kwargs):
         return [0]
 
 
-# Get function's declaration (does not match if "function" is not at the end)
 def matched_function(function_name_str_list, **kwargs):
+    """Get function's declaration (does not match if "function" is not at the end)"""
     out = orchestrator.add_function_by_name(function_name_str_list,
                                             kwargs['xml_function_list'],
                                             kwargs['output_xml'])
     return out
 
 
-# Get data declaration
 def matched_data(data_str_list, **kwargs):
+    """Get data declaration"""
     out = orchestrator.add_data(data_str_list, kwargs['xml_data_list'],
                                 kwargs['output_xml'])
     return out
 
 
-# Get state's declaration
 def matched_state(state_name_str_list, **kwargs):
+    """Get state's declaration"""
     out = orchestrator.add_state_by_name(state_name_str_list,
                                          kwargs['xml_state_list'],
                                          kwargs['output_xml'])
     return out
 
 
-# Get transition's declaration
 def matched_transition(transition_name_str_list, **kwargs):
+    """Get transition's declaration"""
     out = orchestrator.add_transition_by_name(transition_name_str_list,
                                               kwargs['xml_transition_list'],
                                               kwargs['output_xml'])
     return out
 
 
-# Get Functional element's declaration
 def matched_functional_element(functional_elem_name_str_list, **kwargs):
+    """Get Functional element's declaration"""
     out = orchestrator.add_fun_elem_by_name(functional_elem_name_str_list,
                                             kwargs['xml_fun_elem_list'],
                                             kwargs['output_xml'])
     return out
 
 
-# Get set_alias declaration
 def matched_alias(alias_str_list, **kwargs):
+    """Get set_alias declaration"""
     out = orchestrator.check_set_object_alias(alias_str_list,
                                               kwargs['xml_function_list'],
                                               kwargs['xml_state_list'],
@@ -287,8 +289,8 @@ def matched_alias(alias_str_list, **kwargs):
     return out
 
 
-# Get composition relationship command (match for "is composed by' or "composes")
 def matched_composition(parent_child_name_str_list, **kwargs):
+    """Get composition relationship command (match for "is composed by' or "composes")"""
     out = orchestrator.check_add_child(parent_child_name_str_list,
                                        kwargs['xml_function_list'],
                                        kwargs['xml_function_parent_dict'],
@@ -300,8 +302,8 @@ def matched_composition(parent_child_name_str_list, **kwargs):
     return out
 
 
-# Get consumer declaration
 def matched_consumer(consumer_str_list, **kwargs):
+    """Get consumer declaration"""
     out = orchestrator.check_add_consumer_function(consumer_str_list,
                                                    kwargs['xml_consumer_function_list'],
                                                    kwargs['xml_producer_function_list'],
@@ -311,8 +313,8 @@ def matched_consumer(consumer_str_list, **kwargs):
     return out
 
 
-# Get producer declaration
 def matched_producer(producer_str_list, **kwargs):
+    """Get producer declaration"""
     out = orchestrator.check_add_producer_function(producer_str_list,
                                                    kwargs['xml_consumer_function_list'],
                                                    kwargs['xml_producer_function_list'],
@@ -322,8 +324,8 @@ def matched_producer(producer_str_list, **kwargs):
     return out
 
 
-# Get allocation declaration
 def matched_allocation(allocation_str_list, **kwargs):
+    """Get allocation declaration"""
     out = orchestrator.check_add_allocation(allocation_str_list,
                                             kwargs['xml_fun_elem_list'],
                                             kwargs['xml_state_list'],
@@ -332,8 +334,8 @@ def matched_allocation(allocation_str_list, **kwargs):
     return out
 
 
-# Get delete declaration
 def matched_delete(delete_str_list, **kwargs):
+    """Get delete declaration"""
     out = orchestrator.check_and_delete(delete_str_list,
                                         kwargs['xml_function_list'],
                                         kwargs['xml_producer_function_list'],
@@ -346,8 +348,8 @@ def matched_delete(delete_str_list, **kwargs):
     return out
 
 
-# Get set_type declaration
 def matched_type(type_str_list, **kwargs):
+    """Get set_type declaration"""
     out = orchestrator.check_set_object_type(type_str_list,
                                              kwargs['xml_function_list'],
                                              kwargs['xml_data_list'],
@@ -358,8 +360,8 @@ def matched_type(type_str_list, **kwargs):
     return out
 
 
-# Get predecessor declaration
 def matched_implies(data_predecessor_str_set, **kwargs):
+    """Get predecessor declaration"""
     out = orchestrator.check_add_predecessor(data_predecessor_str_set,
                                              kwargs['xml_data_list'],
                                              kwargs['xml_chain_list'],
@@ -367,17 +369,16 @@ def matched_implies(data_predecessor_str_set, **kwargs):
     return out
 
 
-# Get set_condition declaration
 def matched_condition(condition_str_list, **kwargs):
+    """Get set_condition declaration"""
     out = orchestrator.check_add_transition_condition(condition_str_list,
                                                       kwargs['xml_transition_list'],
                                                       kwargs['output_xml'])
     return out
 
 
-# Get source/destination declaration for transition
 def matched_src_dest(src_dest_str, **kwargs):
-    # xml_transition_list, xml_state_list, output_xml
+    """Get source/destination declaration for transition"""
     out = orchestrator.check_add_src_dest(src_dest_str,
                                           kwargs['xml_transition_list'],
                                           kwargs['xml_state_list'],
