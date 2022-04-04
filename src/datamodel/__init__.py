@@ -13,4 +13,5 @@ from .datamodel import FunctionalElement
 from .datamodel import FunctionalElementType
 from .datamodel import Chain
 from .datamodel import ChainType
+from .datamodel import Attribute
 

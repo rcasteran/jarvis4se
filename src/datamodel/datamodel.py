@@ -802,3 +802,28 @@ class Chain:
 
     def set_activation(self, p_activation):
         self.activated = p_activation
+
+
+# Attribute class
+class Attribute:
+    def __init__(self, p_id='', p_name='', p_alias='none', p_type='unknown'):
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.described_item_list = set()
+
+    def set_id(self, p_id):
+        self.id = p_id
+
+    def set_name(self, p_name):
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        self.type = p_type
+
+    def add_described_item(self, p_item):
+        self.described_item_list.add(p_item)
