@@ -25,21 +25,49 @@ class MakePlantUml:
         self.output_file = open(self.file, "w")
 
     @staticmethod
-    def create_object(function):
+    def create_object(function, attribute_list):
+        attribute_str = ''
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
-        object_str = "'id: " + function.id + '\nobject "' + function.name + '"' + ' as ' + function_name + ' <<' + str(
-            function.type) + '>>\n'
+        object_str = "'id: " + function.id + '\nobject "' + function.name + '"' + ' as ' \
+                     + function_name + ' <<' + str(function.type) + '>>'
+
+        if attribute_list:
+            for attribute in attribute_list:
+                for described_item in attribute.described_item_list:
+                    if described_item[0] == function.id:
+                        attribute_str += attribute.name + " = " + described_item[1] + "\n"
+
+        if len(attribute_str) > 1:
+            object_str += " {\n" + attribute_str + "}\n"
+        else:
+            object_str += "\n"
         return object_str
 
     @staticmethod
-    def create_object_with_operand(function):
+    def create_object_with_operand(function, attribute_list):
+        attribute_str = ''
+        operand_str = ''
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
-        object_str = "'id: " + function.id + '\nobject "' + function.name + '"' + ' as ' + function_name + ' <<' + str(
-            function.type) + '>>'
-        operand_str = '{\n' + str(function.operand) + ' : ' + str(function.input_role) + '\n' + '}\n'
-        return object_str + operand_str
+        object_str = "'id: " + function.id + '\nobject "' + function.name + '"' + ' as ' \
+                     + function_name + ' <<' + str(function.type) + '>>'
+
+        if function.operand:
+            operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'
+        if attribute_list:
+            for attribute in attribute_list:
+                for described_item in attribute.described_item_list:
+                    if described_item[0] == function.id:
+                        attribute_str += attribute.name + " = " + described_item[1] + "\n"
+
+        if len(attribute_str) > 1:
+            object_str += " {\n" + operand_str + attribute_str + "}\n"
+        elif len(attribute_str) == 0 and function.operand:
+            object_str += " {\n" + operand_str + "}\n"
+        else:
+            object_str += "\n"
+        return object_str
 
     @staticmethod
     def create_component(component):
@@ -58,6 +86,7 @@ class MakePlantUml:
     def create_output_flow(output_flow_list):
         output_flow_str = ""
         for i in output_flow_list:
+            relationship_str = ''
             if i[0][0] is not None:
                 relationship_str = i[0][1].replace(" ", "_").replace("-", "") + ' #--> '
                 relationship_str += i[0][1].replace(" ", "_").replace("-", "") + '_o '
@@ -65,7 +94,8 @@ class MakePlantUml:
                 relationship_str = i[0][1].replace(" ", "_").replace("-", "") + ' --> '
                 relationship_str += i[0][1].replace(" ", "_").replace("-", "") + '_o '
             if len(i[1]) > 1:
-                output_flow_str = MakePlantUml.create_multiple_arrow(relationship_str, output_flow_str, i)
+                output_flow_str = MakePlantUml.create_multiple_arrow(relationship_str,
+                                                                     output_flow_str, i)
             else:
                 output_flow_str += relationship_str + ' : ' + i[1][0] + '\n'
 
@@ -78,7 +108,8 @@ class MakePlantUml:
             relationship_str = i[0][1].replace(" ", "_").replace("-", "") + '_i' + ' --> '
             relationship_str += i[0][1].replace(" ", "_").replace("-", "")
             if len(i[1]) > 1:
-                input_flow_str = MakePlantUml.create_multiple_arrow(relationship_str, input_flow_str, i)
+                input_flow_str = MakePlantUml.create_multiple_arrow(relationship_str,
+                                                                    input_flow_str, i)
             else:
                 input_flow_str += relationship_str + ' : ' + i[1][0] + '\n'
         return input_flow_str
@@ -194,11 +225,13 @@ class MakePlantUml:
             sequence_message_str += relationship_str + ' : ' + seq_number + val[2] + '\n'
             if val[0] in activate_list and not any(val[0] in sub for sub in message_list[idx+1:]):
                 deactivate_list.append(val[0])
-                sequence_message_str += "deactivate " + val[0].replace(" ", "_").replace("-", "") + "\n"
+                sequence_message_str += "deactivate " + val[0].replace(" ", "_").replace("-", "") \
+                                        + "\n"
 
             if val[1] in activate_list and not any(val[1] in sub for sub in message_list[idx+1:]):
                 deactivate_list.append(val[1])
-                sequence_message_str += "deactivate " + val[1].replace(" ", "_").replace("-", "") + "\n"
+                sequence_message_str += "deactivate " + val[1].replace(" ", "_").replace("-", "") \
+                                        + "\n"
 
         return sequence_message_str
     
@@ -224,8 +257,8 @@ class MakePlantUml:
             state_alias = state.alias
         else:
             state_alias = state.name.lower().replace(" ", "_").replace("-", "")
-        state_str = "'id: " + state.id + '\nstate "' + state.name + '"' + ' as ' + state_alias + ' <<' + str(
-            state.type) + '>>' + open_bracket_str + '\n'
+        state_str = "'id: " + state.id + '\nstate "' + state.name + '"' + ' as ' + state_alias \
+                    + ' <<' + str(state.type) + '>>' + open_bracket_str + '\n'
         return state_str
 
     @staticmethod
