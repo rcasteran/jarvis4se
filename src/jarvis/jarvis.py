@@ -52,6 +52,7 @@ class MyMagics(Magics):
                 xml_fun_elem_list = xml_lists[8]
                 xml_fun_elem_parent_dict = xml_lists[9]
                 xml_chain_list = xml_lists[10]
+                xml_attribute_list = xml_lists[11]
                 output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
             # Else create an empty xml named by "xml_name"(and associated empty lists)
             # or will be named by default "Outpout"
@@ -67,6 +68,7 @@ class MyMagics(Magics):
                 xml_fun_elem_list = set()
                 xml_fun_elem_parent_dict = {}
                 xml_chain_list = set()
+                xml_attribute_list = set()
                 if len(xml_name) > 1:
                     print(f"Creating {xml_name}.xml !")
                     output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
@@ -87,6 +89,7 @@ class MyMagics(Magics):
                         'xml_fun_elem_list': xml_fun_elem_list,
                         'xml_fun_elem_parent_dict': xml_fun_elem_parent_dict,
                         'xml_chain_list': xml_chain_list,
+                        'xml_attribute_list': xml_attribute_list,
                         'output_xml': output_xml,
                         'xml_name': xml_name}
 
@@ -182,6 +185,12 @@ LOOKUPS = [
 
     (r"list (input|output|child) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
+
+    (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
+     lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
+
+    (r"The (.*?) of (.*?) is ([^\.\n]*)",
+     lambda matched_str, **kwargs: matched_described_attribute(matched_str, **kwargs)),
 ]
 
 
@@ -378,6 +387,7 @@ def matched_src_dest(src_dest_str, **kwargs):
 
 # Get "show" declaration
 def matched_show(diagram_name_str, **kwargs):
+    """Get "show" declaration"""
     out = orchestrator.filter_show_command(diagram_name_str, **kwargs)
     if out:
         hyper = get_hyperlink(out)
@@ -422,6 +432,24 @@ def matched_list(object_str, **kwargs):
                 df = df.T
                 df = df.style.set_caption(title)
                 display(df)
+
+
+def matched_attribute(attribute_name_str, **kwargs):
+    """Get "attribute" declaration"""
+    out = orchestrator.add_attribute(attribute_name_str,
+                                     kwargs['xml_attribute_list'],
+                                     kwargs['output_xml'])
+    return out
+
+
+def matched_described_attribute(described_attribute_str, **kwargs):
+    """Get the described attribute value for an object"""
+    out = orchestrator.check_add_object_attribute(described_attribute_str,
+                                                  kwargs['xml_attribute_list'],
+                                                  kwargs['xml_function_list'],
+                                                  kwargs['xml_fun_elem_list'],
+                                                  kwargs['output_xml'])
+    return out
 
 
 def reverse(inverted_list):
