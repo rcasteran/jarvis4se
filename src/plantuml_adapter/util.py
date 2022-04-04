@@ -26,17 +26,12 @@ class MakePlantUml:
 
     @staticmethod
     def create_object(function, attribute_list):
-        attribute_str = ''
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
         object_str = "'id: " + function.id + '\nobject "' + function.name + '"' + ' as ' \
                      + function_name + ' <<' + str(function.type) + '>>'
 
-        if attribute_list:
-            for attribute in attribute_list:
-                for described_item in attribute.described_item_list:
-                    if described_item[0] == function.id:
-                        attribute_str += attribute.name + " = " + described_item[1] + "\n"
+        attribute_str = MakePlantUml.create_object_attributes(function, attribute_list)
 
         if len(attribute_str) > 1:
             object_str += " {\n" + attribute_str + "}\n"
@@ -46,7 +41,6 @@ class MakePlantUml:
 
     @staticmethod
     def create_object_with_operand(function, attribute_list):
-        attribute_str = ''
         operand_str = ''
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
@@ -55,11 +49,8 @@ class MakePlantUml:
 
         if function.operand:
             operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'
-        if attribute_list:
-            for attribute in attribute_list:
-                for described_item in attribute.described_item_list:
-                    if described_item[0] == function.id:
-                        attribute_str += attribute.name + " = " + described_item[1] + "\n"
+
+        attribute_str = MakePlantUml.create_object_attributes(function, attribute_list)
 
         if len(attribute_str) > 1:
             object_str += " {\n" + operand_str + attribute_str + "}\n"
@@ -68,6 +59,16 @@ class MakePlantUml:
         else:
             object_str += "\n"
         return object_str
+
+    @staticmethod
+    def create_object_attributes(function, attribute_list):
+        attribute_str = ''
+        if attribute_list:
+            for attribute in attribute_list:
+                for described_item in attribute.described_item_list:
+                    if described_item[0] == function.id:
+                        attribute_str += attribute.name + " = " + described_item[1] + "\n"
+        return attribute_str
 
     @staticmethod
     def create_component(component):
