@@ -32,11 +32,13 @@ def parse_xml(input_filename):
     # Looking for functional elements
     functional_element_list, fun_elem_parent_dict = get_functional_element(root)
     # Looking for chains
-    chain_list = get_chain(root)
+    chain_list = get_chains(root)
+    # Looking for attributes
+    attribute_list = get_attributes(root)
 
     all_lists = [function_list, consumer_function_list, producer_function_list,
                  function_parent_list, data_list, state_list, state_parent_dict, transition_list,
-                 functional_element_list, fun_elem_parent_dict, chain_list]
+                 functional_element_list, fun_elem_parent_dict, chain_list, attribute_list]
     return all_lists
 
 
@@ -131,7 +133,7 @@ def get_state(root):
     state_parent_dict = {}
     xml_state_list = root.iter('state')
     for xml_state in xml_state_list:
-        # Instantiate functions and add them to a list
+        # Instantiate states and add them to a list
         state = datamodel.State()
         state.set_id(xml_state.get('id'))
         state.set_name(xml_state.get('name'))
@@ -168,7 +170,7 @@ def get_transition(root):
     transition_list = set()
     xml_transition_list = root.iter('transition')
     for xml_transition in xml_transition_list:
-        # Instantiate functions and add them to a list
+        # Instantiate transitions and add them to a list
         transition = datamodel.Transition()
         transition.set_id(xml_transition.get('id'))
         transition.set_name(xml_transition.get('name'))
@@ -193,7 +195,7 @@ def get_functional_element(root):
     fun_elem_parent_dict = {}
     xml_functional_element_list = root.iter('functionalElement')
     for xml_func_elem in xml_functional_element_list:
-        # Instantiate functions and add them to a list
+        # Instantiate functional element and add them to a list
         fun_elem = datamodel.FunctionalElement()
         fun_elem.set_id(xml_func_elem.get('id'))
         fun_elem.set_name(xml_func_elem.get('name'))
@@ -231,11 +233,11 @@ def get_functional_element(root):
     return functional_element_list, fun_elem_parent_dict
 
 
-def get_chain(root):
+def get_chains(root):
     chain_list = set()
     xml_chain_list = root.iter('chain')
     for xml_chain in xml_chain_list:
-        # Instantiate functions and add them to a list
+        # Instantiate chain and add them to a list
         chain = datamodel.Chain()
         chain.set_id(xml_chain.get('id'))
         chain.set_name(xml_chain.get('name'))
@@ -250,3 +252,27 @@ def get_chain(root):
         chain_list.add(chain)
 
     return chain_list
+
+
+def get_attributes(root):
+    attribute_list = set()
+    xml_attribute_list = root.iter('attribute')
+    for xml_attribute in xml_attribute_list:
+        # Instantiate Attribute and add them to a list
+        attribute = datamodel.Attribute()
+        attribute.set_id(xml_attribute.get('id'))
+        attribute.set_name(xml_attribute.get('name'))
+        attribute.set_alias(xml_attribute.get('alias'))
+        # No AttritubeType defined in datamodel yet
+        # attribute_type = datamodel.AttributeType.get_name(xml_attribute.get('type'))
+        attribute.set_type(xml_attribute.get('type'))
+
+        # Looking for described items and add them to the attribute
+        xml_described_item_list = xml_attribute.iter('describedItem')
+        for xml_described_item in xml_described_item_list:
+            attribute.add_described_item((xml_described_item.get("id"),
+                                          xml_described_item.get("value")))
+
+        attribute_list.add(attribute)
+
+    return attribute_list
