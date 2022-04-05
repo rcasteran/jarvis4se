@@ -189,7 +189,7 @@ LOOKUPS = [
     (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
      lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
 
-    (r"The (.*?) of (.*?) is ([^\.\n]*)",
+    (r"The ([^type|alias].*?) of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_described_attribute(matched_str, **kwargs)),
 ]
 
