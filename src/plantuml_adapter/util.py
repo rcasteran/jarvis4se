@@ -84,6 +84,16 @@ class MakePlantUml:
         return close_bracket_str
 
     @staticmethod
+    def create_component_attribute(component, attribute_list):
+        attribute_str = MakePlantUml.create_object_attributes(component, attribute_list)
+        if attribute_str:
+            component_name = component.name.lower().replace(" ", "_").replace("-", "")
+            note_str = 'note bottom of ' + component_name + '\n' + attribute_str + 'end note\n'
+            return note_str
+        else:
+            return ''
+
+    @staticmethod
     def create_output_flow(output_flow_list):
         output_flow_str = ""
         for i in output_flow_list:
@@ -170,7 +180,7 @@ class MakePlantUml:
         current_file_path = None
         out = None
         if len(string) < 30000:
-            full_string = "@startuml\nskin rose\n" + string + "@enduml"
+            full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" + string + "@enduml"
             # Quickest by HTTP request to plantuml server (only for small diagrams)
             server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
                               basic_auth={},
