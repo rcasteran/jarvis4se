@@ -507,3 +507,13 @@ class GenerateXML:
                                                               {'id': item[0].id, 'value': item[1]})
                         allocated_item_tag.tail = "\n\t\t\t"  # Go to next line, indent 3 tab
         self.write()
+
+    # Method to write attribute's type by list [Attribute, type_str]
+    def write_attribute_type(self, attribute_type_list):
+        with open(self.file, 'rb') as file:
+            root = self.tree.parse(file)
+            for attribute in attribute_type_list:
+                for attribute_tag in root.findall(".//attribute[@id='" + attribute[0].id
+                                                  + "']"):
+                    attribute_tag.set('type', attribute[1])
+        self.write()
