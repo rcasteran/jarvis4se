@@ -27,6 +27,7 @@ def test_generate_xml_file_template():
                    "  <transitionList/>\n" \
                    "  <functionalElementList/>\n" \
                    "  <chainList/>\n" \
+                   "  <attributeList/>\n" \
                    "</funcArch>\n"
         assert base_xml in s
     if path:
