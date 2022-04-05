@@ -57,4 +57,62 @@ def test_simple_function_within_xml():
         os.remove(path)
 
 
+def test_described_attribute_within_xml():
+    """Same as test_described_attribute_input() within test_input_cell.py, but here we are
+    verifying that attributes are written correctly within xml:
+     %%jarvis
+     with described_attribute_within_xml
+     F1 is a function
+     Fun elem is a functional element
+     ========================================
+     %%jarvis
+     with described_attribute_within_xml
+     A is an attribute
+     B is an attribute. C is an attribute
+     ========================================
+     %%jarvis
+     with described_attribute_within_xml
+     The A of F1 is 4,2
+     The C of F1 is pink
+     The B of Fun elem is 8,5.
+     The A of Fun elem is 100
 
+     """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "described_attribute_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "Fun elem is a functional element\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "A is an attribute\n"
+                    "B is an attribute. C is an attribute\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "The A of F1 is 4,2\n"
+                    "The C of F1 is pink\n"
+                    "The B of Fun elem is 8,5.\n"
+                    "The A of Fun elem is 100\n")
+
+    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
+
+    expected = {('A', 'F1', '4,2'), ('B', 'Fun elem', '8,5'),
+                ('C', 'F1', 'pink'), ('A', 'Fun elem', '100')}
+    result = set()
+    assert len(attribute_list) == 3
+    for attribute in attribute_list:
+        for item in attribute.described_item_list:
+            for function in function_list:
+                if item[0] == function.id:
+                    result.add((attribute.name, function.name, item[1]))
+            for fun_elem in fun_elem_list:
+                if item[0] == fun_elem.id:
+                    result.add((attribute.name, fun_elem.name, item[1]))
+
+    assert expected == result
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
