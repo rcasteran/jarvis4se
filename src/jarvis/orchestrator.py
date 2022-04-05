@@ -930,11 +930,11 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
     # Check if the wanted to object exists and the type can be set
     for object_to_set_type, type_name in type_str_list:
         is_elem_found = True
-        if not any(object_to_set_type in s for s in concatenated_lists):
+        if not any(s == object_to_set_type for s in concatenated_lists):
             is_elem_found = False
             print(f"The object {object_to_set_type} does not exist")
             # Else do nothing
-        elif not any(type_name.upper() in s for s in concatenated_type_lists):
+        elif not any(s == type_name.upper() for s in concatenated_type_lists):
             is_elem_found = False
             if object_to_set_type in xml_function_name_list:
                 print(
@@ -990,8 +990,9 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
             else:
                 print(f"{object_to_set_type} can not be of type: {type_name}")
 
-    object_type_lists = [object_in_xml_function_list, object_in_xml_data_list, object_in_xml_state_list,
-                         object_in_xml_transition_list, object_in_xml_fun_elem_list]
+    object_type_lists = [object_in_xml_function_list, object_in_xml_data_list,
+                         object_in_xml_state_list, object_in_xml_transition_list,
+                         object_in_xml_fun_elem_list]
     update_list = set_object_type(object_type_lists, output_xml)
 
     return update_list
