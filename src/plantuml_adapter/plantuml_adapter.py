@@ -68,6 +68,9 @@ def write_function_child(function, input_flow_list, output_flow_list, xml_attrib
     for i in range(nb_component):
         plantuml_text += util.MakePlantUml.close_component()
 
+    for component in child_with_child_list:
+        plantuml_text += util.MakePlantUml.create_component_attribute(component, xml_attribute_list)
+
     whole_child_list = child_with_child_list + child_with_no_child_list
     for fun in whole_child_list:
         for i in input_flow_list:
@@ -102,14 +105,19 @@ def count_composed_component(function, count):
 
 
 def write_function_object(function, input_flow_list, output_flow_list, check, xml_attribute_list,
-                          compo_diagram=False):
+                          component_obj=None, compo_diagram=False):
     plantuml_text = ''
     if function.operand:
         plantuml_text += util.MakePlantUml.create_object_with_operand(function, xml_attribute_list)
     else:
         plantuml_text += util.MakePlantUml.create_object(function, xml_attribute_list)
+
     if check:
         plantuml_text += util.MakePlantUml.close_component()
+        if component_obj:
+            plantuml_text += util.MakePlantUml.create_component_attribute(component_obj,
+                                                                          xml_attribute_list)
+
     for p in input_flow_list:
         if compo_diagram:
             if p[0][0] == function.name.lower():
@@ -157,17 +165,17 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
     # Loop in order to filter functions and write in output's file, see write_function_child()
     if not parent_child_dict:
         for function in function_list:
-            check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+            check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
             plantuml_text += fun_elem_txt
             plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                                   check, xml_attribute_list)
+                                                   check, xml_attribute_list, component_obj=fun_elem)
 
     if parent_child_dict:
         for function in function_list:
             if function.id in parent_child_dict.values() and \
                     function.id not in parent_child_dict.keys():
                 if function.type in datamodel.FunctionType.get_parent_function_type_list():
-                    check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+                    check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
                     plantuml_text += fun_elem_txt
                     plantuml_text += util.MakePlantUml.create_component(function)
                     plantuml_text += write_function_child(function,
@@ -176,12 +184,18 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                                                           xml_attribute_list)
                     if check:
                         plantuml_text += util.MakePlantUml.close_component()
+                        plantuml_text += util.MakePlantUml.\
+                            create_component_attribute(fun_elem, xml_attribute_list)
+
             if function.id not in parent_child_dict.keys() \
                     and function.id not in parent_child_dict.values():
-                check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+                check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
                 plantuml_text += fun_elem_txt
                 plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                                       check, xml_attribute_list, True)
+                                                       check, xml_attribute_list,
+                                                       component_obj=fun_elem, compo_diagram=True)
+
+
     # Write in output file and close it
     plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
     plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
@@ -215,6 +229,7 @@ def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=
                     child_allocated_function_list.append(j)
             if not any(t.id in s for s in child_allocated_function_list):
                 out_str += write_function_object(t, [], [], False, xml_attribute_list)
+
     return out_str
 
 
@@ -228,7 +243,6 @@ def recursive_decomposition(main_fun_elem, function_list, input_flow_list, outpu
             out_str = recursive_decomposition(main_fun_elem, function_list,
                                               input_flow_list, output_flow_list,
                                               xml_attribute_list, out_str)
-
     else:
         for c in main_fun_elem.child_list:
             out_str += util.MakePlantUml.create_component(c)
@@ -238,7 +252,8 @@ def recursive_decomposition(main_fun_elem, function_list, input_flow_list, outpu
                                                   output_flow_list, xml_attribute_list,
                                                   out_str)
             out_str += util.MakePlantUml.close_component()
-
+            out_str += util.MakePlantUml.create_component_attribute(c, xml_attribute_list)
+        out_str += util.MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     return out_str
 
 
@@ -273,13 +288,14 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     plantuml_text = recursive_decomposition(main_fun_elem, allocated_function_list,
                                             input_flow_list, output_flow_list, xml_attribute_list)
     plantuml_text += util.MakePlantUml.close_component()
+    plantuml_text += util.MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     # Write external(consumer or producer) functions and highest level functional
     # element allocated to it
     for function in external_function_list:
-        check, fun_elem_txt = check_write_fun_elem(function, fun_elem_list)
+        check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
         plantuml_text += fun_elem_txt
         plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                               check, xml_attribute_list)
+                                               check, xml_attribute_list, component_obj=fun_elem)
 
     # Write data flows
     #plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
@@ -305,13 +321,14 @@ def check_write_fun_elem(function, fun_elem_list):
     """
     plantuml_text = ''
     check = False
+    fun_elem = None
     if fun_elem_list:
         for fun_elem in fun_elem_list:
             if function.id in fun_elem.allocated_function_list:
                 if fun_elem.parent is None:
                     check = True
                     plantuml_text += util.MakePlantUml.create_component(fun_elem)
-    return check, plantuml_text
+    return check, plantuml_text, fun_elem
 
 
 def get_url_from_string(diagram_str):
