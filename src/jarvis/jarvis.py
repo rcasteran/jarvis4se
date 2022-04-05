@@ -356,6 +356,7 @@ def matched_type(type_str_list, **kwargs):
                                              kwargs['xml_state_list'],
                                              kwargs['xml_transition_list'],
                                              kwargs['xml_fun_elem_list'],
+                                             kwargs['xml_attribute_list'],
                                              kwargs['output_xml'])
     return out
 

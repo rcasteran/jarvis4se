@@ -875,8 +875,9 @@ def delete_objects(to_be_deleted_lists, xml_lists, output_xml):
     return update_list
 
 
+# TODO: Clean this method
 def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_state_list,
-                          xml_transition_list, xml_fun_elem_list, output_xml):
+                          xml_transition_list, xml_fun_elem_list, xml_attribute_list, output_xml):
     """
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
     [object, type] lists for objects : Data/State/Function/Transition/FunctionalElement.
@@ -889,16 +890,18 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
             xml_state_list ([State]) : State list from xml parsing
             xml_transition_list ([Transition]) : Transition list from xml parsing
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
+            xml_attribute_list ([Attribute]) : Attribute list from xml parsing
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    object_in_xml_function_list = []
-    object_in_xml_data_list = []
-    object_in_xml_state_list = []
-    object_in_xml_transition_list = []
-    object_in_xml_fun_elem_list = []
+    object_from_xml_function_list = []
+    object_from_xml_data_list = []
+    object_from_xml_state_list = []
+    object_from_xml_transition_list = []
+    object_from_xml_fun_elem_list = []
+    object_from_xml_attribute_list = []
     function_type_list = []
     state_type_list = []
     data_type_list = []
@@ -910,6 +913,7 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
     xml_state_name_list = get_object_name(xml_state_list)
     xml_trnansition_name_list = get_object_name(xml_transition_list)
     xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
+    xml_attribute_name_list = get_object_name(xml_attribute_list)
     # Get __str__ list from FUNCTION_TYPE, DataType, StateType
     for i in datamodel.FunctionType:
         function_type_list.append(str(i).upper())
@@ -923,7 +927,8 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
         fun_elem_type_list.append(str(n).upper())
 
     concatenated_lists = [*xml_function_name_list, *xml_data_name_list, *xml_state_name_list,
-                          *xml_trnansition_name_list, *xml_fun_elem_name_list]
+                          *xml_trnansition_name_list, *xml_fun_elem_name_list,
+                          *xml_attribute_name_list]
     concatenated_type_lists = [*function_type_list, *data_type_list, *state_type_list,
                                *transition_type_list, *fun_elem_type_list]
 
@@ -934,7 +939,8 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
             is_elem_found = False
             print(f"The object {object_to_set_type} does not exist")
             # Else do nothing
-        elif not any(s == type_name.upper() for s in concatenated_type_lists):
+        elif not any(s == type_name.upper() for s in concatenated_type_lists) and \
+                not any(s == object_to_set_type for s in xml_attribute_name_list):
             is_elem_found = False
             if object_to_set_type in xml_function_name_list:
                 print(
@@ -957,42 +963,51 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
                     f"The type {type_name} does not exist, available types are "
                     f": {', '.join(fun_elem_type_list)}.")
         if is_elem_found:
-            if type_name.upper() in function_type_list:
+            if any(s == object_to_set_type for s in xml_attribute_name_list):
+                for attribute in xml_attribute_list:
+                    if object_to_set_type == attribute.name or \
+                            object_to_set_type == attribute.alias:
+                        if type_name.capitalize() != str(attribute.type):
+                            object_from_xml_attribute_list.append([attribute, type_name])
+
+            elif type_name.upper() in function_type_list:
                 for fun in xml_function_list:
                     if object_to_set_type == fun.name or object_to_set_type == fun.alias:
                         if type_name.capitalize() != str(fun.type):
-                            object_in_xml_function_list.append([fun, type_name.capitalize()])
-                        # Else do nothing
+                            object_from_xml_function_list.append([fun, type_name.capitalize()])
+
             elif type_name.upper() in data_type_list:
                 for d in xml_data_list:
                     if object_to_set_type == d.name:
                         if type_name.capitalize() != str(d.type):
-                            object_in_xml_data_list.append([d, type_name.capitalize()])
+                            object_from_xml_data_list.append([d, type_name.capitalize()])
 
             elif type_name.upper() in state_type_list:
                 for sta in xml_state_list:
                     if object_to_set_type == sta.name or object_to_set_type == sta.alias:
                         if type_name.capitalize() != str(sta.type):
-                            object_in_xml_state_list.append([sta, type_name.capitalize()])
+                            object_from_xml_state_list.append([sta, type_name.capitalize()])
 
             elif type_name.upper() in transition_type_list:
                 for transition in xml_transition_list:
-                    if object_to_set_type == transition.name or object_to_set_type == transition.alias:
+                    if object_to_set_type == transition.name or \
+                            object_to_set_type == transition.alias:
                         if type_name.capitalize() != str(transition.type):
-                            object_in_xml_transition_list.append([transition, type_name.capitalize()])
+                            object_from_xml_transition_list.append([transition,
+                                                                    type_name.capitalize()])
 
             elif type_name.upper() in fun_elem_type_list:
                 for fun_elem in xml_fun_elem_list:
                     if object_to_set_type == fun_elem.name or object_to_set_type == fun_elem.alias:
                         if type_name.capitalize() != str(fun_elem.type):
-                            object_in_xml_fun_elem_list.append([fun_elem, type_name.capitalize()])
+                            object_from_xml_fun_elem_list.append([fun_elem, type_name.capitalize()])
 
             else:
                 print(f"{object_to_set_type} can not be of type: {type_name}")
 
-    object_type_lists = [object_in_xml_function_list, object_in_xml_data_list,
-                         object_in_xml_state_list, object_in_xml_transition_list,
-                         object_in_xml_fun_elem_list]
+    object_type_lists = [object_from_xml_function_list, object_from_xml_data_list,
+                         object_from_xml_state_list, object_from_xml_transition_list,
+                         object_from_xml_fun_elem_list, object_from_xml_attribute_list]
     update_list = set_object_type(object_type_lists, output_xml)
 
     return update_list
@@ -1018,6 +1033,7 @@ def set_object_type(object_type_lists, output_xml):
         new_type_in_xml_state_list = object_type_lists[2]
         new_type_in_xml_transition_list = object_type_lists[3]
         new_type_in_xml_fun_elem_list = object_type_lists[4]
+        new_type_in_xml_attribute_list = object_type_lists[5]
         if new_type_in_xml_function_list:
             output_xml.write_function_type(new_type_in_xml_function_list)
             for elem in new_type_in_xml_function_list:
@@ -1048,6 +1064,13 @@ def set_object_type(object_type_lists, output_xml):
             for fun_elem_type in new_type_in_xml_fun_elem_list:
                 fun_elem_type[0].set_type(fun_elem_type[1])
                 print(f"The type of {fun_elem_type[0].name} is {fun_elem_type[0].type}")
+
+        if new_type_in_xml_attribute_list:
+            output_xml.write_attribute_type(new_type_in_xml_attribute_list)
+            for attribute_type in new_type_in_xml_attribute_list:
+                attribute_type[0].set_type(attribute_type[1])
+                print(f"The type of {attribute_type[0].name} is {attribute_type[0].type}")
+
         update_list.append(1)
     else:
         update_list.append(0)
@@ -1073,10 +1096,10 @@ def check_set_object_alias(alias_str_list, xml_function_list, xml_state_list, xm
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    object_in_xml_function_list = []
-    object_in_xml_state_list = []
-    object_in_xml_transition_list = []
-    object_in_xml_fun_elem_list = []
+    object_from_xml_function_list = []
+    object_from_xml_state_list = []
+    object_from_xml_transition_list = []
+    object_from_xml_fun_elem_list = []
     # Create object names/aliases lists
     xml_function_name_list = get_object_name(xml_function_list)
     xml_state_name_list = get_object_name(xml_state_list)
@@ -1095,28 +1118,28 @@ def check_set_object_alias(alias_str_list, xml_function_list, xml_state_list, xm
                 for fun in xml_function_list:
                     if object_to_set_alias == fun.name or object_to_set_alias == fun.alias:
                         if fun.alias != alias_name:
-                            object_in_xml_function_list.append([fun, alias_name])
+                            object_from_xml_function_list.append([fun, alias_name])
                         # Else do nothing
             elif object_to_set_alias in xml_state_name_list:
                 for sta in xml_state_list:
                     if object_to_set_alias == sta.name or object_to_set_alias == sta.alias:
                         if sta.alias != alias_name:
-                            object_in_xml_state_list.append([sta, alias_name])
+                            object_from_xml_state_list.append([sta, alias_name])
                         # Else do nothing
             elif object_to_set_alias in xml_transition_name_list:
                 for transition in xml_transition_list:
                     if object_to_set_alias == transition.name or object_to_set_alias == transition.alias:
                         if transition.alias != alias_name:
-                            object_in_xml_transition_list.append([transition, alias_name])
+                            object_from_xml_transition_list.append([transition, alias_name])
                         # Else do nothing
             elif object_to_set_alias in xml_fun_elem_name_list:
                 for fun_elem in xml_fun_elem_list:
                     if object_to_set_alias == fun_elem.name or object_to_set_alias == fun_elem.alias:
                         if fun_elem.alias != alias_name:
-                            object_in_xml_fun_elem_list.append([fun_elem, alias_name])
+                            object_from_xml_fun_elem_list.append([fun_elem, alias_name])
                         # Else do nothing
-    output_lists = [object_in_xml_function_list, object_in_xml_state_list,
-                    object_in_xml_transition_list, object_in_xml_fun_elem_list]
+    output_lists = [object_from_xml_function_list, object_from_xml_state_list,
+                    object_from_xml_transition_list, object_from_xml_fun_elem_list]
     update_list = set_object_alias(output_lists, output_xml)
 
     return update_list
