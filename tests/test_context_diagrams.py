@@ -81,3 +81,109 @@ def test_simple_function_in_out(mocker):
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_function_with_attribute(mocker):
+    """Notebook equivalent:
+     %%jarvis
+     with test_function_with_attribute
+     F1 is a function
+     ========================================
+     %%jarvis
+     with test_function_with_attribute
+     A is an attribute
+     C is an attribute
+     ========================================
+     %%jarvis
+     with test_function_with_attribute
+     The A of F1 is 4,2
+     The C of F1 is pink
+     ========================================
+     %%jarvis
+     with test_function_with_attribute
+     show context F1
+     """
+    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "test_function_with_attribute"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "A is an attribute\n"
+                    "C is an attribute\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "The A of F1 is 4,2\n"
+                    "The C of F1 is pink\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "show context F1\n")
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    expected = ['object "F1" as f1 <<unknown>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_fun_elem_with_attribute(mocker):
+    """Notebook equivalent:
+     %%jarvis
+     with fun_elem_with_attribute
+     F1 is a function
+     Fun elem is a functional element
+     F1 is allocated to Fun elem
+     ========================================
+     %%jarvis
+     with fun_elem_with_attribute
+     A is an attribute
+     B is an attribute. C is an attribute
+     ========================================
+     %%jarvis
+     with fun_elem_with_attribute
+     The A of F1 is 4,2
+     The C of F1 is pink
+     The B of Fun elem is 8,5.
+     The A of Fun elem is 100
+     """
+    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "fun_elem_with_attribute"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "Fun elem is a functional element\n"
+                    "F1 is allocated to Fun elem")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "A is an attribute\n"
+                    "B is an attribute. C is an attribute\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "The A of F1 is 4,2\n"
+                    "The C of F1 is pink\n"
+                    "The B of Fun elem is 8,5.\n"
+                    "The A of Fun elem is 100\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "show context Fun elem\n")
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    expected = ['component "Fun elem" as fun_elem <<unknown>>{\n',
+                'object "F1" as f1 <<unknown>> {\n',
+                'A = 4,2\n',
+                'C = pink\n',
+                '}\n}\n',
+                'note bottom of fun_elem\n',
+                'A = 100\n',
+                'B = 8,5\n',
+                'end note\n']
+    print(result)
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
