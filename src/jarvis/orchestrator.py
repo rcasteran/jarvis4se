@@ -1352,8 +1352,6 @@ def switch_show_filter(**kwargs):
 def filter_show_command(diagram_name_str, **kwargs):
     wanted_diagram_str = diagram_name_str.group(1)
 
-    # TODO: Add to regex that it can also take the case (decomposition|context|chain)''
-    #  in order to send specific user message for empty compo|context|chain
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
     specific_diagram_str = re.search(regex, wanted_diagram_str, re.MULTILINE)
     if specific_diagram_str:
