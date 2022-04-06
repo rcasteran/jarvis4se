@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 # jarvis4se version
-VERSION = "1.1.2"
+VERSION = "1.1.3"
 
 
 def readme():
@@ -24,7 +24,7 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Topic :: Software Development :: Engineering Tools",
+        "Topic :: Scientific/Engineering :: Visualization",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Programming Language :: Python :: 3",
     ],
