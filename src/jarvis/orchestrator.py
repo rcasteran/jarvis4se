@@ -1492,6 +1492,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
 def show_state_allocated_function(state_str, state_list, function_list, xml_consumer_function_list,
                                   xml_producer_function_list, xml_data_list):
     allocated_function_id_list = set()
+    state_name = ''
     for state in state_list:
         if state_str in (state.name, state.alias):
             if not state.allocated_function_list:
@@ -1734,7 +1735,7 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
                                                                         new_consumer_list,
                                                                         new_producer_list,
                                                                         new_parent_dict,
-                                                                        new_data_list)
+                                                                        new_data_list, str_out)
     if str_out:
         out = plant_uml_text
     else:
