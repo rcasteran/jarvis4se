@@ -179,7 +179,7 @@ class MakePlantUml:
         """
         current_file_path = None
         out = None
-        if len(string) < 30000:
+        if len(string) < 15000:
             full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" + string + "@enduml"
             # Quickest by HTTP request to plantuml server (only for small diagrams)
             server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
