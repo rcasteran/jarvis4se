@@ -135,6 +135,9 @@ LOOKUPS = [
     (r"(?<= |\n)(.*?) is a functional element(?=.|\n)",
      lambda matched_str, **kwargs: matched_functional_element(matched_str, **kwargs)),
 
+    (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
+     lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
+
     (r"The alias of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_alias(matched_str, **kwargs)),
 
@@ -185,9 +188,6 @@ LOOKUPS = [
 
     (r"list (input|output|child) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
-
-    (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
-     lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
 
     (r"The ([^type|alias].*?) of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_described_attribute(matched_str, **kwargs)),
@@ -275,6 +275,14 @@ def matched_functional_element(functional_elem_name_str_list, **kwargs):
     out = orchestrator.add_fun_elem_by_name(functional_elem_name_str_list,
                                             kwargs['xml_fun_elem_list'],
                                             kwargs['output_xml'])
+    return out
+
+
+def matched_attribute(attribute_name_str, **kwargs):
+    """Get "attribute" declaration"""
+    out = orchestrator.add_attribute(attribute_name_str,
+                                     kwargs['xml_attribute_list'],
+                                     kwargs['output_xml'])
     return out
 
 
@@ -434,14 +442,6 @@ def matched_list(object_str, **kwargs):
                 df = df.T
                 df = df.style.set_caption(title)
                 display(df)
-
-
-def matched_attribute(attribute_name_str, **kwargs):
-    """Get "attribute" declaration"""
-    out = orchestrator.add_attribute(attribute_name_str,
-                                     kwargs['xml_attribute_list'],
-                                     kwargs['output_xml'])
-    return out
 
 
 def matched_described_attribute(described_attribute_str, **kwargs):
