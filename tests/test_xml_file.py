@@ -99,6 +99,8 @@ def test_described_attribute_within_xml():
 
     expected = {('A', 'F1', '4,2'), ('B', 'Fun elem', '8,5'),
                 ('C', 'F1', 'pink'), ('A', 'Fun elem', '100')}
+    # xml_adapter.parse_xml() returns mainly set(), so the order can change
+    # thus we have to compare it with a set also
     result = set()
     assert len(attribute_list) == 3
     for attribute in attribute_list:
@@ -109,6 +111,42 @@ def test_described_attribute_within_xml():
             for fun_elem in fun_elem_list:
                 if item[0] == fun_elem.id:
                     result.add((attribute.name, fun_elem.name, item[1]))
+
+    assert expected == result
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_set_attribute_type_within_xml():
+    """Tests that attribute types are written correctly within xml, notebook equivalent:
+     %%jarvis
+     with set_attribute_type_within_xml
+     A is an attribute
+     B is an attribute.
+     The type of A is attribute type A.
+     The type of B is attribute type B
+
+     """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "set_attribute_type_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "A is an attribute\n"
+                    "B is an attribute.\n"
+                    "The type of A is attribute type A.\n"
+                    "The type of B is attribute type B\n")
+
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
+    expected = {('A', 'attribute type A'), ('B', 'attribute type B')}
+    # xml_adapter.parse_xml() returns mainly set(), so the order can change
+    # thus we have to compare it with a set also
+    result = set()
+    assert len(attribute_list) == 2
+    for attribute in attribute_list:
+        result.add((attribute.name, attribute.type))
 
     assert expected == result
 
