@@ -88,6 +88,7 @@ def test_described_attribute_input(capsys):
 
 
 def test_set_object_type_alias(capsys):
+    # TODO: Needs to be extend to test with source/destination
     """ In order to check Issue #21 causing bad regex match between type, alias and
     described attribute. Notebook equivalent:
     %%jarvis
