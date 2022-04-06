@@ -189,7 +189,7 @@ LOOKUPS = [
     (r"list (input|output|child) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
 
-    (r"The ([^type|alias].*?) of (.*?) is ([^\.\n]*)",
+    (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_described_attribute(matched_str, **kwargs)),
 ]
 
