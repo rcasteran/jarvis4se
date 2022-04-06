@@ -21,11 +21,11 @@ def test_attribute_declaration_input(capsys):
                     "B is an attribute. C is an attribute\n")
 
     captured = capsys.readouterr()
-    expected = ["Creating attribute_declaration_input.xml !\n",
+    expected = [f"Creating {file_name}.xml !\n",
                 "C is an attribute (added)\n",
                 "A is an attribute (added)\n",
                 "B is an attribute (added)\n",
-                "attribute_declaration_input.xml updated"]
+                f"{file_name}.xml updated"]
 
     assert all(i in captured.out for i in expected)
 
@@ -71,15 +71,48 @@ def test_described_attribute_input(capsys):
                     "The A of Fun elem is 100\n")
 
     captured = capsys.readouterr()
-    expected = ["described_attribute_input.xml parsed\n",
+    expected = [f"{file_name}.xml parsed\n",
                 "Attribute A for F1 with value 4,2 (added)\n",
                 "Attribute C for F1 with value pink (added)\n",
                 "Attribute B for Fun elem with value 8,5 (added)\n",
                 "Attribute A for Fun elem with value 100 (added)\n",
-                "described_attribute_input.xml updated\n"]
+                f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
     assert all(i in last_out for i in expected)
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_set_object_type_alias(capsys):
+    """ In order to check Issue #21 causing bad regex match between type, alias and
+    described attribute. Notebook equivalent:
+    %%jarvis
+    with set_object_type_alias
+    F1 is a function. The type of F1 is high level function
+    The alias of F1 is f1
+    ========================================
+
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "set_object_type_alias"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function. The type of F1 is high level function\n"
+                    "The alias of F1 is f1\n")
+
+    captured = capsys.readouterr()
+    expected = [f"Creating {file_name}.xml !\n",
+                "F1 is a function (added)\n",
+                "The alias for F1 is f1\n",
+                "The type of F1 is High level function\n",
+                f"{file_name}.xml updated\n"]
+
+    assert all(i in captured.out for i in expected)
+    assert len(captured.out) == len(''.join(expected))
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
