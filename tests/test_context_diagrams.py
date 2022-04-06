@@ -179,7 +179,7 @@ def test_fun_elem_with_attribute(mocker):
                 'A = 100\n',
                 'B = 8,5\n',
                 'end note\n']
-    print(result)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
 
