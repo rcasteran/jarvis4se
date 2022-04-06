@@ -344,7 +344,7 @@ def get_url_from_string(diagram_str):
 
 
 def get_sequence_diagram(function_list, consumer_function_list, producer_function_list,
-                         parent_child_dict, data_list):
+                         parent_child_dict, data_list, str_out=False):
     # Allow plantuml option to put duration between 2 messages
     sequence_text = "!pragma teoz true\n"
 
@@ -362,9 +362,12 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
             sequence_text += util.MakePlantUml.create_participant(f)
 
     sequence_text += util.MakePlantUml.create_sequence_message(ordered_message_list)
-    diagram_url = util.MakePlantUml.get_url_from_local(sequence_text)
 
-    return sequence_text, diagram_url
+    if str_out:
+        return sequence_text, ''
+    else:
+        diagram_url = util.MakePlantUml.get_url_from_local(sequence_text)
+        return sequence_text, diagram_url
 
 
 def get_predecessor_list(data):
