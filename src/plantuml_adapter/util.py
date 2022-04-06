@@ -175,12 +175,13 @@ class MakePlantUml:
     @staticmethod
     def get_url_from_local(string):
         """Generate unique .svg from string using  plantuml default server or plantuml.jar client,
-        depending on the diagram's size (limit around 30000 char.)
+        depending on the diagram's size (limit around 15000 char.)
         """
         current_file_path = None
         out = None
         if len(string) < 15000:
-            full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" + string + "@enduml"
+            full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
+                          + string + "@enduml"
             # Quickest by HTTP request to plantuml server (only for small diagrams)
             server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
                               basic_auth={},
