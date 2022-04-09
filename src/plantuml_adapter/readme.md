@@ -1,3 +1,0 @@
-# Package PlantUml adapter
-
-## Content
