@@ -1,3 +1,0 @@
-# Package XML adapter
-
-## Content
