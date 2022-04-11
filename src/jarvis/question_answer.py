@@ -146,7 +146,6 @@ def get_consumes_produces_info(wanted_object, relationship_list):
         return object_relationship
 
 
-
 def get_child_name_list(parent_object, object_list):
     child_list = set()
     for child in object_list:
@@ -284,8 +283,10 @@ def get_object_list(object_str, **kwargs):
                             if state.id == allocated_state:
                                 child_list.append((state.name, "State allocation"))
 
+                child_list = list(tuple(sorted(child_list)))
                 child_list.insert(0, list_name)
                 answer_list.append(child_list)
+
         else:
             if wanted_object is None:
                 print(f"Object '{elem[1]}' does not exist")
@@ -320,7 +321,7 @@ def get_input(wanted_object, **kwargs):
                         if check:
                             input_list.append([elem[0], elem[1].name])
 
-        return input_list
+        return sorted(input_list)
 
 
 def get_output(wanted_object, **kwargs):
@@ -346,4 +347,4 @@ def get_output(wanted_object, **kwargs):
                         if check:
                             output_list.append([elem[0], elem[1].name])
 
-        return output_list
+        return sorted(output_list)
