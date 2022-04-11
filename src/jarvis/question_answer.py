@@ -30,6 +30,15 @@ def find_question(string, **kwargs):
 
 
 def check_get_object(object_str, **kwargs):
+    """
+    Returns the desired object from object's string
+    Args:
+        object_str ([object_string]): list of object's name from cell
+        **kwargs: all xml lists
+
+    Returns:
+        wanted_object : Function/State/Data/Fun_Elem/Transition
+    """
     # Create object names/aliases lists
     xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
     xml_data_name_list = orchestrator.get_object_name(kwargs['xml_data_list'])
@@ -243,6 +252,15 @@ def get_allocation_object(wanted_object, fun_elem_list):
 
 
 def get_object_list(object_str, **kwargs):
+    """
+    Gets lists from object_str : i.e. Input/Output/child
+    Args:
+        object_str ([object_string]): list of object's name from cell
+        **kwargs: all xml lists
+
+    Returns:
+        answer_list: [Input_list, Output_list, Child_list]
+    """
     answer_list = []
     for elem in object_str:
         wanted_object = check_get_object(elem[1], **kwargs)
@@ -251,13 +269,15 @@ def get_object_list(object_str, **kwargs):
             if elem[0] == "input":
                 list_name = f"Input list for {wanted_object.name}:"
                 input_list = get_input(wanted_object, **kwargs)
-                input_list.insert(0, list_name)
-                answer_list.append(input_list)
+                if input_list:
+                    input_list.insert(0, list_name)
+                    answer_list.append(input_list)
             elif elem[0] == "output":
                 list_name = f"Output list for {wanted_object.name}:"
                 output_list = get_output(wanted_object, **kwargs)
-                output_list.insert(0, list_name)
-                answer_list.append(output_list)
+                if output_list:
+                    output_list.insert(0, list_name)
+                    answer_list.append(output_list)
             elif elem[0] == "child":
                 list_name = f"Child list for {wanted_object.name}:"
                 child_list = None
@@ -298,59 +318,85 @@ def get_object_list(object_str, **kwargs):
     return answer_list
 
 
-def get_input(wanted_object, **kwargs):
+def get_input(wanted_object, unmerged=False, **kwargs):
+    """
+    Gets inputs for object (Function or Functional Element): i.e. what is consumed by wanted object.
+    Args:
+        wanted_object: current object
+        unmerged (bool: default=false): used by functional elements
+        **kwargs: all xml lists
+
+    Returns:
+        Input's list
+    """
     object_type = orchestrator.get_object_type(wanted_object)
-    if object_type in ("state", "Functional element"):
+    if object_type == "state":
         print(f"No input list available for object's type "
               f"{object_type.capitalize()}({wanted_object.name}).")
-    else:
+    elif object_type == "Functional element":
         input_list = []
-        flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_consumer_function_list'])
-        if not flow_list:
-            return input_list
-        for data in flow_list:
-            if not any(data in s for s in kwargs['xml_producer_function_list']):
-                input_list.append([data, None])
-            else:
-                for elem in kwargs['xml_producer_function_list']:
-                    check = True
-                    if elem[0] == data:
-                        for child in elem[1].child_list:
-                            if [elem[0], child] in kwargs['xml_producer_function_list']:
-                                check = False
-                        if check:
-                            input_list.append([elem[0], elem[1].name])
-
+        for fun in wanted_object.allocated_function_list:
+            for xml_fun in kwargs['xml_function_list']:
+                if fun == xml_fun.id:
+                    current_fun_list = get_input(xml_fun, True, **kwargs)
+                    for sub in current_fun_list:
+                        if sub:
+                            input_list.append(sub)
         return merge_list_per_cons_prod(input_list)
+    else:
+        input_list = get_in_out_function(wanted_object,
+                                         kwargs['xml_consumer_function_list'],
+                                         kwargs['xml_producer_function_list'])
+        if unmerged:
+            return input_list
+        else:
+            return merge_list_per_cons_prod(input_list)
 
 
-def get_output(wanted_object, **kwargs):
+def get_output(wanted_object, unmerged=False, **kwargs):
+    """
+    Gets outputs for object (Function or Functional Element): i.e. what is produced by wanted object.
+    Args:
+        wanted_object: current object
+        unmerged (bool: default=false): used by functional elements
+        **kwargs: all xml lists
+
+    Returns:
+        Output's list
+    """
     object_type = orchestrator.get_object_type(wanted_object)
-    if object_type in ("state", "Functional element"):
+    if object_type == "state":
         print(f"No output list available for object's type "
               f"{object_type.capitalize()}({wanted_object.name}).")
-    else:
+    elif object_type == "Functional element":
         output_list = []
-        flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_producer_function_list'])
-        if not flow_list:
-            return output_list
-        for data in flow_list:
-            if not any(data in s for s in kwargs['xml_consumer_function_list']):
-                output_list.append([data, None])
-            else:
-                for elem in kwargs['xml_consumer_function_list']:
-                    check = True
-                    if elem[0] == data:
-                        for child in elem[1].child_list:
-                            if [elem[0], child] in kwargs['xml_consumer_function_list']:
-                                check = False
-                        if check:
-                            output_list.append([elem[0], elem[1].name])
-
+        for fun in wanted_object.allocated_function_list:
+            for xml_fun in kwargs['xml_function_list']:
+                if fun == xml_fun.id:
+                    current_fun_list = get_output(xml_fun, True, **kwargs)
+                    for sub in current_fun_list:
+                        if sub:
+                            output_list.append(sub)
         return merge_list_per_cons_prod(output_list)
+    else:
+        output_list = get_in_out_function(wanted_object,
+                                          kwargs['xml_producer_function_list'],
+                                          kwargs['xml_consumer_function_list'])
+        if unmerged:
+            return output_list
+        else:
+            return merge_list_per_cons_prod(output_list)
 
 
 def merge_list_per_cons_prod(input_list):
+    """
+    Sorts data's name in alphabetical order and merges list by producer or consumer
+    Args:
+        input_list ([Data_name, funcion_name]): List of consumer/producer with data per Function
+
+    Returns:
+        Sorted + merged list
+    """
     input_list = sorted(input_list)
     output_list = []
     empty_dict = {}
@@ -360,5 +406,35 @@ def merge_list_per_cons_prod(input_list):
             empty_dict[obj_name] = len(empty_dict)
         else:
             output_list[empty_dict[obj_name]][0] += ', ' + data
+
+    return output_list
+
+
+def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_relationship):
+    """
+    Return the list of Input/Output for Function's objects.
+    Args:
+        wanted_object (Function): Object's wanted
+        wanted_relationship ([Xml_list]): For Output (producer's list) and Input (consumer's list)
+        opposite_wanted_relationship ([Xml_list]): slef-explained
+    Returns:
+        output_list ([Data, prod/cons])
+    """
+    output_list = []
+    flow_list = get_consumes_produces_info(wanted_object, wanted_relationship)
+    if not flow_list:
+        return output_list
+    for data in flow_list:
+        if not any(data in s for s in opposite_wanted_relationship):
+            output_list.append([data, None])
+        else:
+            for elem in opposite_wanted_relationship:
+                check = True
+                if elem[0] == data:
+                    for child in elem[1].child_list:
+                        if [elem[0], child] in opposite_wanted_relationship:
+                            check = False
+                    if check:
+                        output_list.append([elem[0], elem[1].name])
 
     return output_list
