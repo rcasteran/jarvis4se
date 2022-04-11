@@ -1,5 +1,11 @@
 # Physical architecture
 
+## Physical interface creation
+
+### Physical interface definition
+
+### Physical interface attributes
+
 ## Actor creation
 
 ### Actor definition
@@ -18,14 +24,18 @@
 
 ## Physical element decomposition
 
-## Functional element allocation
-
-### Functional element allocation to actor
-
-### Functional element allocation to physical element
-
 ## Functional interface allocation
 
+## Functional element allocation
+
+### Allocation to actor
+
+### Allocation to physical element
+
 ## Requirement allocation
+
+### Allocation to Physical interface
+
+### Allocation to Physical element
 
 ## Physical chain

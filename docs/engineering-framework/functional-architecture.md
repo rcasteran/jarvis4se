@@ -1,5 +1,11 @@
 # Functional architecture
 
+## Functional interface creation
+
+### Functional interface definition
+
+### Functional interface attributes
+
 ## Functional element creation
 
 ### Functional element definition
@@ -12,19 +18,21 @@
 
 ## Function element state creation
 
+### Transition definition
+
 ### State definition
 
 ### State context
 
 ### State attributes
 
+## Data allocation
+
 ## Function allocation
 
 ### Allocation to functional element
 
 ### Allocation to functional element state
-
-## Data allocation
 
 ## Requirement allocation
 
