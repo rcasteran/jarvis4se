@@ -432,13 +432,13 @@ def matched_list(object_str, **kwargs):
                 display(df)
             elif "Input" in i[0]:
                 title = i.pop(0)
-                df = pd.DataFrame(i, columns=["Data's name", "Producer"])
+                df = pd.DataFrame(i, columns=["Data name", "Producer"])
                 df = df.T
                 df = df.style.set_caption(title)
                 display(df)
             elif "Output" in i[0]:
                 title = i.pop(0)
-                df = pd.DataFrame(i, columns=["Data's name", "Consumer"])
+                df = pd.DataFrame(i, columns=["Data name", "Consumer"])
                 df = df.T
                 df = df.style.set_caption(title)
                 display(df)
