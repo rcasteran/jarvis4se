@@ -321,7 +321,7 @@ def get_input(wanted_object, **kwargs):
                         if check:
                             input_list.append([elem[0], elem[1].name])
 
-        return sorted(input_list)
+        return merge_list_per_cons_prod(input_list)
 
 
 def get_output(wanted_object, **kwargs):
@@ -347,4 +347,18 @@ def get_output(wanted_object, **kwargs):
                         if check:
                             output_list.append([elem[0], elem[1].name])
 
-        return sorted(output_list)
+        return merge_list_per_cons_prod(output_list)
+
+
+def merge_list_per_cons_prod(input_list):
+    input_list = sorted(input_list)
+    output_list = []
+    empty_dict = {}
+    for data, obj_name in input_list:
+        if obj_name not in empty_dict:
+            output_list.append([data, obj_name])
+            empty_dict[obj_name] = len(empty_dict)
+        else:
+            output_list[empty_dict[obj_name]][0] += ', ' + data
+
+    return output_list
