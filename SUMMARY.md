@@ -5,13 +5,13 @@
 
 ## Engineering framework
 
-* [Requirement analysis](engineering-framework/requirement-analysis.md)
-* [Operational analysis](engineering-framework/operational-analysis.md)
-* [Functional analysis](engineering-framework/functional-analysis.md)
-* [Functional architecture](engineering-framework/functional-architecture.md)
-* [Physical architecture](engineering-framework/physical-architecture.md)
-* [Test analysis](engineering-framework/test-analysis.md)
-* [Engineering view](engineering-framework/engineering-view.md)
+* [Requirement analysis](docs/engineering-framework/requirement-analysis.md)
+* [Operational analysis](docs/engineering-framework/operational-analysis.md)
+* [Functional analysis](docs/engineering-framework/functional-analysis.md)
+* [Functional architecture](docs/engineering-framework/functional-architecture.md)
+* [Physical architecture](docs/engineering-framework/physical-architecture.md)
+* [Test analysis](docs/engineering-framework/test-analysis.md)
+* [Engineering view](docs/engineering-framework/engineering-view.md)
 
 ***
 
