@@ -2,3 +2,4 @@
 
 * [Just Another Rather Very Intelligent System (JARVIS) for Systems Engineers (SE)](README.md)
 * [Engineering concepts](docs/engineering-concepts.md)
+* [References](references.md)
