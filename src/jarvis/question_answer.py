@@ -252,15 +252,13 @@ def get_object_list(object_str, **kwargs):
             if elem[0] == "input":
                 list_name = f"Input list for {wanted_object.name}:"
                 input_list = get_input(wanted_object, **kwargs)
-                if input_list:
-                    input_list.insert(0, list_name)
-                    answer_list.append(input_list)
+                input_list.insert(0, list_name)
+                answer_list.append(input_list)
             elif elem[0] == "output":
                 list_name = f"Output list for {wanted_object.name}:"
                 output_list = get_output(wanted_object, **kwargs)
-                if output_list:
-                    output_list.insert(0, list_name)
-                    answer_list.append(output_list)
+                output_list.insert(0, list_name)
+                answer_list.append(output_list)
             elif elem[0] == "child":
                 list_name = f"Child list for {wanted_object.name}:"
                 child_list = None
@@ -307,6 +305,8 @@ def get_input(wanted_object, **kwargs):
     else:
         input_list = []
         flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_consumer_function_list'])
+        if not flow_list:
+            return input_list
         for data in flow_list:
             if not any(data in s for s in kwargs['xml_producer_function_list']):
                 input_list.append([data, None])
@@ -331,6 +331,8 @@ def get_output(wanted_object, **kwargs):
     else:
         output_list = []
         flow_list = get_consumes_produces_info(wanted_object, kwargs['xml_producer_function_list'])
+        if not flow_list:
+            return output_list
         for data in flow_list:
             if not any(data in s for s in kwargs['xml_consumer_function_list']):
                 output_list.append([data, None])
