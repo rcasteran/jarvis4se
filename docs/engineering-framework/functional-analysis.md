@@ -2,10 +2,11 @@
 
 Functional analysis is the systematic examination of a defined [function](../../engineering-concepts/definitions.md) to identify all the subfunctions necessary to accomplish that function and to identify the incoming / outgoing [data](../../engineering-concepts/definitions.md) flowing between them (Adapted from [REF\_3](../../engineering-concepts/references.md))
 
-From a methodology point of view, the definition of a function can be justify by:
+From a methodological point of view, the definition of a function can be justified by:
 
-* The refinement of an activity identified during the operational analysis.
-* The identification of new data to be created / transformed during the definition of the functional architecture
+* The documentation of a requirement specifying its behavior or its quality;
+* The refinement of an activity identified during the operational analysis;
+* The identification of new data to be created / transformed during the definition of the functional architecture and/or the physical architecture.
 
 ## Data creation
 
@@ -133,9 +134,38 @@ JARVIS4SE allows to allocate an activity named \<activity name> to a function na
 <function name> allocates <activity name>
 ```
 
-
-
 ## Requirement allocation
+
+JARVIS4SE allows to allocate a requirement named \<requirement name> to a function named \<function name> through the following command:
+
+```
+<function name> allocates <requirement name>
+```
 
 ## Functional chain
 
+### Chain visualization
+
+JARVIS4SE allows to visualize a chain of functions named _\<function i name>,_ linked together by the data they produce/consume, through the following command:
+
+```
+show chain <function 1 name>, <function 2 name>
+```
+
+<mark style="color:orange;">Note: chain visualization could be equivalent to a decomposition visualization in case of dealing with the chain of all subfunctions of the same function.</mark>
+
+### Sequence visualization
+
+JARVIS4SE allows to visualize a chain of functions named _\<function i name>,_ linked together by the data they produce/consume, as a sequence of functions, through the following command:
+
+```
+show sequence <function 1 name>, <function 2 name>
+```
+
+Below an example of a sequence visualization with the previous F1 and F2 subfunctions:
+
+```
+show sequence F1, F2
+```
+
+![](<../../.gitbook/assets/image (3).png>)
