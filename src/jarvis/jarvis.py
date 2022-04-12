@@ -39,8 +39,8 @@ class MyMagics(Magics):
             xml_name = xml_name_str.group(1)
             # If the model(i.e. file) already exists, parse it to extract lists
             if os.path.isfile(f"{xml_name}.xml"):
-                print(f"{xml_name}.xml parsed")
                 xml_lists = xml_adapter.parse_xml(f"{xml_name}.xml")
+                print(f"{xml_name}.xml parsed")
                 xml_function_list = xml_lists[0]
                 xml_consumer_function_list = xml_lists[1]
                 xml_producer_function_list = xml_lists[2]
