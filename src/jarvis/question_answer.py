@@ -401,11 +401,13 @@ def merge_list_per_cons_prod(input_list):
     output_list = []
     empty_dict = {}
     for data, obj_name in input_list:
-        if obj_name not in empty_dict:
+        if data not in empty_dict:
             output_list.append([data, obj_name])
-            empty_dict[obj_name] = len(empty_dict)
+            empty_dict[data] = len(empty_dict)
         else:
-            output_list[empty_dict[obj_name]][0] += ', ' + data
+            if obj_name:
+                if obj_name not in output_list[empty_dict[data]][1]:
+                    output_list[empty_dict[data]][1] += '\\n' + obj_name
 
     return output_list
 
