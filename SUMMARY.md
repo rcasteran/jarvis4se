@@ -1,4 +1,19 @@
 # Table of contents
 
 * [Just Another Rather Very Intelligent System (JARVIS) for Systems Engineers (SE)](README.md)
+* [Installation](docs/installation.md)
+
+## Engineering framework
+
+* [Requirement analysis](docs/engineering-framework/requirement-analysis.md)
+* [Operational analysis](docs/engineering-framework/operational-analysis.md)
+* [Functional analysis](docs/engineering-framework/functional-analysis.md)
+* [Functional architecture](docs/engineering-framework/functional-architecture.md)
+* [Physical architecture](docs/engineering-framework/physical-architecture.md)
+* [Test analysis](docs/engineering-framework/test-analysis.md)
+* [Engineering view](docs/engineering-framework/engineering-view.md)
+
+***
+
 * [Engineering concepts](docs/engineering-concepts.md)
+* [References](docs/references.md)
