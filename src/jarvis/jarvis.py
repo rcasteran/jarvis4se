@@ -428,20 +428,28 @@ def matched_list(object_str, **kwargs):
                 df = df.T
                 # Could be usefull to add it with button next to table but needs ipywidgets ...
                 # df.to_clipboard(excel=True)
-                df = df.style.set_caption(title)
+                df = df.style\
+                    .set_caption(title)\
+                    .set_properties(**{'white-space': 'nowrap'})
                 display(df)
             elif "Input" in i[0]:
                 title = i.pop(0)
                 df = pd.DataFrame(i, columns=["Data name", "Producer"])
                 df = df.T
-                df = df.style.set_caption(title)
-                display(df)
+                df = df.style\
+                    .set_caption(title)\
+                    .set_properties(**{'white-space': 'nowrap'})
+                df = df.to_html().replace("\\n", "<br>")
+                display(HTML(df))
             elif "Output" in i[0]:
                 title = i.pop(0)
                 df = pd.DataFrame(i, columns=["Data name", "Consumer"])
                 df = df.T
-                df = df.style.set_caption(title)
-                display(df)
+                df = df.style\
+                    .set_caption(title)\
+                    .set_properties(**{'white-space': 'nowrap'})
+                df = df.to_html().replace("\\n", "<br>")
+                display(HTML(df))
 
 
 def matched_described_attribute(described_attribute_str, **kwargs):
