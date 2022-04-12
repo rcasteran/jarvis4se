@@ -13,7 +13,7 @@
 * [Test analysis](docs/engineering-framework/test-analysis.md)
 * [Engineering view](docs/engineering-framework/engineering-view.md)
 
-## ENGINEERING CONCEPTS
+## Engineering concepts
 
 * [Definitions](docs/engineering-concepts/definitions.md)
 * [References](docs/engineering-concepts/references.md)
