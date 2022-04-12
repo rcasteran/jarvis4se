@@ -4,8 +4,8 @@ Functional analysis is the systematic examination of a defined [function](../../
 
 From a methodological point of view, the definition of a function can be justified by:
 
-* The documentation of a requirement specifying its behavior or its quality;
-* The refinement of an activity identified during the operational analysis;
+* The documentation of a [requirement](../../engineering-concepts/definitions.md) specifying its behavior or its quality;
+* The refinement of an [activity](../../engineering-concepts/definitions.md) identified during the operational analysis;
 * The identification of new data to be created / transformed during the definition of the functional architecture and/or the physical architecture.
 
 ## Data creation
