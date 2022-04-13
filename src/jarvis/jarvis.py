@@ -141,6 +141,9 @@ LOOKUPS = [
     (r"The alias of (.*?) is ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_alias(matched_str, **kwargs)),
 
+    (r"(?<= |\n)consider ([^\.\n]*)",
+     lambda matched_str, **kwargs: matched_consider(matched_str, **kwargs)),
+
     (r"([^\. \.\n]*) is composed of ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_composition(matched_str, **kwargs)),
 
@@ -287,13 +290,24 @@ def matched_attribute(attribute_name_str, **kwargs):
 
 
 def matched_alias(alias_str_list, **kwargs):
-    """Get set_alias declaration"""
+    """Get "alias" declaration"""
     out = orchestrator.check_set_object_alias(alias_str_list,
                                               kwargs['xml_function_list'],
                                               kwargs['xml_state_list'],
                                               kwargs['xml_transition_list'],
                                               kwargs['xml_fun_elem_list'],
                                               kwargs['output_xml'])
+    return out
+
+
+def matched_consider(consider_str_list, **kwargs):
+    """Get "consider" declaration"""
+    out = orchestrator.check_get_consider(consider_str_list,
+                                          kwargs['xml_function_list'],
+                                          kwargs['xml_fun_elem_list'],
+                                          kwargs['xml_data_list'],
+                                          kwargs['xml_chain_list'],
+                                          kwargs['output_xml'])
     return out
 
 
