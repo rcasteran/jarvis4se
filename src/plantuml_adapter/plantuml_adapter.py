@@ -285,8 +285,9 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     data_flow_list = get_exchanged_flows(consumer_list, producer_list,
                                          {}, 1)
     # Write functional element decompo recursively and add allocated functions
+    # TODO: Delte useless [] parameters
     plantuml_text = recursive_decomposition(main_fun_elem, allocated_function_list,
-                                            input_flow_list, output_flow_list, xml_attribute_list)
+                                            [], [], xml_attribute_list)
     plantuml_text += util.MakePlantUml.close_component()
     plantuml_text += util.MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     # Write external(consumer or producer) functions and highest level functional
