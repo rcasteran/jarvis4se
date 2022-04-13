@@ -3,15 +3,21 @@
 * [Just Another Rather Very Intelligent System (JARVIS) for Systems Engineers (SE)](README.md)
 * [Installation](docs/installation.md)
 
-## Engineering framework
+## System framework
 
-* [Requirement analysis](docs/engineering-framework/requirement-analysis.md)
-* [Operational analysis](docs/engineering-framework/operational-analysis.md)
-* [Functional analysis](docs/engineering-framework/functional-analysis.md)
-* [Functional architecture definition](docs/engineering-framework/functional-architecture-definition.md)
-* [Physical architecture definition](docs/engineering-framework/physical-architecture-definition.md)
-* [Test analysis](docs/engineering-framework/test-analysis.md)
-* [Engineering view](docs/engineering-framework/engineering-view.md)
+* [Requirement analysis](system-framework/requirement-analysis.md)
+* [Operational analysis](system-framework/operational-analysis.md)
+* [Functional analysis](system-framework/functional-analysis.md)
+* [Functional architecture definition](system-framework/functional-architecture-definition.md)
+* [Physical architecture definition](system-framework/physical-architecture-definition.md)
+* [Test analysis](system-framework/test-analysis.md)
+* [Engineering view](system-framework/engineering-view.md)
+
+## Safety and security framework
+
+* [Attack tree analysis](safety-and-security-framework/attack-tree-analysis.md)
+* [Fault tree analysis](safety-and-security-framework/fault-tree-analysis.md)
+* [Failure modes, effects and diagnostic analysis](safety-and-security-framework/failure-modes-effects-and-diagnostic-analysis.md)
 
 ## Engineering concepts
 

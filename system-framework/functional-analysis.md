@@ -1,11 +1,11 @@
 # Functional analysis
 
-Functional analysis is the systematic examination of a defined [function](../../engineering-concepts/definitions.md) to identify all the subfunctions necessary to accomplish that function and to identify the incoming / outgoing [data](../../engineering-concepts/definitions.md) flowing between them (Adapted from [REF\_3](../../engineering-concepts/references.md))
+Functional analysis is the systematic examination of a defined [function](../docs/engineering-concepts/definitions.md) to identify all the subfunctions necessary to accomplish that function and to identify the incoming / outgoing [data](../docs/engineering-concepts/definitions.md) flowing between them (Adapted from [REF\_3](../docs/engineering-concepts/references.md))
 
 From a methodological point of view, the definition of a function can be justified by:
 
-* The documentation of a [requirement](../../engineering-concepts/definitions.md) specifying its behavior or its quality;
-* The refinement of an [activity](../../engineering-concepts/definitions.md) identified during the operational analysis;
+* The documentation of a [requirement](../docs/engineering-concepts/definitions.md) specifying its behavior or its quality;
+* The refinement of an [activity](../docs/engineering-concepts/definitions.md) identified during the operational analysis;
 * The identification of new data to be created / transformed during the definition of the functional architecture and/or the physical architecture.
 
 ## Data creation
@@ -89,7 +89,7 @@ F produces y
 show context F
 ```
 
-![](<../../.gitbook/assets/image (1).png>)
+![](<../.gitbook/assets/image (1).png>)
 
 ## Function decomposition
 
@@ -124,7 +124,7 @@ F2 produces y
 F is composed of F1, F2
 ```
 
-![](../../.gitbook/assets/image.png)
+![](../.gitbook/assets/image.png)
 
 ## Activity allocation
 
@@ -168,4 +168,4 @@ Below an example of a sequence visualization with the previous F1 and F2 subfunc
 show sequence F1, F2
 ```
 
-![](<../../.gitbook/assets/image (3).png>)
+![](<../.gitbook/assets/image (3).png>)

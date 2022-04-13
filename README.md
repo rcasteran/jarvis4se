@@ -12,7 +12,7 @@ JARVIS4SE allows systems engineers to build the single source of truth of the kn
 
 ### Free from graphical representation considerations
 
-The core of JARVIS4SE is independent from any graphical representation considerations: it is based on a set of basic [engineering concepts](engineering-concepts/definitions.md) adapted from different domain languages, without taking into account concepts like coordinates, rendering...
+The core of JARVIS4SE is independent from any graphical representation considerations: it is based on a set of basic [engineering concepts](docs/engineering-concepts/definitions.md) adapted from different domain languages, without taking into account concepts like coordinates, rendering...
 
 To be able to visualize the knowledge of the system of interest with diagrams, the core of JARVIS4SE can be interfaced with the API of any modeling tool through a dedicated adapter.
 
@@ -22,6 +22,6 @@ Today the following adapters are available:
 
 ### Based on natural language
 
-The core of JARVIS4SE is based on a subset of the english language that has been mapped to the set of basic [engineering concepts](engineering-concepts/definitions.md).
+The core of JARVIS4SE is based on a subset of the english language that has been mapped to the set of basic [engineering concepts](docs/engineering-concepts/definitions.md).
 
 This allows systems engineers to interact with JARVIS4SE via voice or a textual interface.
