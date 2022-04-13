@@ -49,8 +49,8 @@ def test_simple_function_within_xml():
 
     function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
     assert len(function_list) == 1
-    for fun in function_list:
-        assert fun.name == "F1"
+    assert [fun.name == "F1" for fun in function_list]
+
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
     if path:
@@ -147,6 +147,72 @@ def test_set_attribute_type_within_xml():
     assert len(attribute_list) == 2
     for attribute in attribute_list:
         result.add((attribute.name, attribute.type))
+
+    assert expected == result
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_set_allocated_item_to_chain_within_xml():
+    """Relative to Issue #9 to add new allocated item to a chain(i.e. filter) by verifying than
+    it's written within xml. Notebook equivalent:
+    %%jarvis
+    with set_allocated_item_to_chain_within_xml
+    F1 is a function
+    F2 with a long name is a function. The alias of F2 with a long name is F2.
+    F3 is a function
+    F4 is a function
+    a is a data
+    Fun_elem is a functional element
+    ========================================
+    %%jarvis
+    with set_allocated_item_to_chain_within_xml
+    under toto
+    consider F1. consider toto. consider a, Fun_elem
+    consider tata.
+    consider F1, F2, F3, F4
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "set_allocated_item_to_chain_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "F2 with a long name is a function. The alias of F2 with a long name is F2.\n"
+                    "F3 is a function\n"
+                    "F4 is a function\n"
+                    "a is a data\n"
+                    "Fun_elem is a functional element\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "under test_chain\n"
+                    "consider F1. consider toto. consider a, Fun_elem\n"
+                    "consider tata.\n"
+                    "consider F1, F2, F3, F4\n")
+
+    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    chain_list = xml_adapter.parse_xml(file_name + ".xml")[10]
+
+    expected = {'F1', 'F2 with a long name', 'F3', 'F4', 'a', 'Fun_elem'}
+    # xml_adapter.parse_xml() returns mainly set(), so the order can change
+    # thus we have to compare it with a set also
+    result = set()
+    assert len(chain_list) == 1
+    for item in next(iter(chain_list)).allocated_item_list:
+        for fun in function_list:
+            if item == fun.id:
+                result.add(fun.name)
+
+        for fun_elem in fun_elem_list:
+            if item == fun_elem.id:
+                result.add(fun_elem.name)
+
+        for data in data_list:
+            if item == data.id:
+                result.add(data.name)
 
     assert expected == result
 
