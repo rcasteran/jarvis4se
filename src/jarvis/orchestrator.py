@@ -1237,23 +1237,104 @@ def case_context_diagram(**kwargs):
         return
 
 
+def get_cons_prod_from_chain_data(xml_data_list, xml_chain_list, xml_consumer_function_list,
+                                  xml_producer_function_list, function_list, fun_elem_list=False):
+    """If a chain is activated, returns filtered consumer/producer lists"""
+    new_consumer_list = []
+    new_producer_list = []
+    new_data_list = filter_allocated_item_from_chain(xml_data_list, xml_chain_list)
+
+    if len(new_data_list) == len(xml_data_list):
+        for prod in xml_producer_function_list:
+            if any(item == prod[1] for item in function_list):
+                new_producer_list.append(prod)
+
+        for cons in xml_consumer_function_list:
+            if any(item == cons[1] for item in function_list):
+                new_consumer_list.append(cons)
+
+    else:
+        for cons in xml_consumer_function_list:
+            if any(item.name == cons[0] for item in new_data_list) and \
+                    any(item == cons[1] for item in function_list):
+                new_consumer_list.append(cons)
+
+        for prod in xml_producer_function_list:
+            if any(item.name == prod[0] for item in new_data_list) and \
+                    any(item == prod[1] for item in function_list):
+                new_producer_list.append(prod)
+
+    return new_consumer_list, new_producer_list
+
+
+def get_object_list(obj_str, xml_obj_list, xml_chain_list):
+    """Returns current object's list by checking chain"""
+    output_list = filter_allocated_item_from_chain(xml_obj_list,
+                                                   xml_chain_list)
+    if len(xml_obj_list) == len(output_list):
+        return xml_obj_list
+    else:
+        for obj in xml_obj_list:
+            if obj_str == obj.name or obj_str == obj.alias:
+                if not any(item == obj for item in output_list):
+                    output_list.append(obj)
+
+        for new_obj in output_list:
+            child_list = set()
+            for child in new_obj.child_list:
+                if child in output_list:
+                    child_list.add(child)
+            new_obj.child_list.clear()
+            new_obj.child_list = child_list
+            # TODO: Check later if necessary
+            #if isinstance(new_obj, datamodel.FunctionalElement):
+                # print("do specific stuuf for alloc fun et state")
+
+    return output_list
+
+
 def case_decomposition_diagram(**kwargs):
-    # Create object names/aliases lists
+    """Cases for decompostion diagrams"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_function_name_list:
+
+        function_list = get_object_list(kwargs['diagram_object_str'],
+                                        kwargs['xml_function_list'],
+                                        kwargs['xml_chain_list'])
+        consumer_list, producer_list = get_cons_prod_from_chain_data(
+            kwargs['xml_data_list'],
+            kwargs['xml_chain_list'],
+            kwargs['xml_consumer_function_list'],
+            kwargs['xml_producer_function_list'],
+            function_list)
+
         filename = show_function_decomposition(kwargs['diagram_object_str'],
-                                               kwargs['xml_function_list'],
-                                               kwargs['xml_consumer_function_list'],
-                                               kwargs['xml_producer_function_list'],
+                                               function_list,
+                                               consumer_list,
+                                               producer_list,
                                                kwargs['xml_attribute_list'])
         return filename
     elif kwargs['diagram_object_str'] in xml_fun_elem_name_list:
+        function_list = get_object_list(kwargs['diagram_object_str'],
+                                        kwargs['xml_function_list'],
+                                        kwargs['xml_chain_list'])
+        fun_elem_list = get_object_list(kwargs['diagram_object_str'],
+                                        kwargs['xml_fun_elem_list'],
+                                        kwargs['xml_chain_list'])
+        consumer_list, producer_list = get_cons_prod_from_chain_data(
+            kwargs['xml_data_list'],
+            kwargs['xml_chain_list'],
+            kwargs['xml_consumer_function_list'],
+            kwargs['xml_producer_function_list'],
+            function_list,
+            fun_elem_list)
+
         filename = show_fun_elem_decomposition(kwargs['diagram_object_str'],
-                                               kwargs['xml_function_list'],
-                                               kwargs['xml_consumer_function_list'],
-                                               kwargs['xml_producer_function_list'],
-                                               kwargs['xml_fun_elem_list'],
+                                               function_list,
+                                               consumer_list,
+                                               producer_list,
+                                               fun_elem_list,
                                                kwargs['xml_attribute_list'])
         return filename
     else:
@@ -2561,8 +2642,11 @@ def recursive_allocation(elem, output_xml):
     return None
 
 
-# Method that returns a list with all object aliases/names
 def get_object_name(xml_object_list):
+    """
+    Method that returns a list with all object aliases/names from object's list
+
+    """
     object_name_list = []
     # Create the xml [object_name (and object_alias)] list
     for xml_object in xml_object_list:
@@ -2626,6 +2710,7 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
 
 
 def activate_chain(chain_name, xml_chain_list):
+    """Activates Chain from chain's name str"""
     for chain in xml_chain_list:
         if chain_name == chain.name:
             chain.set_activation(True)
@@ -2634,6 +2719,17 @@ def activate_chain(chain_name, xml_chain_list):
 
 
 def check_add_allocated_item(item, xml_item_list, xml_chain_list):
+    """
+    Checks if a chain is already activated, if yes check if item isn't already
+    allocated and returns corresponding [Chain, Object].
+    Args:
+        item (string): Object's name/alias from user's input
+        xml_item_list ([Object]): List of xml's item (same type as item)
+        xml_chain_list ([Chain]) : Chain list from xml parsing
+
+    Returns:
+        [Chain, Object]
+    """
     if not any(s.activated for s in xml_chain_list):
         return
     else:
@@ -2647,9 +2743,19 @@ def check_add_allocated_item(item, xml_item_list, xml_chain_list):
                     if i.id not in activated_chain.allocated_item_list:
                         activated_chain.add_allocated_item(i.id)
                         return [activated_chain, i]
+                # To avoid errors for i.alias when i is Data (no such attriute)
+                try:
+                    if item == i.alias:
+                        if i.id not in activated_chain.allocated_item_list:
+                            activated_chain.add_allocated_item(i.id)
+                            return [activated_chain, i]
+                except AttributeError:
+                    pass
 
 
 def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
+    """For a type of item from xml, check if a Chain is activated and if the item is in its
+    allocated item's list"""
     if not any(j.activated for j in xml_chain_list):
         return xml_item_list
     else:
@@ -2659,7 +2765,78 @@ def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
                 for item in xml_item_list:
                     if item.id in j.allocated_item_list:
                         filtered_items_list.append(item)
+    if filtered_items_list:
         return filtered_items_list
+    else:
+        return xml_item_list
+
+
+def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, xml_data_list,
+                       xml_chain_list, output_xml):
+    """
+    Check and get all "consider xxx" strings. If corresponds to an actual object not yet added to
+    the current chain => add it to Chain object and as allocatedItem within xml
+    Args:
+        consider_str_list ([strings]): list of strings (separated by comma is possible)
+        xml_function_list ([Function]) : Function list from xml parsing
+        xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
+        xml_data_list ([Data]) : Data list from xml parsing
+        xml_chain_list ([Chain]) : Chain list from xml parsing
+        output_xml (GenerateXML object) : XML's file object
+
+    Returns:
+        update_list ([0/1]) : if update has been made
+    """
+    allocated_item_list = []
+    # Create lists with all object names/aliases already in the xml
+    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
+    xml_function_name_list = get_object_name(xml_function_list)
+    xml_data_name_list = get_object_name(xml_data_list)
+
+    consider_str_list = split_chain_from_string(consider_str_list)
+
+    for consider_str in consider_str_list:
+        if consider_str not in [*xml_fun_elem_name_list, *xml_function_name_list,
+                                *xml_data_name_list]:
+            print(f"Object {consider_str} does not exist, available object types are : "
+                  f"Functional Element, Function and Data")
+        else:
+            result_function = any(item == consider_str for item in xml_function_name_list)
+            result_fun_elem = any(item == consider_str for item in xml_fun_elem_name_list)
+            result_data = any(item == consider_str for item in xml_data_name_list)
+
+            if result_function:
+                allocated_fun = check_add_allocated_item(consider_str, xml_function_list,
+                                                         xml_chain_list)
+                if allocated_fun:
+                    allocated_item_list.append(allocated_fun)
+            elif result_fun_elem:
+                allocated_fun_elem = check_add_allocated_item(consider_str, xml_fun_elem_list,
+                                                              xml_chain_list)
+                if allocated_fun_elem:
+                    allocated_item_list.append(allocated_fun_elem)
+            elif result_data:
+                allocated_data = check_add_allocated_item(consider_str, xml_data_list,
+                                                          xml_chain_list)
+                if allocated_data:
+                    allocated_item_list.append(allocated_data)
+
+    update_list = add_allocation([0, 0, 0, allocated_item_list], output_xml)
+
+    return update_list
+
+
+def split_chain_from_string(consider_str_list):
+    """Creates flatten list : from ["A", "B, C, D"] to ["A", "B", "C", "D"]"""
+    output_list = []
+    for consider_str in consider_str_list:
+        if "," in consider_str:
+            clean_diagram_object_str = consider_str.replace(" ", "")
+            output_list += re.split(r',(?![^[]*\])', clean_diagram_object_str)
+        else:
+            output_list.append(consider_str)
+
+    return output_list
 
 
 def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
