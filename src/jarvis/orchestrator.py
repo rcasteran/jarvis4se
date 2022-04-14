@@ -472,13 +472,16 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                     if [elem[0], function] not in xml_consumer_function_list:
                         if [elem[0], function] not in xml_producer_function_list:
                             new_consumer_list.append([elem[0], function])
-                            parent = add_parent_for_data(elem[0], function,
-                                                         xml_consumer_function_list,
-                                                         xml_producer_function_list,
-                                                         new_consumer_list,
-                                                         output_xml, "consumer")
+                            parent = add_parent_recurisvely(elem[0], function,
+                                                            xml_consumer_function_list,
+                                                            xml_producer_function_list,
+                                                            new_consumer_list,
+                                                            output_xml, "consumer")
+
                             if parent is not None:
-                                new_consumer_list.append(parent)
+                                for par in parent:
+                                    if par:
+                                        new_consumer_list.append(par)
                         elif [elem[0], function] in xml_producer_function_list:
                             None
 
@@ -515,10 +518,44 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     return update_list
 
 
+def add_parent_recurisvely(flow, function, current_list, opposite_list, new_list, output_xml,
+                           relationship_str, out=False):
+    """
+    Recursive method around add_parent_for_data().
+        Parameters:
+            flow (Data_name_str) : Data's name
+            function (Function) : Current function's parent
+            current_list ([Data_name_str, function_name_str]) : 'Current' list (producer or consumer)
+            opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
+            new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
+            output_xml (GenerateXML object) : XML's file object
+            relationship_str (str) : "consumer" or "producer"
+            out (bool) : List for recursivity
+        Returns:
+            elem ([data, Function]) : Return parent
+
+    """
+    if not out:
+        out = []
+    parent = add_parent_for_data(flow, function,
+                                 current_list,
+                                 opposite_list,
+                                 new_list,
+                                 output_xml, relationship_str)
+
+    if parent is not None:
+        out.append(parent)
+        return add_parent_recurisvely(flow, function.parent, current_list, opposite_list, new_list,
+                                      output_xml,
+                                      relationship_str, out)
+
+    return out
+
+
 def add_parent_for_data(flow, function, current_list, opposite_list, new_list, output_xml,
                         relationship_str):
     """
-    Add direct parent's function of consumer/producer and delete internal flow if the case
+    Adds direct parent's function of consumer/producer and delete internal flow if the case
 
         Parameters:
             flow (Data_name_str) : Data's name
@@ -636,12 +673,16 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                     if [elem[0], function] not in xml_producer_function_list:
                         if [elem[0], function] not in xml_consumer_function_list:
                             new_producer_list.append([elem[0], function])
-                            parent = add_parent_for_data(elem[0], function,
-                                                         xml_producer_function_list,
-                                                         xml_consumer_function_list,
-                                                         new_producer_list, output_xml, "producer")
+                            parent = add_parent_recurisvely(elem[0], function,
+                                                            xml_producer_function_list,
+                                                            xml_consumer_function_list,
+                                                            new_producer_list, output_xml,
+                                                            "producer")
                             if parent is not None:
-                                new_producer_list.append(parent)
+                                for par in parent:
+                                    if par:
+                                        new_producer_list.append(par)
+
                         elif [elem[0], function] in xml_consumer_function_list:
                             None
 
