@@ -22,9 +22,9 @@ def test_attribute_declaration_input(capsys):
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
-                "C is an attribute (added)\n",
-                "A is an attribute (added)\n",
-                "B is an attribute (added)\n",
+                "C is an attribute\n",
+                "A is an attribute\n",
+                "B is an attribute\n",
                 f"{file_name}.xml updated"]
 
     assert all(i in captured.out for i in expected)
@@ -72,10 +72,10 @@ def test_described_attribute_input(capsys):
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
-                "Attribute A for F1 with value 4,2 (added)\n",
-                "Attribute C for F1 with value pink (added)\n",
-                "Attribute B for Fun elem with value 8,5 (added)\n",
-                "Attribute A for Fun elem with value 100 (added)\n",
+                "Attribute A for F1 with value 4,2\n",
+                "Attribute C for F1 with value pink\n",
+                "Attribute B for Fun elem with value 8,5\n",
+                "Attribute A for Fun elem with value 100\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
@@ -107,7 +107,7 @@ def test_set_object_type_alias_input(capsys):
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
-                "F1 is a function (added)\n",
+                "F1 is a function\n",
                 "The alias for F1 is f1\n",
                 "The type of F1 is High level function\n",
                 f"{file_name}.xml updated\n"]
@@ -157,17 +157,17 @@ def test_consider_object_input(capsys):
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
-                "test_chain is a chain (added)\n",
+                "test_chain is a chain\n",
                 "Object toto does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
                 "Object tata does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
-                "Function F1 allocated to chain test_chain (added)\n",
-                "Data a allocated to chain test_chain (added)\n",
-                "FunctionalElement Fun_elem allocated to chain test_chain (added)\n",
-                "Function F2 with a long name allocated to chain test_chain (added)\n",
-                "Function F3 allocated to chain test_chain (added)\n",
-                "Function F4 allocated to chain test_chain (added)\n",
+                "Function F1 allocated to chain test_chain\n",
+                "Data a allocated to chain test_chain\n",
+                "FunctionalElement Fun_elem allocated to chain test_chain\n",
+                "Function F2 with a long name allocated to chain test_chain\n",
+                "Function F3 allocated to chain test_chain\n",
+                "Function F4 allocated to chain test_chain\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]

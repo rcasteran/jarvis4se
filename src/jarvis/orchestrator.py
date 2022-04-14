@@ -59,7 +59,7 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
     else:
         output_xml.write_function(function_list)
         for fun in function_list:
-            print(fun.name + " is a function (added)")
+            print(fun.name + " is a function")
         update_list.append(1)
 
     return update_list
@@ -222,7 +222,7 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
             output_xml.write_function_child(parent_child_function_list)
             # Warn the user once added within xml
             for i in parent_child_function_list:
-                print(f"{i[0].name} is composed of {i[1].name} (added)")
+                print(f"{i[0].name} is composed of {i[1].name}")
                 for fun_elem in xml_fun_elem_list:
                     if i[0].id in fun_elem.allocated_function_list:
                         recursive_allocation([fun_elem, i[1]], output_xml)
@@ -231,7 +231,7 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
             output_xml.write_state_child(parent_child_state_list)
             # Warn the user once added within xml
             for i in parent_child_state_list:
-                print(f"{i[0].name} is composed of {i[1].name} (added)")
+                print(f"{i[0].name} is composed of {i[1].name}")
                 for fun_elem in xml_fun_elem_list:
                     if i[0].id in fun_elem.allocated_state_list:
                         recursive_allocation([fun_elem, i[1]], output_xml)
@@ -240,7 +240,7 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
             output_xml.write_functional_element_child(paren_child_fun_elem_list)
             # Warn the user once added within xml
             for i in paren_child_fun_elem_list:
-                print(f"{i[0].name} is composed of {i[1].name} (added)")
+                print(f"{i[0].name} is composed of {i[1].name}")
 
         update_list.append(1)
     else:
@@ -319,7 +319,7 @@ def add_data(data_str_list, xml_data_list, output_xml):
         output_xml.write_data(new_data_list)
         for data in new_data_list:
             xml_data_list.add(data)
-            print(data.name + " is a data" + " (added)")
+            print(data.name + " is a data" + "")
         update_list.append(1)
 
     return update_list
@@ -416,7 +416,7 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
                 if data_predecessor[0].id == d.id:
                     d.add_predecessor(data_predecessor[1])
                     print(f"{data_predecessor[1].name} predecessor for "
-                          f"{data_predecessor[0].name} (added)")
+                          f"{data_predecessor[0].name}")
         update_list.append(1)
 
     return update_list
@@ -512,7 +512,7 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
         # Warn the user once added within xml
         for consumer in new_consumer_list:
             xml_consumer_function_list.append(consumer)
-            print(f"{consumer[1].name} consumer for {consumer[0]} (added)")
+            print(f"{consumer[1].name} consumes {consumer[0]}")
         update_list.append(1)
 
     return update_list
@@ -592,7 +592,7 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
                     delete_opposite(flow, function.parent, output_xml, relationship_str)
                 if fun in parent_child_list:
                     length -= 1
-        if length == 0 and not current_loop_check:
+        if length == 0 and not current_loop_check and temp_set != set():
             delete_opposite(flow, function.parent, output_xml, relationship_str)
     if check:
         return elem
@@ -615,13 +615,13 @@ def delete_opposite(data, function, output_xml, relationship_type):
         output_xml.delete_single_consumer_producer(data,
                                                    function,
                                                    "consumer")
-        print(f"{function.name} consumes {data} (deleted)")
+        print(f"{function.name} does not consume {data} anymore")
     elif relationship_type == "consumer":
 
         output_xml.delete_single_consumer_producer(data,
                                                    function,
                                                    "producer")
-        print(f"{function.name} consumes {data} (deleted)")
+        print(f"{function.name} does not produce {data} anymore")
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -713,7 +713,7 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
         # Warn the user once added within xml
         for producer in new_producer_list:
             xml_producer_function_list.append(producer)
-            print(f"{producer[1].name} producer for {producer[0]} (added)")
+            print(f"{producer[1].name} produces {producer[0]}")
         update_list.append(1)
 
     return update_list
@@ -2164,7 +2164,7 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
     else:
         output_xml.write_state(state_list)
         for state in state_list:
-            print(state.name + " is a state (added)")
+            print(state.name + " is a state")
         update_list.append(1)
     return update_list
 
@@ -2213,7 +2213,7 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
     else:
         output_xml.write_transition(transition_list)
         for transition in transition_list:
-            print(transition.name + " is a transition (added)")
+            print(transition.name + " is a transition")
         update_list.append(1)
 
     return update_list
@@ -2274,7 +2274,7 @@ def add_transition_condition(condition_list, output_xml):
         output_xml.write_transition_condition(condition_list)
         for elem in condition_list:
             elem[0].add_condition(elem[1])
-            print(f"Condition for {elem[0].name} : {elem[1]} (added)")
+            print(f"Condition for {elem[0].name} : {elem[1]}")
         update_list.append(1)
 
     return update_list
@@ -2370,14 +2370,14 @@ def add_src_dest(src_dest_lists, output_xml):
             # Warn the user once writtent and added within xml
             for source in new_src_list:
                 source[0].set_source(source[1].id)
-                print(f"{source[1].name} source for {source[0].name} (added)")
+                print(f"{source[1].name} source for {source[0].name}")
 
         if new_dest_list:
             output_xml.write_destination(new_dest_list)
             # Warn the user once writtent and added within xml
             for destination in new_dest_list:
                 destination[0].set_destination(destination[1].id)
-                print(f"{destination[1].name} destination for {destination[0].name} (added)")
+                print(f"{destination[1].name} destination for {destination[0].name}")
         update_list.append(1)
     else:
         update_list.append(0)
@@ -2430,7 +2430,7 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
     else:
         output_xml.write_functional_element(functional_element_list)
         for func_elem in functional_element_list:
-            print(func_elem.name + " is a functional element (added)")
+            print(func_elem.name + " is a functional element")
         update_list.append(1)
 
     return update_list
@@ -2567,27 +2567,27 @@ def add_allocation(allocation_lists, output_xml):
             # Warn the user once added within xml
             for elem in fun_elem_allocated_function_list:
                 print(f"Function {elem[1].name} allocated to functional "
-                      f"element {elem[0].name} (added)")
+                      f"element {elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if fun_elem_allocated_state_list:
             output_xml.write_allocated_state(fun_elem_allocated_state_list)
             # Warn the user once added within xml
             for elem in fun_elem_allocated_state_list:
                 print(f"State {elem[1].name} allocated to functional "
-                      f"element {elem[0].name} (added)")
+                      f"element {elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if state_allocated_function_list:
             output_xml.write_allocated_function_to_state(state_allocated_function_list)
             # Warn the user once added within xml
             for elem in state_allocated_function_list:
-                print(f"Function {elem[1].name} allocated to state {elem[0].name} (added)")
+                print(f"Function {elem[1].name} allocated to state {elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if chain_allocated_item_list:
             output_xml.write_allocated_chain_item(chain_allocated_item_list)
             # Warn the user once added within xml
             for elem in chain_allocated_item_list:
                 print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to "
-                      f"chain {elem[0].name} (added)")
+                      f"chain {elem[0].name}")
         update_list.append(1)
     else:
         update_list.append(0)
@@ -2630,13 +2630,13 @@ def check_parent_allocation(elem, output_xml):
                     output_xml.write_allocated_state([[fun_elem_parent, object_parent]])
                     fun_elem_parent.add_allocated_state(object_parent.id)
                     print(f"State {object_parent.name} allocated to functional "
-                          f"element {fun_elem_parent.name} (added)")
+                          f"element {fun_elem_parent.name}")
                     check_parent_allocation([fun_elem_parent, object_parent], output_xml)
                 elif object_type == "function":
                     output_xml.write_allocated_function([[fun_elem_parent, object_parent]])
                     fun_elem_parent.add_allocated_function(object_parent.id)
                     print(f"Function {object_parent.name} allocated to functional "
-                          f"element {fun_elem_parent.name} (added)")
+                          f"element {fun_elem_parent.name}")
                     check_parent_allocation([fun_elem_parent, object_parent], output_xml)
             else:
                 print(f"Error: {object_parent.name} is not allocated despite at least one "
@@ -2662,11 +2662,11 @@ def recursive_allocation(elem, output_xml):
                     if object_type == "state":
                         e[0].add_allocated_state(e[1].id)
                         print(f"State {e[1].name} allocated to functional "
-                              f"element {e[0].name} (added)")
+                              f"element {e[0].name}")
                     elif object_type == "function":
                         e[0].add_allocated_function(e[1].id)
                         print(f"Function {e[1].name} allocated to functional "
-                              f"element {e[0].name} (added)")
+                              f"element {e[0].name}")
                     if e[1].child_list:
                         recursive_allocation(e, output_xml)
 
@@ -2674,11 +2674,11 @@ def recursive_allocation(elem, output_xml):
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             elem[0].add_allocated_state(elem[1].id)
             print(f"State {elem[1].name} allocated to functional "
-                  f"element {elem[0].name} (added)")
+                  f"element {elem[0].name}")
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
             elem[0].add_allocated_function(elem[1].id)
             print(f"Function {elem[1].name} allocated to functional "
-                  f"element {elem[0].name} (added)")
+                  f"element {elem[0].name}")
 
     return None
 
@@ -2744,7 +2744,7 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
     else:
         output_xml.write_chain(chain_list)
         for chain in chain_list:
-            print(chain.name + " is a chain (added)")
+            print(chain.name + " is a chain")
         update_list.append(1)
 
     return update_list
@@ -2917,7 +2917,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
         output_xml.write_attribute(new_attribute_list)
         for attribute in new_attribute_list:
             xml_attribute_list.add(attribute)
-            print(attribute.name + " is an attribute" + " (added)")
+            print(attribute.name + " is an attribute" + "")
         update_list.append(1)
 
     return update_list
@@ -3016,7 +3016,7 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
         for described_attribute in new_obj_attribute_list:
             described_attribute[0].add_described_item(described_attribute[1])
             print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
-                  f"with value {described_attribute[1][1]} (added)")
+                  f"with value {described_attribute[1][1]}")
         update_list.append(1)
 
     return update_list
