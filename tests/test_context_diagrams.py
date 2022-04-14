@@ -33,7 +33,7 @@ def test_simple_function_context(mocker):
         os.remove(path)
 
 
-def test_simple_function_in_out(mocker):
+def test_simple_function_context_in_out(mocker):
     """Notebook equivalent:
      %%jarvis
      with simple_function_in_out
@@ -83,7 +83,7 @@ def test_simple_function_in_out(mocker):
         os.remove(path)
 
 
-def test_function_with_attribute(mocker):
+def test_function_context_with_attribute(mocker):
     """Notebook equivalent:
      %%jarvis
      with test_function_with_attribute
@@ -130,7 +130,7 @@ def test_function_with_attribute(mocker):
         os.remove(path)
 
 
-def test_fun_elem_with_attribute(mocker):
+def test_fun_elem_context_with_attribute(mocker):
     """Notebook equivalent:
      %%jarvis
      with fun_elem_with_attribute
@@ -182,6 +182,66 @@ def test_fun_elem_with_attribute(mocker):
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_function_context_with_grandkids(mocker):
+    """See Issue #31, Notebook equivalent:
+    %%jarvis
+    with function_context_with_grandkids
+    F1 is a function
+    F1a is a function
+    F1a1 is a function
+    F1 is composed of F1a
+    F1a is composed of F1a1
+    a is a data
+    F1a produces a
+    b is a data
+    F1a consumes b
+    c is a data
+    F1a1 produces c
+    d is a data
+    F1a1 consumes d
+
+    show context F1
+     """
+    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "function_context_with_grandkids"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "F1a is a function\n"
+                    "F1a1 is a function\n"
+                    "F1 is composed of F1a\n"
+                    "F1a is composed of F1a1\n"
+                    "a is a data\n"
+                    "F1a produces a\n"
+                    "b is a data\n"
+                    "F1a consumes b\n"
+                    "c is a data\n"
+                    "F1a1 produces c\n"
+                    "d is a data\n"
+                    "F1a1 consumes d\n"
+                    "\n"
+                    "show context F1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    expected = ['object "F1" as f1 <<unknown>>\n',
+                'circle f1_i\n',
+                'circle f1_o\n',
+                'f1_i --> f1 : ',
+                'b', '\\n', 'd', '\n',
+                'f1 --> f1_o  : ',
+                'c', '\\n', 'a', '\n']
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)

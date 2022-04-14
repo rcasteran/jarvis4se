@@ -220,3 +220,73 @@ def test_set_allocated_item_to_chain_within_xml():
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_function_with_grandkids_within_xml():
+    """See Issue #31, Notebook equivalent:
+    %%jarvis
+    with function_with_grandkids_within_xml
+    F1 is a function
+    F1a is a function
+    F1a1 is a function
+    F1 is composed of F1a
+    F1a is composed of F1a1
+    a is a data
+    F1a produces a
+    b is a data
+    F1a consumes b
+    c is a data
+    F1a1 produces c
+    d is a data
+    F1a1 consumes d
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "function_with_grandkids_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "F1a is a function\n"
+                    "F1a1 is a function\n"
+                    "F1 is composed of F1a\n"
+                    "F1a is composed of F1a1\n"
+                    "a is a data\n"
+                    "F1a produces a\n"
+                    "b is a data\n"
+                    "F1a consumes b\n"
+                    "c is a data\n"
+                    "F1a1 produces c\n"
+                    "d is a data\n"
+                    "F1a1 consumes d\n")
+
+    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
+    consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
+    producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+
+    expected_cons = {('b', 'F1a'), ('d', 'F1'), ('b', 'F1'), ('d', 'F1a'), ('d', 'F1a1')}
+    expected_prod = {('c', 'F1a1'), ('a', 'F1'), ('c', 'F1'), ('c', 'F1a'), ('a', 'F1a')}
+    expected_child = {('F1', 'F1a'), ('F1a', 'F1a1')}
+    # xml_adapter.parse_xml() returns mainly set(), so the order can change
+    # thus we have to compare it with a set also
+    result_cons = set()
+    result_prod = set()
+    result_child = set()
+    assert len(data_list) == 4 and len(function_list) == 3
+    assert (len(consumer_list) and len(producer_list)) == 5
+
+    for cons in consumer_list:
+        result_cons.add((cons[0], cons[1].name))
+    for prod in producer_list:
+        result_prod.add((prod[0], prod[1].name))
+    for fun in function_list:
+        if fun.child_list:
+            for child in fun.child_list:
+                result_child.add((fun.name, child.name))
+
+    assert expected_cons == result_cons
+    assert expected_prod == result_prod
+    assert expected_child == result_child
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
