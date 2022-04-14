@@ -290,3 +290,106 @@ def test_function_with_grandkids_within_xml():
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_function_childs_cons_prod_within_xml():
+    """See Issue #5, Notebook equivalent:
+    %%jarvis
+    with function_childs_cons_prod_within_xml
+    F1 is a function
+    F1a is a function
+    F1b is a function
+    F1c is a function
+    F1d is a function
+    F1e is a function
+    F2 is a function
+    F3 is a function
+
+    F1 is composed of F1a
+    F1 is composed of F1b
+    F1 is composed of F1c
+    F1 is composed of F1d
+    F1 is composed of F1e
+
+    a is a data
+    F1 produces a
+    F2 consumes a
+
+    F1a produces a
+    F1b consumes a
+
+    b is a data
+    F1c produces b
+    F1d consumes b
+
+    c is a data
+    F3 produces c
+    F1e consumes c
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "function_childs_cons_prod_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "F1a is a function\n"
+                    "F1b is a function\n"
+                    "F1c is a function\n"
+                    "F1d is a function\n"
+                    "F1e is a function\n"
+                    "F2 is a function\n"
+                    "F3 is a function\n"
+                    "\n"
+                    "F1 is composed of F1a\n"
+                    "F1 is composed of F1b\n"
+                    "F1 is composed of F1c\n"
+                    "F1 is composed of F1d\n"
+                    "F1 is composed of F1e\n"
+                    "\n"
+                    "a is a data\n"
+                    "F1 produces a\n"
+                    "F2 consumes a\n"
+                    "\n"
+                    "F1a produces a\n"
+                    "F1b consumes a\n"
+                    "\n"
+                    "b is a data\n"
+                    "F1c produces b\n"
+                    "F1d consumes b\n"
+                    "\n"
+                    "c is a data\n"
+                    "F3 produces c\n"
+                    "F1e consumes c\n")
+
+    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
+    consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
+    producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+
+    expected_cons = {('a', 'F1b'), ('b', 'F1d'), ('a', 'F2'), ('c', 'F1e'), ('c', 'F1')}
+    expected_prod = {('b', 'F1c'), ('c', 'F3'), ('a', 'F1a'), ('a', 'F1')}
+    expected_child = {('F1', 'F1e'), ('F1', 'F1d'), ('F1', 'F1c'), ('F1', 'F1b'), ('F1', 'F1a')}
+    # xml_adapter.parse_xml() returns mainly set(), so the order can change
+    # thus we have to compare it with a set also
+    result_cons = set()
+    result_prod = set()
+    result_child = set()
+    assert len(data_list) == 3 and len(function_list) == 8
+    assert len(consumer_list) == 5 and len(producer_list) == 4
+
+    for cons in consumer_list:
+        result_cons.add((cons[0], cons[1].name))
+    for prod in producer_list:
+        result_prod.add((prod[0], prod[1].name))
+    for fun in function_list:
+        if fun.child_list:
+            for child in fun.child_list:
+                result_child.add((fun.name, child.name))
+
+    assert expected_cons == result_cons
+    assert expected_prod == result_prod
+    assert expected_child == result_child
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
