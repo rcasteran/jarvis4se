@@ -28,6 +28,7 @@ def test_generate_xml_file_template():
                    "  <functionalElementList/>\n" \
                    "  <chainList/>\n" \
                    "  <attributeList/>\n" \
+                   "  <functionalInterfaceList/>\n" \
                    "</funcArch>\n"
         assert base_xml in s
     if path:
@@ -388,6 +389,53 @@ def test_function_childs_cons_prod_within_xml():
     assert expected_cons == result_cons
     assert expected_prod == result_prod
     assert expected_child == result_child
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_functional_interface_within_xml():
+    """Notebook equivalent:
+    %%jarvis
+    with functional_interface_input
+    Color is an attribute
+    A is a data
+    Fun_inter is a functional interface.
+    The type of Fun_inter is a_type
+    The alias of Fun_inter is FI
+    The Color of Fun_inter is pink
+    Fun_inter allocates A.
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "test_functional_interface_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Color is an attribute\n"
+                    "A is a data\n"
+                    "Fun_inter is a functional interface.\n"
+                    "The type of Fun_inter is a_type\n"
+                    "The alias of Fun_inter is FI\n"
+                    "The Color of Fun_inter is pink\n"
+                    "Fun_inter allocates A.\n")
+
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
+    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[12]
+
+    assert (len(data_list) == len(attribute_list) == len(fun_inter_list)) == 1
+    data = data_list.pop()
+    fun_inter = fun_inter_list.pop()
+    attribute = attribute_list.pop()
+    assert data.name == 'A'
+    assert fun_inter.name == 'Fun_inter'
+    assert fun_inter.alias == 'FI'
+    assert fun_inter.type == 'a_type'
+    assert attribute.name == 'Color'
+    described_item = attribute.described_item_list.pop()
+    assert described_item[0] == fun_inter.id and described_item[1] == 'pink'
+    assert fun_inter.allocated_data_list.pop() == data.id
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)

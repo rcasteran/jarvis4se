@@ -177,3 +177,47 @@ def test_consider_object_input(capsys):
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_functional_interface_input(capsys):
+    """Notebook equivalent:
+    %%jarvis
+    with functional_interface_input
+    Color is an attribute
+    A is a data
+    Fun_inter is a functional interface.
+    The type of Fun_inter is a_type
+    The alias of Fun_inter is FI
+    The Color of Fun_inter is pink
+    Fun_inter allocates A.
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "functional_interface_input"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Color is an attribute\n"
+                    "A is a data\n"
+                    "Fun_inter is a functional interface.\n"
+                    "The type of Fun_inter is a_type\n"
+                    "The alias of Fun_inter is FI\n"
+                    "The Color of Fun_inter is pink\n"
+                    "Fun_inter allocates A.\n")
+
+    captured = capsys.readouterr()
+    expected = [f"Creating {file_name}.xml !\n",
+                "A is a data\n",
+                "Fun_inter is a functional interface\n",
+                "Color is an attribute\n",
+                "The alias for Fun_inter is FI\n",
+                "Data A allocated to functional interface Fun_inter\n",
+                "The type of Fun_inter is a_type\n",
+                "Attribute Color for Fun_inter with value pink\n",
+                f"{file_name}.xml updated\n"]
+
+    assert len(captured.out) == len("".join(expected))
+    assert all(i in captured.out for i in expected)
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
