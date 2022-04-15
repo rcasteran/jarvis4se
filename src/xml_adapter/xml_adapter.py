@@ -35,10 +35,13 @@ def parse_xml(input_filename):
     chain_list = get_chains(root)
     # Looking for attributes
     attribute_list = get_attributes(root)
+    # Looking for functional interfaces
+    functional_interface_list = get_functional_interface(root)
 
     all_lists = [function_list, consumer_function_list, producer_function_list,
                  function_parent_list, data_list, state_list, state_parent_dict, transition_list,
-                 functional_element_list, fun_elem_parent_dict, chain_list, attribute_list]
+                 functional_element_list, fun_elem_parent_dict, chain_list, attribute_list,
+                 functional_interface_list]
     return all_lists
 
 
@@ -276,3 +279,24 @@ def get_attributes(root):
         attribute_list.add(attribute)
 
     return attribute_list
+
+
+def get_functional_interface(root):
+    functional_interface_list = set()
+    xml_fun_inter_list = root.iter('functionalInterface')
+    for xml_fun_inter in xml_fun_inter_list:
+        # Instantiate fun_inter and add them to a list
+        fun_inter = datamodel.FunctionalInterface()
+        fun_inter.set_id(xml_fun_inter.get('id'))
+        fun_inter.set_name(xml_fun_inter.get('name'))
+        fun_inter.set_type(xml_fun_inter.get('type'))
+        fun_inter.set_alias(xml_fun_inter.get('alias'))
+
+        # Looking for allocated data and add them to the fun inter
+        xml_allocated_data_list = xml_fun_inter.iter('allocatedData')
+        for xml_allo_data in xml_allocated_data_list:
+            fun_inter.add_allocated_data(xml_allo_data.get("id"))
+
+        functional_interface_list.add(fun_inter)
+
+    return functional_interface_list
