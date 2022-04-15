@@ -14,4 +14,5 @@ from .datamodel import FunctionalElementType
 from .datamodel import Chain
 from .datamodel import ChainType
 from .datamodel import Attribute
+from .datamodel import FunctionalInterface
 
