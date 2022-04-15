@@ -10,7 +10,8 @@ class GenerateXML:
         # Initialize XML structure/tags
         self.root = etree.Element("funcArch")
         self.tags = ['functionList', 'dataList', 'stateList', 'transitionList',
-                     'functionalElementList', 'chainList', 'attributeList']
+                     'functionalElementList', 'chainList', 'attributeList',
+                     'functionalInterfaceList']
         for tag in self.tags:
             etree.SubElement(self.root, tag)
         self.tree = etree.ElementTree(self.root)
@@ -526,4 +527,58 @@ class GenerateXML:
                 for attribute_tag in root.findall(".//attribute[@id='" + attribute[0].id
                                                   + "']"):
                     attribute_tag.set('type', attribute[1])
+        self.write()
+
+    # Method to write interfaces from interface's list
+    def write_functional_interface(self, functional_interface_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            if root.find('functionalInterfaceList') is None:
+                etree.SubElement(root, 'functionalInterfaceList')
+            for fun_interface_list_tag in root.findall("./functionalInterfaceList"):
+                for fun_interface in functional_interface_list:
+                    fun_interface_tag = etree.SubElement(fun_interface_list_tag,
+                                                         "functionalInterface",
+                                                         {'id': fun_interface.id,
+                                                          'name': fun_interface.name,
+                                                          'type': str(fun_interface.type)})
+                    _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
+                                                                "allocatedDataList")
+        self.write()
+
+    # Method to write allocated data by list [Functional Interface, allocated_data]
+    def write_fun_interface_allocated_data(self, fun_inter_data_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            # Loop on each flow/data
+            for fun_interface_tag in root.findall(".//functionalInterface"):
+                for fun_interface, data in fun_inter_data_list:
+                    if fun_interface_tag.get('id') == fun_interface.id:
+                        tag = fun_interface_tag.find('allocatedDataList')
+                        _allocated_data_tag = etree.SubElement(tag, "allocatedData",
+                                                               {'id': data.id})
+        self.write()
+
+    # Method to write functional interface's type by list [Fun interface, type_str]
+    def write_fun_interface_type(self, fun_inter_type_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for fun_inter_type in fun_inter_type_list:
+                for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
+                                                  fun_inter_type[0].id + "']"):
+                    fun_inter_tag.set('type', fun_inter_type[1])
+        self.write()
+
+    # Method to write fun_inter's alias by list [fun_inter, alias]
+    def write_fun_interface_alias(self, fun_inter_alias_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for fun_inter_alias in fun_inter_alias_list:
+                for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
+                                                  fun_inter_alias[0].id + "']"):
+                    fun_inter_tag.set('alias', fun_inter_alias[1])
         self.write()
