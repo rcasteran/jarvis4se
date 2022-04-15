@@ -53,6 +53,7 @@ class MyMagics(Magics):
                 xml_fun_elem_parent_dict = xml_lists[9]
                 xml_chain_list = xml_lists[10]
                 xml_attribute_list = xml_lists[11]
+                xml_fun_inter_list = xml_lists[12]
                 output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
             # Else create an empty xml named by "xml_name"(and associated empty lists)
             # or will be named by default "Outpout"
@@ -69,6 +70,7 @@ class MyMagics(Magics):
                 xml_fun_elem_parent_dict = {}
                 xml_chain_list = set()
                 xml_attribute_list = set()
+                xml_fun_inter_list = set()
                 if len(xml_name) > 1:
                     print(f"Creating {xml_name}.xml !")
                     output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
@@ -90,6 +92,7 @@ class MyMagics(Magics):
                         'xml_fun_elem_parent_dict': xml_fun_elem_parent_dict,
                         'xml_chain_list': xml_chain_list,
                         'xml_attribute_list': xml_attribute_list,
+                        'xml_fun_inter_list': xml_fun_inter_list,
                         'output_xml': output_xml,
                         'xml_name': xml_name}
 
@@ -134,6 +137,9 @@ LOOKUPS = [
 
     (r"(?<= |\n)(.*?) is a functional element(?=.|\n)",
      lambda matched_str, **kwargs: matched_functional_element(matched_str, **kwargs)),
+
+    (r"(?<= |\n)(.*?) is a functional interface(?=.|\n)",
+     lambda matched_str, **kwargs: matched_functional_interface(matched_str, **kwargs)),
 
     (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
      lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
@@ -281,6 +287,14 @@ def matched_functional_element(functional_elem_name_str_list, **kwargs):
     return out
 
 
+def matched_functional_interface(functional_inter_name_str_list, **kwargs):
+    """Get Functional interface's declaration"""
+    out = orchestrator.add_fun_inter_by_name(functional_inter_name_str_list,
+                                             kwargs['xml_fun_inter_list'],
+                                             kwargs['output_xml'])
+    return out
+
+
 def matched_attribute(attribute_name_str, **kwargs):
     """Get "attribute" declaration"""
     out = orchestrator.add_attribute(attribute_name_str,
@@ -296,6 +310,7 @@ def matched_alias(alias_str_list, **kwargs):
                                               kwargs['xml_state_list'],
                                               kwargs['xml_transition_list'],
                                               kwargs['xml_fun_elem_list'],
+                                              kwargs['xml_fun_inter_list'],
                                               kwargs['output_xml'])
     return out
 
@@ -352,6 +367,8 @@ def matched_allocation(allocation_str_list, **kwargs):
                                             kwargs['xml_fun_elem_list'],
                                             kwargs['xml_state_list'],
                                             kwargs['xml_function_list'],
+                                            kwargs['xml_fun_inter_list'],
+                                            kwargs['xml_data_list'],
                                             kwargs['output_xml'])
     return out
 
@@ -379,6 +396,7 @@ def matched_type(type_str_list, **kwargs):
                                              kwargs['xml_transition_list'],
                                              kwargs['xml_fun_elem_list'],
                                              kwargs['xml_attribute_list'],
+                                             kwargs['xml_fun_inter_list'],
                                              kwargs['output_xml'])
     return out
 
@@ -472,6 +490,7 @@ def matched_described_attribute(described_attribute_str, **kwargs):
                                                   kwargs['xml_attribute_list'],
                                                   kwargs['xml_function_list'],
                                                   kwargs['xml_fun_elem_list'],
+                                                  kwargs['xml_fun_inter_list'],
                                                   kwargs['output_xml'])
     return out
 

@@ -232,19 +232,24 @@ def matched_allocated(object_str, **kwargs):
     return
 
 
-def get_allocation_object(wanted_object, fun_elem_list):
+def get_allocation_object(wanted_object, object_list):
+    """Get current allocation for an object Fun_elem with State/Function OR Fun_inter with data"""
     allocation_list = set()
 
     object_type = orchestrator.get_object_type(wanted_object)
 
     if object_type == 'function':
-        for fun_elem in fun_elem_list:
-            if any(wanted_object.id in s for s in fun_elem.allocated_function_list):
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.allocated_function_list):
                 allocation_list.add(fun_elem)
     elif object_type == 'state':
-        for fun_elem in fun_elem_list:
-            if any(wanted_object.id in s for s in fun_elem.allocated_state_list):
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.allocated_state_list):
                 allocation_list.add(fun_elem)
+    elif object_type == 'data':
+        for fun_inter in object_list:
+            if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
+                allocation_list.add(fun_inter)
     if allocation_list:
         return allocation_list
 
