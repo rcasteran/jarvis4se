@@ -542,7 +542,8 @@ class GenerateXML:
                                                          "functionalInterface",
                                                          {'id': fun_interface.id,
                                                           'name': fun_interface.name,
-                                                          'type': str(fun_interface.type)})
+                                                          'type': str(fun_interface.type),
+                                                          'alias': fun_interface.alias})
                     _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
                                                                 "allocatedDataList")
         self.write()
