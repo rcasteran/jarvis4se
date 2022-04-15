@@ -806,7 +806,7 @@ class Chain:
 
 # Attribute class
 class Attribute:
-    def __init__(self, p_id='', p_name='', p_alias='none', p_type='unknown'):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -831,7 +831,7 @@ class Attribute:
 
 # Functional Interface class
 class FunctionalInterface:
-    def __init__(self, p_id='', p_name='', p_alias='none', p_type='unknown'):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
