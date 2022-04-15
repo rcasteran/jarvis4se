@@ -410,7 +410,7 @@ def test_functional_interface_within_xml():
     """
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
-    file_name = "test_functional_interface_within_xml"
+    file_name = "functional_interface_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Color is an attribute\n"
                     "A is a data\n"
