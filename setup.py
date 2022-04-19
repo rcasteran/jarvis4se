@@ -26,10 +26,15 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Visualization",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
     ],
     keywords='',
     packages=find_packages(include=['jarvis4se', 'jarvis4se.*']),
-    install_requires=['pytest', 'pytest_mock'],
-    python_requires='>=3.7.6',
+    install_requires=[
+        'ipython >= 7.27.0',
+        'lxml >= 4.6.3',
+        'notebook >= 6.4.3',
+        'plantuml == 0.3.0',
+        'pandas~=1.4.1'],
+    python_requires='>=3.8',
 )
