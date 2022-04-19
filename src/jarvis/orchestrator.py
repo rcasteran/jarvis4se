@@ -1013,14 +1013,14 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
                 for attribute in xml_attribute_list:
                     if object_to_set_type == attribute.name or \
                             object_to_set_type == attribute.alias:
-                        if type_name.capitalize() != str(attribute.type):
+                        if type_name != str(attribute.type):
                             object_from_xml_attribute_list.append([attribute, type_name])
 
             elif any(s == object_to_set_type for s in xml_fun_inter_name_list):
                 for fun_inter in xml_fun_inter_list:
                     if object_to_set_type == fun_inter.name or \
                             object_to_set_type == fun_inter.alias:
-                        if type_name.capitalize() != str(fun_inter.type):
+                        if type_name != str(fun_inter.type):
                             object_from_xml_fun_inter_list.append([fun_inter, type_name])
 
             elif type_name.upper() in function_type_list:
