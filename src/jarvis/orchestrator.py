@@ -2590,7 +2590,7 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                                         state.add_allocated_function(fun.id)
                                         state_allocated_function_list.append([state, fun])
 
-            if result_fun_inter_data:
+            elif result_fun_inter_data:
                 for fun_inter in xml_fun_inter_list:
                     if elem[0] == fun_inter.name or elem[0] == fun_inter.alias:
                         for data in xml_data_list:
