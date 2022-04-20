@@ -2594,7 +2594,7 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                 for fun_inter in xml_fun_inter_list:
                     if elem[0] == fun_inter.name or elem[0] == fun_inter.alias:
                         for data in xml_data_list:
-                            if elem[1] == data.name or elem[1] == data.alias:
+                            if elem[1] == data.name:
                                 check_allocation = \
                                     question_answer.get_allocation_object(data, xml_fun_inter_list)
                                 if check_allocation is None:
