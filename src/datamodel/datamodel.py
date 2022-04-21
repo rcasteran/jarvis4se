@@ -710,6 +710,7 @@ class FunctionalElement:
         self.child_list = set()
         self.allocated_state_list = set()
         self.allocated_function_list = set()
+        self.exposed_interface_list = set()
 
     def set_id(self, p_id):
         self.id = p_id
@@ -734,6 +735,9 @@ class FunctionalElement:
 
     def add_allocated_function(self, p_function):
         self.allocated_function_list.add(p_function)
+
+    def add_exposed_interface(self, p_interface):
+        self.exposed_interface_list.add(p_interface)
 
 
 # Chain type

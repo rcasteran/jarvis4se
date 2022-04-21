@@ -374,12 +374,12 @@ class GenerateXML:
 
                     _fun_elem_part_list_tag = etree.SubElement(functional_element_tag,
                                                                "functionalElementPartList")
-
                     _allocated_state_list_tag = etree.SubElement(functional_element_tag,
                                                                  "allocatedStateList")
                     _allocated_function_list_tag = etree.SubElement(functional_element_tag,
                                                                     "allocatedFunctionList")
-
+                    _exposed_interface_list_tag = etree.SubElement(functional_element_tag,
+                                                                   "exposedInterfaceList")
         self.write()
 
     # Method to write child by list [parent, child]
@@ -423,6 +423,22 @@ class GenerateXML:
                         tag = functional_element.find('allocatedFunctionList')
                         _allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
                                                                 {'id': function.id})
+        self.write()
+
+    # Method to write exposed interfaces by list [fun_elem, exposed_interface]
+    def write_exposed_interface(self, fun_elem_inter_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for functional_element in root.findall(".//functionalElement"):
+                if functional_element.find('exposedInterfaceList') is None:
+                    etree.SubElement(functional_element, 'exposedInterfaceList')
+
+                for fun_elem, inter in fun_elem_inter_list:
+                    if functional_element.get('id') == fun_elem.id:
+                        tag = functional_element.find('exposedInterfaceList')
+                        _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
+                                                                  {'id': inter.id})
         self.write()
 
     # Method to delete functional element by list [functional element]
