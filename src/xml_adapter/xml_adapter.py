@@ -222,6 +222,11 @@ def get_functional_element(root):
         for xml_allo_fun in xml_allocated_function_list:
             fun_elem.add_allocated_function(xml_allo_fun.get("id"))
 
+        # Looking for exposed interface and add them to the functional element
+        xml_exposed_interface_list = xml_func_elem.iter('exposedInterface')
+        for xml_exp_inter in xml_exposed_interface_list:
+            fun_elem.add_exposed_interface(xml_exp_inter.get("id"))
+
     # Loop to set parent() and add_child() to fun elem
     for child_id in fun_elem_parent_dict:
         for child_state in functional_element_list:
