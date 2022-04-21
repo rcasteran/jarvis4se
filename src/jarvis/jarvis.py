@@ -518,7 +518,8 @@ def reverse(inverted_list):
 
 
 def greet_user():
-    """Greets the user according to the time"""
+    """Greets the user according to the time thanks to :
+    https://ireadblog.com/posts/141/how-to-build-your-personal-ai-assistant-using-python"""
     hour = datetime.now().hour
     # Use getpass() because available on Unix/Windows
     user_name = getpass.getuser()
