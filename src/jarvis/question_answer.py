@@ -31,35 +31,55 @@ def find_question(string, **kwargs):
     return out
 
 
+def get_objects_name_lists(**kwargs):
+    """Returns lists of objects with their names depending on kwargs"""
+    xml_function_name_list, xml_data_name_list, xml_state_name_list = [], [], []
+    xml_fun_elem_name_list, xml_transition_name_list, xml_fun_inter_name_list = [], [], []
+
+    # Create object names/aliases lists
+    if kwargs.get('xml_function_list', False):
+        xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
+    if kwargs.get('xml_data_list', False):
+        xml_data_name_list = orchestrator.get_object_name(kwargs['xml_data_list'])
+    if kwargs.get('xml_state_list', False):
+        xml_state_name_list = orchestrator.get_object_name(kwargs['xml_state_list'])
+    if kwargs.get('xml_fun_elem_list', False):
+        xml_fun_elem_name_list = orchestrator.get_object_name(kwargs['xml_fun_elem_list'])
+    if kwargs.get('xml_transition_list', False):
+        xml_transition_name_list = orchestrator.get_object_name(kwargs['xml_transition_list'])
+    if kwargs.get('xml_fun_inter_list', False):
+        xml_fun_inter_name_list = orchestrator.get_object_name(kwargs['xml_fun_inter_list'])
+
+    whole_objects_name_list = [xml_function_name_list,
+                               xml_data_name_list,
+                               xml_state_name_list,
+                               xml_fun_elem_name_list,
+                               xml_transition_name_list,
+                               xml_fun_inter_name_list]
+    return whole_objects_name_list
+
+
 def check_get_object(object_str, **kwargs):
     """
     Returns the desired object from object's string
     Args:
         object_str ([object_string]): list of object's name from cell
-        **kwargs: all xml lists
+        **kwargs: xml lists
 
     Returns:
         wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
     """
-    # Create object names/aliases lists
-    xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
-    xml_data_name_list = orchestrator.get_object_name(kwargs['xml_data_list'])
-    xml_state_name_list = orchestrator.get_object_name(kwargs['xml_state_list'])
-    xml_fun_elem_name_list = orchestrator.get_object_name(kwargs['xml_fun_elem_list'])
-    xml_transition_name_list = orchestrator.get_object_name(kwargs['xml_transition_list'])
-    xml_fun_inter_name_list = orchestrator.get_object_name(kwargs['xml_fun_inter_list'])
-    whole_objects_name_list = [*xml_function_name_list, *xml_data_name_list, *xml_state_name_list,
-                               *xml_fun_elem_name_list, *xml_transition_name_list,
-                               *xml_fun_inter_name_list]
-    if not [object_str in whole_objects_name_list]:
+    whole_objects_name_list = get_objects_name_lists(**kwargs)
+
+    if not [object_str in s for s in whole_objects_name_list]:
         print(f"{object_str} does not exist")
     else:
-        result_function = [object_str in xml_function_name_list]
-        resul_state = [object_str in xml_state_name_list]
-        result_data = [object_str in xml_data_name_list]
-        result_fun_elem = [object_str in xml_fun_elem_name_list]
-        result_transition = [object_str in xml_transition_name_list]
-        result_fun_inter = [object_str in xml_fun_inter_name_list]
+        result_function = [object_str in whole_objects_name_list[0]]
+        result_data = [object_str in whole_objects_name_list[1]]
+        resul_state = [object_str in whole_objects_name_list[2]]
+        result_fun_elem = [object_str in whole_objects_name_list[3]]
+        result_transition = [object_str in whole_objects_name_list[4]]
+        result_fun_inter = [object_str in whole_objects_name_list[5]]
         result = [*result_function, *result_data, *resul_state,  *result_fun_elem,
                   *result_transition, *result_fun_inter]
         wanted_object = match_object(object_str, result, **kwargs)
@@ -504,7 +524,8 @@ def get_input(wanted_object, unmerged=False, **kwargs):
 
 def get_output(wanted_object, unmerged=False, **kwargs):
     """
-    Gets outputs for object (Function or Functional Element): i.e. what is produced by wanted object.
+    Gets outputs for object (Function or Functional Element): i.e. what is produced by wanted
+    object.
     Args:
         wanted_object: current object
         unmerged (bool: default=false): used by functional elements
