@@ -162,12 +162,12 @@ def test_consider_object_input(capsys):
                 "Functional Element, Function and Data\n",
                 "Object tata does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
-                "Function F1 allocated to chain test_chain\n",
-                "Data a allocated to chain test_chain\n",
-                "FunctionalElement Fun_elem allocated to chain test_chain\n",
-                "Function F2 with a long name allocated to chain test_chain\n",
-                "Function F3 allocated to chain test_chain\n",
-                "Function F4 allocated to chain test_chain\n",
+                "Function F1 is allocated to chain test_chain\n",
+                "Data a is allocated to chain test_chain\n",
+                "FunctionalElement Fun_elem is allocated to chain test_chain\n",
+                "Function F2 with a long name is allocated to chain test_chain\n",
+                "Function F3 is allocated to chain test_chain\n",
+                "Function F4 is allocated to chain test_chain\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
@@ -209,7 +209,7 @@ def test_functional_interface_input(capsys):
                 "Fun_inter is a functional interface\n",
                 "Color is an attribute\n",
                 "The alias for Fun_inter is FI\n",
-                "Data A allocated to functional interface Fun_inter\n",
+                "Data A is allocated to functional interface Fun_inter\n",
                 "The type of Fun_inter is a_type\n",
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]
