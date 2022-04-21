@@ -2636,34 +2636,34 @@ def add_allocation(allocation_lists, output_xml):
             output_xml.write_allocated_function(fun_elem_allocated_function_list)
             # Warn the user once added within xml
             for elem in fun_elem_allocated_function_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to functional "
+                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to functional "
                       f"element {elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if fun_elem_allocated_state_list:
             output_xml.write_allocated_state(fun_elem_allocated_state_list)
             # Warn the user once added within xml
             for elem in fun_elem_allocated_state_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to functional "
+                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to functional "
                       f"element {elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if state_allocated_function_list:
             output_xml.write_allocated_function_to_state(state_allocated_function_list)
             # Warn the user once added within xml
             for elem in state_allocated_function_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to state "
+                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to state "
                       f"{elem[0].name}")
                 recursive_allocation(elem, output_xml)
         if chain_allocated_item_list:
             output_xml.write_allocated_chain_item(chain_allocated_item_list)
             # Warn the user once added within xml
             for elem in chain_allocated_item_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to "
+                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                       f"chain {elem[0].name}")
         if fun_inter_allocated_data_list:
             output_xml.write_fun_interface_allocated_data(fun_inter_allocated_data_list)
             # Warn the user once added within xml
             for elem in fun_inter_allocated_data_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} allocated to "
+                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                       f"functional interface {elem[0].name}")
         update_list.append(1)
     else:
@@ -2714,13 +2714,13 @@ def check_parent_allocation(elem, output_xml):
                 if object_type == "state":
                     output_xml.write_allocated_state([[fun_elem_parent, object_parent]])
                     fun_elem_parent.add_allocated_state(object_parent.id)
-                    print(f"State {object_parent.name} allocated to functional "
+                    print(f"State {object_parent.name} is allocated to functional "
                           f"element {fun_elem_parent.name}")
                     check_parent_allocation([fun_elem_parent, object_parent], output_xml)
                 elif object_type == "function":
                     output_xml.write_allocated_function([[fun_elem_parent, object_parent]])
                     fun_elem_parent.add_allocated_function(object_parent.id)
-                    print(f"Function {object_parent.name} allocated to functional "
+                    print(f"Function {object_parent.name} is allocated to functional "
                           f"element {fun_elem_parent.name}")
                     check_parent_allocation([fun_elem_parent, object_parent], output_xml)
             else:
@@ -2746,11 +2746,11 @@ def recursive_allocation(elem, output_xml):
                 for e in allocated_child_list:
                     if object_type == "state":
                         e[0].add_allocated_state(e[1].id)
-                        print(f"State {e[1].name} allocated to functional "
+                        print(f"State {e[1].name} is allocated to functional "
                               f"element {e[0].name}")
                     elif object_type == "function":
                         e[0].add_allocated_function(e[1].id)
-                        print(f"Function {e[1].name} allocated to functional "
+                        print(f"Function {e[1].name} is allocated to functional "
                               f"element {e[0].name}")
                     if e[1].child_list:
                         recursive_allocation(e, output_xml)
@@ -2758,11 +2758,11 @@ def recursive_allocation(elem, output_xml):
     else:
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             elem[0].add_allocated_state(elem[1].id)
-            print(f"State {elem[1].name} allocated to functional "
+            print(f"State {elem[1].name} is allocated to functional "
                   f"element {elem[0].name}")
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
             elem[0].add_allocated_function(elem[1].id)
-            print(f"Function {elem[1].name} allocated to functional "
+            print(f"Function {elem[1].name} is allocated to functional "
                   f"element {elem[0].name}")
 
     return None
