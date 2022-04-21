@@ -3002,7 +3002,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
         output_xml.write_attribute(new_attribute_list)
         for attribute in new_attribute_list:
             xml_attribute_list.add(attribute)
-            print(attribute.name + " is an attribute" + "")
+            print(attribute.name + " is an attribute")
         update_list.append(1)
 
     return update_list
@@ -3048,7 +3048,6 @@ def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml
             is_elem_found = False
             if any(item == elem[1] for item in whole_list) and \
                     not any(item == elem[0] for item in xml_attribute_name_list):
-                print("yeee")
                 print(f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_attribute_name_list) and not \
                     any(item == elem[1] for item in whole_list):
@@ -3164,4 +3163,76 @@ def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, ou
         update_list.append(1)
 
     return update_list
+
+
+def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, xml_data_list,
+                      output_xml):
+    """
+    Check and get all "Fun_elem exposes Fun_inter" strings, if Fun_inter is not exposed yet
+    (or parentality relationship) => add it to Fun_elem object and as exposedInterface within xml.
+    Args:
+        exposes_str_list ([strings]): list of strings
+        xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
+        xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
+        xml_data_list ([Data]) : Data list from xml parsing
+        output_xml (GenerateXML object) : XML's file object
+
+    Returns:
+        [0/1] : if update has been made
+    """
+    output = False
+    for exposes_str in exposes_str_list:
+        fun_elem = question_answer.check_get_object(exposes_str[0],
+                                                    **{'xml_fun_elem_list': xml_fun_elem_list})
+        fun_inter = question_answer.check_get_object(exposes_str[1],
+                                                     **{'xml_fun_inter_list': xml_fun_inter_list})
+
+        check_print_wrong_pair_object((exposes_str[0], fun_elem, 'Functional Element'),
+                                      (exposes_str[1], fun_inter, 'Functional Interface'),
+                                      'exposes')
+        if fun_elem and fun_inter:
+            check_rule = True
+            for xml_fun_elem in xml_fun_elem_list:
+                if any(s == fun_inter.id for s in xml_fun_elem.exposed_interface_list) and \
+                        xml_fun_elem != fun_elem:
+                    if not check_parentality(xml_fun_elem, fun_elem) and \
+                            not check_parentality(fun_elem, xml_fun_elem):
+                        check_rule = False
+
+            if fun_inter.id not in fun_elem.exposed_interface_list and check_rule:
+                output = True
+                fun_elem.add_exposed_interface(fun_inter.id)
+                output_xml.write_exposed_interface([[fun_elem, fun_inter]])
+                print(f"{fun_elem.name} exposes {fun_inter.name}")
+
+    if output:
+        return [1]
+    else:
+        return [0]
+
+
+def check_print_wrong_pair_object(object_a, object_b, relationship_type):
+    """
+    Prints specific user messages for wrong object(s) pair (Object_a, Object_b) relationship
+
+    Args:
+        object_a: (input_string, object_or_none, object_type_string)
+        e.g. (exposes_str[0], fun_elem, 'Functional Element')
+        object_b: (exposes_str[1], fun_inter, 'Functional Interface')
+        relationship_type: e.g. 'exposes'
+
+    """
+    if object_a[1] == object_b[1] is None:
+        print(f"{object_a[0]} and {object_b[0]} do not exist, choose valid names/aliases for: "
+              f"'{object_a[2]}' {relationship_type} "
+              f"'{object_b[2]}'")
+    elif object_a[1] is None or object_b[1] is None:
+        if object_a[1] is None and object_b[1]:
+            print(f"{object_a[0]} does not exist, choose a valid name/alias for: "
+                  f"'{object_a[2]}' {relationship_type} "
+                  f"{object_b[1].name}")
+        elif object_b[1] is None and object_a[1]:
+            print(f"{object_b[0]} does not exist, choose a valid name/alias for: "
+                  f"{object_a[1].name} {relationship_type} "
+                  f"'{object_b[2]}'")
 

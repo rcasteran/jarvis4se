@@ -174,6 +174,9 @@ LOOKUPS = [
     (r"(?<= |\n)(.*?) allocates ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_allocation(matched_str, **kwargs)),
 
+    (r"(?<= |\n)(.*?) exposes ([^\.\n]*)",
+     lambda matched_str, **kwargs: matched_exposes(matched_str, **kwargs)),
+
     (r"(?<= |\n)delete ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_delete(matched_str, **kwargs)),
 
@@ -370,6 +373,16 @@ def matched_allocation(allocation_str_list, **kwargs):
                                             kwargs['xml_fun_inter_list'],
                                             kwargs['xml_data_list'],
                                             kwargs['output_xml'])
+    return out
+
+
+def matched_exposes(exposes_str_list, **kwargs):
+    """Get 'exposes' declaration"""
+    out = orchestrator.check_add_exposes(exposes_str_list,
+                                         kwargs['xml_fun_elem_list'],
+                                         kwargs['xml_fun_inter_list'],
+                                         kwargs['xml_data_list'],
+                                         kwargs['output_xml'])
     return out
 
 
