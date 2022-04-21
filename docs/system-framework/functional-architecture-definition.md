@@ -25,6 +25,10 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 
 <mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
 
+### Interaction visualization
+
+
+
 ## Functional element creation
 
 ### Definition
