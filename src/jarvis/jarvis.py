@@ -195,7 +195,7 @@ LOOKUPS = [
     (r"\s([A-Za-z\s].*\?)",
      lambda matched_str, **kwargs: matched_question_mark(matched_str, **kwargs)),
 
-    (r"list (input|output|child) ([^\.\n]*)",
+    (r"list (input|output|child|data) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
 
     (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
@@ -477,6 +477,17 @@ def matched_list(object_str, **kwargs):
                 title = i.pop(0)
                 df = pd.DataFrame(i, columns=["Data name", "Consumer"])
                 df = df.T
+                df = df.style\
+                    .set_caption(title)\
+                    .set_properties(**{'white-space': 'nowrap'})
+                df = df.to_html().replace("\\n", "<br>")
+                display(HTML(df))
+            elif "Data" in i[0]:
+                title = i.pop(0)
+                df = pd.DataFrame(i)
+                df = df.T
+                for idx in range(1, 5):
+                    df.iloc[idx] = df.iloc[idx].str.join("\\n")
                 df = df.style\
                     .set_caption(title)\
                     .set_properties(**{'white-space': 'nowrap'})
