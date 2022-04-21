@@ -221,3 +221,71 @@ def test_functional_interface_input(capsys):
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_fun_elem_exposes_interface_input(capsys):
+    """Notebook equivalent:
+    %%jarvis
+    with fun_elem_exposes_interface_input
+    Fun_inter is a functional interface
+    Fun_elem is a functional element
+    Fun_elem_2 is a functional element
+    Fun_elem_3 is a functional element
+    Fun_elem_4 is a functional element
+    Fun_elem_5 is a functional element
+    Fun_elem_6 is a functional element
+    Fun_elem_ext is a functional element
+    Fun_elem is composed of Fun_elem_2
+    Fun_elem_2 is composed of Fun_elem_3
+    Fun_elem_3 is composed of Fun_elem_4
+    Fun_elem_4 is composed of Fun_elem_5
+    Fun_elem_5 is composed of Fun_elem_6
+    Fun_elem exposes Fun_inter
+    Fun_elem_6 exposes Fun_inter
+    Fun_elem_ext exposes Fun_inter
+    toto exposes Fun_inter
+    tata exposes titi
+    Fun_elem exposes coco
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "fun_elem_exposes_interface_input"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Fun_inter is a functional interface\n"
+                    "Fun_elem is a functional element\n"
+                    "Fun_elem_2 is a functional element\n"
+                    "Fun_elem_3 is a functional element\n"
+                    "Fun_elem_4 is a functional element\n"
+                    "Fun_elem_5 is a functional element\n"
+                    "Fun_elem_6 is a functional element\n"
+                    "Fun_elem_ext is a functional element\n"
+                    "Fun_elem is composed of Fun_elem_2\n"
+                    "Fun_elem_2 is composed of Fun_elem_3\n"
+                    "Fun_elem_3 is composed of Fun_elem_4\n"
+                    "Fun_elem_4 is composed of Fun_elem_5\n"
+                    "Fun_elem_5 is composed of Fun_elem_6\n"
+                    "Fun_elem exposes Fun_inter\n"
+                    "Fun_elem_6 exposes Fun_inter\n"
+                    "Fun_elem_ext exposes Fun_inter\n"
+                    "toto exposes Fun_inter\n"
+                    "tata exposes titi\n"
+                    "Fun_elem exposes coco\n")
+
+    captured = capsys.readouterr()
+    expected = ["Fun_elem exposes Fun_inter\n",
+                "Fun_elem_6 exposes Fun_inter\n",
+                "toto does not exist, choose a valid name/alias for: "
+                "'Functional Element' exposes Fun_inter\n",
+                "tata and titi do not exist, choose valid names/aliases for: "
+                "'Functional Element' exposes 'Functional Interface'\n",
+                "coco does not exist, choose a valid name/alias for: "
+                "Fun_elem exposes 'Functional Interface'\n",
+                f"{file_name}.xml updated\n"]
+    # Get last part from capsys
+    last_out = captured.out[-len(''.join(expected)):len(captured.out)]
+    assert all(i in last_out for i in expected)
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)

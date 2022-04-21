@@ -399,7 +399,7 @@ def test_function_childs_cons_prod_within_xml():
 def test_functional_interface_within_xml():
     """Notebook equivalent:
     %%jarvis
-    with functional_interface_input
+    with functional_interface_within_xml
     Color is an attribute
     A is a data
     Fun_inter is a functional interface.
@@ -436,6 +436,83 @@ def test_functional_interface_within_xml():
     described_item = attribute.described_item_list.pop()
     assert described_item[0] == fun_inter.id and described_item[1] == 'pink'
     assert fun_inter.allocated_data_list.pop() == data.id
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_fun_elem_exposes_interface_within_xml():
+    """Notebook equivalent:
+    %%jarvis
+    with fun_elem_exposes_interface_within_xml
+    Fun_inter is a functional interface
+    Fun_elem is a functional element
+    Fun_elem_2 is a functional element
+    Fun_elem_3 is a functional element
+    Fun_elem_4 is a functional element
+    Fun_elem_5 is a functional element
+    Fun_elem_6 is a functional element
+    Fun_elem_ext is a functional element
+    Fun_elem is composed of Fun_elem_2
+    Fun_elem_2 is composed of Fun_elem_3
+    Fun_elem_3 is composed of Fun_elem_4
+    Fun_elem_4 is composed of Fun_elem_5
+    Fun_elem_5 is composed of Fun_elem_6
+    Fun_elem exposes Fun_inter
+    Fun_elem_6 exposes Fun_inter
+    Fun_elem_ext exposes Fun_inter
+    toto exposes Fun_inter
+    tata exposes titi
+    Fun_elem exposes coco
+    """
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "fun_elem_exposes_interface_within_xml"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Fun_inter is a functional interface\n"
+                    "Fun_elem is a functional element\n"
+                    "Fun_elem_2 is a functional element\n"
+                    "Fun_elem_3 is a functional element\n"
+                    "Fun_elem_4 is a functional element\n"
+                    "Fun_elem_5 is a functional element\n"
+                    "Fun_elem_6 is a functional element\n"
+                    "Fun_elem_ext is a functional element\n"
+                    "Fun_elem is composed of Fun_elem_2\n"
+                    "Fun_elem_2 is composed of Fun_elem_3\n"
+                    "Fun_elem_3 is composed of Fun_elem_4\n"
+                    "Fun_elem_4 is composed of Fun_elem_5\n"
+                    "Fun_elem_5 is composed of Fun_elem_6\n"
+                    "Fun_elem exposes Fun_inter\n"
+                    "Fun_elem_6 exposes Fun_inter\n"
+                    "Fun_elem_ext exposes Fun_inter\n"
+                    "toto exposes Fun_inter\n"
+                    "tata exposes titi\n"
+                    "Fun_elem exposes coco\n")
+
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[12]
+
+    expected_child = {('Fun_elem', 'Fun_elem_2'), ('Fun_elem_2', 'Fun_elem_3'),
+                      ('Fun_elem_3', 'Fun_elem_4'), ('Fun_elem_4', 'Fun_elem_5'),
+                      ('Fun_elem_5', 'Fun_elem_6')}
+    expected_exposed = {('Fun_elem', 'Fun_inter'), ('Fun_elem_6', 'Fun_inter')}
+
+    assert len(fun_inter_list) == 1 and len(fun_elem_list) == 7
+    fun_inter = fun_inter_list.pop()
+    assert fun_inter.name == 'Fun_inter'
+
+    result_exposed = set()
+    result_child = set()
+    for fun_elem in fun_elem_list:
+        for child in fun_elem.child_list:
+            result_child.add((fun_elem.name, child.name))
+        if fun_inter.id in fun_elem.exposed_interface_list:
+            result_exposed.add((fun_elem.name, fun_inter.name))
+
+    assert expected_child == result_child
+    assert expected_exposed == result_exposed
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
