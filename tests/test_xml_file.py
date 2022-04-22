@@ -479,6 +479,7 @@ def test_fun_elem_exposes_interface_within_xml():
                     "Fun_elem_5 is a functional element\n"
                     "Fun_elem_6 is a functional element\n"
                     "Fun_elem_ext is a functional element\n"
+                    "Fun_elem_ext_2 is a functional element\n"
                     "Fun_elem is composed of Fun_elem_2\n"
                     "Fun_elem_2 is composed of Fun_elem_3\n"
                     "Fun_elem_3 is composed of Fun_elem_4\n"
@@ -487,6 +488,7 @@ def test_fun_elem_exposes_interface_within_xml():
                     "Fun_elem exposes Fun_inter\n"
                     "Fun_elem_6 exposes Fun_inter\n"
                     "Fun_elem_ext exposes Fun_inter\n"
+                    "Fun_elem_ext_2 exposes Fun_inter\n"
                     "toto exposes Fun_inter\n"
                     "tata exposes titi\n"
                     "Fun_elem exposes coco\n")
@@ -497,9 +499,10 @@ def test_fun_elem_exposes_interface_within_xml():
     expected_child = {('Fun_elem', 'Fun_elem_2'), ('Fun_elem_2', 'Fun_elem_3'),
                       ('Fun_elem_3', 'Fun_elem_4'), ('Fun_elem_4', 'Fun_elem_5'),
                       ('Fun_elem_5', 'Fun_elem_6')}
-    expected_exposed = {('Fun_elem', 'Fun_inter'), ('Fun_elem_6', 'Fun_inter')}
+    expected_exposed = {('Fun_elem', 'Fun_inter'), ('Fun_elem_6', 'Fun_inter'),
+                        ('Fun_elem_ext', 'Fun_inter')}
 
-    assert len(fun_inter_list) == 1 and len(fun_elem_list) == 7
+    assert len(fun_inter_list) == 1 and len(fun_elem_list) == 8
     fun_inter = fun_inter_list.pop()
     assert fun_inter.name == 'Fun_inter'
 

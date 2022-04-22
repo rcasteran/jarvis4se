@@ -235,6 +235,7 @@ def test_fun_elem_exposes_interface_input(capsys):
     Fun_elem_5 is a functional element
     Fun_elem_6 is a functional element
     Fun_elem_ext is a functional element
+    Fun_elem_ext_2 is a functional element
     Fun_elem is composed of Fun_elem_2
     Fun_elem_2 is composed of Fun_elem_3
     Fun_elem_3 is composed of Fun_elem_4
@@ -243,6 +244,7 @@ def test_fun_elem_exposes_interface_input(capsys):
     Fun_elem exposes Fun_inter
     Fun_elem_6 exposes Fun_inter
     Fun_elem_ext exposes Fun_inter
+    Fun_elem_ext_2 exposes Fun_inter
     toto exposes Fun_inter
     tata exposes titi
     Fun_elem exposes coco
@@ -259,6 +261,7 @@ def test_fun_elem_exposes_interface_input(capsys):
                     "Fun_elem_5 is a functional element\n"
                     "Fun_elem_6 is a functional element\n"
                     "Fun_elem_ext is a functional element\n"
+                    "Fun_elem_ext_2 is a functional element\n"
                     "Fun_elem is composed of Fun_elem_2\n"
                     "Fun_elem_2 is composed of Fun_elem_3\n"
                     "Fun_elem_3 is composed of Fun_elem_4\n"
@@ -267,6 +270,7 @@ def test_fun_elem_exposes_interface_input(capsys):
                     "Fun_elem exposes Fun_inter\n"
                     "Fun_elem_6 exposes Fun_inter\n"
                     "Fun_elem_ext exposes Fun_inter\n"
+                    "Fun_elem_ext_2 exposes Fun_inter\n"
                     "toto exposes Fun_inter\n"
                     "tata exposes titi\n"
                     "Fun_elem exposes coco\n")
@@ -274,6 +278,7 @@ def test_fun_elem_exposes_interface_input(capsys):
     captured = capsys.readouterr()
     expected = ["Fun_elem exposes Fun_inter\n",
                 "Fun_elem_6 exposes Fun_inter\n",
+                "Fun_elem_ext exposes Fun_inter\n",
                 "toto does not exist, choose a valid name/alias for: "
                 "'Functional Element' exposes Fun_inter\n",
                 "tata and titi do not exist, choose valid names/aliases for: "

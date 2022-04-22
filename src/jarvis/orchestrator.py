@@ -1947,8 +1947,7 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
 
 # TODO: Clean/organize this method by creating sub
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_attribute_list,
-                                str_out=False, xml_fun_elem_list=None):
+                                xml_producer_function_list, xml_attribute_list):
     main_function_list = set()
     ext_prod_fun_list = set()
     ext_cons_fun_list = set()
@@ -2026,14 +2025,10 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                                    new_producer_list,
                                                                    new_parent_dict,
                                                                    None,
-                                                                   xml_attribute_list,
-                                                                   xml_fun_elem_list)
-    if str_out:
-        out = plant_uml_text
-    else:
-        out = url_diagram
-        print("Decomposition Diagram " + diagram_function_str + " generated")
-    return out
+                                                                   xml_attribute_list)
+
+    print("Decomposition Diagram " + diagram_function_str + " generated")
+    return url_diagram
 
 
 def get_children(element, function_list=None, parent_dict=None):
@@ -3191,14 +3186,7 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
                                       (exposes_str[1], fun_inter, 'Functional Interface'),
                                       'exposes')
         if fun_elem and fun_inter:
-            check_rule = True
-            for xml_fun_elem in xml_fun_elem_list:
-                if any(s == fun_inter.id for s in xml_fun_elem.exposed_interface_list) and \
-                        xml_fun_elem != fun_elem:
-                    if not check_parentality(xml_fun_elem, fun_elem) and \
-                            not check_parentality(fun_elem, xml_fun_elem):
-                        check_rule = False
-
+            check_rule = check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list)
             if fun_inter.id not in fun_elem.exposed_interface_list and check_rule:
                 output = True
                 fun_elem.add_exposed_interface(fun_inter.id)
@@ -3209,6 +3197,35 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
         return [1]
     else:
         return [0]
+
+
+def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
+    """A fun elem can expose an interface if already allocated to a parent/child and
+    an interface can only be exposed by 2 families of fun_elem"""
+    check = True
+    exposed_fun_elem_list = set()
+    for xml_fun_elem in xml_fun_elem_list:
+        if any(s == fun_inter.id for s in xml_fun_elem.exposed_interface_list) and \
+                xml_fun_elem != fun_elem:
+            exposed_fun_elem_list.add(xml_fun_elem)
+
+    if not exposed_fun_elem_list:
+        return check
+
+    opposite_fun_elem_list = []
+    for elem in exposed_fun_elem_list:
+        if check_parentality(elem, fun_elem) or check_parentality(fun_elem, elem):
+            return check
+        else:
+            opposite_fun_elem_list.append(elem)
+
+    for idx in range(0, len(opposite_fun_elem_list)-1):
+        if not check_parentality(opposite_fun_elem_list[idx], opposite_fun_elem_list[idx+1]) and \
+                not check_parentality(opposite_fun_elem_list[idx+1], opposite_fun_elem_list[idx]):
+            check = False
+            return check
+
+    return check
 
 
 def check_print_wrong_pair_object(object_a, object_b, relationship_type):
