@@ -1312,7 +1312,9 @@ def case_context_diagram(**kwargs):
                                          kwargs['xml_function_list'],
                                          kwargs['xml_consumer_function_list'],
                                          kwargs['xml_producer_function_list'],
-                                         kwargs['xml_attribute_list'])
+                                         kwargs['xml_attribute_list'],
+                                         kwargs['xml_fun_inter_list'],
+                                         kwargs['xml_data_list'])
         return filename
     else:
         print(f"Jarvis does not know the function {kwargs['diagram_object_str']}")
@@ -1730,7 +1732,7 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
 
 def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                           xml_consumer_function_list, xml_producer_function_list,
-                          xml_attribute_list):
+                          xml_attribute_list, xml_fun_inter_list, xml_data_list):
     allocated_function_id_list = set()
     allocated_function_list = set()
     new_function_list = set()
@@ -1769,9 +1771,10 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                                                                    cons,
                                                                    prod,
                                                                    {},
-                                                                   set(),
+                                                                   xml_data_list,
                                                                    xml_attribute_list,
-                                                                   xml_fun_elem_list)
+                                                                   xml_fun_elem_list,
+                                                                   xml_fun_inter_list)
     print("Context Diagram for " + fun_elem_str + " generated")
     return url_diagram
 
