@@ -5,7 +5,7 @@ import inspect
 import sys
 
 # Modules
-from . import util
+from .util import MakePlantUml
 sys.path.append("../xml_adapter")
 import xml_adapter # noqa
 sys.path.append("../datamodel")
@@ -38,9 +38,9 @@ def write_function_child(function, input_flow_list, output_flow_list, xml_attrib
             if q[0][1] == function.name.lower():
                 parent_function_port.append(q)
 
-    plantuml_text += util.MakePlantUml.create_port(function_input_port, "in")
-    plantuml_text += util.MakePlantUml.create_port(function_output_port, "out")
-    plantuml_text += util.MakePlantUml.create_port(parent_function_port, "None")
+    plantuml_text += MakePlantUml.create_port(function_input_port, "in")
+    plantuml_text += MakePlantUml.create_port(function_output_port, "out")
+    plantuml_text += MakePlantUml.create_port(parent_function_port, "None")
 
     child_with_no_child_list = []
     child_with_child_list = []
@@ -54,39 +54,38 @@ def write_function_child(function, input_flow_list, output_flow_list, xml_attrib
     # For child that has no child: create object
     for fun in child_with_no_child_list:
         if fun.operand:
-            plantuml_text += util.MakePlantUml.create_object_with_operand(fun, xml_attribute_list)
+            plantuml_text += MakePlantUml.create_object_with_operand(fun, xml_attribute_list)
         else:
-            plantuml_text += util.MakePlantUml.create_object(fun, xml_attribute_list)
+            plantuml_text += MakePlantUml.create_object(fun, xml_attribute_list)
 
     for child in child_with_child_list:
-        plantuml_text += util.MakePlantUml.create_component(child)
+        plantuml_text += MakePlantUml.create_component(child)
         plantuml_text += write_function_child(child, input_flow_list,
                                               output_flow_list, xml_attribute_list)
         nb_component -= 1
 
     # Close all the brackets depending on the number of component within highest parent
     for i in range(nb_component):
-        plantuml_text += util.MakePlantUml.close_component()
+        plantuml_text += MakePlantUml.close_component()
 
     for component in child_with_child_list:
-        plantuml_text += util.MakePlantUml.create_component_attribute(component, xml_attribute_list)
+        plantuml_text += MakePlantUml.create_component_attribute(component, xml_attribute_list)
 
     whole_child_list = child_with_child_list + child_with_no_child_list
     for fun in whole_child_list:
         for i in input_flow_list:
             if i[0][0] == fun.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(input_flow_list, "in")
+                plantuml_text += MakePlantUml.create_port(input_flow_list, "in")
         for j in output_flow_list:
             if j[0][0] == fun.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(output_flow_list, "out")
+                plantuml_text += MakePlantUml.create_port(output_flow_list, "out")
 
-    plantuml_text += util.MakePlantUml.create_port(external_input_port, "in")
-    plantuml_text += util.MakePlantUml.create_port(external_output_port, "out")
+    plantuml_text += MakePlantUml.create_port(external_input_port, "in")
+    plantuml_text += MakePlantUml.create_port(external_output_port, "out")
 
     return plantuml_text
 
 
-# Method to count the number of composed function within the higher function
 def count_composed_component(function, count):
     """
     Count the number of composed function within the higher function
@@ -108,48 +107,83 @@ def write_function_object(function, input_flow_list, output_flow_list, check, xm
                           component_obj=None, compo_diagram=False):
     plantuml_text = ''
     if function.operand:
-        plantuml_text += util.MakePlantUml.create_object_with_operand(function, xml_attribute_list)
+        plantuml_text += MakePlantUml.create_object_with_operand(function, xml_attribute_list)
     else:
-        plantuml_text += util.MakePlantUml.create_object(function, xml_attribute_list)
+        plantuml_text += MakePlantUml.create_object(function, xml_attribute_list)
 
     if check:
-        plantuml_text += util.MakePlantUml.close_component()
+        plantuml_text += MakePlantUml.close_component()
         if component_obj:
-            plantuml_text += util.MakePlantUml.create_component_attribute(component_obj,
-                                                                          xml_attribute_list)
+            plantuml_text += MakePlantUml.create_component_attribute(component_obj,
+                                                                     xml_attribute_list)
 
     for p in input_flow_list:
         if compo_diagram:
             if p[0][0] == function.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(input_flow_list, "in")
+                plantuml_text += MakePlantUml.create_port(input_flow_list, "in")
         else:
             if p[0][0] == function.name.lower() or p[0][1] == function.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(input_flow_list, "in")
+                plantuml_text += MakePlantUml.create_port(input_flow_list, "in")
     for q in output_flow_list:
         if compo_diagram:
             if q[0][0] == function.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(output_flow_list, "out")
+                plantuml_text += MakePlantUml.create_port(output_flow_list, "out")
         else:
             if q[0][0] == function.name.lower() or q[0][1] == function.name.lower():
-                plantuml_text += util.MakePlantUml.create_port(output_flow_list, "out")
+                plantuml_text += MakePlantUml.create_port(output_flow_list, "out")
 
     return plantuml_text
 
 
 def plantuml_binder(function_list, consumer_function_list, producer_function_list,
-                    parent_child_dict, data_list, xml_attribute_list=None, fun_elem_list=None):
+                    parent_child_dict, data_list, xml_attribute_list=None, fun_elem_list=None,
+                    fun_inter_list=None):
     plantuml_text = ""
-    # Filter output flows
-    output_flow_list = get_output_flows(consumer_function_list, producer_function_list)
-    # Filter input flows
-    input_flow_list = get_input_flows(consumer_function_list, producer_function_list)
-    # Filter consumers and producers list in order to create data flow
-    data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
-                                         parent_child_dict, 1)
-    if data_list:
+    interface_list = None
+
+    if fun_inter_list:
+        unmerged_out_list = get_output_flows(consumer_function_list, producer_function_list)
+        out_interface_list, output_flow_list = get_interface_list(fun_inter_list,
+                                                                  data_list,
+                                                                  unmerged_out_list,
+                                                                  function_list,
+                                                                  fun_elem_list)
+
+        unmerged_in_list = get_input_flows(consumer_function_list, producer_function_list)
+        in_interface_list, input_flow_list = get_interface_list(fun_inter_list,
+                                                                data_list,
+                                                                unmerged_in_list,
+                                                                function_list,
+                                                                fun_elem_list)
+
+        unmerged_data_list = get_exchanged_flows(consumer_function_list, producer_function_list,
+                                                 parent_child_dict)
+
+        interface_list, data_flow_list = get_interface_list(fun_inter_list,
+                                                            data_list,
+                                                            unmerged_data_list,
+                                                            function_list,
+                                                            fun_elem_list)
+        interface_list += in_interface_list + out_interface_list
+        data_flow_list = concatenate_flows(data_flow_list)
+        input_flow_list = concatenate_flows(input_flow_list)
+        output_flow_list = concatenate_flows(output_flow_list)
+
+    else:
+        # Filter output flows
+        output_flow_list = get_output_flows(consumer_function_list, producer_function_list,
+                                            concatenate=True)
+        # Filter input flows
+        input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
+                                          concatenate=True)
+        # Filter consumers and producers list in order to create data flow
+        data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
+                                             parent_child_dict, concatenate=True)
+
+    if data_list and not fun_inter_list:
         per_message_data_flow_list = get_exchanged_flows(consumer_function_list,
                                                          producer_function_list,
-                                                         parent_child_dict, 0)
+                                                         parent_child_dict)
         if len(data_list) == len(per_message_data_flow_list):
             ordered_function_list, ordered_message_list = order_list(per_message_data_flow_list,
                                                                      data_list)
@@ -167,8 +201,9 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
         for function in function_list:
             check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
             plantuml_text += fun_elem_txt
-            plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                                   check, xml_attribute_list, component_obj=fun_elem)
+            plantuml_text += write_function_object(function, input_flow_list,
+                                                   output_flow_list, check,
+                                                   xml_attribute_list, component_obj=fun_elem)
 
     if parent_child_dict:
         for function in function_list:
@@ -177,14 +212,14 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                 if function.type in datamodel.FunctionType.get_parent_function_type_list():
                     check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
                     plantuml_text += fun_elem_txt
-                    plantuml_text += util.MakePlantUml.create_component(function)
+                    plantuml_text += MakePlantUml.create_component(function)
                     plantuml_text += write_function_child(function,
                                                           input_flow_list,
                                                           output_flow_list,
                                                           xml_attribute_list)
                     if check:
-                        plantuml_text += util.MakePlantUml.close_component()
-                        plantuml_text += util.MakePlantUml.\
+                        plantuml_text += MakePlantUml.close_component()
+                        plantuml_text += MakePlantUml.\
                             create_component_attribute(fun_elem, xml_attribute_list)
 
             if function.id not in parent_child_dict.keys() \
@@ -195,15 +230,54 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                                                        check, xml_attribute_list,
                                                        component_obj=fun_elem, compo_diagram=True)
 
+    plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
+    plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
+    plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
 
-    # Write in output file and close it
-    plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
-    plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
-    plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
+    if interface_list:
+        plantuml_text += MakePlantUml.create_interface(interface_list)
 
-    diagram_url = util.MakePlantUml.get_url_from_local(plantuml_text)
+    diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
 
     return plantuml_text, diagram_url
+
+
+def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list, fun_elem_list):
+    """Get [fun_elem_1, fun_elem_2, fun_inter] when data allocated to fun_inter
+    and pop according data from data_flow_list"""
+    interface_list = []
+    for fun_inter in fun_inter_list:
+        for data_id in fun_inter.allocated_data_list:
+            for data in data_list:
+                if data_id == data.id:
+                    for elem in data_flow_list.copy():
+                        if data.name == elem[2]:
+                            first = None
+                            second = None
+                            for fun in function_list:
+                                if elem[0] == fun.name.lower():
+                                    first = fun
+                                if elem[1] == fun.name.lower():
+                                    second = fun
+                            if not (not first and not second):
+                                interface_list.append([first, second, fun_inter])
+                                data_flow_list.remove(elem)
+    output_list = []
+    for i in interface_list:
+        fun_elem_1 = None
+        fun_elem_2 = None
+        for elem in fun_elem_list:
+            if i[0]:
+                if i[0].id in elem.allocated_function_list and elem.parent is None:
+                    fun_elem_1 = elem
+            if i[1]:
+                if i[1].id in elem.allocated_function_list and elem.parent is None:
+                    fun_elem_2 = elem
+        if not (not fun_elem_1 and not fun_elem_2):
+            if [fun_elem_1, fun_elem_2, i[2]] not in output_list:
+                output_list.append([fun_elem_1, fun_elem_2, i[2]])
+
+    return output_list, data_flow_list
 
 
 def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=None):
@@ -237,7 +311,7 @@ def recursive_decomposition(main_fun_elem, function_list, input_flow_list, outpu
                             xml_attribute_list, out_str=None):
     if out_str is None:
         out_str = ''
-        out_str += util.MakePlantUml.create_component(main_fun_elem)
+        out_str += MakePlantUml.create_component(main_fun_elem)
         out_str += check_child_allocation(main_fun_elem, function_list, xml_attribute_list)
         if main_fun_elem.child_list:
             out_str = recursive_decomposition(main_fun_elem, function_list,
@@ -245,15 +319,15 @@ def recursive_decomposition(main_fun_elem, function_list, input_flow_list, outpu
                                               xml_attribute_list, out_str)
     else:
         for c in main_fun_elem.child_list:
-            out_str += util.MakePlantUml.create_component(c)
+            out_str += MakePlantUml.create_component(c)
             out_str += check_child_allocation(c, function_list, xml_attribute_list)
             if c.child_list:
                 out_str = recursive_decomposition(c, function_list, input_flow_list,
                                                   output_flow_list, xml_attribute_list,
                                                   out_str)
-            out_str += util.MakePlantUml.close_component()
-            out_str += util.MakePlantUml.create_component_attribute(c, xml_attribute_list)
-        out_str += util.MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
+            out_str += MakePlantUml.close_component()
+            out_str += MakePlantUml.create_component_attribute(c, xml_attribute_list)
+        out_str += MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     return out_str
 
 
@@ -276,20 +350,20 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
             diagram_url (url_str) : Url can be local(big diagram) or visible via plantuml server
     """
     # Filter output flows
-    #output_flow_list = get_output_flows(consumer_list, producer_list)
+    # output_flow_list = get_output_flows(consumer_list, producer_list)
     output_flow_list = []
     # Filter input flows
-    #input_flow_list = get_input_flows(consumer_list, producer_list)
+    # input_flow_list = get_input_flows(consumer_list, producer_list)
     input_flow_list = []
     # Filter consumers and producers list in order to create data flow
     data_flow_list = get_exchanged_flows(consumer_list, producer_list,
-                                         {}, 1)
+                                         {}, concatenate=True)
     # Write functional element decompo recursively and add allocated functions
-    # TODO: Delte useless [] parameters
+    # TODO: Delete useless [] parameters
     plantuml_text = recursive_decomposition(main_fun_elem, allocated_function_list,
                                             [], [], xml_attribute_list)
-    plantuml_text += util.MakePlantUml.close_component()
-    plantuml_text += util.MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
+    plantuml_text += MakePlantUml.close_component()
+    plantuml_text += MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     # Write external(consumer or producer) functions and highest level functional
     # element allocated to it
     for function in external_function_list:
@@ -299,11 +373,11 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                                check, xml_attribute_list, component_obj=fun_elem)
 
     # Write data flows
-    #plantuml_text += util.MakePlantUml.create_input_flow(input_flow_list)
-    #plantuml_text += util.MakePlantUml.create_output_flow(output_flow_list)
-    plantuml_text += util.MakePlantUml.create_data_flow(data_flow_list)
-    #print(plantuml_text)
-    diagram_url = util.MakePlantUml.get_url_from_local(plantuml_text)
+    # plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
+    # plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
+    plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
+    # print(plantuml_text)
+    diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
     return diagram_url
 
 
@@ -328,7 +402,7 @@ def check_write_fun_elem(function, fun_elem_list):
             if function.id in fun_elem.allocated_function_list:
                 if fun_elem.parent is None:
                     check = True
-                    plantuml_text += util.MakePlantUml.create_component(fun_elem)
+                    plantuml_text += MakePlantUml.create_component(fun_elem)
     return check, plantuml_text, fun_elem
 
 
@@ -340,7 +414,7 @@ def get_url_from_string(diagram_str):
         Returns:
             diagram_url (string) : Url can be local(big diagram) or hosted by plantuml server
     """
-    diagram_url = util.MakePlantUml.get_url_from_local(diagram_str)
+    diagram_url = MakePlantUml.get_url_from_local(diagram_str)
     return diagram_url
 
 
@@ -350,24 +424,24 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
     sequence_text = "!pragma teoz true\n"
 
     message_list = get_exchanged_flows(consumer_function_list, producer_function_list,
-                                       parent_child_dict, 0)
+                                       parent_child_dict)
     ordered_function_list, ordered_message_list = order_list(message_list, data_list)
 
     if ordered_function_list:
         for fun_name in ordered_function_list:
             for f in function_list:
                 if fun_name == f.name.lower():
-                    sequence_text += util.MakePlantUml.create_participant(f)
+                    sequence_text += MakePlantUml.create_participant(f)
     else:
         for f in function_list:
-            sequence_text += util.MakePlantUml.create_participant(f)
+            sequence_text += MakePlantUml.create_participant(f)
 
-    sequence_text += util.MakePlantUml.create_sequence_message(ordered_message_list)
+    sequence_text += MakePlantUml.create_sequence_message(ordered_message_list)
 
     if str_out:
         return sequence_text, ''
     else:
-        diagram_url = util.MakePlantUml.get_url_from_local(sequence_text)
+        diagram_url = MakePlantUml.get_url_from_local(sequence_text)
         return sequence_text, diagram_url
 
 
@@ -514,7 +588,7 @@ def order_list(message_list, data_list):
 
 
 def get_exchanged_flows(consumer_function_list, producer_function_list, parent_child_dict,
-                        concatenate_boolean):
+                        concatenate=False):
     output_list = []
     for producer_flow, producer_function in producer_function_list:
         if len(producer_function.child_list) == 0:
@@ -530,13 +604,13 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
                             [producer_function.name.lower(), consumer_function.name.lower(),
                              producer_flow])
 
-    if concatenate_boolean == 1:
+    if concatenate:
         output_list = concatenate_flows(output_list)
 
     return output_list
 
 
-def get_output_flows(consumer_function_list, producer_function_list):
+def get_output_flows(consumer_function_list, producer_function_list, concatenate=False):
     flow_consumer_name_list = []
     flow_child_consumer_list = []
     temp_input_list = []
@@ -568,11 +642,12 @@ def get_output_flows(consumer_function_list, producer_function_list):
             if not any(producer_flow in sub for sub in output_list):
                 output_list.append([None, producer_function.name.lower(), producer_flow])
 
-    output_list = concatenate_flows(output_list)
+    if concatenate:
+        output_list = concatenate_flows(output_list)
     return output_list
 
 
-def get_input_flows(consumer_function_list, producer_function_list):
+def get_input_flows(consumer_function_list, producer_function_list, concatenate=False):
     flow_producer_name_list = []
     flow_child_producer_list = []
     temp_input_list = []
@@ -603,7 +678,8 @@ def get_input_flows(consumer_function_list, producer_function_list):
             if not any(cons_flow in sublist for sublist in output_list):
                 output_list.append([None, consumer_fun.name.lower(), cons_flow])
 
-    output_list = concatenate_flows(output_list)
+    if concatenate:
+        output_list = concatenate_flows(output_list)
     return output_list
 
 
@@ -646,12 +722,12 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
                     if state.id in fun_elem.allocated_state_list:
                         if fun_elem.parent is None:
                             check = True
-                            state_machine_text += util.MakePlantUml.create_state(fun_elem, True)
+                            state_machine_text += MakePlantUml.create_state(fun_elem, True)
 
             state_machine_text += write_composed_state(state, already_added_state_id_list,
                                                        objects_conditions_list)
             if check:
-                state_machine_text += util.MakePlantUml.close_component()
+                state_machine_text += MakePlantUml.close_component()
 
     for s in xml_state_list:
         if s.id not in already_added_state_id_list:
@@ -661,18 +737,18 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
                     if s.id in fun_elem.allocated_state_list:
                         if fun_elem.parent is None:
                             check = True
-                            state_machine_text += util.MakePlantUml.create_state(fun_elem, True)
+                            state_machine_text += MakePlantUml.create_state(fun_elem, True)
             state_machine_text += write_state(s, already_added_state_id_list,
                                               objects_conditions_list)
             if check:
-                state_machine_text += util.MakePlantUml.close_component()
+                state_machine_text += MakePlantUml.close_component()
 
     for p in objects_conditions_list:
         if (p[0].id and not p[1].id) or (not p[0].id and p[1].id):
-            state_machine_text += util.MakePlantUml.create_transition([p])
+            state_machine_text += MakePlantUml.create_transition([p])
             objects_conditions_list.remove(p)
 
-    diagram_url = util.MakePlantUml.get_url_from_local(state_machine_text)
+    diagram_url = MakePlantUml.get_url_from_local(state_machine_text)
 
     return state_machine_text, diagram_url
 
@@ -696,31 +772,31 @@ def get_objects_conditions_list(xml_state_list, xml_transition_list):
 def write_state(state, new, objects_conditions_list, output_str=''):
 
     if not state.parent and not state.child_list:
-        output_str += util.MakePlantUml.create_state(state)
+        output_str += MakePlantUml.create_state(state)
         new.append(state.id)
 
     for j in objects_conditions_list:
         if all(x in new for x in [j[0].id, j[1].id]):
-            output_str += util.MakePlantUml.create_transition([j])
+            output_str += MakePlantUml.create_transition([j])
             objects_conditions_list.remove(j)
 
     return output_str
 
 
 def write_composed_state(state, new, objects_conditions_list, output_str='', count=0):
-    output_str += util.MakePlantUml.create_state(state, parent=True)
+    output_str += MakePlantUml.create_state(state, parent=True)
     new.insert(count, state.id)
     count += 1
     for i in state.child_list:
         if not i.child_list:
-            output_str += util.MakePlantUml.create_state(i)
+            output_str += MakePlantUml.create_state(i)
             new.insert(count+1, i.id)
         else:
             return write_composed_state(i, new, objects_conditions_list, output_str, count)
 
     for j in objects_conditions_list:
         if all(x in new for x in [j[0].id, j[1].id]):
-            output_str += util.MakePlantUml.create_transition([j])
+            output_str += MakePlantUml.create_transition([j])
             objects_conditions_list.remove(j)
 
     output_str += "}\n"*count
