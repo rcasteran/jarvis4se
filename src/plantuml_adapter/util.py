@@ -10,7 +10,7 @@ import subprocess
 from plantuml import PlantUML
 
 sys.path.append("../datamodel")
-import datamodel # noqa
+import datamodel  # noqa
 
 
 # Class to generate PLantuml string/.txt and .svg/url diagram
@@ -150,6 +150,30 @@ class MakePlantUml:
         return flow_str
 
     @staticmethod
+    def create_interface(interface_list):
+        flow_str = ""
+        for i in interface_list:
+            relationship_str = ""
+            if i[0] and i[1]:
+                relationship_str = i[0].name.lower().replace(" ", "_").replace("-", "") + ' -- ' \
+                                   + i[1].name.lower().replace(" ", "_").replace("-", "")
+            elif not i[0] and i[1]:
+                circle_name = i[1].name.lower().replace(" ", "_").replace("-", "") + '_o'
+                relationship_str += 'circle ' + circle_name + '\n'
+                relationship_str += i[1].name.lower().replace(" ", "_").replace("-", "") \
+                                    + ' -- ' + circle_name
+
+            elif i[0] and not i[1]:
+                circle_name = i[1].name.lower().replace(" ", "_").replace("-", "") + '_o'
+                relationship_str += 'circle ' + circle_name + '\n'
+                relationship_str += circle_name + ' -- ' +\
+                                    i[1].name.lower().replace(" ", "_").replace("-", "")
+
+            flow_str += relationship_str + ' : ' + \
+                        i[2].name.lower().replace(" ", "_").replace("-", "") + '\n'
+        return flow_str
+
+    @staticmethod
     def create_multiple_arrow(relationship_str, flow_str, flow_list):
         extended_flow_list = []
         new_prod_cons_flow_list = []
@@ -213,7 +237,7 @@ class MakePlantUml:
 
     def write(self, lines):
         self.output_file.writelines(lines)
-        
+
     @staticmethod
     def create_sequence_message(message_list):
         sequence_message_str = ""
@@ -231,22 +255,22 @@ class MakePlantUml:
             relationship_str = val[0].replace(" ", "_").replace("-", "") + ' -> ' \
                                + val[1].replace(" ", "_").replace("-", "")
             if val[3]:
-                seq_number = str(idx+1) + "- "
+                seq_number = str(idx + 1) + "- "
             else:
                 seq_number = ""
             sequence_message_str += relationship_str + ' : ' + seq_number + val[2] + '\n'
-            if val[0] in activate_list and not any(val[0] in sub for sub in message_list[idx+1:]):
+            if val[0] in activate_list and not any(val[0] in sub for sub in message_list[idx + 1:]):
                 deactivate_list.append(val[0])
                 sequence_message_str += "deactivate " + val[0].replace(" ", "_").replace("-", "") \
                                         + "\n"
 
-            if val[1] in activate_list and not any(val[1] in sub for sub in message_list[idx+1:]):
+            if val[1] in activate_list and not any(val[1] in sub for sub in message_list[idx + 1:]):
                 deactivate_list.append(val[1])
                 sequence_message_str += "deactivate " + val[1].replace(" ", "_").replace("-", "") \
                                         + "\n"
 
         return sequence_message_str
-    
+
     @staticmethod
     def create_participant(function):
         # If the string is not formatted like this, plantuml raises error
