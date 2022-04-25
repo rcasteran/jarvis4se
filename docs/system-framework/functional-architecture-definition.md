@@ -1,6 +1,6 @@
 # Functional architecture definition
 
-Functional architecture definition is the systematic examination of different implementation-independant architecture candidates to identify independant groups of [functions](../engineering-concepts/definitions.md) <mark style="color:blue;"></mark> and their required ressources to be executed (so called [functional elements](../engineering-concepts/definitions.md)), to identify the [data](../engineering-concepts/definitions.md) they exchange (so called [functional interfaces](../engineering-concepts/definitions.md)) and to select the best one according to the selected architecture criteria (Adapted from [REF\_3](../engineering-concepts/references.md))
+Functional architecture is the systematic examination of different implementation-independant architecture candidates to identify independant groups of [functions](../engineering-concepts/definitions.md) <mark style="color:blue;"></mark> and their required ressources to be executed (so called [functional elements](../engineering-concepts/definitions.md)) from the [functional analysis](functional-analysis.md), to organize the way they exchange [data](../engineering-concepts/definitions.md) (so called [functional interfaces](../engineering-concepts/definitions.md)), and to select the best one according to the selected architecture criteria (Adapted from [REF\_3](../engineering-concepts/references.md))
 
 ## Functional interface creation
 
@@ -27,7 +27,7 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 
 ### Interaction visualization
 
-
+TBD
 
 ## Functional element creation
 
@@ -72,7 +72,7 @@ Below an example of a context visualization for a functional element E which exp
 
 ```
 E is a functional element
-I is a functional interfaceE
+I is a functional interface
 E exposes I
 show context E
 ```
