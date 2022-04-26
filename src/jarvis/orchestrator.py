@@ -472,7 +472,7 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                     if [elem[0], function] not in xml_consumer_function_list:
                         if [elem[0], function] not in xml_producer_function_list:
                             new_consumer_list.append([elem[0], function])
-                            parent = add_parent_recurisvely(elem[0], function,
+                            parent = add_parent_recursively(elem[0], function,
                                                             xml_consumer_function_list,
                                                             xml_producer_function_list,
                                                             new_consumer_list,
@@ -518,7 +518,7 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     return update_list
 
 
-def add_parent_recurisvely(flow, function, current_list, opposite_list, new_list, output_xml,
+def add_parent_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
                            relationship_str, out=False):
     """
     Recursive method around add_parent_for_data().
@@ -545,7 +545,7 @@ def add_parent_recurisvely(flow, function, current_list, opposite_list, new_list
 
     if parent is not None:
         out.append(parent)
-        return add_parent_recurisvely(flow, function.parent, current_list, opposite_list, new_list,
+        return add_parent_recursively(flow, function.parent, current_list, opposite_list, new_list,
                                       output_xml,
                                       relationship_str, out)
 
@@ -589,7 +589,8 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
             for fun in temp_set:
                 if fun not in parent_child_list:
                     check = True
-                    delete_opposite(flow, function.parent, output_xml, relationship_str)
+                    if any(s == [flow, function.parent] for s in opposite_list):
+                        delete_opposite(flow, function.parent, output_xml, relationship_str)
                 if fun in parent_child_list:
                     length -= 1
         if length == 0 and not current_loop_check and temp_set != set():
@@ -673,7 +674,7 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                     if [elem[0], function] not in xml_producer_function_list:
                         if [elem[0], function] not in xml_consumer_function_list:
                             new_producer_list.append([elem[0], function])
-                            parent = add_parent_recurisvely(elem[0], function,
+                            parent = add_parent_recursively(elem[0], function,
                                                             xml_producer_function_list,
                                                             xml_consumer_function_list,
                                                             new_producer_list, output_xml,
