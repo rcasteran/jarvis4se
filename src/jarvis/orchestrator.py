@@ -1370,9 +1370,6 @@ def get_object_list(obj_str, xml_obj_list, xml_chain_list):
                     child_list.add(child)
             new_obj.child_list.clear()
             new_obj.child_list = child_list
-            # TODO: Check later if necessary
-            #if isinstance(new_obj, datamodel.FunctionalElement):
-                # print("do specific stuuf for alloc fun et state")
 
     return output_list
 
@@ -1419,7 +1416,9 @@ def case_decomposition_diagram(**kwargs):
                                                consumer_list,
                                                producer_list,
                                                fun_elem_list,
-                                               kwargs['xml_attribute_list'])
+                                               kwargs['xml_attribute_list'],
+                                               kwargs['xml_data_list'],
+                                               kwargs['xml_fun_inter_list'])
         return filename
     else:
         print(f"Jarvis does not know the object {kwargs['diagram_object_str']}"
@@ -1604,7 +1603,8 @@ def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
 
 
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_fun_elem_list, xml_attribute_list):
+                                xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
+                                xml_data_list, xml_fun_inter_list):
     main_fun_elem = None
     # main_fun_elem_list = set()
     external_function_list = set()
@@ -1649,7 +1649,9 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                                               new_consumer_list,
                                                               new_producer_list,
                                                               external_function_list,
-                                                              xml_attribute_list)
+                                                              xml_attribute_list,
+                                                              xml_data_list,
+                                                              xml_fun_inter_list)
     print("Decomposition Diagram for " + fun_elem_str + " generated")
     return url_diagram
 
