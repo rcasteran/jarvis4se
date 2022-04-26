@@ -1644,14 +1644,14 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                     if t not in new_consumer_list:
                         new_consumer_list.append(t)
 
-    url_diagram = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
-                                                              allocated_function_list,
-                                                              new_consumer_list,
-                                                              new_producer_list,
-                                                              external_function_list,
-                                                              xml_attribute_list,
-                                                              xml_data_list,
-                                                              xml_fun_inter_list)
+    url_diagram, _ = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
+                                                                 allocated_function_list,
+                                                                 new_consumer_list,
+                                                                 new_producer_list,
+                                                                 external_function_list,
+                                                                 xml_attribute_list,
+                                                                 xml_data_list,
+                                                                 xml_fun_inter_list)
     print("Decomposition Diagram for " + fun_elem_str + " generated")
     return url_diagram
 

@@ -400,7 +400,7 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
 
     diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
 
-    return diagram_url
+    return diagram_url, plantuml_text
 
 
 def check_write_fun_elem(function, fun_elem_list):
