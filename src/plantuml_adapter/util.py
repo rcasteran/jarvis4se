@@ -164,10 +164,10 @@ class MakePlantUml:
                                     + ' -- ' + circle_name
 
             elif i[0] and not i[1]:
-                circle_name = i[1].name.lower().replace(" ", "_").replace("-", "") + '_o'
+                circle_name = i[0].name.lower().replace(" ", "_").replace("-", "") + '_o'
                 relationship_str += 'circle ' + circle_name + '\n'
                 relationship_str += circle_name + ' -- ' +\
-                                    i[1].name.lower().replace(" ", "_").replace("-", "")
+                                    i[0].name.lower().replace(" ", "_").replace("-", "")
 
             flow_str += relationship_str + ' : ' + \
                         i[2].name.lower().replace(" ", "_").replace("-", "") + '\n'
