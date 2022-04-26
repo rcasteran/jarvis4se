@@ -783,18 +783,18 @@ def check_and_delete(delete_str_list, xml_function_list, xml_producer_function_l
                           *xml_fun_elem_name_list, *xml_transition_name_list]
     # Check if the wanted to delete object exists and can be deleted
     for elem in delete_str_list:
-        if not any(elem in s for s in concatenated_lists):
+        if not any(s == elem for s in concatenated_lists):
             print(f"{elem} does not exist")
         elif any(elem in flow_consumer for flow_consumer in xml_consumer_function_name_list):
             print(f"{elem} in [flow, consumer] list (not deleted)")
         elif any(elem in flow_producer for flow_producer in xml_producer_function_name_list):
             print(f"{elem} in [flow, producer] list (not deleted)")
         else:
-            result_function = any(elem in s for s in xml_function_name_list)
-            resul_state = any(elem in s for s in xml_state_name_list)
-            result_data = any(elem in s for s in xml_data_name_list)
-            result_fun_elem = any(elem in s for s in xml_fun_elem_name_list)
-            result_transition = any(elem in s for s in xml_transition_name_list)
+            result_function = any(s == elem for s in xml_function_name_list)
+            resul_state = any(s == elem for s in xml_state_name_list)
+            result_data = any(s == elem for s in xml_data_name_list)
+            result_fun_elem = any(s == elem for s in xml_fun_elem_name_list)
+            result_transition = any(s == elem for s in xml_transition_name_list)
             if result_function:
                 for function in xml_function_list:
                     if elem == function.name or elem == function.alias:
