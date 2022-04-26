@@ -156,15 +156,16 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                                                                 function_list,
                                                                 fun_elem_list)
 
-        unmerged_data_list = get_exchanged_flows(consumer_function_list, producer_function_list,
-                                                 parent_child_dict)
-
+        unmerged_data_list = get_exchanged_flows(consumer_function_list, producer_function_list, {})
         interface_list, data_flow_list = get_interface_list(fun_inter_list,
                                                             data_list,
                                                             unmerged_data_list,
                                                             function_list,
                                                             fun_elem_list)
-        interface_list += in_interface_list + out_interface_list
+        if interface_list and in_interface_list:
+            interface_list += in_interface_list
+        if interface_list and out_interface_list:
+            interface_list += out_interface_list
         data_flow_list = concatenate_flows(data_flow_list)
         input_flow_list = concatenate_flows(input_flow_list)
         output_flow_list = concatenate_flows(output_flow_list)
@@ -246,6 +247,7 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     """Get [fun_elem_1, fun_elem_2, fun_inter] when data allocated to fun_inter
     and pop according data from data_flow_list"""
     interface_list = []
+    initial_data = list(data_flow_list)
     for fun_inter in fun_inter_list:
         for data_id in fun_inter.allocated_data_list:
             for data in data_list:
@@ -260,24 +262,37 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
                                 if elem[1] == fun.name.lower():
                                     second = fun
                             if not (not first and not second):
-                                interface_list.append([first, second, fun_inter])
-                                data_flow_list.remove(elem)
+                                if not any(s == fun_inter for s in interface_list):
+                                    interface_list.append([first, second, fun_inter])
+                                    data_flow_list.remove(elem)
     output_list = []
-    for i in interface_list:
+
+    for first, second, interface in interface_list:
         fun_elem_1 = None
         fun_elem_2 = None
-        for elem in fun_elem_list:
-            if i[0]:
-                if i[0].id in elem.allocated_function_list and elem.parent is None:
-                    fun_elem_1 = elem
-            if i[1]:
-                if i[1].id in elem.allocated_function_list and elem.parent is None:
-                    fun_elem_2 = elem
-        if not (not fun_elem_1 and not fun_elem_2):
-            if [fun_elem_1, fun_elem_2, i[2]] not in output_list:
-                output_list.append([fun_elem_1, fun_elem_2, i[2]])
+        if first:
+            for elem_1 in fun_elem_list:
+                if interface.id in elem_1.exposed_interface_list and elem_1.parent is None:
+                    fun_elem_1 = elem_1
 
-    return output_list, data_flow_list
+        if second:
+            for elem_2 in fun_elem_list:
+                if not first:
+                    if interface.id in elem_2.exposed_interface_list and elem_2.parent is None:
+                        fun_elem_2 = elem_2
+                else:
+                    if interface.id in elem_2.exposed_interface_list and elem_2.parent is None \
+                            and elem_2 != fun_elem_1:
+                        fun_elem_2 = elem_2
+
+        if not (not fun_elem_1 and not fun_elem_2):
+            if [fun_elem_1, fun_elem_2, interface] not in output_list:
+                output_list.append([fun_elem_1, fun_elem_2, interface])
+
+    if not output_list:
+        return None, initial_data
+    else:
+        return output_list, data_flow_list
 
 
 def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=None):
@@ -307,24 +322,21 @@ def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=
     return out_str
 
 
-def recursive_decomposition(main_fun_elem, function_list, input_flow_list, output_flow_list,
-                            xml_attribute_list, out_str=None):
+def recursive_decomposition(main_fun_elem, function_list, xml_attribute_list, out_str=None):
+    """ Creates Functional Elements as plantuml 'component' recursively """
     if out_str is None:
         out_str = ''
         out_str += MakePlantUml.create_component(main_fun_elem)
         out_str += check_child_allocation(main_fun_elem, function_list, xml_attribute_list)
         if main_fun_elem.child_list:
-            out_str = recursive_decomposition(main_fun_elem, function_list,
-                                              input_flow_list, output_flow_list,
-                                              xml_attribute_list, out_str)
+            out_str = recursive_decomposition(main_fun_elem, function_list, xml_attribute_list,
+                                              out_str)
     else:
         for c in main_fun_elem.child_list:
             out_str += MakePlantUml.create_component(c)
             out_str += check_child_allocation(c, function_list, xml_attribute_list)
             if c.child_list:
-                out_str = recursive_decomposition(c, function_list, input_flow_list,
-                                                  output_flow_list, xml_attribute_list,
-                                                  out_str)
+                out_str = recursive_decomposition(c, function_list, xml_attribute_list, out_str)
             out_str += MakePlantUml.close_component()
             out_str += MakePlantUml.create_component_attribute(c, xml_attribute_list)
         out_str += MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
@@ -332,9 +344,10 @@ def recursive_decomposition(main_fun_elem, function_list, input_flow_list, outpu
 
 
 def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_list, consumer_list,
-                               producer_list, external_function_list, xml_attribute_list):
+                               producer_list, external_function_list, xml_attribute_list,
+                               data_list, fun_inter_list):
     """
-    Method that parsed input lists in order to create dedicated functional element decomposition
+    Parses input lists in order to create dedicated functional element decomposition
     diagram by: Creating the whole string plantuml_text, retrieve url and return it.
 
         Parameters:
@@ -346,22 +359,30 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
             external_function_list ([Function]) : Filtered external(i.e. "outside" Main) functions
                                                     list
             xml_attribute_list ([Attributes]) : Xml list of attributes
+            data_list ([Data]) : Data list from xml
+            fun_inter_list ([Functional Interface]) : Functional interface list from xml
         Returns:
             diagram_url (url_str) : Url can be local(big diagram) or visible via plantuml server
     """
-    # Filter output flows
-    # output_flow_list = get_output_flows(consumer_list, producer_list)
-    output_flow_list = []
-    # Filter input flows
-    # input_flow_list = get_input_flows(consumer_list, producer_list)
-    input_flow_list = []
-    # Filter consumers and producers list in order to create data flow
-    data_flow_list = get_exchanged_flows(consumer_list, producer_list,
-                                         {}, concatenate=True)
+    interface_list = None
+
+    if fun_inter_list:
+        unmerged_data_list = get_exchanged_flows(consumer_list, producer_list, {})
+        interface_list, data_flow_list = get_interface_list(fun_inter_list,
+                                                            data_list,
+                                                            unmerged_data_list,
+                                                            allocated_function_list.
+                                                            union(external_function_list),
+                                                            fun_elem_list)
+        data_flow_list = concatenate_flows(data_flow_list)
+
+    else:
+        # Filter consumers and producers list in order to create data flow
+        data_flow_list = get_exchanged_flows(consumer_list, producer_list, {}, concatenate=True)
+
     # Write functional element decompo recursively and add allocated functions
-    # TODO: Delete useless [] parameters
     plantuml_text = recursive_decomposition(main_fun_elem, allocated_function_list,
-                                            [], [], xml_attribute_list)
+                                            xml_attribute_list)
     plantuml_text += MakePlantUml.close_component()
     plantuml_text += MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
     # Write external(consumer or producer) functions and highest level functional
@@ -369,15 +390,16 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     for function in external_function_list:
         check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
         plantuml_text += fun_elem_txt
-        plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                               check, xml_attribute_list, component_obj=fun_elem)
+        plantuml_text += write_function_object(function, [], [], check,
+                                               xml_attribute_list, component_obj=fun_elem)
 
     # Write data flows
-    # plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
-    # plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
     plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
-    # print(plantuml_text)
+    if interface_list:
+        plantuml_text += MakePlantUml.create_interface(interface_list)
+
     diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
+
     return diagram_url
 
 
@@ -420,6 +442,7 @@ def get_url_from_string(diagram_str):
 
 def get_sequence_diagram(function_list, consumer_function_list, producer_function_list,
                          parent_child_dict, data_list, str_out=False):
+    """ Generates plantuml string and url for sequence diagrams """
     # Allow plantuml option to put duration between 2 messages
     sequence_text = "!pragma teoz true\n"
 
@@ -446,6 +469,7 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
 
 
 def get_predecessor_list(data):
+    """ Get the predecessor's list for a Data object"""
     predecessor_list = set()
     if data.predecessor_list:
         for predecessor in data.predecessor_list:
@@ -455,6 +479,7 @@ def get_predecessor_list(data):
 
 
 def check_sequence(predecessor_list, sequence):
+    """ Checks if predecessors are in the sequence"""
     check = False
     if predecessor_list == set():
         check = None
@@ -474,7 +499,7 @@ def check_sequence(predecessor_list, sequence):
 
 
 def clean_predecessor_list(message_object_list):
-
+    """ Deletes predecessor if not in the message's list """
     for message in message_object_list:
         pred_list = get_predecessor_list(message[2])
         for pred in pred_list:
