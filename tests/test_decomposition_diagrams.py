@@ -199,7 +199,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
                     "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[1]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
     expected = ['component "E1" as e1 <<unknown>>{\n',
                 'object "F2" as f2 <<unknown>>\n',
                 'component "E1b" as e1b <<unknown>>{\n',
@@ -345,7 +345,7 @@ def test_fun_elem_decompo_with_interface(mocker):
                     "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[1]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
     expected = ['component "E1" as e1 <<unknown>>{\n',
                 'component "E1c" as e1c <<unknown>>{\n',
                 'component "E1c1" as e1c1 <<unknown>>{\n',
