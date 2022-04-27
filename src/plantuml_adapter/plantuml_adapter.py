@@ -247,7 +247,11 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     """Get [fun_elem_1, fun_elem_2, fun_inter] when data allocated to fun_inter
     and pop according data from data_flow_list"""
     interface_list = []
+    removed_data_flow_list = []
     initial_data = list(data_flow_list)
+    idx = 0
+    # Get all fun_inter with allocated data within data_flow_list and create interface list
+    # [[producer, consumer, fun_inter]...]
     for fun_inter in fun_inter_list:
         for data_id in fun_inter.allocated_data_list:
             for data in data_list:
@@ -262,37 +266,80 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
                                 if elem[1] == fun.name.lower():
                                     second = fun
                             if not (not first and not second):
-                                if not any(s == fun_inter for s in interface_list):
-                                    interface_list.append([first, second, fun_inter])
-                                    data_flow_list.remove(elem)
-    output_list = []
+                                # if not any(fun_inter in s for s in interface_list):
+                                interface_list.insert(idx, [first, second, fun_inter])
+                                removed_data_flow_list.insert(idx, elem)
+                                data_flow_list.remove(elem)
+                                idx += 1
 
-    for first, second, interface in interface_list:
-        fun_elem_1 = None
-        fun_elem_2 = None
-        if first:
-            for elem_1 in fun_elem_list:
-                if interface.id in elem_1.exposed_interface_list and elem_1.parent is None:
-                    fun_elem_1 = elem_1
-
-        if second:
-            for elem_2 in fun_elem_list:
-                if not first:
-                    if interface.id in elem_2.exposed_interface_list and elem_2.parent is None:
-                        fun_elem_2 = elem_2
-                else:
-                    if interface.id in elem_2.exposed_interface_list and elem_2.parent is None \
-                            and elem_2 != fun_elem_1:
-                        fun_elem_2 = elem_2
-
-        if not (not fun_elem_1 and not fun_elem_2):
-            if [fun_elem_1, fun_elem_2, interface] not in output_list:
-                output_list.append([fun_elem_1, fun_elem_2, interface])
+    output_list, interface_list = get_fun_elem_from_fun_inter(interface_list, fun_elem_list)
 
     if not output_list:
         return None, initial_data
     else:
+        # (re)Add [producer, consumer, data_name] to data_flow_list if no interface exposed
+        if any(isinstance(s, list) for s in interface_list):
+            for idx, rest_inter in enumerate(interface_list):
+                if isinstance(rest_inter, list):
+                    data_flow_list.append(removed_data_flow_list[idx])
+
         return output_list, data_flow_list
+
+
+def get_fun_elem_from_fun_inter(interface_list, fun_elem_list):
+    """Get output_list = [[fun_elem_1, fun_elem_2, fun_inter]...] list from interface_list =
+    [[producer, consumer, fun_inter]...] and put value to False if (first, second, interface)
+    have been added to output_list (i.e. fun_elem_1/fun_elem_2 have been found for a fun_inter)"""
+    output_list = []
+    for ix, (first, second, interface) in enumerate(interface_list):
+        fun_elem_1 = None
+        fun_elem_2 = None
+        if first:
+            for elem_1 in fun_elem_list:
+                if any(s == interface.id for s in elem_1.exposed_interface_list):
+                    if not elem_1.child_list:
+                        fun_elem_1 = elem_1
+                    else:
+                        check = True
+                        for child in elem_1.child_list:
+                            if any(s == interface.id for s in child.exposed_interface_list):
+                                check = False
+                        if check:
+                            fun_elem_1 = elem_1
+
+        if second:
+            for elem_2 in fun_elem_list:
+                if not first:
+                    if any(s == interface.id for s in elem_2.exposed_interface_list):
+                        if not elem_2.child_list:
+                            fun_elem_2 = elem_2
+                        else:
+                            check = True
+                            for child in elem_2.child_list:
+                                if any(s == interface.id for s in child.exposed_interface_list):
+                                    check = False
+                            if check:
+                                fun_elem_2 = elem_2
+                else:
+                    if any(s == interface.id for s in elem_2.exposed_interface_list) and \
+                            elem_2 != fun_elem_1:
+                        if not elem_2.child_list:
+                            fun_elem_2 = elem_2
+                        else:
+                            check = True
+                            for child in elem_2.child_list:
+                                if any(s == interface.id for s in child.exposed_interface_list):
+                                    check = False
+
+                            if check:
+                                fun_elem_2 = elem_2
+
+        if not (not fun_elem_1 and not fun_elem_2):
+            if [fun_elem_1, fun_elem_2, interface] not in output_list:
+                output_list.append([fun_elem_1, fun_elem_2, interface])
+            interface_list[ix] = False
+
+    return output_list, interface_list
 
 
 def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=None):
@@ -374,6 +421,7 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                                             allocated_function_list.
                                                             union(external_function_list),
                                                             fun_elem_list)
+
         data_flow_list = concatenate_flows(data_flow_list)
 
     else:
@@ -615,16 +663,17 @@ def order_list(message_list, data_list):
 def get_exchanged_flows(consumer_function_list, producer_function_list, parent_child_dict,
                         concatenate=False):
     output_list = []
+
     for producer_flow, producer_function in producer_function_list:
-        if len(producer_function.child_list) == 0:
+        if not producer_function.child_list:
             for cons_flow, consumer_function in consumer_function_list:
                 if cons_flow == producer_flow:
-                    if consumer_function.id in parent_child_dict.keys():
-                        if len(consumer_function.child_list) == 0:
-                            output_list.append(
-                                [producer_function.name.lower(), consumer_function.name.lower(),
-                                 producer_flow])
-                    elif len(consumer_function.child_list) == 0:
+                    if consumer_function.id in parent_child_dict.keys() \
+                            and not consumer_function.child_list:
+                        output_list.append(
+                            [producer_function.name.lower(), consumer_function.name.lower(),
+                             producer_flow])
+                    elif not consumer_function.child_list:
                         output_list.append(
                             [producer_function.name.lower(), consumer_function.name.lower(),
                              producer_flow])
