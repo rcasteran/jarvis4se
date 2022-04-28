@@ -1465,28 +1465,35 @@ def case_chain_diagram(**kwargs):
 def case_sequence_diagram(**kwargs):
     # Create object names/aliases list
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
+    xml_fun_inter_name_list = get_object_name(kwargs['xml_fun_inter_list'])
     clean_diagram_object_str = kwargs['diagram_object_str'].replace(" ", "")
     function_list_str = re.split(r',(?![^[]*\])', clean_diagram_object_str)
-    if len(function_list_str) > 0:
-        bad_list = []
-        for i in function_list_str:
-            if len(i) > 0:
-                if i not in xml_function_name_list:
-                    print(f"{i} is not a function's name nor an alias")
-                    bad_list.append(i)
-            else:
-                print(f"{kwargs['diagram_object_str']} is not a valid sequence")
-        if not bad_list:
-            xml_data_list = filter_allocated_item_from_chain(kwargs['xml_data_list'],
-                                                             kwargs['xml_chain_list'])
-            filename = show_functions_sequence(function_list_str,
-                                               kwargs['xml_function_list'],
-                                               kwargs['xml_consumer_function_list'],
-                                               kwargs['xml_producer_function_list'],
-                                               xml_data_list)
+
+    if function_list_str:
+        if len(function_list_str) == 1 and \
+                any(s == function_list_str[0] for s in xml_fun_inter_name_list):
+            filename = get_fun_inter_sequence_diagram(function_list_str.pop(), **kwargs)
             return filename
+        elif len(function_list_str) >= 1:
+            bad_list = []
+            for i in function_list_str:
+                if len(i) > 0:
+                    if i not in xml_function_name_list:
+                        print(f"{i} is not a function's name nor an alias")
+                        bad_list.append(i)
+                else:
+                    print(f"{kwargs['diagram_object_str']} is not a valid sequence")
+            if not bad_list:
+                xml_data_list = filter_allocated_item_from_chain(kwargs['xml_data_list'],
+                                                                 kwargs['xml_chain_list'])
+                filename = show_functions_sequence(function_list_str,
+                                                   kwargs['xml_function_list'],
+                                                   kwargs['xml_consumer_function_list'],
+                                                   kwargs['xml_producer_function_list'],
+                                                   xml_data_list)
+                return filename
         else:
-            return
+            print(f"{kwargs['diagram_object_str']} is not a valid sequence")
 
 
 def case_state_diagram(**kwargs):
@@ -2520,13 +2527,13 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
             if any(s == elem[0] for s in xml_fun_elem_name_list) and not any(
                     j == elem[1] for j in available_objects_list):
                 print(f"Object {elem[1]} does not exist")
-            elif any(s == elem[1] in s for s in available_objects_list) and not any(
+            elif any(s == elem[1] for s in available_objects_list) and not any(
                     j == elem[0] for j in xml_fun_elem_name_list):
                 print(f"Functional Element {elem[0]} does not exist")
-            elif any(s == elem[1] in s for s in xml_data_name_list) and not any(
+            elif any(s == elem[1] for s in xml_data_name_list) and not any(
                     j == elem[0] for j in xml_fun_inter_name_list):
                 print(f"Functional Interface {elem[0]} does not exist")
-            elif any(s == elem[0] in s for s in xml_fun_inter_name_list) and not any(
+            elif any(s == elem[0] for s in xml_fun_inter_name_list) and not any(
                     j == elem[1] for j in xml_data_name_list):
                 print(f"Data {elem[0]} does not exist")
             else:
@@ -3259,3 +3266,48 @@ def check_print_wrong_pair_object(object_a, object_b, relationship_type):
                   f"{object_a[1].name} {relationship_type} "
                   f"'{object_b[2]}'")
 
+
+def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
+    """
+    Check and get all "show sequence Fun_inter" strings, find Fun_inter obj and then get/filter
+    needed lists for plantuml_adapter.
+    Args:
+        fun_inter_str: functional interface name/alias from input cell
+        **kwargs: whole lists
+
+    Returns:
+        url_diagram : url diagram from plantuml default server or local path
+    """
+    new_consumer_list = []
+    new_producer_list = []
+    new_fun_elem_list = set()
+    fun_inter = question_answer.check_get_object(
+        fun_inter_str, **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
+
+    if fun_inter:
+        data_list_fun_inter = question_answer.switch_data(fun_inter, None, **kwargs)
+        data_list_fun_inter.pop(0)
+        for elem in data_list_fun_inter:
+            fun_elem_cons = question_answer.check_get_object(
+                elem['Last consumer Functional element(s)'].pop(),
+                **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+            fun_elem_prod = question_answer.check_get_object(
+                elem['Last producer Functional element(s)'].pop(),
+                **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+            if fun_elem_cons and fun_elem_prod:
+                new_consumer_list.append([elem['Data'], fun_elem_cons])
+                new_producer_list.append([elem['Data'], fun_elem_prod])
+                new_fun_elem_list.add(fun_elem_cons)
+                new_fun_elem_list.add(fun_elem_prod)
+    else:
+        print(f"Functional elements exposing '{fun_inter.name}' not found")
+
+    if new_consumer_list and new_producer_list:
+        url_diagram = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
+                                                            new_consumer_list,
+                                                            new_producer_list,
+                                                            {},
+                                                            kwargs['xml_data_list'])
+
+        if url_diagram[1]:
+            return url_diagram[1]
