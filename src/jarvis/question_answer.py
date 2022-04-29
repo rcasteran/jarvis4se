@@ -508,13 +508,16 @@ def get_input(wanted_object, unmerged=False, **kwargs):
     object_type = orchestrator.get_object_type(wanted_object)
     if object_type == "Functional element":
         input_list = []
+        allocated_fun_list = set()
         for fun in wanted_object.allocated_function_list:
             for xml_fun in kwargs['xml_function_list']:
                 if fun == xml_fun.id:
-                    current_fun_list = get_input(xml_fun, True, **kwargs)
-                    for sub in current_fun_list:
-                        if sub:
-                            input_list.append(sub)
+                    allocated_fun_list.add(xml_fun)
+        for func in allocated_fun_list:
+            current_fun_list = get_input(func, True, **kwargs)
+            for sub in current_fun_list:
+                if sub and sub[1] not in [f.name for f in allocated_fun_list]:
+                    input_list.append(sub)
         return merge_list_per_cons_prod(input_list)
     else:
         input_list = get_in_out_function(wanted_object,
@@ -541,13 +544,16 @@ def get_output(wanted_object, unmerged=False, **kwargs):
     object_type = orchestrator.get_object_type(wanted_object)
     if object_type == "Functional element":
         output_list = []
+        allocated_fun_list = set()
         for fun in wanted_object.allocated_function_list:
             for xml_fun in kwargs['xml_function_list']:
                 if fun == xml_fun.id:
-                    current_fun_list = get_output(xml_fun, True, **kwargs)
-                    for sub in current_fun_list:
-                        if sub:
-                            output_list.append(sub)
+                    allocated_fun_list.add(xml_fun)
+        for func in allocated_fun_list:
+            current_fun_list = get_output(func, True, **kwargs)
+            for sub in current_fun_list:
+                if sub and sub[1] not in [f.name for f in allocated_fun_list]:
+                    output_list.append(sub)
         return merge_list_per_cons_prod(output_list)
     else:
         output_list = get_in_out_function(wanted_object,
