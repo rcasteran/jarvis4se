@@ -315,9 +315,7 @@ def test_fun_elem_context_with_interfaces(mocker):
                 'object "F1" as f1 <<unknown>>\n',
                 '}\n',
                 'f2 #--> f1 : B\n',
-                'fun_elem_1', ' -- ', 'fun_elem_2 ', ': fun_inter_1\n',
-                'circle fun_elem_1_o\n',
-                'fun_elem_1', ' -- ', 'fun_elem_1_o ', ': fun_inter_2\n']
+                'fun_elem_1', ' -- ', 'fun_elem_2 ', ': fun_inter_1\n']
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
@@ -328,72 +326,116 @@ def test_fun_elem_context_with_interfaces(mocker):
         os.remove(path)
 
 
-def test_fun_elem_context_without_exposed_interfaces(mocker):
-    """Test when functional interfaces are not exposed. Notebook equivalent:
+# def test_fun_elem_context_without_exposed_interfaces(mocker):
+#     """Test when functional interfaces are not exposed. Notebook equivalent:
+#     %%jarvis
+#     with fun_elem_context_without_exposed_interfaces
+#     F1 is a function
+#     F2 is a function
+#     A is a data
+#     B is a data
+#     C is a data
+#     F1 produces A
+#     F2 consumes A
+#     F2 produces B
+#     F1 consumes B
+#     F1 produces C
+#     Fun_elem_1 is a functional element
+#     Fun_elem_2 is a functional element
+#     Fun_inter_1 is a functional interface
+#     Fun_inter_2 is a functional interface
+#     Fun_elem_1 allocates F1
+#     Fun_elem_2 allocates F2
+#     Fun_inter_1 allocates A
+#     Fun_inter_2 allocates C
+#
+#     show context Fun_elem_1
+#      """
+#     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
+#     ip = get_ipython()
+#     my_magic = jarvis.MyMagics(ip)
+#     file_name = "fun_elem_context_without_exposed_interfaces"
+#     my_magic.jarvis("", "with %s\n" % file_name +
+#                     "F1 is a function\n"
+#                     "F2 is a function\n"
+#                     "A is a data\n"
+#                     "B is a data\n"
+#                     "C is a data\n"
+#                     "F1 produces A\n"
+#                     "F2 consumes A\n"
+#                     "F2 produces B\n"
+#                     "F1 consumes B\n"
+#                     "F1 produces C\n"
+#                     "Fun_elem_1 is a functional element\n"
+#                     "Fun_elem_2 is a functional element\n"
+#                     "Fun_inter_1 is a functional interface\n"
+#                     "Fun_inter_2 is a functional interface\n"
+#                     "Fun_elem_1 allocates F1\n"
+#                     "Fun_elem_2 allocates F2\n"
+#                     "Fun_inter_1 allocates A\n"
+#                     "Fun_inter_2 allocates C\n"
+#                     "\n"
+#                     "show context Fun_elem_1\n")
+#
+#     # result = plantuml text without "@startuml ... @enduml" tags
+#     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+#     expected = ['component "Fun_elem_2" as fun_elem_2 <<unknown>>{\n',
+#                 'object "F2" as f2 <<unknown>>\n',
+#                 '}\n',
+#                 'component "Fun_elem_1" as fun_elem_1 <<unknown>>{\n',
+#                 'object "F1" as f1 <<unknown>>\n',
+#                 '}\n',
+#                 'circle f1_o\n',
+#                 'f1 --> f1_o  : C\n',
+#                 'f2 #--> f1 : B\n',
+#                 'f1 #--> f2 : A\n']
+#     print(result)
+#     assert all(i in result for i in expected)
+#     assert len(result) - len(''.join(expected)) == 4 * len("\'id: xxxxxxxxxx\n")
+#
+#     fname = os.path.join("./", file_name + ".xml")
+#     path = Path(fname)
+#     if path:
+#         os.remove(path)
+
+
+def test_fun_elem_context_interface_with_no_flow(mocker):
+    """ See issue #39, Notebook equivalent:
     %%jarvis
-    with fun_elem_context_without_exposed_interfaces
-    F1 is a function
-    F2 is a function
-    A is a data
-    B is a data
-    C is a data
-    F1 produces A
-    F2 consumes A
-    F2 produces B
-    F1 consumes B
-    F1 produces C
-    Fun_elem_1 is a functional element
-    Fun_elem_2 is a functional element
-    Fun_inter_1 is a functional interface
-    Fun_inter_2 is a functional interface
-    Fun_elem_1 allocates F1
-    Fun_elem_2 allocates F2
-    Fun_inter_1 allocates A
-    Fun_inter_2 allocates C
+    with fun_elem_context_interface_with_no_flow
+    E is a functional element
+    E1 is a functional element
+    I_E_E1 is a functional interface
+    E exposes I_E_E1
+    E1 exposes I_E_E1
+
+    show context E1
 
     show context Fun_elem_1
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
-    file_name = "fun_elem_context_without_exposed_interfaces"
+    file_name = "fun_elem_context_interface_with_no_flow"
     my_magic.jarvis("", "with %s\n" % file_name +
-                    "F1 is a function\n"
-                    "F2 is a function\n"
-                    "A is a data\n"
-                    "B is a data\n"
-                    "C is a data\n"
-                    "F1 produces A\n"
-                    "F2 consumes A\n"
-                    "F2 produces B\n"
-                    "F1 consumes B\n"
-                    "F1 produces C\n"
-                    "Fun_elem_1 is a functional element\n"
-                    "Fun_elem_2 is a functional element\n"
-                    "Fun_inter_1 is a functional interface\n"
-                    "Fun_inter_2 is a functional interface\n"
-                    "Fun_elem_1 allocates F1\n"
-                    "Fun_elem_2 allocates F2\n"
-                    "Fun_inter_1 allocates A\n"
-                    "Fun_inter_2 allocates C\n"
+                    "E is a functional element\n"
+                    "E1 is a functional element\n"
+                    "I_E_E1 is a functional interface\n"
+                    "E exposes I_E_E1\n"
+                    "E1 exposes I_E_E1\n"
                     "\n"
-                    "show context Fun_elem_1\n")
+                    "show context E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
-    expected = ['component "Fun_elem_2" as fun_elem_2 <<unknown>>{\n',
-                'object "F2" as f2 <<unknown>>\n',
+    expected = ['component "E" as e <<unknown>>{\n',
                 '}\n',
-                'component "Fun_elem_1" as fun_elem_1 <<unknown>>{\n',
-                'object "F1" as f1 <<unknown>>\n',
+                'component "E1" as e1 <<unknown>>{\n',
                 '}\n',
-                'circle f1_o\n',
-                'f1 --> f1_o  : C\n',
-                'f2 #--> f1 : B\n',
-                'f1 #--> f2 : A\n']
+                'e1', ' -- ', 'e ', ': i_e_e1\n']
 
     assert all(i in result for i in expected)
-    assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
+    assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
