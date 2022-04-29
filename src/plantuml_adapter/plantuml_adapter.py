@@ -308,10 +308,13 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
         plantuml_text += MakePlantUml.create_component(fun_elem)
         check_function = False
         for f in function_list:
-            if f.id in fun_elem.allocated_function_list:
-                check_function = True
+            if any(a == f.id for a in fun_elem.allocated_function_list):
+                if len(fun_elem.allocated_function_list) > 1:
+                    check_function = False
+                else:
+                    check_function = True
                 plantuml_text += write_function_object(f, input_flow_list,
-                                                       output_flow_list, True,
+                                                       output_flow_list, check_function,
                                                        xml_attribute_list, component_obj=fun_elem)
         if not check_function:
             plantuml_text += MakePlantUml.close_component()
