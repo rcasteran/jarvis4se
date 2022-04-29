@@ -289,6 +289,10 @@ def get_allocation_object(wanted_object, object_list):
         for fun_inter in object_list:
             if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
                 allocation_list.add(fun_inter)
+    elif object_type == 'Functional interface':
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
+                allocation_list.add(fun_elem)
     if allocation_list:
         return allocation_list
 
