@@ -205,78 +205,11 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     return plantuml_text, diagram_url
 
 
-def get_fun_elem_context_diagram_base(function_list, consumer_function_list, producer_function_list,
-                                 data_list, xml_attribute_list, fun_elem_list, fun_inter_list):
-
-    plantuml_text = ""
-    interface_list = None
-
-    if fun_inter_list:
-        unmerged_out_list = get_output_flows(consumer_function_list, producer_function_list)
-        out_interface_list, output_flow_list = get_interface_list(fun_inter_list,
-                                                                  data_list,
-                                                                  unmerged_out_list,
-                                                                  function_list,
-                                                                  fun_elem_list)
-
-        unmerged_in_list = get_input_flows(consumer_function_list, producer_function_list)
-        in_interface_list, input_flow_list = get_interface_list(fun_inter_list,
-                                                                data_list,
-                                                                unmerged_in_list,
-                                                                function_list,
-                                                                fun_elem_list)
-
-        unmerged_data_list = get_exchanged_flows(consumer_function_list, producer_function_list, {})
-        interface_list, data_flow_list = get_interface_list(fun_inter_list,
-                                                            data_list,
-                                                            unmerged_data_list,
-                                                            function_list,
-                                                            fun_elem_list)
-
-        if interface_list and in_interface_list:
-            interface_list += in_interface_list
-        if interface_list and out_interface_list:
-            interface_list += out_interface_list
-        data_flow_list = concatenate_flows(data_flow_list)
-        input_flow_list = concatenate_flows(input_flow_list)
-        output_flow_list = concatenate_flows(output_flow_list)
-
-    else:
-        # Filter output flows
-        output_flow_list = get_output_flows(consumer_function_list, producer_function_list,
-                                            concatenate=True)
-        # Filter input flows
-        input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
-                                          concatenate=True)
-        # Filter consumers and producers list in order to create data flow
-        data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
-                                             {}, concatenate=True)
-
-    for function in function_list:
-        check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
-        plantuml_text += fun_elem_txt
-        plantuml_text += write_function_object(function, input_flow_list,
-                                               output_flow_list, check,
-                                               xml_attribute_list, component_obj=fun_elem)
-
-    plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
-    plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
-    plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
-
-    if interface_list:
-        plantuml_text += MakePlantUml.create_interface(interface_list)
-
-    diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
-
-    return plantuml_text, diagram_url
-
-
 def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
                                  data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
                                  fun_elem_inter_list):
 
     plantuml_text = ""
-    interface_list = None
 
     if fun_inter_list:
 
@@ -288,8 +221,6 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
                                                             fun_elem_list)
 
         data_flow_list = concatenate_flows(data_flow_list)
-        # input_flow_list = concatenate_flows(input_flow_list)
-        # output_flow_list = concatenate_flows(output_flow_list)
 
     else:
 
