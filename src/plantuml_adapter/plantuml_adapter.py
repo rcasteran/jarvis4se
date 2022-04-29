@@ -328,7 +328,7 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
         plantuml_text += MakePlantUml.create_interface(fun_elem_inter_list)
 
     diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
-    # print(plantuml_text)
+
     return plantuml_text, diagram_url
 
 

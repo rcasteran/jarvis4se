@@ -1812,10 +1812,12 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
             if any(z == fun.id for z in elem.allocated_function_list) and elem not in fun_elem_list:
                 fun_elem_list.add(elem)
 
-    for elem in fun_elem_list:
+    for elem in fun_elem_list.copy():
         for str_id in elem.allocated_function_list.copy():
             if str_id not in [i.id for i in new_function_list]:
                 elem.allocated_function_list.remove(str_id)
+        if any(a == elem for a in main_fun_elem.child_list):
+            fun_elem_list.remove(elem)
 
     plant_uml_text, url_diagram = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                                 cons,
