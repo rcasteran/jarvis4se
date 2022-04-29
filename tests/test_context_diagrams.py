@@ -15,7 +15,7 @@ def test_simple_function_context(mocker):
      show context F1
 
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "simple_function_context"
@@ -23,7 +23,7 @@ def test_simple_function_context(mocker):
                     "F1 is a function\n"
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = 'object "F1" as f1 <<unknown>>\n'
     assert expected in result
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
@@ -54,7 +54,7 @@ def test_simple_function_context_in_out(mocker):
      show context F1
 
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "simple_function_in_out"
@@ -69,7 +69,7 @@ def test_simple_function_context_in_out(mocker):
     my_magic.jarvis("", "with %s\n" % file_name +
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = 'object "F1" as f1 <<unknown>>\n' \
                'circle f1_i\n' \
                'circle f1_o\n' \
@@ -103,7 +103,7 @@ def test_function_context_with_attribute(mocker):
      with test_function_with_attribute
      show context F1
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "test_function_with_attribute"
@@ -118,7 +118,7 @@ def test_function_context_with_attribute(mocker):
     my_magic.jarvis("", "with %s\n" % file_name +
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['object "F1" as f1 <<unknown>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
 
     assert all(i in result for i in expected)
@@ -133,27 +133,27 @@ def test_function_context_with_attribute(mocker):
 def test_fun_elem_context_with_attribute(mocker):
     """Notebook equivalent:
      %%jarvis
-     with fun_elem_with_attribute
+     with fun_elem_context_with_attribute
      F1 is a function
      Fun elem is a functional element
      F1 is allocated to Fun elem
      ========================================
      %%jarvis
-     with fun_elem_with_attribute
+     with fun_elem_context_with_attribute
      A is an attribute
      B is an attribute. C is an attribute
      ========================================
      %%jarvis
-     with fun_elem_with_attribute
+     with fun_elem_context_with_attribute
      The A of F1 is 4,2
      The C of F1 is pink
      The B of Fun elem is 8,5.
      The A of Fun elem is 100
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
-    file_name = "fun_elem_with_attribute"
+    file_name = "fun_elem_context_with_attribute"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
                     "Fun elem is a functional element\n"
@@ -169,7 +169,7 @@ def test_fun_elem_context_with_attribute(mocker):
     my_magic.jarvis("", "with %s\n" % file_name +
                     "show context Fun elem\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['component "Fun elem" as fun_elem <<unknown>>{\n',
                 'object "F1" as f1 <<unknown>> {\n',
                 'A = 4,2\n',
@@ -209,7 +209,7 @@ def test_function_context_with_grandkids(mocker):
 
     show context F1
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "function_context_with_grandkids"
@@ -231,7 +231,7 @@ def test_function_context_with_grandkids(mocker):
                     "show context F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['object "F1" as f1 <<unknown>>\n',
                 'circle f1_i\n',
                 'circle f1_o\n',
@@ -277,7 +277,7 @@ def test_fun_elem_context_with_interfaces(mocker):
 
     show context Fun_elem_1
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "fun_elem_context_with_interfaces"
@@ -307,7 +307,7 @@ def test_fun_elem_context_with_interfaces(mocker):
                     "show context Fun_elem_1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
     expected = ['component "Fun_elem_2" as fun_elem_2 <<unknown>>{\n',
                 'object "F2" as f2 <<unknown>>\n',
                 '}\n',
@@ -353,7 +353,7 @@ def test_fun_elem_context_without_exposed_interfaces(mocker):
 
     show context Fun_elem_1
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "fun_elem_context_without_exposed_interfaces"
@@ -380,7 +380,7 @@ def test_fun_elem_context_without_exposed_interfaces(mocker):
                     "show context Fun_elem_1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
     expected = ['component "Fun_elem_2" as fun_elem_2 <<unknown>>{\n',
                 'object "F2" as f2 <<unknown>>\n',
                 '}\n',

@@ -44,7 +44,7 @@ def test_function_with_childs_decomposition(mocker):
 
     show decomposition F1
      """
-    spy = mocker.spy(plantuml_adapter, "plantuml_binder")
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     my_magic = jarvis.MyMagics(ip)
     file_name = "function_with_childs_decomposition"
@@ -82,7 +82,7 @@ def test_function_with_childs_decomposition(mocker):
                     "show decomposition F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by plantuml_binder()
+    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['object "F3" as f3 <<unknown>>\n',
                 'component "F1" as f1 <<unknown>>{\n',
                 'object "F1c" as f1c <<unknown>>\n',

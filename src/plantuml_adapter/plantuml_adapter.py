@@ -10,6 +10,8 @@ sys.path.append("../xml_adapter")
 import xml_adapter # noqa
 sys.path.append("../datamodel")
 import datamodel # noqa
+sys.path.append("../jarvis")
+from jarvis import question_answer # noqa
 
 
 def write_function_child(function, input_flow_list, output_flow_list, xml_attribute_list):
@@ -135,13 +137,89 @@ def write_function_object(function, input_flow_list, output_flow_list, check, xm
     return plantuml_text
 
 
-def plantuml_binder(function_list, consumer_function_list, producer_function_list,
-                    parent_child_dict, data_list, xml_attribute_list=None, fun_elem_list=None,
-                    fun_inter_list=None):
+def get_function_diagrams(function_list, consumer_function_list, producer_function_list,
+                          parent_child_dict, data_list, xml_attribute_list=None):
+    plantuml_text = ""
+    interface_list = None
+
+    # Filter output flows
+    output_flow_list = get_output_flows(consumer_function_list, producer_function_list,
+                                        concatenate=True)
+    # Filter input flows
+    input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
+                                      concatenate=True)
+    # Filter consumers and producers list in order to create data flow
+    data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
+                                         parent_child_dict, concatenate=True)
+
+    if data_list:
+        per_message_data_flow_list = get_exchanged_flows(consumer_function_list,
+                                                         producer_function_list,
+                                                         parent_child_dict)
+        if len(data_list) == len(per_message_data_flow_list):
+            ordered_function_list, ordered_message_list = order_list(per_message_data_flow_list,
+                                                                     data_list)
+            if per_message_data_flow_list != ordered_message_list:
+                for idx, i in enumerate(ordered_message_list):
+                    for j in data_flow_list:
+                        for k in j[1]:
+                            if i[2] == k and i[3]:
+                                new = str(idx+1) + ":" + k
+                                j[1].remove(k)
+                                j[1].append(new)
+
+    # Loop in order to filter functions and write in output's file, see write_function_child()
+    if not parent_child_dict:
+        for function in function_list:
+            plantuml_text += write_function_object(function, input_flow_list,
+                                                   output_flow_list, False,
+                                                   xml_attribute_list)
+
+    if parent_child_dict:
+        for function in function_list:
+            if function.id in parent_child_dict.values() and \
+                    function.id not in parent_child_dict.keys():
+                if function.type in datamodel.FunctionType.get_parent_function_type_list():
+
+                    plantuml_text += MakePlantUml.create_component(function)
+                    plantuml_text += write_function_child(function,
+                                                          input_flow_list,
+                                                          output_flow_list,
+                                                          xml_attribute_list)
+
+            if function.id not in parent_child_dict.keys() \
+                    and function.id not in parent_child_dict.values():
+                plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
+                                                       False, xml_attribute_list,
+                                                       compo_diagram=True)
+
+    plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
+    plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
+    plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
+
+    if interface_list:
+        plantuml_text += MakePlantUml.create_interface(interface_list)
+
+    diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
+
+    return plantuml_text, diagram_url
+
+
+def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
+                                 data_list, xml_attribute_list, fun_elem_list, fun_inter_list):
+
     plantuml_text = ""
     interface_list = None
 
     if fun_inter_list:
+        kwargs = {
+            'xml_function_list': function_list,
+            'xml_data_list': data_list,
+            'xml_consumer_function_list': consumer_function_list,
+            'xml_producer_function_list': producer_function_list,
+            'xml_fun_elem_list': fun_elem_list,
+            'xml_fun_inter_list': fun_inter_list,
+        }
         unmerged_out_list = get_output_flows(consumer_function_list, producer_function_list)
         out_interface_list, output_flow_list = get_interface_list(fun_inter_list,
                                                                   data_list,
@@ -162,6 +240,7 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                                                             unmerged_data_list,
                                                             function_list,
                                                             fun_elem_list)
+
         if interface_list and in_interface_list:
             interface_list += in_interface_list
         if interface_list and out_interface_list:
@@ -179,57 +258,14 @@ def plantuml_binder(function_list, consumer_function_list, producer_function_lis
                                           concatenate=True)
         # Filter consumers and producers list in order to create data flow
         data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
-                                             parent_child_dict, concatenate=True)
+                                             {}, concatenate=True)
 
-    if data_list and not fun_inter_list:
-        per_message_data_flow_list = get_exchanged_flows(consumer_function_list,
-                                                         producer_function_list,
-                                                         parent_child_dict)
-        if len(data_list) == len(per_message_data_flow_list):
-            ordered_function_list, ordered_message_list = order_list(per_message_data_flow_list,
-                                                                     data_list)
-            if per_message_data_flow_list != ordered_message_list:
-                for idx, i in enumerate(ordered_message_list):
-                    for j in data_flow_list:
-                        for k in j[1]:
-                            if i[2] == k and i[3]:
-                                new = str(idx+1) + ":" + k
-                                j[1].remove(k)
-                                j[1].append(new)
-
-    # Loop in order to filter functions and write in output's file, see write_function_child()
-    if not parent_child_dict:
-        for function in function_list:
-            check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
-            plantuml_text += fun_elem_txt
-            plantuml_text += write_function_object(function, input_flow_list,
-                                                   output_flow_list, check,
-                                                   xml_attribute_list, component_obj=fun_elem)
-
-    if parent_child_dict:
-        for function in function_list:
-            if function.id in parent_child_dict.values() and \
-                    function.id not in parent_child_dict.keys():
-                if function.type in datamodel.FunctionType.get_parent_function_type_list():
-                    check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
-                    plantuml_text += fun_elem_txt
-                    plantuml_text += MakePlantUml.create_component(function)
-                    plantuml_text += write_function_child(function,
-                                                          input_flow_list,
-                                                          output_flow_list,
-                                                          xml_attribute_list)
-                    if check:
-                        plantuml_text += MakePlantUml.close_component()
-                        plantuml_text += MakePlantUml.\
-                            create_component_attribute(fun_elem, xml_attribute_list)
-
-            if function.id not in parent_child_dict.keys() \
-                    and function.id not in parent_child_dict.values():
-                check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
-                plantuml_text += fun_elem_txt
-                plantuml_text += write_function_object(function, input_flow_list, output_flow_list,
-                                                       check, xml_attribute_list,
-                                                       component_obj=fun_elem, compo_diagram=True)
+    for function in function_list:
+        check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
+        plantuml_text += fun_elem_txt
+        plantuml_text += write_function_object(function, input_flow_list,
+                                               output_flow_list, check,
+                                               xml_attribute_list, component_obj=fun_elem)
 
     plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
     plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
@@ -363,7 +399,7 @@ def check_child_allocation(fun_elem, function_list, xml_attribute_list, out_str=
             for c in fun_elem.child_list:
                 for j in c.allocated_function_list:
                     child_allocated_function_list.append(j)
-            if not any(t.id in s for s in child_allocated_function_list):
+            if not any(s == t.id for s in child_allocated_function_list):
                 out_str += write_function_object(t, [], [], False, xml_attribute_list)
 
     return out_str

@@ -1731,10 +1731,10 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
                     if cons[0] == prod[0] and cons[1] in new_function_list:
                         new_producer_list.append(prod)
 
-    diagram_str, url_diagram = plantuml_adapter.plantuml_binder(new_function_list,
-                                                                new_consumer_list,
-                                                                new_producer_list,
-                                                                {}, None)
+    diagram_str, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                                      new_consumer_list,
+                                                                      new_producer_list,
+                                                                      {}, None)
 
     print("Function Diagram for " + fun_elem_str + " generated")
     return url_diagram
@@ -1777,14 +1777,13 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                 if p not in prod:
                     prod.append(p)
 
-    plant_uml_text, url_diagram = plantuml_adapter.plantuml_binder(new_function_list,
-                                                                   cons,
-                                                                   prod,
-                                                                   {},
-                                                                   xml_data_list,
-                                                                   xml_attribute_list,
-                                                                   xml_fun_elem_list,
-                                                                   xml_fun_inter_list)
+    plant_uml_text, url_diagram = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
+                                                                                cons,
+                                                                                prod,
+                                                                                xml_data_list,
+                                                                                xml_attribute_list,
+                                                                                xml_fun_elem_list,
+                                                                                xml_fun_inter_list)
     print("Context Diagram for " + fun_elem_str + " generated")
     return url_diagram
 
@@ -1949,10 +1948,10 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
                         if [xml_producer_flow, fun] not in new_producer_list and \
                                 [xml_producer_flow, fun] not in xml_consumer_function_list:
                             new_producer_list.append([xml_producer_flow, fun])
-    plant_uml_text, url_diagram = plantuml_adapter.plantuml_binder(new_function_list,
-                                                                   new_consumer_list,
-                                                                   new_producer_list,
-                                                                   new_parent_dict, None)
+    plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                                         new_consumer_list,
+                                                                         new_producer_list,
+                                                                         new_parent_dict, None)
     spaced_function_list = ", ".join(function_list_str)
     print("Chain Diagram " + str(spaced_function_list) + " generated")
     return url_diagram
@@ -2033,12 +2032,12 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                 if j not in new_function_list:
                     a.child_list.remove(j)
 
-    plant_uml_text, url_diagram = plantuml_adapter.plantuml_binder(new_function_list,
-                                                                   new_consumer_list,
-                                                                   new_producer_list,
-                                                                   new_parent_dict,
-                                                                   None,
-                                                                   xml_attribute_list)
+    plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                                         new_consumer_list,
+                                                                         new_producer_list,
+                                                                         new_parent_dict,
+                                                                         None,
+                                                                         xml_attribute_list)
 
     print("Decomposition Diagram " + diagram_function_str + " generated")
     return url_diagram
@@ -2146,12 +2145,12 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
     if list_out:
         out = new_function_list, new_consumer_list, new_producer_list
     else:
-        plant_uml_text, url_diagram = plantuml_adapter.plantuml_binder(new_function_list,
-                                                                       new_consumer_list,
-                                                                       new_producer_list,
-                                                                       new_parent_dict,
-                                                                       xml_data_list,
-                                                                       xml_attribute_list)
+        plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                                             new_consumer_list,
+                                                                             new_producer_list,
+                                                                             new_parent_dict,
+                                                                             xml_data_list,
+                                                                             xml_attribute_list)
 
         out = url_diagram
         print("Context Diagram " + diagram_function_str + " generated")
