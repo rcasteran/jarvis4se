@@ -209,7 +209,7 @@ def test_functional_interface_input(capsys):
                 "Fun_inter is a functional interface\n",
                 "Color is an attribute\n",
                 "The alias for Fun_inter is FI\n",
-                "Data A is allocated to functional interface Fun_inter\n",
+                "Data A has no producer(s) nor consumer(s), not added\n",
                 "The type of Fun_inter is a_type\n",
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]

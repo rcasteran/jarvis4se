@@ -402,10 +402,20 @@ def test_functional_interface_within_xml():
     with functional_interface_within_xml
     Color is an attribute
     A is a data
+    F1 is a function
+    F2 is a function
+    Fun_elem_1 is a functional element
+    Fun_elem_2 is a functional element
+    F1 produces A
+    F2 consumes A
+    Fun_elem_1 allocates F1
+    Fun_elem_2 allocates F2
     Fun_inter is a functional interface.
     The type of Fun_inter is a_type
     The alias of Fun_inter is FI
     The Color of Fun_inter is pink
+    Fun_elem_1 exposes Fun_inter
+    Fun_elem_2 exposes Fun_inter
     Fun_inter allocates A.
     """
     ip = get_ipython()
@@ -414,10 +424,20 @@ def test_functional_interface_within_xml():
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Color is an attribute\n"
                     "A is a data\n"
+                    "F1 is a function\n"
+                    "F2 is a function\n"
+                    "Fun_elem_1 is a functional element\n"
+                    "Fun_elem_2 is a functional element\n"
+                    "F1 produces A\n"
+                    "F2 consumes A\n"
+                    "Fun_elem_1 allocates F1\n"
+                    "Fun_elem_2 allocates F2\n"
                     "Fun_inter is a functional interface.\n"
                     "The type of Fun_inter is a_type\n"
                     "The alias of Fun_inter is FI\n"
                     "The Color of Fun_inter is pink\n"
+                    "Fun_elem_1 exposes Fun_inter\n"
+                    "Fun_elem_2 exposes Fun_inter\n"
                     "Fun_inter allocates A.\n")
 
     data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
