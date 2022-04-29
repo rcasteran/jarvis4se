@@ -449,3 +449,73 @@ def test_fun_elem_context_interface_not_exposed(mocker):
     path = Path(fname)
     if path:
         os.remove(path)
+
+
+def test_fun_elem_context_interface_with_child(mocker):
+    """ See issue #44, Notebook equivalent:
+    %%jarvis
+    with fun_elem_context_interface_with_child
+    F is a function
+    F1 is a function
+    a is a data
+    F produces a
+    F1 consumes a
+    E is a functional element
+    E1 is a functional element
+    E allocates F
+    E1 allocates F1
+    I_E_E1 is a functional interface
+    E exposes I_E_E1
+    E1 exposes I_E_E1
+    I_E_E1 allocates a
+
+    E11 is a functional element
+    E11 composes E
+    E11 allocates F
+    E11 exposes I_E_E1
+
+    show context E
+     """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
+    ip = get_ipython()
+    my_magic = jarvis.MyMagics(ip)
+    file_name = "fun_elem_context_interface_with_child"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F is a function\n"
+                    "F1 is a function\n"
+                    "a is a data\n"
+                    "F produces a\n"
+                    "F1 consumes a\n"
+                    "E is a functional element\n"
+                    "E1 is a functional element\n"
+                    "E allocates F\n"
+                    "E1 allocates F1\n"
+                    "I_E_E1 is a functional interface\n"
+                    "E exposes I_E_E1\n"
+                    "E1 exposes I_E_E1\n"
+                    "I_E_E1 allocates a\n"
+                    "\n"
+                    "E11 is a functional element\n"
+                    "E11 composes E\n"
+                    "E11 allocates F\n"
+                    "E11 exposes I_E_E1\n"
+                    "\n"
+                    "show context E\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+    expected = ['component "E" as e <<unknown>>{\n',
+                'object "F" as f <<unknown>>\n',
+                '}\n',
+                'component "E1" as e1 <<unknown>>{\n',
+                'object "F1" as f1 <<unknown>>\n',
+                '}\n',
+                'e1', ' -- ', 'e ', ': i_e_e1\n']
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
