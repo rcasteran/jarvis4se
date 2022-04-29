@@ -13,7 +13,7 @@ For full depedencies to build and tests, see requirements.txt.
 To install JARVIS4SE, please execute the following command line in your compatible Python environment:
 
 ```
-// pip install jarvis4se
+pip install jarvis4se
 ```
 
 ## PlantUML executable
