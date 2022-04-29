@@ -168,14 +168,14 @@ LOOKUPS = [
     (r"([^\. \.\n]*) is an output of ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_producer(matched_str, **kwargs)),
 
+    (r"(?<= |\n)(.*?) exposes ([^\.\n]*)",
+     lambda matched_str, **kwargs: matched_exposes(matched_str, **kwargs)),
+
     (r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_allocation(reverse(matched_str), **kwargs)),
 
     (r"(?<= |\n)(.*?) allocates ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_allocation(matched_str, **kwargs)),
-
-    (r"(?<= |\n)(.*?) exposes ([^\.\n]*)",
-     lambda matched_str, **kwargs: matched_exposes(matched_str, **kwargs)),
 
     (r"(?<= |\n)delete ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_delete(matched_str, **kwargs)),
@@ -372,6 +372,8 @@ def matched_allocation(allocation_str_list, **kwargs):
                                             kwargs['xml_function_list'],
                                             kwargs['xml_fun_inter_list'],
                                             kwargs['xml_data_list'],
+                                            kwargs['xml_consumer_function_list'],
+                                            kwargs['xml_producer_function_list'],
                                             kwargs['output_xml'])
     return out
 

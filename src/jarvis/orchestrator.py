@@ -2486,7 +2486,8 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
 
 
 def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list, xml_function_list,
-                         xml_fun_inter_list, xml_data_list, output_xml):
+                         xml_fun_inter_list, xml_data_list,
+                         xml_consumer_function_list, xml_producer_function_list, output_xml):
     """
     Check if each string in allocation_str_list are corresponding to an actual object, create new
     [FunctionalElement, allocated State/Function] lists.
@@ -2603,12 +2604,29 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                     if elem[0] == fun_inter.name or elem[0] == fun_inter.alias:
                         for data in xml_data_list:
                             if elem[1] == data.name:
-                                check_allocation = \
+                                check_allocation_fun_inter = \
                                     question_answer.get_allocation_object(data, xml_fun_inter_list)
-                                if check_allocation is None:
-                                    fun_inter.add_allocated_data(data.id)
-                                    fun_inter_allocated_data_list.append([fun_inter, data])
-
+                                if check_allocation_fun_inter is None:
+                                    check_fe = check_fun_elem_data_consumption(
+                                        data, fun_inter,
+                                        xml_fun_elem_list,
+                                        xml_function_list,
+                                        xml_consumer_function_list,
+                                        xml_producer_function_list)
+                                    if all(i for i in check_fe):
+                                        fun_inter_allocated_data_list.append([fun_inter, data])
+                                        fun_inter.add_allocated_data(data.id)
+                                    elif True in check_fe:
+                                        fun_inter.add_allocated_data(data.id)
+                                        if check_fe[0] is True:
+                                            print(f"Data {data.name} has only consumer(s), "
+                                                  f"not added")
+                                        elif check_fe[1] is True:
+                                            print(f"Data {data.name} has only producer(s), "
+                                                  f"not added")
+                                    else:
+                                        print(f"Data {data.name} has no producer(s) nor "
+                                              f"consumer(s), not added")
             else:
                 print(f"Available allocation types are: (State/Function with Functional Element) OR"
                       f" (State with Function) OR (Data with Functional Interface)")
@@ -2618,6 +2636,27 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
     update_list = add_allocation(allocation_lists, output_xml)
 
     return update_list
+
+
+def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_list,
+                                    xml_consumer_function_list, xml_producer_function_list,):
+    fun_elem_exposes = set()
+    for fun_elem in fun_elem_list:
+        if any(a == fun_inter.id for a in fun_elem.exposed_interface_list):
+            fun_elem_exposes.add(fun_elem)
+
+    cons_list = False
+    prod_list = False
+    for function in function_list:
+        for fun_elem in fun_elem_exposes:
+            if any(a == function.id for a in fun_elem.allocated_function_list):
+                fun_data = [data.name, function]
+                if any(a == fun_data for a in xml_consumer_function_list):
+                    cons_list = True
+                elif any(a == fun_data for a in xml_producer_function_list):
+                    prod_list = True
+
+    return [cons_list, prod_list]
 
 
 def add_allocation(allocation_lists, output_xml):
