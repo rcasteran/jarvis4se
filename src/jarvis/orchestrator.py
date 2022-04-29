@@ -2619,13 +2619,13 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                                         fun_inter.add_allocated_data(data.id)
                                         if check_fe[0] is True:
                                             print(f"Data {data.name} has only consumer(s), "
-                                                  f"not added")
+                                                  f"not added to {fun_inter.name}")
                                         elif check_fe[1] is True:
                                             print(f"Data {data.name} has only producer(s), "
-                                                  f"not added")
+                                                  f"not added to {fun_inter.name}")
                                     else:
                                         print(f"Data {data.name} has no producer(s) nor "
-                                              f"consumer(s), not added")
+                                              f"consumer(s), not added to {fun_inter.name}")
             else:
                 print(f"Available allocation types are: (State/Function with Functional Element) OR"
                       f" (State with Function) OR (Data with Functional Interface)")
