@@ -205,21 +205,13 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     return plantuml_text, diagram_url
 
 
-def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
+def get_fun_elem_context_diagram_base(function_list, consumer_function_list, producer_function_list,
                                  data_list, xml_attribute_list, fun_elem_list, fun_inter_list):
 
     plantuml_text = ""
     interface_list = None
 
     if fun_inter_list:
-        kwargs = {
-            'xml_function_list': function_list,
-            'xml_data_list': data_list,
-            'xml_consumer_function_list': consumer_function_list,
-            'xml_producer_function_list': producer_function_list,
-            'xml_fun_elem_list': fun_elem_list,
-            'xml_fun_inter_list': fun_inter_list,
-        }
         unmerged_out_list = get_output_flows(consumer_function_list, producer_function_list)
         out_interface_list, output_flow_list = get_interface_list(fun_inter_list,
                                                                   data_list,
@@ -276,6 +268,46 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
 
     diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
 
+    return plantuml_text, diagram_url
+
+
+def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
+                                 data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
+                                 fun_elem_inter_list):
+
+    plantuml_text = ""
+    interface_list = None
+
+    # Filter output flows
+    output_flow_list = get_output_flows(consumer_function_list, producer_function_list,
+                                        concatenate=True)
+    # Filter input flows
+    input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
+                                      concatenate=True)
+    # Filter consumers and producers list in order to create data flow
+    data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
+                                         {}, concatenate=True)
+
+    for fun_elem in fun_elem_list:
+        plantuml_text += MakePlantUml.create_component(fun_elem)
+        for f in function_list:
+            if f.id in fun_elem.allocated_function_list:
+                plantuml_text += write_function_object(f, input_flow_list,
+                                                       output_flow_list, False,
+                                                       xml_attribute_list)
+        plantuml_text += MakePlantUml.close_component()
+        plantuml_text += MakePlantUml.create_component_attribute(fun_elem,
+                                                                 xml_attribute_list)
+
+    plantuml_text += MakePlantUml.create_input_flow(input_flow_list)
+    plantuml_text += MakePlantUml.create_output_flow(output_flow_list)
+    plantuml_text += MakePlantUml.create_data_flow(data_flow_list)
+
+    if fun_elem_inter_list:
+        plantuml_text += MakePlantUml.create_interface(fun_elem_inter_list)
+
+    diagram_url = MakePlantUml.get_url_from_local(plantuml_text)
+    print(plantuml_text)
     return plantuml_text, diagram_url
 
 

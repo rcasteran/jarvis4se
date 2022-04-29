@@ -1318,7 +1318,9 @@ def case_context_diagram(**kwargs):
                                          kwargs['xml_data_list'])
         return filename
     else:
-        print(f"Jarvis does not know the function {kwargs['diagram_object_str']}")
+        print(f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
+              f"{kwargs['diagram_object_str']} is not a valid "
+              f"Function/State/Functional Element name/alias")
         return
 
 
@@ -1746,16 +1748,24 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     allocated_function_id_list = set()
     allocated_function_list = set()
     new_function_list = set()
+    fun_elem_list = set()
+    interface_list = set()
+    fun_elem_inter_list = []
     cons = []
     prod = []
-    for fun_elem in xml_fun_elem_list:
-        if fun_elem_str in (fun_elem.name, fun_elem.alias):
-            if not fun_elem.allocated_function_list:
-                print(f"No function allocated to {fun_elem.name} (no display)")
-                return
-            else:
-                for s in fun_elem.allocated_function_list:
-                    allocated_function_id_list.add(s)
+
+    main_fun_elem = question_answer.check_get_object(fun_elem_str,
+                                                     **{'xml_fun_elem_list': xml_fun_elem_list})
+    if not main_fun_elem:
+        return
+
+    # main_fun_elem.child_list.clear()
+    # main_fun_elem.parent = None
+    fun_elem_list.add(main_fun_elem)
+    xml_fun_elem_list.remove(main_fun_elem)
+    # Get allocated function to main_fun_elem
+    for alloc_fun in main_fun_elem.allocated_function_list:
+        allocated_function_id_list.add(alloc_fun)
 
     for function_id in allocated_function_id_list:
         for fun in xml_function_list:
@@ -1777,15 +1787,63 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                 if p not in prod:
                     prod.append(p)
 
+    # Get exposed interfaces of fun_elem
+    for interface in xml_fun_inter_list:
+        if any(i == interface.id for i in main_fun_elem.exposed_interface_list):
+            interface_list.add(interface)
+
+    # Get fun_elem pair for fun_inter
+    for fun_inter in interface_list:
+        for fun_elem in xml_fun_elem_list:
+            if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
+                if get_last_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
+                        check_not_family(main_fun_elem, fun_elem):
+                    fun_elem_list.add(fun_elem)
+                    if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
+                        fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
+
+    for fun in new_function_list:
+        for elem in xml_fun_elem_list:
+            if any(i == fun.id for i in elem.exposed_interface_list) and elem not in fun_elem_list:
+                fun_elem_list.add(elem)
+
+    #for fun_elem_inter in fun_elem_inter_list:
+        #for fun in new_function_list:
+            #if fun
     plant_uml_text, url_diagram = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                                 cons,
                                                                                 prod,
                                                                                 xml_data_list,
                                                                                 xml_attribute_list,
-                                                                                xml_fun_elem_list,
-                                                                                xml_fun_inter_list)
+                                                                                fun_elem_list,
+                                                                                interface_list,
+                                                                                fun_elem_inter_list)
     print("Context Diagram for " + fun_elem_str + " generated")
     return url_diagram
+
+
+def get_last_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
+    """Retruns True if it's last fun_elem exposing fun_inter"""
+    check = False
+    if not fun_elem.child_list:
+        check = True
+        return check
+    else:
+        for child in fun_elem.child_list:
+            if any(s == fun_inter.id for s in child.exposed_interface_list):
+                check = False
+                return check
+            else:
+                get_last_fun_elem_exposing_fun_inter(fun_inter, child)
+        return check
+
+
+def check_not_family(object_a, object_b):
+    """Returns True if object_a and object_b are not in the same family"""
+    if not check_parentality(object_a, object_b) and not check_parentality(object_b, object_a):
+        return True
+    else:
+        return False
 
 
 def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_list,
