@@ -2680,7 +2680,6 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                                         fun_inter_allocated_data_list.append([fun_inter, data])
                                         fun_inter.add_allocated_data(data.id)
                                     elif True in check_fe:
-                                        fun_inter.add_allocated_data(data.id)
                                         if check_fe[0] is True:
                                             print(f"Data {data.name} has only consumer(s), "
                                                   f"not added to {fun_inter.name}")
