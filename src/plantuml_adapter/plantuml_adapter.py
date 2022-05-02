@@ -98,7 +98,7 @@ def count_composed_component(function, count):
             count (int) : Number of component
     """
     for elem in function.child_list:
-        if len(elem.child_list) > 0:
+        if elem.child_list:
             count += 1
             count_composed_component(elem, count)
             continue
