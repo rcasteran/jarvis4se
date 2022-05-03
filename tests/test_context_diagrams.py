@@ -451,6 +451,7 @@ def test_fun_elem_context_interface_not_exposed(mocker):
         os.remove(path)
 
 
+# TODO: Add childs to external fun_elem or create new test
 def test_fun_elem_context_interface_with_child(mocker):
     """ See issue #44, Notebook equivalent:
     %%jarvis
