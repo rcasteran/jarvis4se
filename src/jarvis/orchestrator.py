@@ -1381,9 +1381,25 @@ def case_decomposition_diagram(**kwargs):
     """Cases for decompostion diagrams"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
-    if kwargs['diagram_object_str'] in xml_function_name_list:
 
-        function_list = get_object_list(kwargs['diagram_object_str'],
+    if ' at level ' in kwargs['diagram_object_str']:
+        splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
+        diagram_object_str = splitted_str[0]
+        try:
+            diagram_level = int(splitted_str[1])
+            if diagram_level == 0:
+                print("Invalid level, please choose a valid level >= 1")
+                return
+        except ValueError as e:
+            print("Invalid level, please choose a valid level >= 1")
+            return
+    else:
+        diagram_object_str = kwargs['diagram_object_str']
+        diagram_level = None
+
+    if diagram_object_str in xml_function_name_list:
+
+        function_list = get_object_list(diagram_object_str,
                                         kwargs['xml_function_list'],
                                         kwargs['xml_chain_list'])
         consumer_list, producer_list = get_cons_prod_from_chain_data(
@@ -1393,17 +1409,18 @@ def case_decomposition_diagram(**kwargs):
             kwargs['xml_producer_function_list'],
             function_list)
 
-        filename = show_function_decomposition(kwargs['diagram_object_str'],
+        filename = show_function_decomposition(diagram_object_str,
                                                function_list,
                                                consumer_list,
                                                producer_list,
-                                               kwargs['xml_attribute_list'])
+                                               kwargs['xml_attribute_list'],
+                                               diagram_level)
         return filename
-    elif kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        function_list = get_object_list(kwargs['diagram_object_str'],
+    elif diagram_object_str in xml_fun_elem_name_list:
+        function_list = get_object_list(diagram_object_str,
                                         kwargs['xml_function_list'],
                                         kwargs['xml_chain_list'])
-        fun_elem_list = get_object_list(kwargs['diagram_object_str'],
+        fun_elem_list = get_object_list(diagram_object_str,
                                         kwargs['xml_fun_elem_list'],
                                         kwargs['xml_chain_list'])
         consumer_list, producer_list = get_cons_prod_from_chain_data(
@@ -1414,7 +1431,7 @@ def case_decomposition_diagram(**kwargs):
             function_list,
             fun_elem_list)
 
-        filename = show_fun_elem_decomposition(kwargs['diagram_object_str'],
+        filename = show_fun_elem_decomposition(diagram_object_str,
                                                function_list,
                                                consumer_list,
                                                producer_list,
@@ -1424,7 +1441,7 @@ def case_decomposition_diagram(**kwargs):
                                                kwargs['xml_fun_inter_list'])
         return filename
     else:
-        print(f"Jarvis does not know the object {kwargs['diagram_object_str']}"
+        print(f"Jarvis does not know the object {diagram_object_str}"
               f"(i.e. it is not a function, nor a functional element)")
         return
 
@@ -1796,7 +1813,7 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     for fun_inter in interface_list:
         for fun_elem in xml_fun_elem_list:
             if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
-                if get_last_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
+                if get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
                         check_not_family(main_fun_elem, fun_elem):
                     fun_elem_list.add(fun_elem)
                     if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
@@ -1831,19 +1848,16 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     return url_diagram
 
 
-def get_last_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
-    """Retruns True if it's last fun_elem exposing fun_inter"""
+def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
+    """Retruns True if it's highest fun_elem exposing fun_inter"""
     check = False
-    if not fun_elem.child_list:
+    if not fun_elem.parent:
         check = True
         return check
     else:
-        for child in fun_elem.child_list:
-            if any(s == fun_inter.id for s in child.exposed_interface_list):
-                check = False
-                return check
-            else:
-                get_last_fun_elem_exposing_fun_inter(fun_inter, child)
+        if not any(a == fun_inter.id for a in fun_elem.parent.exposed_interface_list):
+            check = True
+            return check
         return check
 
 
@@ -2024,80 +2038,50 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
     return url_diagram
 
 
-# TODO: Clean/organize this method by creating sub
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_attribute_list):
-    main_function_list = set()
-    ext_prod_fun_list = set()
-    ext_cons_fun_list = set()
-    ext_producer_list = []
-    ext_consumer_list = []
-    main_parent_dict = {}
-    ext_prod_parent_dict = {}
-    ext_cons_parent_dict = {}
-    main_parent = None
-    main_fun = None
-    for fun in xml_function_list:
-        if diagram_function_str == fun.name or diagram_function_str == fun.alias:
-            main_parent = fun.parent
-            main_fun = fun
-            main_function_list, main_parent_dict = get_children(fun)
+                                xml_producer_function_list, xml_attribute_list, diagram_level=None):
+
+    main_fun = question_answer.check_get_object(diagram_function_str,
+                                                **{'xml_function_list': xml_function_list})
+    if not main_fun:
+        return
+    main_parent = main_fun.parent
+    if diagram_level:
+        full_fun_list, full_parent_dict = get_children(main_fun)
+        main_function_list, main_parent_dict = get_children(main_fun, level=diagram_level)
+
+        for k in full_fun_list.symmetric_difference(main_function_list):
+            for cons in xml_consumer_function_list.copy():
+                if k in cons:
+                    xml_consumer_function_list.remove(cons)
+
+            for prod in xml_producer_function_list.copy():
+                if k in prod:
+                    xml_producer_function_list.remove(prod)
+    else:
+        main_function_list, main_parent_dict = get_children(main_fun)
 
     main_consumer_list = check_get_child_flows(main_function_list, xml_consumer_function_list)
     main_producer_list = check_get_child_flows(main_function_list, xml_producer_function_list)
 
-    for p, m in main_consumer_list:
-        for xml_prod_flow, xml_prod in xml_producer_function_list:
-            if p == xml_prod_flow and xml_prod not in main_function_list \
-                    and xml_prod != main_parent and check_parentality(xml_prod, main_fun) is False:
-                ext_prod_fun_list.add(xml_prod)
-                if not xml_prod.child_list:
-                    if [xml_prod_flow, xml_prod] not in ext_producer_list:
-                        ext_producer_list.append([xml_prod_flow, xml_prod])
-                else:
-                    temp = []
-                    for k in xml_prod.child_list:
-                        temp.append([xml_prod_flow, k])
-                    if not any(t in temp for t in xml_producer_function_list):
-                        if [xml_prod_flow, xml_prod] not in ext_producer_list:
-                            ext_producer_list.append([xml_prod_flow, xml_prod])
+    ext_prod_fun_list, ext_producer_list, ext_prod_parent_dict = get_external_flow_with_level(
+        main_consumer_list, main_function_list, main_fun, xml_producer_function_list, diagram_level)
 
-    for k in ext_prod_fun_list:
-        if k.parent in ext_prod_fun_list:
-            ext_prod_parent_dict[k.id] = k.parent.id
-
-    for a, z in main_producer_list:
-        for xml_cons_flow, xml_cons in xml_consumer_function_list:
-            if a == xml_cons_flow and xml_cons not in main_function_list \
-                    and xml_cons != main_parent and check_parentality(xml_cons, main_fun) is False:
-                ext_cons_fun_list.add(xml_cons)
-                if not xml_cons.child_list:
-                    if [xml_cons_flow, xml_cons] not in ext_consumer_list:
-                        ext_consumer_list.append([xml_cons_flow, xml_cons])
-                else:
-                    temp = []
-                    for k in xml_cons.child_list:
-                        temp.append([xml_cons_flow, k])
-                    if not any(t in temp for t in xml_consumer_function_list):
-                        if [xml_cons_flow, xml_cons] not in ext_consumer_list:
-                            ext_consumer_list.append([xml_cons_flow, xml_cons])
-
-    for e in ext_cons_fun_list:
-        if e.parent in ext_cons_fun_list:
-            ext_cons_parent_dict[e.id] = e.parent.id
+    ext_cons_fun_list, ext_consumer_list, ext_cons_parent_dict = get_external_flow_with_level(
+        main_producer_list, main_function_list, main_fun, xml_consumer_function_list, diagram_level)
 
     new_function_list = main_function_list.union(ext_prod_fun_list).union(ext_cons_fun_list)
     new_consumer_list = main_consumer_list + ext_consumer_list
     new_producer_list = main_producer_list + ext_producer_list
     new_parent_dict = {**main_parent_dict, **ext_cons_parent_dict, **ext_prod_parent_dict}
 
-    for a in new_function_list:
-        if main_parent and a.parent is main_parent:
-            a.parent = None
-        if a.child_list:
-            for j in a.child_list.copy():
+    for function in new_function_list:
+        if main_parent and function.parent is main_parent:
+            function.parent = None
+        if function.child_list:
+            for j in function.child_list.copy():
                 if j not in new_function_list:
-                    a.child_list.remove(j)
+                    function.child_list.remove(j)
 
     plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
                                                                          new_consumer_list,
@@ -2110,21 +2094,105 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
     return url_diagram
 
 
-def get_children(element, function_list=None, parent_dict=None):
+def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, xml_flow_list,
+                                 level):
+    ext_flow_fun_list = set()
+    ext_flow_list = []
+    ext_flow_parent_dict = {}
+    for flow, function in main_flow_list:
+        for xml_flow, xml_fun in xml_flow_list:
+            if flow == xml_flow and xml_fun.parent == main_fun.parent:
+                ext_flow_fun_list.add(xml_fun)
+            elif flow == xml_flow and check_not_family(main_fun, xml_fun) and \
+                    xml_fun.parent is None:
+                ext_flow_fun_list.add(xml_fun)
+            elif flow == xml_flow and not check_parentality(xml_fun, main_fun) and \
+                    [xml_flow, xml_fun.parent] not in xml_flow_list:
+                ext_flow_fun_list.add(xml_fun)
+
+    for fun in ext_flow_fun_list.copy():
+        if fun.child_list:
+            function_list_dict = get_children(fun, level=level)
+            ext_flow_fun_list.update(function_list_dict[0])
+            ext_flow_parent_dict.update(function_list_dict[1])
+
+    for flow, function in main_flow_list:
+        for xml_flow, xml_fun in xml_flow_list:
+            if flow == xml_flow and xml_fun in ext_flow_fun_list and \
+                    xml_fun not in main_function_list:
+                # ext_flow_list.append([xml_flow, xml_fun])
+                if not xml_fun.child_list:
+                    if [xml_flow, xml_fun] not in ext_flow_list:
+                        ext_flow_list.append([xml_flow, xml_fun])
+                else:
+                    temp = []
+                    for k in xml_fun.child_list:
+                        temp.append([xml_flow, k])
+                    if not any(t in temp for t in xml_flow_list):
+                        if [xml_flow, xml_fun] not in ext_flow_list:
+                            ext_flow_list.append([xml_flow, xml_fun])
+
+    for fun in ext_flow_fun_list.copy():
+        if not any(fun in s for s in ext_flow_list) and not fun.child_list:
+            ext_flow_fun_list.remove(fun)
+
+    return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
+
+
+# TODO: Delete this method once get_external_flow_with_level() has been validated
+def get_external_function_flow(main_flow_list, main_function_list, main_fun, main_parent,
+                               xml_flow_list):
+    ext_flow_fun_list = set()
+    ext_flow_list = []
+    ext_flow_parent_dict = {}
+    for flow, function in main_flow_list:
+        for xml_prod_flow, xml_prod in xml_flow_list:
+            if flow == xml_prod_flow and xml_prod not in main_function_list \
+                    and xml_prod != main_parent and check_parentality(xml_prod, main_fun) is False:
+                ext_flow_fun_list.add(xml_prod)
+                if not xml_prod.child_list:
+                    if [xml_prod_flow, xml_prod] not in ext_flow_list:
+                        ext_flow_list.append([xml_prod_flow, xml_prod])
+                else:
+                    temp = []
+                    for k in xml_prod.child_list:
+                        temp.append([xml_prod_flow, k])
+                    if not any(t in temp for t in xml_flow_list):
+                        if [xml_prod_flow, xml_prod] not in ext_flow_list:
+                            ext_flow_list.append([xml_prod_flow, xml_prod])
+
+    for k in ext_flow_fun_list:
+        if k.parent in ext_flow_fun_list:
+            ext_flow_parent_dict[k.id] = k.parent.id
+
+    return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
+
+
+def get_children(element, function_list=None, parent_dict=None, count=None, level=None):
+    """Get children recursively, adds them to function_list and create parend_dict"""
     if function_list is None:
         function_list = set()
     if parent_dict is None:
         parent_dict = {}
+    if not count:
+        count = 0
 
     function_list.add(element)
     if element.child_list:
+        count += 1
+        if level:
+            if (count - 1) == level:
+                element.child_list.clear()
+                return function_list, parent_dict
         for child in element.child_list:
             parent_dict[child.id] = element.id
-            get_children(child, function_list, parent_dict)
+            get_children(child, function_list, parent_dict, count, level)
+
     return function_list, parent_dict
 
 
 def check_get_child_flows(function_list, xml_flow_list, new_flow_list=None):
+    """Get flow_list associated with function_list and xml_flow_list"""
     if new_flow_list is None:
         new_flow_list = []
     for f in function_list:
