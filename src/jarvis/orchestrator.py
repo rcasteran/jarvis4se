@@ -2133,7 +2133,12 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
                             ext_flow_list.append([xml_flow, xml_fun])
 
     for fun in ext_flow_fun_list.copy():
-        if not any(fun in s for s in ext_flow_list) and not fun.child_list:
+        if not any(a == fun for a in [i[1] for i in ext_flow_list]) and not fun.child_list:
+            ext_flow_fun_list.remove(fun)
+    for fun in ext_flow_fun_list.copy():
+        if not any(a == fun for a in [i[1] for i in ext_flow_list]) and \
+                not any(i in fun.child_list for i in ext_flow_fun_list) and \
+                fun != main_fun:
             ext_flow_fun_list.remove(fun)
 
     return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
