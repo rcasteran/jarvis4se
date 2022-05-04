@@ -293,6 +293,10 @@ def get_allocation_object(wanted_object, object_list):
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
                 allocation_list.add(fun_elem)
+    elif object_type == 'Functional element':
+        for function in object_list:
+            if any(s == function.id for s in wanted_object.allocated_function_list):
+                allocation_list.add(function)
     if allocation_list:
         return allocation_list
 
