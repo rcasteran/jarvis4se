@@ -311,8 +311,11 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
             "output": switch_out,
             "child": switch_child,
             "function": switch_state_function,
+            "transition": switch_state_transition,
         }
         if object_type == "state" and type_list_str in ("input", "output"):
+            return case_no_list(wanted_object, object_type, **kwargs)
+        elif object_type != "state" and type_list_str in ("function", "transition"):
             return case_no_list(wanted_object, object_type, **kwargs)
         else:
             type_list = switch_type_list.get(type_list_str, case_no_list)
@@ -373,18 +376,48 @@ def switch_child(wanted_object, object_type, **kwargs):
 
 def switch_state_function(wanted_object, object_type, **kwargs):
     """Case 'list function State' """
-    list_name = f"Function list for {wanted_object.name}:"
-    child_list = []
+
+    function_list = []
     for allocated_fun in wanted_object.allocated_function_list:
         for fun in kwargs['xml_function_list']:
             if fun.id == allocated_fun:
-                child_list.append((fun.name, "Function allocation"))
+                function_list.append((fun.name, "Function allocation"))
 
-    if child_list:
-        child_list = list(tuple(sorted(child_list)))
-        child_list.insert(0, list_name)
+    if function_list:
+        list_name = f"Function list for {wanted_object.name}:"
+        function_list = list(tuple(sorted(function_list)))
+        function_list.insert(0, list_name)
 
-        return child_list
+        return function_list
+
+
+def switch_state_transition(wanted_object, object_type, **kwargs):
+    transition_list = []
+    for transition in kwargs['xml_transition_list']:
+        if wanted_object.id == transition.source:
+            for state in kwargs['xml_state_list']:
+                if transition.destination == state.id:
+                    transition_list.append({
+                        'Transition name': transition.name,
+                        'Source state': wanted_object.name,
+                        'Destination state': state.name,
+                        'Condition(s)': transition.condition_list
+                    })
+        elif wanted_object.id == transition.destination:
+            for state in kwargs['xml_state_list']:
+                if transition.source == state.id:
+                    transition_list.append({
+                        'Transition name': transition.name,
+                        'Source state': state.name,
+                        'Destination state': wanted_object.name,
+                        'Condition(s)': transition.condition_list
+                    })
+
+    if transition_list:
+        list_name = f"Transition list for {wanted_object.name}:"
+        transition_list.insert(0, list_name)
+
+        return transition_list
 
 
 def switch_data(wanted_object, object_type, **kwargs):
@@ -407,6 +440,7 @@ def case_no_list(wanted_object, object_type, **kwargs):
            f"of type '{object_type.capitalize()}', possible lists are:\n" \
            f"- List child [Function/State/Functional element]\n" \
            f"- List input/output [Function/Functional element]\n" \
+           f"- List function/transition [State]\n" \
            f"- List data [Functional interface]"
 
 
