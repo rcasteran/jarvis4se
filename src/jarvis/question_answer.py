@@ -310,6 +310,7 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
             "input": switch_in,
             "output": switch_out,
             "child": switch_child,
+            "function": switch_state_function,
         }
         if object_type == "state" and type_list_str in ("input", "output"):
             return case_no_list(wanted_object, object_type, **kwargs)
@@ -352,11 +353,6 @@ def switch_child(wanted_object, object_type, **kwargs):
     elif object_type == "state":
         child_list = list(get_child_name_list(wanted_object,
                                               kwargs['xml_state_list']))
-        for allocated_fun in wanted_object.allocated_function_list:
-            for fun in kwargs['xml_function_list']:
-                if fun.id == allocated_fun:
-                    child_list.append((fun.name, "Function allocation"))
-
     elif object_type == "Functional element":
         child_list = list(get_child_name_list(wanted_object,
                                               kwargs['xml_fun_elem_list']))
@@ -368,11 +364,27 @@ def switch_child(wanted_object, object_type, **kwargs):
             for state in kwargs['xml_state_list']:
                 if state.id == allocated_state:
                     child_list.append((state.name, "State allocation"))
+    if child_list:
+        child_list = list(tuple(sorted(child_list)))
+        child_list.insert(0, list_name)
 
-    child_list = list(tuple(sorted(child_list)))
-    child_list.insert(0, list_name)
+        return child_list
 
-    return child_list
+
+def switch_state_function(wanted_object, object_type, **kwargs):
+    """Case 'list function State' """
+    list_name = f"Function list for {wanted_object.name}:"
+    child_list = []
+    for allocated_fun in wanted_object.allocated_function_list:
+        for fun in kwargs['xml_function_list']:
+            if fun.id == allocated_fun:
+                child_list.append((fun.name, "Function allocation"))
+
+    if child_list:
+        child_list = list(tuple(sorted(child_list)))
+        child_list.insert(0, list_name)
+
+        return child_list
 
 
 def switch_data(wanted_object, object_type, **kwargs):

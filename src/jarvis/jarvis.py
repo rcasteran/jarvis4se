@@ -198,7 +198,7 @@ LOOKUPS = [
     (r"\s([A-Za-z\s].*\?)",
      lambda matched_str, **kwargs: matched_question_mark(matched_str, **kwargs)),
 
-    (r"list (input|output|child|data) ([^\.\n]*)",
+    (r"list (input|output|child|data|function) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
 
     (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
@@ -469,7 +469,7 @@ def matched_list(object_str, **kwargs):
     out = question_answer.get_object_list(object_str, **kwargs)
     if out:
         for i in out:
-            if "Child" in i[0]:
+            if "Child" in i[0] or "Function" in i[0]:
                 title = i.pop(0)
                 df = pd.DataFrame(i, columns=["Object's name", "Relationship's type"])
                 df = df.T
