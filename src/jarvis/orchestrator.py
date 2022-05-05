@@ -1592,17 +1592,16 @@ def filter_show_command(diagram_name_str, **kwargs):
 def check_level_0_allocated_child(fun_elem, function):
     if fun_elem.child_list == set():
         return True
-    elif function.child_list == set() and function.parent.id not in fun_elem.allocated_function_list:
+    elif function.child_list == set() and \
+            function.parent.id not in fun_elem.allocated_function_list:
         return True
     else:
         allocated_function_id_list = []
-        child_id_list = []
         for fun_elem_child in fun_elem.child_list:
             for elem in fun_elem_child.allocated_function_list:
                 allocated_function_id_list.append(elem)
         child_list, child_dict = get_children(function)
-        for elem in child_list:
-            child_id_list.append(elem.id)
+        child_id_list = [elem.id for elem in child_list]
         if any(t in child_id_list for t in allocated_function_id_list) or not child_id_list:
             return False
         else:
@@ -1638,11 +1637,19 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
     external_function_list = set()
     new_producer_list = []
     new_consumer_list = []
-    for fun_elem in xml_fun_elem_list:
-        if fun_elem_str in (fun_elem.name, fun_elem.alias):
-            fun_elem.parent = None
-            main_fun_elem = fun_elem
-            # main_fun_elem_list, main_parent_dict = get_children(fun_elem)
+
+    main_fun_elem = question_answer.check_get_object(fun_elem_str,
+                                                     **{'xml_fun_elem_list': xml_fun_elem_list})
+    if not main_fun_elem:
+        return
+    main_fun_elem.parent = None
+
+    if diagram_level:
+        # main_fun_elem_list, main_parent_dict = get_children(main_fun_elem, level=diagram_level)
+        # for l in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
+        #     if not check_not_family(l, main_fun_elem):
+        #         xml_fun_elem_list.remove(l)
+        pass
 
     allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 

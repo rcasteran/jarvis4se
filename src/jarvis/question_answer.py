@@ -312,10 +312,13 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
             "child": switch_child,
             "function": switch_state_function,
             "transition": switch_state_transition,
+            "interface": switch_fun_elem_interface,
         }
         if object_type == "state" and type_list_str in ("input", "output"):
             return case_no_list(wanted_object, object_type, **kwargs)
         elif object_type != "state" and type_list_str in ("function", "transition"):
+            return case_no_list(wanted_object, object_type, **kwargs)
+        elif object_type != "Functional element" and type_list_str == "interface":
             return case_no_list(wanted_object, object_type, **kwargs)
         else:
             type_list = switch_type_list.get(type_list_str, case_no_list)
@@ -348,7 +351,6 @@ def switch_out(wanted_object, object_type, **kwargs):
 
 def switch_child(wanted_object, object_type, **kwargs):
     """Case 'list child Function/State/Functional ELement' """
-    list_name = f"Child list for {wanted_object.name}:"
     child_list = None
     if object_type == "function":
         child_list = list(get_child_name_list(wanted_object,
@@ -368,6 +370,7 @@ def switch_child(wanted_object, object_type, **kwargs):
                 if state.id == allocated_state:
                     child_list.append((state.name, "State allocation"))
     if child_list:
+        list_name = f"Child list for {wanted_object.name}:"
         child_list = list(tuple(sorted(child_list)))
         child_list.insert(0, list_name)
 
@@ -420,6 +423,42 @@ def switch_state_transition(wanted_object, object_type, **kwargs):
         return transition_list
 
 
+def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
+    """Case for 'list interface Functional element'"""
+    fun_inter_list = get_objects_from_id_list([i for i in wanted_object.exposed_interface_list],
+                                              kwargs['xml_fun_inter_list'])
+    main_fun_elem_child_list, _ = orchestrator.get_children(wanted_object)
+    if not fun_inter_list:
+        return f"Not any exposed interface for {wanted_object.name}"
+    else:
+        parent_fun_elem = set()
+        for interface in fun_inter_list:
+            for fun_elem in kwargs['xml_fun_elem_list']:
+                if fun_elem not in main_fun_elem_child_list and \
+                        interface.id in fun_elem.exposed_interface_list:
+                    parent_fun_elem.add((interface, fun_elem))
+
+        interface_list = set()
+        for k in parent_fun_elem:
+            child_list, _ = orchestrator.get_children(k[1])
+            child_list.remove(k[1])
+            if child_list:
+                check = True
+                for p in parent_fun_elem:
+                    if p[0] == k[0] and any(a == p[1] for a in child_list):
+                        check = False
+                        break
+                if check:
+                    interface_list.add((k[0].name, k[1].name))
+            else:
+                interface_list.add((k[0].name, k[1].name))
+        if interface_list:
+            list_name = f"Interface list for {wanted_object.name}:"
+            interface_list = list(tuple(sorted(interface_list)))
+            interface_list.insert(0, list_name)
+            return interface_list
+
+
 def switch_data(wanted_object, object_type, **kwargs):
     """Case for 'list data Functional Interface' """
     data_list = []
@@ -443,6 +482,7 @@ def case_no_list(wanted_object, object_type, **kwargs):
            f"- List child [Function/State/Functional element]\n" \
            f"- List input/output [Function/Functional element]\n" \
            f"- List function/transition [State]\n" \
+           f"- List interface [Functional element]\n" \
            f"- List data [Functional interface]"
 
 
@@ -494,12 +534,10 @@ def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
 
 def check_latest(wanted_object, check_list):
     """Checks and returns latest object = last one decomposed"""
-    if wanted_object.parent is None and not wanted_object.child_list:
+    if not wanted_object.child_list:
         return wanted_object.name
     else:
-        check_child = []
-        for child in wanted_object.child_list:
-            check_child.append(child)
+        check_child = [c for c in wanted_object.child_list]
         if not any(j in check_child for j in check_list):
             return wanted_object.name
 
@@ -532,6 +570,7 @@ def get_object_list(object_str, **kwargs):
     return answer_list
 
 
+# TODO: Merge get_output and get_input()
 def get_input(wanted_object, unmerged=False, **kwargs):
     """
     Gets inputs for object (Function or Functional Element): i.e. what is consumed by wanted object.
@@ -655,3 +694,17 @@ def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_rela
                         output_list.append([elem[0], elem[1].name])
 
     return output_list
+
+
+def get_objects_from_id_list(id_list, object_list):
+    """From a list of id (from same type) returns list of corresponding objects"""
+    if not id_list:
+        return
+    else:
+        output_list = set()
+        for wanted_object in object_list:
+            if wanted_object.id in id_list:
+                output_list.add(wanted_object)
+
+        if output_list:
+            return output_list

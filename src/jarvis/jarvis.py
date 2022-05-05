@@ -198,7 +198,7 @@ LOOKUPS = [
     (r"\s([A-Za-z\s].*\?)",
      lambda matched_str, **kwargs: matched_question_mark(matched_str, **kwargs)),
 
-    (r"list (input|output|child|data|function|transition) ([^\.\n]*)",
+    (r"list (input|output|child|data|function|transition|interface) ([^\.\n]*)",
      lambda matched_str, **kwargs: matched_list(matched_str, **kwargs)),
 
     (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
@@ -509,6 +509,15 @@ def matched_list(object_str, **kwargs):
                 df = df.T
                 for idx in range(first, last):
                     df.iloc[idx] = df.iloc[idx].str.join("\\n")
+                df = df.style\
+                    .set_caption(title)\
+                    .set_properties(**{'white-space': 'nowrap'})
+                df = df.to_html().replace("\\n", "<br>")
+                display(HTML(df))
+            elif "Interface" in i[0]:
+                title = i.pop(0)
+                df = pd.DataFrame(i, columns=["Interface ", "Last connected functional element"])
+                df = df.T
                 df = df.style\
                     .set_caption(title)\
                     .set_properties(**{'white-space': 'nowrap'})
