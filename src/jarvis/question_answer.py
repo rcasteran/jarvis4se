@@ -517,18 +517,20 @@ def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
                 if not cons_last_fun_elem == prod_last_fun_elem:
                     if not any(c == prod[1].name for c in data_dict['Last producer Function(s)']):
                         data_dict['Last producer Function(s)'].append(prod[1].name)
-                    if prod_last_fun_elem is None:
-                        data_dict['Last producer Functional element(s)'].append(
-                            f"'{prod[1].name}' is not allocated")
-                    else:
-                        data_dict['Last producer Functional element(s)'].append(prod_last_fun_elem)
+                        if prod_last_fun_elem is None:
+                            data_dict['Last producer Functional element(s)'].append(
+                                f"'{prod[1].name}' is not allocated")
+                        else:
+                            data_dict['Last producer Functional element(s)'].append(
+                                prod_last_fun_elem)
                     if not any(c == cons[1].name for c in data_dict['Last consumer Function(s)']):
                         data_dict['Last consumer Function(s)'].append(cons[1].name)
-                    if cons_last_fun_elem is None:
-                        data_dict['Last consumer Functional element(s)'].append(
-                            f"'{cons[1].name}' is not allocated")
-                    else:
-                        data_dict['Last consumer Functional element(s)'].append(cons_last_fun_elem)
+                        if cons_last_fun_elem is None:
+                            data_dict['Last consumer Functional element(s)'].append(
+                                f"'{cons[1].name}' is not allocated")
+                        else:
+                            data_dict['Last consumer Functional element(s)'].append(
+                                cons_last_fun_elem)
 
     return data_dict
 
