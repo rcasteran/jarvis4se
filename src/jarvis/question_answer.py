@@ -431,20 +431,21 @@ def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
     if not fun_inter_list:
         return f"Not any exposed interface for {wanted_object.name}"
     else:
-        parent_fun_elem = set()
+        exposing_fun_elem = set()
         for interface in fun_inter_list:
             for fun_elem in kwargs['xml_fun_elem_list']:
                 if fun_elem not in main_fun_elem_child_list and \
-                        interface.id in fun_elem.exposed_interface_list:
-                    parent_fun_elem.add((interface, fun_elem))
+                        interface.id in fun_elem.exposed_interface_list and \
+                        orchestrator.check_not_family(fun_elem, wanted_object):
+                    exposing_fun_elem.add((interface, fun_elem))
 
         interface_list = set()
-        for k in parent_fun_elem:
+        for k in exposing_fun_elem:
             child_list, _ = orchestrator.get_children(k[1])
             child_list.remove(k[1])
             if child_list:
                 check = True
-                for p in parent_fun_elem:
+                for p in exposing_fun_elem:
                     if p[0] == k[0] and any(a == p[1] for a in child_list):
                         check = False
                         break
