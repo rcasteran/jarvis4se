@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 # jarvis4se version
-VERSION = "1.2.2"
+VERSION = "1.2.3"
 
 
 def readme():
