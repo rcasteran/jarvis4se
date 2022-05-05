@@ -447,6 +447,8 @@ def case_no_list(wanted_object, object_type, **kwargs):
 
 
 def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
+    """For a data, find last producer and consumer and if they are allocated to last fun_elem
+    exposing the functional interface asked"""
     data_dict = {'Data': data.name,
                  'Last consumer Function(s)': [],
                  'Last consumer Functional element(s)': [],
