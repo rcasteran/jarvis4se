@@ -423,10 +423,12 @@ def switch_state_transition(wanted_object, object_type, **kwargs):
 def switch_data(wanted_object, object_type, **kwargs):
     """Case for 'list data Functional Interface' """
     data_list = []
+    fun_elem_exposing = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
+    last_fun_elem_exposing = [check_latest(j, fun_elem_exposing) for j in fun_elem_exposing]
     for allocated_id in wanted_object.allocated_data_list:
         for data in kwargs['xml_data_list']:
             if allocated_id == data.id:
-                data_list.append(get_latest_objects(data, **kwargs))
+                data_list.append(get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
 
     if data_list:
         list_name = f"Data list for {wanted_object.name}:"
@@ -444,62 +446,46 @@ def case_no_list(wanted_object, object_type, **kwargs):
            f"- List data [Functional interface]"
 
 
-# TODO: Clean/Split this mess once behavior has been validating
-def get_latest_objects(data, **kwargs):
-    """Get latest decomposed consumer/producer Function and associated Functional element """
+def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
     data_dict = {'Data': data.name,
                  'Last consumer Function(s)': [],
                  'Last consumer Functional element(s)': [],
                  'Last producer Function(s)': [],
                  'Last producer Functional element(s)': []}
-
-    for cons in kwargs['xml_consumer_function_list']:
-        if cons[0] == data.name:
-            if cons[1].parent is None and not cons[1].child_list:
-                data_dict['Last consumer Function(s)'].append(cons[1].name)
-                fun_elem_list = get_allocation_object(cons[1], kwargs['xml_fun_elem_list'])
-                if fun_elem_list:
-                    for fun_elem in fun_elem_list:
-                        last_fun_elem = check_latest(fun_elem, fun_elem_list)
-                        if last_fun_elem:
-                            data_dict['Last consumer Functional element(s)'].append(last_fun_elem)
-            else:
-                check_child = []
-                for child in cons[1].child_list:
-                    check_child.append([data.name, child])
-                if not any(j in check_child for j in kwargs['xml_consumer_function_list']):
-                    data_dict['Last consumer Function(s)'].append(cons[1].name)
-                    fun_elem_list = get_allocation_object(cons[1], kwargs['xml_fun_elem_list'])
-                    if fun_elem_list:
-                        for fun_elem in fun_elem_list:
-                            last_fun_elem = check_latest(fun_elem, fun_elem_list)
-                            if last_fun_elem:
-                                data_dict['Last consumer Functional element(s)'].append(
-                                    last_fun_elem)
-
     for prod in kwargs['xml_producer_function_list']:
-        if prod[0] == data.name:
-            if prod[1].parent is None and not prod[1].child_list:
-                data_dict['Last producer Function(s)'].append(prod[1].name)
-                fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
-                if fun_elem_list:
-                    for fun_elem in fun_elem_list:
-                        last_fun_elem = check_latest(fun_elem, fun_elem_list)
-                        if last_fun_elem:
-                            data_dict['Last producer Functional element(s)'].append(last_fun_elem)
-            else:
-                check_child = []
-                for child in prod[1].child_list:
-                    check_child.append([data.name, child])
-                if not any(j in check_child for j in kwargs['xml_producer_function_list']):
-                    data_dict['Last producer Function(s)'].append(prod[1].name)
-                    fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
-                    if fun_elem_list:
-                        for fun_elem in fun_elem_list:
-                            last_fun_elem = check_latest(fun_elem, fun_elem_list)
-                            if last_fun_elem:
-                                data_dict['Last producer Functional element(s)'].append(
-                                    last_fun_elem)
+        if prod[0] == data.name and \
+                check_latest(prod[1], kwargs['xml_function_list']) == prod[1].name:
+            for cons in kwargs['xml_consumer_function_list']:
+                cons_last_fun_elem = None
+                prod_last_fun_elem = None
+                if cons[0] == prod[0] and \
+                        check_latest(cons[1], kwargs['xml_function_list']) == cons[1].name:
+                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs['xml_fun_elem_list'])
+                    if cons_fun_elem_list:
+                        for fun_elem in cons_fun_elem_list:
+                            if fun_elem.name in last_fun_elem_exposing:
+                                cons_last_fun_elem = fun_elem.name
+                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
+                    if prod_fun_elem_list:
+                        for fun_elem in prod_fun_elem_list:
+                            if fun_elem.name in last_fun_elem_exposing:
+                                prod_last_fun_elem = fun_elem.name
+
+                if not cons_last_fun_elem == prod_last_fun_elem:
+                    if not any(c == prod[1].name for c in data_dict['Last producer Function(s)']):
+                        data_dict['Last producer Function(s)'].append(prod[1].name)
+                    if prod_last_fun_elem is None:
+                        data_dict['Last producer Functional element(s)'].append(
+                            f"'{prod[1].name}' is not allocated")
+                    else:
+                        data_dict['Last producer Functional element(s)'].append(prod_last_fun_elem)
+                    if not any(c == cons[1].name for c in data_dict['Last consumer Function(s)']):
+                        data_dict['Last consumer Function(s)'].append(cons[1].name)
+                    if cons_last_fun_elem is None:
+                        data_dict['Last consumer Functional element(s)'].append(
+                            f"'{cons[1].name}' is not allocated")
+                    else:
+                        data_dict['Last consumer Functional element(s)'].append(cons_last_fun_elem)
 
     return data_dict
 
