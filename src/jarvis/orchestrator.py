@@ -1438,7 +1438,8 @@ def case_decomposition_diagram(**kwargs):
                                                fun_elem_list,
                                                kwargs['xml_attribute_list'],
                                                kwargs['xml_data_list'],
-                                               kwargs['xml_fun_inter_list'])
+                                               kwargs['xml_fun_inter_list'],
+                                               diagram_level)
         return filename
     else:
         print(f"Jarvis does not know the object {diagram_object_str}"
@@ -1631,7 +1632,7 @@ def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
 
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
-                                xml_data_list, xml_fun_inter_list):
+                                xml_data_list, xml_fun_inter_list, diagram_level=None):
     main_fun_elem = None
     # main_fun_elem_list = set()
     external_function_list = set()
@@ -2639,6 +2640,8 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
             xml_function_list ([Function]) : function list from xml parsing
             xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
             xml_data_list ([Data]) : Data list from xml parsing
+            xml_consumer_function_list ([flow_name, Function]): consumer's list
+            xml_producer_function_list ([flow_name, Function]): producer's list
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
@@ -2757,14 +2760,20 @@ def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list,
                                         fun_inter.add_allocated_data(data.id)
                                     elif True in check_fe:
                                         if check_fe[0] is True:
-                                            print(f"Data {data.name} has only consumer(s), "
-                                                  f"not added to {fun_inter.name}")
+                                            print(f"Data {data.name} has only consumer(s) "
+                                                  f"allocated to a functional element exposing "
+                                                  f"{fun_inter.name}, {data.name} not "
+                                                  f"allocated to {fun_inter.name}")
                                         elif check_fe[1] is True:
-                                            print(f"Data {data.name} has only producer(s), "
-                                                  f"not added to {fun_inter.name}")
+                                            print(f"Data {data.name} has only producer(s) "
+                                                  f"allocated to a functional element exposing "
+                                                  f"{fun_inter.name}, {data.name} not "
+                                                  f"allocated to {fun_inter.name}")
                                     else:
                                         print(f"Data {data.name} has no producer(s) nor "
-                                              f"consumer(s), not added to {fun_inter.name}")
+                                              f"consumer(s) allocated to functional elements "
+                                              f"exposing {fun_inter.name}, {data.name} not "
+                                              f"allocated to {fun_inter.name}")
             else:
                 print(f"Available allocation types are: (State/Function with Functional Element) OR"
                       f" (State with Function) OR (Data with Functional Interface)")
@@ -2791,7 +2800,7 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
                 fun_data = [data.name, function]
                 if any(a == fun_data for a in xml_consumer_function_list):
                     cons_list = True
-                elif any(a == fun_data for a in xml_producer_function_list):
+                if any(a == fun_data for a in xml_producer_function_list):
                     prod_list = True
 
     return [cons_list, prod_list]
