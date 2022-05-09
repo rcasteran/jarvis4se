@@ -21,6 +21,11 @@ def parse_xml(input_filename):
     tree = etree.parse(input_filename)
     # Get the XML tree
     root = tree.getroot()
+    # Check xml root tag
+    if not check_xml(root):
+        user_msg = f"Xml's file structure has changed since jarvis4se 1.3, please delete " \
+                   f"{input_filename} and re-execute your whole notebook"
+        return user_msg
     # looking for elements with tag "function" and create function objects and list
     function_list, function_parent_list = get_functions(root)
     # Create data(and set predecessors), consumers, producers lists
@@ -43,6 +48,14 @@ def parse_xml(input_filename):
                  functional_element_list, fun_elem_parent_dict, chain_list, attribute_list,
                  functional_interface_list]
     return all_lists
+
+
+def check_xml(root):
+    """Check xml file root, since jarvis4se version 1.3 it's <systemAnalysis>"""
+    if root.tag == "systemAnalysis":
+        return True
+    else:
+        return False
 
 
 def get_functions(root):

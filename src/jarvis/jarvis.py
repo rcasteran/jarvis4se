@@ -40,21 +40,25 @@ class MyMagics(Magics):
             # If the model(i.e. file) already exists, parse it to extract lists
             if os.path.isfile(f"{xml_name}.xml"):
                 xml_lists = xml_adapter.parse_xml(f"{xml_name}.xml")
-                print(f"{xml_name}.xml parsed")
-                xml_function_list = xml_lists[0]
-                xml_consumer_function_list = xml_lists[1]
-                xml_producer_function_list = xml_lists[2]
-                xml_function_parent_dict = xml_lists[3]
-                xml_data_list = xml_lists[4]
-                xml_state_list = xml_lists[5]
-                xml_state_parent_dict = xml_lists[6]
-                xml_transition_list = xml_lists[7]
-                xml_fun_elem_list = xml_lists[8]
-                xml_fun_elem_parent_dict = xml_lists[9]
-                xml_chain_list = xml_lists[10]
-                xml_attribute_list = xml_lists[11]
-                xml_fun_inter_list = xml_lists[12]
-                output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
+                if isinstance(xml_lists, str):
+                    print(xml_lists)
+                    return
+                else:
+                    print(f"{xml_name}.xml parsed")
+                    xml_function_list = xml_lists[0]
+                    xml_consumer_function_list = xml_lists[1]
+                    xml_producer_function_list = xml_lists[2]
+                    xml_function_parent_dict = xml_lists[3]
+                    xml_data_list = xml_lists[4]
+                    xml_state_list = xml_lists[5]
+                    xml_state_parent_dict = xml_lists[6]
+                    xml_transition_list = xml_lists[7]
+                    xml_fun_elem_list = xml_lists[8]
+                    xml_fun_elem_parent_dict = xml_lists[9]
+                    xml_chain_list = xml_lists[10]
+                    xml_attribute_list = xml_lists[11]
+                    xml_fun_inter_list = xml_lists[12]
+                    output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
             # Else create an empty xml named by "xml_name"(and associated empty lists)
             # or will be named by default "Outpout"
             else:

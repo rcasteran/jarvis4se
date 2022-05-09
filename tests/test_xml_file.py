@@ -20,16 +20,24 @@ def test_generate_xml_file_template():
     with path as f:
         s = f.read_text(encoding="utf-8")
         base_xml = "<?xml version='1.0' encoding='UTF-8'?>\n" \
-                   "<funcArch>\n" \
-                   "  <functionList/>\n" \
-                   "  <dataList/>\n" \
-                   "  <stateList/>\n" \
-                   "  <transitionList/>\n" \
-                   "  <functionalElementList/>\n" \
-                   "  <chainList/>\n" \
-                   "  <attributeList/>\n" \
-                   "  <functionalInterfaceList/>\n" \
-                   "</funcArch>\n"
+                   "<systemAnalysis>\n" \
+                   "  <funcArch>\n" \
+                   "    <functionList/>\n" \
+                   "    <dataList/>\n" \
+                   "    <stateList/>\n" \
+                   "    <transitionList/>\n" \
+                   "    <functionalElementList/>\n" \
+                   "    <functionalInterfaceList/>\n" \
+                   "  </funcArch>\n" \
+                   "  <phyArch>\n" \
+                   "    <physicalElementList/>\n" \
+                   "    <physicalInterfaceList/>\n" \
+                   "  </phyArch>\n" \
+                   "  <viewPoint>\n" \
+                   "    <chainList/>\n" \
+                   "    <attributeList/>\n" \
+                   "  </viewPoint>\n" \
+                   "</systemAnalysis>\n"
         assert base_xml in s
     if path:
         os.remove(Path(fname))

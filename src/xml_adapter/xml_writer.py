@@ -8,12 +8,20 @@ from lxml import etree
 class GenerateXML:
     def __init__(self, xml_file):
         # Initialize XML structure/tags
-        self.root = etree.Element("funcArch")
-        self.tags = ['functionList', 'dataList', 'stateList', 'transitionList',
-                     'functionalElementList', 'chainList', 'attributeList',
-                     'functionalInterfaceList']
-        for tag in self.tags:
-            etree.SubElement(self.root, tag)
+        self.root = etree.Element("systemAnalysis")
+        fun_arch = etree.SubElement(self.root, "funcArch")
+        fun_arch_tags = ['functionList', 'dataList', 'stateList', 'transitionList',
+                         'functionalElementList', 'functionalInterfaceList']
+        for tag in fun_arch_tags:
+            etree.SubElement(fun_arch, tag)
+        phy_arch = etree.SubElement(self.root, "phyArch")
+        phy_arch_tags = ['physicalElementList', 'physicalInterfaceList']
+        for tag in phy_arch_tags:
+            etree.SubElement(phy_arch, tag)
+        viewpoint = etree.SubElement(self.root, "viewPoint")
+        viewpoint_tags = ['chainList', 'attributeList']
+        for tag in viewpoint_tags:
+            etree.SubElement(viewpoint, tag)
         self.tree = etree.ElementTree(self.root)
 
         if len(xml_file) > 0:
@@ -26,10 +34,10 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('functionList') is None:
+            if root.find('.//functionList') is None:
                 etree.SubElement(root, 'functionList')
             # Loop on each flow/data
-            for function_list_tag in root.findall("./functionList"):
+            for function_list_tag in root.findall(".//functionList"):
                 # Loop on function's list
                 for function in function_list:
                     function_tag = etree.SubElement(function_list_tag, "function",
@@ -83,11 +91,11 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('dataList') is None:
+            if root.find('.//dataList') is None:
                 etree.SubElement(root, 'dataList')
-            for data_list_tag in root.findall('dataList'):
+            for data_list_tag in root.findall('.//dataList'):
                 for data in data_list:
-                    existing_data_tag = data_list_tag.find('./dataList/data')
+                    existing_data_tag = data_list_tag.find('.//dataList/data')
                     if existing_data_tag is not None:
                         tag = existing_data_tag
                     else:
@@ -121,7 +129,7 @@ class GenerateXML:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for i in consumer_list:
-                for consumer_list_tag in root.findall("./dataList/data[@name='" + str(i[0])
+                for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
                                                       + "']/consumerList"):
                     if not i[1].operand:
                         consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
@@ -138,7 +146,7 @@ class GenerateXML:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for i in producer_list:
-                for producer_list_tag in root.findall("./dataList/data[@name='" + str(i[0])
+                for producer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
                                                       + "']/producerList"):
 
                     producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': i[1].id})
@@ -152,7 +160,7 @@ class GenerateXML:
             root = self.tree.parse(file, parser)
             for i in predecessor_list:
                 for predecessor_list_tag in root.findall(
-                        "./dataList/data[@name='" + str(i[0].name) + "']/predecessorList"):
+                        ".//dataList/data[@name='" + str(i[0].name) + "']/predecessorList"):
 
                     _producer_tag = etree.SubElement(predecessor_list_tag, "predecessor",
                                                      {'id': i[1].id})
@@ -201,9 +209,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('stateList') is None:
+            if root.find('.//stateList') is None:
                 etree.SubElement(root, 'stateList')
-            for state_list_tag in root.findall("./stateList"):
+            for state_list_tag in root.findall(".//stateList"):
                 for state in state_list:
                     state_tag = etree.SubElement(state_list_tag, "state",
                                                     {'id': state.id, 'name': state.name,
@@ -277,9 +285,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('transitionList') is None:
+            if root.find('.//transitionList') is None:
                 etree.SubElement(root, 'transitionList')
-            for transition_list_tag in root.findall("./transitionList"):
+            for transition_list_tag in root.findall(".//transitionList"):
                 for transition in transition_list:
                     transition_tag = etree.SubElement(transition_list_tag, "transition",
                                                       {'id': transition.id,
@@ -359,9 +367,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('functionalElementList') is None:
+            if root.find('.//functionalElementList') is None:
                 etree.SubElement(root, 'functionalElementList')
-            for functional_element_list_tag in root.findall("./functionalElementList"):
+            for functional_element_list_tag in root.findall(".//functionalElementList"):
                 for functional_element in functional_element_list:
                     functional_element_tag = etree.SubElement(functional_element_list_tag,
                                                               "functionalElement", {
@@ -478,9 +486,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('chainList') is None:
+            if root.find('.//chainList') is None:
                 etree.SubElement(root, 'chainList')
-            for chain_list_tag in root.findall("./chainList"):
+            for chain_list_tag in root.findall(".//chainList"):
                 for chain in chain_list:
                     chain_tag = etree.SubElement(chain_list_tag, "chain",
                                                  {'id': chain.id, 'name': chain.name,
@@ -507,9 +515,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('attributeList') is None:
+            if root.find('.//attributeList') is None:
                 etree.SubElement(root, 'attributeList')
-            for attribute_list_tag in root.findall("./attributeList"):
+            for attribute_list_tag in root.findall(".//attributeList"):
                 for attribute in attribute_list:
                     attribute_tag = etree.SubElement(attribute_list_tag, "attribute",
                                                      {'id': attribute.id, 'name': attribute.name,
@@ -550,9 +558,9 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('functionalInterfaceList') is None:
+            if root.find('.//functionalInterfaceList') is None:
                 etree.SubElement(root, 'functionalInterfaceList')
-            for fun_interface_list_tag in root.findall("./functionalInterfaceList"):
+            for fun_interface_list_tag in root.findall(".//functionalInterfaceList"):
                 for fun_interface in functional_interface_list:
                     fun_interface_tag = etree.SubElement(fun_interface_list_tag,
                                                          "functionalInterface",
