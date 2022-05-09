@@ -15,7 +15,6 @@ def generate_xml(xml_file):
     return xml
 
 
-# TODO: Delete dict not useful -> TBC
 def parse_xml(input_filename):
     # Parse the XML file
     tree = etree.parse(input_filename)
@@ -27,15 +26,15 @@ def parse_xml(input_filename):
                    f"and re-execute your whole notebook"
         return user_msg
     # looking for elements with tag "function" and create function objects and list
-    function_list, function_parent_list = get_functions(root)
+    function_list = get_functions(root)
     # Create data(and set predecessors), consumers, producers lists
     data_list, producer_function_list, consumer_function_list = get_data(root, function_list)
     # Looking for elements with tag "state" and create state objects and list
-    state_list, state_parent_dict = get_state(root)
+    state_list = get_state(root)
     # Looking for elements with tag "transition"
     transition_list = get_transition(root)
     # Looking for functional elements
-    functional_element_list, fun_elem_parent_dict = get_functional_element(root)
+    functional_element_list = get_functional_element(root)
     # Looking for chains
     chain_list = get_chains(root)
     # Looking for attributes
@@ -43,9 +42,8 @@ def parse_xml(input_filename):
     # Looking for functional interfaces
     functional_interface_list = get_functional_interface(root)
 
-    all_lists = [function_list, consumer_function_list, producer_function_list,
-                 function_parent_list, data_list, state_list, state_parent_dict, transition_list,
-                 functional_element_list, fun_elem_parent_dict, chain_list, attribute_list,
+    all_lists = [function_list, consumer_function_list, producer_function_list, data_list,
+                 state_list, transition_list, functional_element_list, chain_list, attribute_list,
                  functional_interface_list]
     return all_lists
 
@@ -89,7 +87,7 @@ def get_functions(root):
                         break
                 break
 
-    return function_list, parent_list
+    return function_list
 
 
 # TODO: Change consumer/producer list from [data_name, function] to [data, function] and
@@ -179,7 +177,7 @@ def get_state(root):
                         break
                 break
 
-    return state_list, state_parent_dict
+    return state_list
 
 
 def get_transition(root):
@@ -251,7 +249,7 @@ def get_functional_element(root):
                         break
                 break
 
-    return functional_element_list, fun_elem_parent_dict
+    return functional_element_list
 
 
 def get_chains(root):

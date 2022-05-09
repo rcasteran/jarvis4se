@@ -48,16 +48,13 @@ class MyMagics(Magics):
                     xml_function_list = xml_lists[0]
                     xml_consumer_function_list = xml_lists[1]
                     xml_producer_function_list = xml_lists[2]
-                    xml_function_parent_dict = xml_lists[3]
-                    xml_data_list = xml_lists[4]
-                    xml_state_list = xml_lists[5]
-                    xml_state_parent_dict = xml_lists[6]
-                    xml_transition_list = xml_lists[7]
-                    xml_fun_elem_list = xml_lists[8]
-                    xml_fun_elem_parent_dict = xml_lists[9]
-                    xml_chain_list = xml_lists[10]
-                    xml_attribute_list = xml_lists[11]
-                    xml_fun_inter_list = xml_lists[12]
+                    xml_data_list = xml_lists[3]
+                    xml_state_list = xml_lists[4]
+                    xml_transition_list = xml_lists[5]
+                    xml_fun_elem_list = xml_lists[6]
+                    xml_chain_list = xml_lists[7]
+                    xml_attribute_list = xml_lists[8]
+                    xml_fun_inter_list = xml_lists[9]
                     output_xml = xml_adapter.generate_xml(f"{xml_name}.xml")
             # Else create an empty xml named by "xml_name"(and associated empty lists)
             # or will be named by default "Outpout"
@@ -65,13 +62,10 @@ class MyMagics(Magics):
                 xml_function_list = set()
                 xml_consumer_function_list = []
                 xml_producer_function_list = []
-                xml_function_parent_dict = {}
                 xml_data_list = set()
                 xml_state_list = set()
-                xml_state_parent_dict = {}
                 xml_transition_list = set()
                 xml_fun_elem_list = set()
-                xml_fun_elem_parent_dict = {}
                 xml_chain_list = set()
                 xml_attribute_list = set()
                 xml_fun_inter_list = set()
@@ -87,13 +81,10 @@ class MyMagics(Magics):
             xml_dict = {'xml_function_list': xml_function_list,
                         'xml_consumer_function_list': xml_consumer_function_list,
                         'xml_producer_function_list': xml_producer_function_list,
-                        'xml_function_parent_dict': xml_function_parent_dict,
                         'xml_data_list': xml_data_list,
                         'xml_state_list': xml_state_list,
-                        'xml_state_parent_dict': xml_state_parent_dict,
                         'xml_transition_list': xml_transition_list,
                         'xml_fun_elem_list': xml_fun_elem_list,
-                        'xml_fun_elem_parent_dict': xml_fun_elem_parent_dict,
                         'xml_chain_list': xml_chain_list,
                         'xml_attribute_list': xml_attribute_list,
                         'xml_fun_inter_list': xml_fun_inter_list,
@@ -337,11 +328,8 @@ def matched_composition(parent_child_name_str_list, **kwargs):
     """Get composition relationship command (match for "is composed by' or "composes")"""
     out = orchestrator.check_add_child(parent_child_name_str_list,
                                        kwargs['xml_function_list'],
-                                       kwargs['xml_function_parent_dict'],
                                        kwargs['xml_state_list'],
-                                       kwargs['xml_state_parent_dict'],
                                        kwargs['xml_fun_elem_list'],
-                                       kwargs['xml_fun_elem_parent_dict'],
                                        kwargs['output_xml'])
     return out
 

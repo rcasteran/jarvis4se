@@ -90,9 +90,8 @@ def cut_string_list(string_tuple_list):
     return output_list
 
 
-def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_function_dict,
-                    xml_state_list, xml_parent_state_dict, xml_fun_elem_list,
-                    xml_parent_fun_elem_dict, output_xml):
+def check_add_child(parent_child_name_str_list, xml_function_list, xml_state_list,
+                    xml_fun_elem_list, output_xml):
     """
     Check if each string in parent_child_name_str_list are corresponding to an actual object,
     create new [parent, child] objects lists for object's type : State/Function/FunctionalElement.
@@ -101,13 +100,8 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
         Parameters:
             parent_child_name_str_list ([str]) : Lists of string from jarvis cell
             xml_function_list ([Function]) : function list from xml parsing
-            xml_parent_function_dict ({child_function_id: parent_function_id}) : parent and child
-            function's dict
             xml_state_list ([State]) : state list from xml parsing
-            xml_parent_state_dict ({child_state_id: parent_state_id}) : parent and child state's
-                                                                        dictionnary
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            xml_parent_fun_elem_dict ({child_fun_elem_id: parent_fun_elem_id}) : parent and child
             fun elem's dict
             output_xml (GenerateXML object) : XML's file object
 
@@ -149,11 +143,9 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
             if result_function:
                 for function in xml_function_list:
                     if elem[0] == function.name or elem[0] == function.alias:
-                        parent_id = function.id
                         for fu in xml_function_list:
                             if elem[1] == fu.name or elem[1] == fu.alias:
-                                child_parent_tuple = (fu.id, parent_id)
-                                if child_parent_tuple not in xml_parent_function_dict.items():
+                                if fu.parent is None:
                                     fu.set_parent(function)
                                     function.add_child(fu)
                                     parent_child_function_list.append([function, fu])
@@ -161,11 +153,9 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
             elif result_state:
                 for state in xml_state_list:
                     if elem[0] == state.name or elem[0] == state.alias:
-                        parent_id = state.id
                         for sta in xml_state_list:
                             if elem[1] == sta.name or elem[1] == sta.alias:
-                                child_parent_tuple = (sta.id, parent_id)
-                                if child_parent_tuple not in xml_parent_state_dict.items():
+                                if sta.parent is None:
                                     sta.set_parent(state)
                                     state.add_child(sta)
                                     parent_child_state_list.append([state, sta])
@@ -173,11 +163,9 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_parent_fu
             elif result_fun_elem:
                 for fun_elem in xml_fun_elem_list:
                     if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
-                        parent_id = fun_elem.id
                         for fe in xml_fun_elem_list:
                             if elem[1] == fe.name or elem[1] == fe.alias:
-                                child_parent_tuple = (fe.id, parent_id)
-                                if child_parent_tuple not in xml_parent_fun_elem_dict.items():
+                                if fe.parent is None:
                                     fe.set_parent(fun_elem)
                                     fun_elem.add_child(fe)
                                     parent_child_fun_elem_list.append([fun_elem, fe])

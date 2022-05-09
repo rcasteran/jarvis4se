@@ -103,8 +103,8 @@ def test_described_attribute_within_xml():
                     "The A of Fun elem is 100\n")
 
     function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
 
     expected = {('A', 'F1', '4,2'), ('B', 'Fun elem', '8,5'),
                 ('C', 'F1', 'pink'), ('A', 'Fun elem', '100')}
@@ -148,7 +148,7 @@ def test_set_attribute_type_within_xml():
                     "The type of A is attribute type A.\n"
                     "The type of B is attribute type B\n")
 
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
     expected = {('A', 'attribute type A'), ('B', 'attribute type B')}
     # xml_adapter.parse_xml() returns mainly set(), so the order can change
     # thus we have to compare it with a set also
@@ -201,9 +201,9 @@ def test_set_allocated_item_to_chain_within_xml():
                     "consider F1, F2, F3, F4\n")
 
     function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
-    chain_list = xml_adapter.parse_xml(file_name + ".xml")[10]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
+    chain_list = xml_adapter.parse_xml(file_name + ".xml")[7]
 
     expected = {'F1', 'F2 with a long name', 'F3', 'F4', 'a', 'Fun_elem'}
     # xml_adapter.parse_xml() returns mainly set(), so the order can change
@@ -270,7 +270,7 @@ def test_function_with_grandkids_within_xml():
     function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
     consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
     producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
 
     expected_cons = {('b', 'F1a'), ('d', 'F1'), ('b', 'F1'), ('d', 'F1a'), ('d', 'F1a1')}
     expected_prod = {('c', 'F1a1'), ('a', 'F1'), ('c', 'F1'), ('c', 'F1a'), ('a', 'F1a')}
@@ -372,7 +372,7 @@ def test_function_childs_cons_prod_within_xml():
     function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
     consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
     producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
 
     expected_cons = {('a', 'F1b'), ('b', 'F1d'), ('a', 'F2'), ('c', 'F1e'), ('c', 'F1')}
     expected_prod = {('b', 'F1c'), ('c', 'F3'), ('a', 'F1a'), ('a', 'F1')}
@@ -448,9 +448,9 @@ def test_functional_interface_within_xml():
                     "Fun_elem_2 exposes Fun_inter\n"
                     "Fun_inter allocates A.\n")
 
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[4]
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[11]
-    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[12]
+    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
+    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[9]
 
     assert (len(data_list) == len(attribute_list) == len(fun_inter_list)) == 1
     data = data_list.pop()
@@ -521,8 +521,8 @@ def test_fun_elem_exposes_interface_within_xml():
                     "tata exposes titi\n"
                     "Fun_elem exposes coco\n")
 
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[8]
-    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[12]
+    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
+    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[9]
 
     expected_child = {('Fun_elem', 'Fun_elem_2'), ('Fun_elem_2', 'Fun_elem_3'),
                       ('Fun_elem_3', 'Fun_elem_4'), ('Fun_elem_4', 'Fun_elem_5'),
