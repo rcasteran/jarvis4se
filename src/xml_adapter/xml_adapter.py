@@ -23,8 +23,8 @@ def parse_xml(input_filename):
     root = tree.getroot()
     # Check xml root tag
     if not check_xml(root):
-        user_msg = f"Xml's file structure has changed since jarvis4se 1.3, please delete " \
-                   f"{input_filename} and re-execute your whole notebook"
+        user_msg = f"Xml's file structure has changed, please delete {input_filename} " \
+                   f"and re-execute your whole notebook"
         return user_msg
     # looking for elements with tag "function" and create function objects and list
     function_list, function_parent_list = get_functions(root)
