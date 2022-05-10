@@ -489,7 +489,7 @@ def case_no_list(wanted_object, object_type, **kwargs):
 
 
 def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
-    """For a data, find last producer and consumer and if they are allocated to last fun_elem
+    """For a data, find last producer and consumer if they are allocated to last fun_elem
     exposing the functional interface asked"""
     data_dict = {'Data': data.name,
                  'Last consumer Function(s)': [],
@@ -508,30 +508,26 @@ def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
                     if cons_fun_elem_list:
                         for fun_elem in cons_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing:
-                                cons_last_fun_elem = fun_elem.name
+                                cons_last_fun_elem = fun_elem
                     prod_fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
                     if prod_fun_elem_list:
                         for fun_elem in prod_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing:
-                                prod_last_fun_elem = fun_elem.name
+                                prod_last_fun_elem = fun_elem
 
                 if not cons_last_fun_elem == prod_last_fun_elem:
                     if not any(c == prod[1].name for c in data_dict['Last producer Function(s)']):
-                        data_dict['Last producer Function(s)'].append(prod[1].name)
-                        if prod_last_fun_elem is None:
+                        if prod_last_fun_elem and \
+                                prod[1].id in prod_last_fun_elem.allocated_function_list:
+                            data_dict['Last producer Function(s)'].append(prod[1].name)
                             data_dict['Last producer Functional element(s)'].append(
-                                f"'{prod[1].name}' is not allocated")
-                        else:
-                            data_dict['Last producer Functional element(s)'].append(
-                                prod_last_fun_elem)
+                                prod_last_fun_elem.name)
                     if not any(c == cons[1].name for c in data_dict['Last consumer Function(s)']):
-                        data_dict['Last consumer Function(s)'].append(cons[1].name)
-                        if cons_last_fun_elem is None:
+                        if cons_last_fun_elem and \
+                                cons[1].id in cons_last_fun_elem.allocated_function_list:
+                            data_dict['Last consumer Function(s)'].append(cons[1].name)
                             data_dict['Last consumer Functional element(s)'].append(
-                                f"'{cons[1].name}' is not allocated")
-                        else:
-                            data_dict['Last consumer Functional element(s)'].append(
-                                cons_last_fun_elem)
+                                cons_last_fun_elem.name)
 
     return data_dict
 
