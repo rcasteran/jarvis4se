@@ -5,30 +5,66 @@ import re
 # Modules
 import datamodel
 
-question_type = [
+
+questions = [
     (r"What is ([^\.\n]*) ", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
 
     (r"Is (.*) allocated ", lambda matched_str, **kwargs: matched_allocated(matched_str, **kwargs)),
 ]
 
 
-def lookup(strings, questions, **kwargs):
-    """Method to match regex"""
+def find_question(string, **kwargs):
+    """Entry point from jarvis.py"""
+    out = lookup_table(string, questions, **kwargs)
+    return out
+
+
+def lookup_table(strings, questions_table, **kwargs):
+    """Method to match regex and corresponding method from [questions]"""
     answer_list = []
-    for pattern, values in questions:
+    for regex, method in questions_table:
         for i in strings:
-            result = re.findall(pattern, i, re.MULTILINE)
+            result = re.findall(regex, i, re.MULTILINE)
             if result:
-                answer = values(result, **kwargs)
+                answer = method(result, **kwargs)
                 if answer:
                     answer_list.append(answer)
     return answer_list
 
 
-def find_question(string, **kwargs):
-    """Entry point from jarvis.py"""
-    out = lookup(string, question_type, **kwargs)
-    return out
+def matched_what(question_str, **kwargs):
+    """Get the 'what' declaration """
+    object_str = question_str[0].strip()
+    wanted_object = check_get_object(object_str, **kwargs)
+
+    if wanted_object:
+        object_info = get_object_info(wanted_object, **kwargs)
+        if object_info:
+            return object_info
+
+
+def matched_allocated(object_str, **kwargs):
+    """From object_str, get object then check if allocated and returns allocation's list"""
+    object_info = ""
+    object_str = object_str[0]
+    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
+    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
+    whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
+    if not any(s == object_str for s in whole_objects_name_list):
+        print(f"{object_str} is not a function nor a state")
+    else:
+        result_function = any(s == object_str for s in xml_function_name_list)
+        resul_state = any(s == object_str for s in xml_state_name_list)
+        result = [result_function, False, resul_state,  False, False]
+        wanted_object = match_object(object_str, result, **kwargs)
+        if wanted_object:
+            allocation_list = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
+            if allocation_list:
+                object_info += f'"{wanted_object.name}" is allocated to ' \
+                               + ", ".join([elem.name for elem in allocation_list])
+                return object_info
+
+    return
 
 
 def get_objects_name_lists(**kwargs):
@@ -85,17 +121,6 @@ def check_get_object(object_str, **kwargs):
                   *result_transition, *result_fun_inter]
         wanted_object = match_object(object_str, result, **kwargs)
         return wanted_object
-
-
-def matched_what(question_str, **kwargs):
-    """Get the 'what' declaration """
-    object_str = question_str[0].strip()
-    wanted_object = check_get_object(object_str, **kwargs)
-
-    if wanted_object:
-        object_info = get_object_info(wanted_object, **kwargs)
-        if object_info:
-            return object_info
 
 
 def match_object(object_str, result, **kwargs):
@@ -246,30 +271,6 @@ def get_data_info(wanted_object, object_info, **kwargs):
             pred_list.add(pred.name)
     object_info['Predecessor List'] = pred_list
     return object_info
-
-
-def matched_allocated(object_str, **kwargs):
-    """From object_str, get object then check if allocated and returns allocation's list"""
-    object_info = ""
-    object_str = object_str[0]
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
-    whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
-    if not any(s == object_str for s in whole_objects_name_list):
-        print(f"{object_str} is not a function nor a state")
-    else:
-        result_function = any(s == object_str for s in xml_function_name_list)
-        resul_state = any(s == object_str for s in xml_state_name_list)
-        result = [result_function, False, resul_state,  False, False]
-        wanted_object = match_object(object_str, result, **kwargs)
-        if wanted_object:
-            allocation_list = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
-            if allocation_list:
-                object_info += f'"{wanted_object.name}" is allocated to ' \
-                               + ", ".join([elem.name for elem in allocation_list])
-                return object_info
-
-    return
 
 
 def get_allocation_object(wanted_object, object_list):

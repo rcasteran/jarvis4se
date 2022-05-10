@@ -98,13 +98,81 @@ def case_context_diagram(**kwargs):
         return
 
 
+def case_decomposition_diagram(**kwargs):
+    """Cases for decompostion diagrams"""
+    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
+    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+
+    if ' at level ' in kwargs['diagram_object_str']:
+        splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
+        diagram_object_str = splitted_str[0]
+        try:
+            diagram_level = int(splitted_str[1])
+            if diagram_level == 0:
+                print("Invalid level, please choose a valid level >= 1")
+                return
+        except ValueError:
+            print("Invalid level, please choose a valid level >= 1")
+            return
+    else:
+        diagram_object_str = kwargs['diagram_object_str']
+        diagram_level = None
+
+    if diagram_object_str in xml_function_name_list:
+
+        function_list = get_object_list_from_chain(diagram_object_str,
+                                                   kwargs['xml_function_list'],
+                                                   kwargs['xml_chain_list'])
+        consumer_list, producer_list = get_cons_prod_from_chain_data(
+            kwargs['xml_data_list'],
+            kwargs['xml_chain_list'],
+            kwargs['xml_consumer_function_list'],
+            kwargs['xml_producer_function_list'],
+            function_list)
+
+        filename = show_function_decomposition(diagram_object_str,
+                                               function_list,
+                                               consumer_list,
+                                               producer_list,
+                                               kwargs['xml_attribute_list'],
+                                               diagram_level)
+        return filename
+    elif diagram_object_str in xml_fun_elem_name_list:
+        function_list = get_object_list_from_chain(diagram_object_str,
+                                                   kwargs['xml_function_list'],
+                                                   kwargs['xml_chain_list'])
+        fun_elem_list = get_object_list_from_chain(diagram_object_str,
+                                                   kwargs['xml_fun_elem_list'],
+                                                   kwargs['xml_chain_list'])
+        consumer_list, producer_list = get_cons_prod_from_chain_data(
+            kwargs['xml_data_list'],
+            kwargs['xml_chain_list'],
+            kwargs['xml_consumer_function_list'],
+            kwargs['xml_producer_function_list'],
+            function_list)
+
+        filename = show_fun_elem_decomposition(diagram_object_str,
+                                               function_list,
+                                               consumer_list,
+                                               producer_list,
+                                               fun_elem_list,
+                                               kwargs['xml_attribute_list'],
+                                               kwargs['xml_data_list'],
+                                               kwargs['xml_fun_inter_list'],
+                                               diagram_level)
+        return filename
+    else:
+        print(f"Jarvis does not know the object {diagram_object_str}"
+              f"(i.e. it is not a function, nor a functional element)")
+        return
+
+
 def get_cons_prod_from_chain_data(xml_data_list, xml_chain_list, xml_consumer_function_list,
-                                  xml_producer_function_list, function_list, fun_elem_list=False):
+                                  xml_producer_function_list, function_list):
     """If a chain is activated, returns filtered consumer/producer lists"""
     new_consumer_list = []
     new_producer_list = []
-    new_data_list = filter_allocated_item_from_chain(xml_data_list,
-                                                                            xml_chain_list)
+    new_data_list = filter_allocated_item_from_chain(xml_data_list, xml_chain_list)
 
     if len(new_data_list) == len(xml_data_list):
         for prod in xml_producer_function_list:
@@ -129,10 +197,9 @@ def get_cons_prod_from_chain_data(xml_data_list, xml_chain_list, xml_consumer_fu
     return new_consumer_list, new_producer_list
 
 
-def get_object_list(obj_str, xml_obj_list, xml_chain_list):
+def get_object_list_from_chain(obj_str, xml_obj_list, xml_chain_list):
     """Returns current object's list by checking chain"""
-    output_list = filter_allocated_item_from_chain(xml_obj_list,
-                                                                          xml_chain_list)
+    output_list = filter_allocated_item_from_chain(xml_obj_list, xml_chain_list)
     if len(xml_obj_list) == len(output_list):
         return xml_obj_list
     else:
@@ -150,76 +217,6 @@ def get_object_list(obj_str, xml_obj_list, xml_chain_list):
             new_obj.child_list = child_list
 
     return output_list
-
-
-def case_decomposition_diagram(**kwargs):
-    """Cases for decompostion diagrams"""
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
-
-    if ' at level ' in kwargs['diagram_object_str']:
-        splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
-        diagram_object_str = splitted_str[0]
-        try:
-            diagram_level = int(splitted_str[1])
-            if diagram_level == 0:
-                print("Invalid level, please choose a valid level >= 1")
-                return
-        except ValueError:
-            print("Invalid level, please choose a valid level >= 1")
-            return
-    else:
-        diagram_object_str = kwargs['diagram_object_str']
-        diagram_level = None
-
-    if diagram_object_str in xml_function_name_list:
-
-        function_list = get_object_list(diagram_object_str,
-                                        kwargs['xml_function_list'],
-                                        kwargs['xml_chain_list'])
-        consumer_list, producer_list = get_cons_prod_from_chain_data(
-            kwargs['xml_data_list'],
-            kwargs['xml_chain_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'],
-            function_list)
-
-        filename = show_function_decomposition(diagram_object_str,
-                                               function_list,
-                                               consumer_list,
-                                               producer_list,
-                                               kwargs['xml_attribute_list'],
-                                               diagram_level)
-        return filename
-    elif diagram_object_str in xml_fun_elem_name_list:
-        function_list = get_object_list(diagram_object_str,
-                                        kwargs['xml_function_list'],
-                                        kwargs['xml_chain_list'])
-        fun_elem_list = get_object_list(diagram_object_str,
-                                        kwargs['xml_fun_elem_list'],
-                                        kwargs['xml_chain_list'])
-        consumer_list, producer_list = get_cons_prod_from_chain_data(
-            kwargs['xml_data_list'],
-            kwargs['xml_chain_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'],
-            function_list,
-            fun_elem_list)
-
-        filename = show_fun_elem_decomposition(diagram_object_str,
-                                               function_list,
-                                               consumer_list,
-                                               producer_list,
-                                               fun_elem_list,
-                                               kwargs['xml_attribute_list'],
-                                               kwargs['xml_data_list'],
-                                               kwargs['xml_fun_inter_list'],
-                                               diagram_level)
-        return filename
-    else:
-        print(f"Jarvis does not know the object {diagram_object_str}"
-              f"(i.e. it is not a function, nor a functional element)")
-        return
 
 
 def case_chain_diagram(**kwargs):

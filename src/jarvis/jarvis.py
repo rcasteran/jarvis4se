@@ -93,7 +93,7 @@ class MyMagics(Magics):
                         'output_xml': output_xml,
                         'xml_name': xml_name}
 
-            update = lookup(input_str, LOOKUPS, **xml_dict)
+            update = lookup_table(input_str, commands, **xml_dict)
 
             if not update:
                 return
@@ -116,7 +116,7 @@ class MyMagics(Magics):
         print(f"No update for {xml_name}.xml")
 
 
-LOOKUPS = [
+commands = [
     (r"(under.*)",
      lambda matched_str, **kwargs: matched_under(matched_str, **kwargs)),
 
@@ -203,10 +203,10 @@ LOOKUPS = [
 ]
 
 
-def lookup(string, lookups, **kwargs):
+def lookup_table(string, commands_table, **kwargs):
     """Lookup table with conditions depending on the match"""
     update_list = []
-    for regex, values in lookups:
+    for regex, method in commands_table:
         result_chain = None
         result = None
         update = None
@@ -222,7 +222,7 @@ def lookup(string, lookups, **kwargs):
             [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
 
         if result and not result_chain:
-            update = values(result, **kwargs)
+            update = method(result, **kwargs)
         elif result_chain:
             string = ''
             update = matched_under(result_chain, **kwargs)
@@ -238,10 +238,8 @@ def matched_under(chain_name_str, **kwargs):
     out = []
     for a, b in zip(chain_name_str[::2], chain_name_str[1::2]):
         a = a.replace("under ", "")
-        out += viewpoint_orchestrator.add_chain(a,
-                                                kwargs['xml_chain_list'],
-                                                kwargs['output_xml'])
-        lookup(b, LOOKUPS, **kwargs)
+        out += viewpoint_orchestrator.add_chain(a, kwargs['xml_chain_list'], kwargs['output_xml'])
+        lookup_table(b, commands, **kwargs)
     if 1 in out:
         return [1]
     else:
@@ -251,39 +249,39 @@ def matched_under(chain_name_str, **kwargs):
 def matched_function(function_name_str_list, **kwargs):
     """Get function's declaration (does not match if "function" is not at the end)"""
     out = functional_orchestrator.add_function_by_name(function_name_str_list,
-                                            kwargs['xml_function_list'],
-                                            kwargs['output_xml'])
+                                                       kwargs['xml_function_list'],
+                                                       kwargs['output_xml'])
     return out
 
 
 def matched_data(data_str_list, **kwargs):
     """Get data declaration"""
     out = functional_orchestrator.add_data(data_str_list, kwargs['xml_data_list'],
-                                kwargs['output_xml'])
+                                           kwargs['output_xml'])
     return out
 
 
 def matched_state(state_name_str_list, **kwargs):
     """Get state's declaration"""
     out = functional_orchestrator.add_state_by_name(state_name_str_list,
-                                         kwargs['xml_state_list'],
-                                         kwargs['output_xml'])
+                                                    kwargs['xml_state_list'],
+                                                    kwargs['output_xml'])
     return out
 
 
 def matched_transition(transition_name_str_list, **kwargs):
     """Get transition's declaration"""
     out = functional_orchestrator.add_transition_by_name(transition_name_str_list,
-                                              kwargs['xml_transition_list'],
-                                              kwargs['output_xml'])
+                                                         kwargs['xml_transition_list'],
+                                                         kwargs['output_xml'])
     return out
 
 
 def matched_functional_element(functional_elem_name_str_list, **kwargs):
     """Get Functional element's declaration"""
     out = functional_orchestrator.add_fun_elem_by_name(functional_elem_name_str_list,
-                                            kwargs['xml_fun_elem_list'],
-                                            kwargs['output_xml'])
+                                                       kwargs['xml_fun_elem_list'],
+                                                       kwargs['output_xml'])
     return out
 
 
@@ -306,12 +304,12 @@ def matched_attribute(attribute_name_str, **kwargs):
 def matched_alias(alias_str_list, **kwargs):
     """Get "alias" declaration"""
     out = functional_orchestrator.check_set_object_alias(alias_str_list,
-                                              kwargs['xml_function_list'],
-                                              kwargs['xml_state_list'],
-                                              kwargs['xml_transition_list'],
-                                              kwargs['xml_fun_elem_list'],
-                                              kwargs['xml_fun_inter_list'],
-                                              kwargs['output_xml'])
+                                                         kwargs['xml_function_list'],
+                                                         kwargs['xml_state_list'],
+                                                         kwargs['xml_transition_list'],
+                                                         kwargs['xml_fun_elem_list'],
+                                                         kwargs['xml_fun_inter_list'],
+                                                         kwargs['output_xml'])
     return out
 
 
@@ -329,110 +327,110 @@ def matched_consider(consider_str_list, **kwargs):
 def matched_composition(parent_child_name_str_list, **kwargs):
     """Get composition relationship command (match for "is composed by' or "composes")"""
     out = functional_orchestrator.check_add_child(parent_child_name_str_list,
-                                       kwargs['xml_function_list'],
-                                       kwargs['xml_state_list'],
-                                       kwargs['xml_fun_elem_list'],
-                                       kwargs['output_xml'])
+                                                  kwargs['xml_function_list'],
+                                                  kwargs['xml_state_list'],
+                                                  kwargs['xml_fun_elem_list'],
+                                                  kwargs['output_xml'])
     return out
 
 
 def matched_consumer(consumer_str_list, **kwargs):
     """Get consumer declaration"""
     out = functional_orchestrator.check_add_consumer_function(consumer_str_list,
-                                                   kwargs['xml_consumer_function_list'],
-                                                   kwargs['xml_producer_function_list'],
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_data_list'],
-                                                   kwargs['output_xml'])
+                                                              kwargs['xml_consumer_function_list'],
+                                                              kwargs['xml_producer_function_list'],
+                                                              kwargs['xml_function_list'],
+                                                              kwargs['xml_data_list'],
+                                                              kwargs['output_xml'])
     return out
 
 
 def matched_producer(producer_str_list, **kwargs):
     """Get producer declaration"""
     out = functional_orchestrator.check_add_producer_function(producer_str_list,
-                                                   kwargs['xml_consumer_function_list'],
-                                                   kwargs['xml_producer_function_list'],
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_data_list'],
-                                                   kwargs['output_xml'])
+                                                              kwargs['xml_consumer_function_list'],
+                                                              kwargs['xml_producer_function_list'],
+                                                              kwargs['xml_function_list'],
+                                                              kwargs['xml_data_list'],
+                                                              kwargs['output_xml'])
     return out
 
 
 def matched_allocation(allocation_str_list, **kwargs):
     """Get allocation declaration"""
     out = functional_orchestrator.check_add_allocation(allocation_str_list,
-                                            kwargs['xml_fun_elem_list'],
-                                            kwargs['xml_state_list'],
-                                            kwargs['xml_function_list'],
-                                            kwargs['xml_fun_inter_list'],
-                                            kwargs['xml_data_list'],
-                                            kwargs['xml_consumer_function_list'],
-                                            kwargs['xml_producer_function_list'],
-                                            kwargs['output_xml'])
+                                                       kwargs['xml_fun_elem_list'],
+                                                       kwargs['xml_state_list'],
+                                                       kwargs['xml_function_list'],
+                                                       kwargs['xml_fun_inter_list'],
+                                                       kwargs['xml_data_list'],
+                                                       kwargs['xml_consumer_function_list'],
+                                                       kwargs['xml_producer_function_list'],
+                                                       kwargs['output_xml'])
     return out
 
 
 def matched_exposes(exposes_str_list, **kwargs):
     """Get 'exposes' declaration"""
     out = functional_orchestrator.check_add_exposes(exposes_str_list,
-                                         kwargs['xml_fun_elem_list'],
-                                         kwargs['xml_fun_inter_list'],
-                                         kwargs['xml_data_list'],
-                                         kwargs['output_xml'])
+                                                    kwargs['xml_fun_elem_list'],
+                                                    kwargs['xml_fun_inter_list'],
+                                                    kwargs['xml_data_list'],
+                                                    kwargs['output_xml'])
     return out
 
 
 def matched_delete(delete_str_list, **kwargs):
     """Get delete declaration"""
     out = functional_orchestrator.check_and_delete(delete_str_list,
-                                        kwargs['xml_function_list'],
-                                        kwargs['xml_producer_function_list'],
-                                        kwargs['xml_consumer_function_list'],
-                                        kwargs['xml_data_list'],
-                                        kwargs['xml_state_list'],
-                                        kwargs['xml_transition_list'],
-                                        kwargs['xml_fun_elem_list'],
-                                        kwargs['output_xml'])
+                                                   kwargs['xml_function_list'],
+                                                   kwargs['xml_producer_function_list'],
+                                                   kwargs['xml_consumer_function_list'],
+                                                   kwargs['xml_data_list'],
+                                                   kwargs['xml_state_list'],
+                                                   kwargs['xml_transition_list'],
+                                                   kwargs['xml_fun_elem_list'],
+                                                   kwargs['output_xml'])
     return out
 
 
 def matched_type(type_str_list, **kwargs):
     """Get set_type declaration"""
     out = functional_orchestrator.check_set_object_type(type_str_list,
-                                             kwargs['xml_function_list'],
-                                             kwargs['xml_data_list'],
-                                             kwargs['xml_state_list'],
-                                             kwargs['xml_transition_list'],
-                                             kwargs['xml_fun_elem_list'],
-                                             kwargs['xml_attribute_list'],
-                                             kwargs['xml_fun_inter_list'],
-                                             kwargs['output_xml'])
+                                                        kwargs['xml_function_list'],
+                                                        kwargs['xml_data_list'],
+                                                        kwargs['xml_state_list'],
+                                                        kwargs['xml_transition_list'],
+                                                        kwargs['xml_fun_elem_list'],
+                                                        kwargs['xml_attribute_list'],
+                                                        kwargs['xml_fun_inter_list'],
+                                                        kwargs['output_xml'])
     return out
 
 
 def matched_implies(data_predecessor_str_set, **kwargs):
     """Get predecessor declaration"""
     out = functional_orchestrator.check_add_predecessor(data_predecessor_str_set,
-                                             kwargs['xml_data_list'],
-                                             kwargs['xml_chain_list'],
-                                             kwargs['output_xml'])
+                                                        kwargs['xml_data_list'],
+                                                        kwargs['xml_chain_list'],
+                                                        kwargs['output_xml'])
     return out
 
 
 def matched_condition(condition_str_list, **kwargs):
     """Get set_condition declaration"""
     out = functional_orchestrator.check_add_transition_condition(condition_str_list,
-                                                      kwargs['xml_transition_list'],
-                                                      kwargs['output_xml'])
+                                                                 kwargs['xml_transition_list'],
+                                                                 kwargs['output_xml'])
     return out
 
 
 def matched_src_dest(src_dest_str, **kwargs):
     """Get source/destination declaration for transition"""
     out = functional_orchestrator.check_add_src_dest(src_dest_str,
-                                          kwargs['xml_transition_list'],
-                                          kwargs['xml_state_list'],
-                                          kwargs['output_xml'])
+                                                     kwargs['xml_transition_list'],
+                                                     kwargs['xml_state_list'],
+                                                     kwargs['output_xml'])
     return out
 
 
@@ -522,11 +520,11 @@ def matched_list(object_str, **kwargs):
 def matched_described_attribute(described_attribute_str, **kwargs):
     """Get the described attribute value for an object"""
     out = viewpoint_orchestrator.check_add_object_attribute(described_attribute_str,
-                                                  kwargs['xml_attribute_list'],
-                                                  kwargs['xml_function_list'],
-                                                  kwargs['xml_fun_elem_list'],
-                                                  kwargs['xml_fun_inter_list'],
-                                                  kwargs['output_xml'])
+                                                            kwargs['xml_attribute_list'],
+                                                            kwargs['xml_function_list'],
+                                                            kwargs['xml_fun_elem_list'],
+                                                            kwargs['xml_fun_inter_list'],
+                                                            kwargs['output_xml'])
     return out
 
 
