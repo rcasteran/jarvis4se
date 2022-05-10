@@ -3,7 +3,7 @@
 # Libraries
 import re
 # Modules
-from . import orchestrator
+import datamodel
 
 question_type = [
     (r"What is ([^\.\n]*) ", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
@@ -38,17 +38,17 @@ def get_objects_name_lists(**kwargs):
 
     # Create object names/aliases lists
     if kwargs.get('xml_function_list', False):
-        xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
+        xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     if kwargs.get('xml_data_list', False):
-        xml_data_name_list = orchestrator.get_object_name(kwargs['xml_data_list'])
+        xml_data_name_list = get_object_name(kwargs['xml_data_list'])
     if kwargs.get('xml_state_list', False):
-        xml_state_name_list = orchestrator.get_object_name(kwargs['xml_state_list'])
+        xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     if kwargs.get('xml_fun_elem_list', False):
-        xml_fun_elem_name_list = orchestrator.get_object_name(kwargs['xml_fun_elem_list'])
+        xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
     if kwargs.get('xml_transition_list', False):
-        xml_transition_name_list = orchestrator.get_object_name(kwargs['xml_transition_list'])
+        xml_transition_name_list = get_object_name(kwargs['xml_transition_list'])
     if kwargs.get('xml_fun_inter_list', False):
-        xml_fun_inter_name_list = orchestrator.get_object_name(kwargs['xml_fun_inter_list'])
+        xml_fun_inter_name_list = get_object_name(kwargs['xml_fun_inter_list'])
 
     whole_objects_name_list = [xml_function_name_list,
                                xml_data_name_list,
@@ -97,7 +97,7 @@ def matched_what(question_str, **kwargs):
             return object_info
 
 
-# TODO: Use check_get_object and this method within orchestrator.py
+# TODO: Use check_get_object and this method within functional_orchestrator.py
 def match_object(object_str, result, **kwargs):
     """Returns wanted_object from object_str and result matched from name lists"""
     if result[0]:
@@ -252,8 +252,8 @@ def matched_allocated(object_str, **kwargs):
     """From object_str, get object then check if allocated and returns allocation's list"""
     object_info = ""
     object_str = object_str[0]
-    xml_function_name_list = orchestrator.get_object_name(kwargs['xml_function_list'])
-    xml_state_name_list = orchestrator.get_object_name(kwargs['xml_state_list'])
+    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
+    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
     if not any(s == object_str for s in whole_objects_name_list):
         print(f"{object_str} is not a function nor a state")
@@ -275,7 +275,7 @@ def matched_allocated(object_str, **kwargs):
 def get_allocation_object(wanted_object, object_list):
     """Get current allocation for an object Fun_elem with State/Function OR Fun_inter with data"""
     allocation_list = set()
-    object_type = orchestrator.get_object_type(wanted_object)
+    object_type = get_object_type(wanted_object)
 
     if object_type == 'function':
         for fun_elem in object_list:
@@ -427,7 +427,7 @@ def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
     """Case for 'list interface Functional element'"""
     fun_inter_list = get_objects_from_id_list([i for i in wanted_object.exposed_interface_list],
                                               kwargs['xml_fun_inter_list'])
-    main_fun_elem_child_list, _ = orchestrator.get_children(wanted_object)
+    main_fun_elem_child_list, _ = get_children(wanted_object)
     if not fun_inter_list:
         return f"Not any exposed interface for {wanted_object.name}"
     else:
@@ -436,12 +436,12 @@ def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
             for fun_elem in kwargs['xml_fun_elem_list']:
                 if fun_elem not in main_fun_elem_child_list and \
                         interface.id in fun_elem.exposed_interface_list and \
-                        orchestrator.check_not_family(fun_elem, wanted_object):
+                        check_not_family(fun_elem, wanted_object):
                     exposing_fun_elem.add((interface, fun_elem))
 
         interface_list = set()
         for k in exposing_fun_elem:
-            child_list, _ = orchestrator.get_children(k[1])
+            child_list, _ = get_children(k[1])
             child_list.remove(k[1])
             if child_list:
                 check = True
@@ -561,7 +561,7 @@ def get_object_list(object_str, **kwargs):
         if wanted_object is None:
             print(f"Object '{elem[1]}' does not exist")
         else:
-            object_type = orchestrator.get_object_type(wanted_object)
+            object_type = get_object_type(wanted_object)
             wanted_list = switch_objects_lists(elem[0], wanted_object, object_type, **kwargs)
             if isinstance(wanted_list, list):
                 answer_list.append(wanted_list)
@@ -585,7 +585,7 @@ def get_input(wanted_object, unmerged=False, **kwargs):
     Returns:
         Input's list
     """
-    object_type = orchestrator.get_object_type(wanted_object)
+    object_type = get_object_type(wanted_object)
     if object_type == "Functional element":
         input_list = []
         allocated_fun_list = set()
@@ -621,7 +621,7 @@ def get_output(wanted_object, unmerged=False, **kwargs):
     Returns:
         Output's list
     """
-    object_type = orchestrator.get_object_type(wanted_object)
+    object_type = get_object_type(wanted_object)
     if object_type == "Functional element":
         output_list = []
         allocated_fun_list = set()
@@ -711,3 +711,88 @@ def get_objects_from_id_list(id_list, object_list):
 
         if output_list:
             return output_list
+
+
+def get_object_name(xml_object_list):
+    """
+    Method that returns a list with all object aliases/names from object's list
+
+    """
+    object_name_list = []
+    # Create the xml [object_name (and object_alias)] list
+    for xml_object in xml_object_list:
+        object_name_list.append(xml_object.name)
+        try:
+            if len(xml_object.alias) > 0:
+                object_name_list.append(xml_object.alias)
+        except AttributeError:
+            # To avoid error when there is no alias attribute for the object
+            pass
+
+    return object_name_list
+
+
+def check_parentality(a, b):
+    """Check recursively if object 'a' is not parent of object 'b'"""
+    if b.parent:
+        if a == b.parent:
+            return True
+        else:
+            return check_parentality(a, b.parent)
+    else:
+        return False
+
+
+def get_children(element, function_list=None, parent_dict=None, count=None, level=None):
+    """Get children recursively, adds them to function_list and create parend_dict"""
+    if function_list is None:
+        function_list = set()
+    if parent_dict is None:
+        parent_dict = {}
+    if not count:
+        count = 0
+
+    function_list.add(element)
+    if element.child_list:
+        count += 1
+        if level:
+            if (count - 1) == level:
+                element.child_list.clear()
+                return function_list, parent_dict
+        for child in element.child_list:
+            parent_dict[child.id] = element.id
+            get_children(child, function_list, parent_dict, count, level)
+
+    return function_list, parent_dict
+
+
+def check_not_family(object_a, object_b):
+    """Returns True if object_a and object_b are not in the same family"""
+    if not check_parentality(object_a, object_b) and not check_parentality(object_b, object_a):
+        return True
+    else:
+        return False
+
+
+def get_object_type(object_to_check):
+    """From an object, returns its type as string"""
+    if isinstance(object_to_check, datamodel.State):
+        object_type = "state"
+    elif isinstance(object_to_check, datamodel.Function):
+        object_type = "function"
+    elif isinstance(object_to_check, datamodel.Data):
+        object_type = "data"
+    elif isinstance(object_to_check, datamodel.FunctionalElement):
+        object_type = "Functional element"
+    elif isinstance(object_to_check, datamodel.Chain):
+        object_type = "Chain"
+    elif isinstance(object_to_check, datamodel.Transition):
+        object_type = "Transition"
+    elif isinstance(object_to_check, datamodel.Attribute):
+        object_type = "Attribute"
+    elif isinstance(object_to_check, datamodel.FunctionalInterface):
+        object_type = "Functional interface"
+    else:
+        object_type = ''
+
+    return object_type

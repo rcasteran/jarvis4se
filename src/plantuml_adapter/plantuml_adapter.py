@@ -6,12 +6,8 @@ import sys
 
 # Modules
 from .util import MakePlantUml
-sys.path.append("../xml_adapter")
-import xml_adapter # noqa
 sys.path.append("../datamodel")
 import datamodel # noqa
-sys.path.append("../jarvis")
-from jarvis import question_answer # noqa
 
 
 def write_function_child(function, input_flow_list, output_flow_list, xml_attribute_list):
