@@ -59,6 +59,7 @@ def get_objects_name_lists(**kwargs):
     return whole_objects_name_list
 
 
+# TODO: Use this method within functional_orchestrator.py
 def check_get_object(object_str, **kwargs):
     """
     Returns the desired object from object's string
@@ -97,7 +98,6 @@ def matched_what(question_str, **kwargs):
             return object_info
 
 
-# TODO: Use check_get_object and this method within functional_orchestrator.py
 def match_object(object_str, result, **kwargs):
     """Returns wanted_object from object_str and result matched from name lists"""
     if result[0]:
