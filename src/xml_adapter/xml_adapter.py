@@ -5,13 +5,13 @@ import sys
 from lxml import etree
 
 # Modules
-from . import xml_writer # noqa
+from .xml_writer import GenerateXML
 sys.path.append("../datamodel")
 import datamodel # noqa
 
 
 def generate_xml(xml_file):
-    xml = xml_writer.GenerateXML(xml_file)
+    xml = GenerateXML(xml_file)
     return xml
 
 
