@@ -99,7 +99,7 @@ def case_context_diagram(**kwargs):
 
 
 def case_decomposition_diagram(**kwargs):
-    """Cases for decompostion diagrams"""
+    """Cases for decomposition diagrams"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
 
@@ -203,10 +203,17 @@ def get_object_list_from_chain(obj_str, xml_obj_list, xml_chain_list):
     if len(xml_obj_list) == len(output_list):
         return xml_obj_list
     else:
-        for obj in xml_obj_list:
-            if obj_str == obj.name or obj_str == obj.alias:
-                if not any(item == obj for item in output_list):
-                    output_list.append(obj)
+        if isinstance(obj_str, str):
+            for obj in xml_obj_list:
+                if obj_str == obj.name or obj_str == obj.alias:
+                    if not any(item == obj for item in output_list):
+                        output_list.append(obj)
+        elif isinstance(obj_str, list):
+            for object_name in obj_str:
+                for obj in xml_obj_list:
+                    if object_name == obj.name or object_name == obj.alias:
+                        if not any(item == obj for item in output_list):
+                            output_list.append(obj)
 
         for new_obj in output_list:
             child_list = set()
@@ -223,8 +230,7 @@ def case_chain_diagram(**kwargs):
     # Create object names/aliases lists
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_state_name_list = get_object_name(kwargs['xml_state_list'])
-    clean_diagram_object_str = kwargs['diagram_object_str'].replace(" ", "")
-    object_list_str = re.split(r',(?![^[]*\])', clean_diagram_object_str)
+    object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(" ", ""))
     if len(object_list_str) > 0:
         result_function = all(t in xml_function_name_list for t in object_list_str)
         result_state = all(t in xml_state_name_list for t in object_list_str)
@@ -240,14 +246,28 @@ def case_chain_diagram(**kwargs):
 
         elif result_function or result_state:
             if result_function:
+                function_list = get_object_list_from_chain(object_list_str,
+                                                           kwargs['xml_function_list'],
+                                                           kwargs['xml_chain_list'])
+                consumer_list, producer_list = get_cons_prod_from_chain_data(
+                    kwargs['xml_data_list'],
+                    kwargs['xml_chain_list'],
+                    kwargs['xml_consumer_function_list'],
+                    kwargs['xml_producer_function_list'],
+                    function_list)
                 filename = show_functions_chain(object_list_str,
-                                                kwargs['xml_function_list'],
-                                                kwargs['xml_consumer_function_list'],
-                                                kwargs['xml_producer_function_list'])
+                                                function_list,
+                                                consumer_list,
+                                                producer_list)
                 return filename
             elif result_state:
-                filename = show_states_chain(object_list_str, kwargs['xml_state_list'],
-                                             kwargs['xml_transition_list'])
+                state_list = get_object_list_from_chain(object_list_str,
+                                                        kwargs['xml_state_list'],
+                                                        kwargs['xml_chain_list'])
+                transition_list = filter_allocated_item_from_chain(kwargs['xml_transition_list'],
+                                                                   kwargs['xml_chain_list'])
+                filename = show_states_chain(object_list_str, state_list,
+                                             transition_list)
                 return filename
         else:
             print(f"{kwargs['diagram_object_str']} is not a valid chain")
