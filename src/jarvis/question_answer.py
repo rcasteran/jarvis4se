@@ -274,7 +274,7 @@ def get_data_info(wanted_object, object_info, **kwargs):
 
 
 def get_allocation_object(wanted_object, object_list):
-    """Get current allocation for an object Fun_elem with State/Function OR Fun_inter with data"""
+    """Get current allocation for an object"""
     allocation_list = set()
     object_type = get_object_type(wanted_object)
 
