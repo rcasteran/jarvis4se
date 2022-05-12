@@ -449,13 +449,15 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                             xml_attribute_list)
     plantuml_text += MakePlantUml.close_component()
     plantuml_text += MakePlantUml.create_component_attribute(main_fun_elem, xml_attribute_list)
-    # Write external(consumer or producer) functions and highest level functional
-    # element allocated to it
-    for function in external_function_list:
-        check, fun_elem_txt, fun_elem = check_write_fun_elem(function, fun_elem_list)
-        plantuml_text += fun_elem_txt
-        plantuml_text += write_function_object(function, [], [], check,
-                                               xml_attribute_list, component_obj=fun_elem)
+    # Write external fun_elem
+    for elem in fun_elem_list:
+        if elem != main_fun_elem and elem.parent is None:
+            plantuml_text += recursive_decomposition(elem,
+                                                     external_function_list,
+                                                     xml_attribute_list)
+            plantuml_text += MakePlantUml.close_component()
+            plantuml_text += MakePlantUml.create_component_attribute(elem,
+                                                                     xml_attribute_list)
 
     # Write data flows
     plantuml_text += MakePlantUml.create_data_flow(data_flow_list)

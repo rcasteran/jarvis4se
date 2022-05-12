@@ -386,24 +386,32 @@ def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
                                 xml_data_list, xml_fun_inter_list, diagram_level=None):
-    main_fun_elem = None
-    # main_fun_elem_list = set()
+
     external_function_list = set()
     new_producer_list = []
     new_consumer_list = []
 
-    main_fun_elem = check_get_object(fun_elem_str,
-                                                     **{'xml_fun_elem_list': xml_fun_elem_list})
+    main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
         return
     main_fun_elem.parent = None
 
     if diagram_level:
-        # main_fun_elem_list, main_parent_dict = get_children(main_fun_elem, level=diagram_level)
-        # for l in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        #     if not check_not_family(l, main_fun_elem):
-        #         xml_fun_elem_list.remove(l)
-        pass
+        main_fun_elem_list, _ = get_children(main_fun_elem, level=diagram_level)
+        for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
+            if not check_not_family(unwanted_fun_elem, main_fun_elem):
+                for fun in xml_function_list.copy():
+                    if fun.id in unwanted_fun_elem.allocated_function_list:
+                        xml_function_list.remove(fun)
+                xml_fun_elem_list.remove(unwanted_fun_elem)
+
+        for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
+            if check_not_family(unwanted_fun_elem, main_fun_elem) and \
+                    unwanted_fun_elem.parent is None:
+                curr_fun_elem_list, _ = get_children(unwanted_fun_elem, level=diagram_level)
+                for un_fun_elem in xml_fun_elem_list.symmetric_difference(curr_fun_elem_list):
+                    if not check_not_family(unwanted_fun_elem, un_fun_elem):
+                        xml_fun_elem_list.remove(un_fun_elem)
 
     allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 
@@ -432,6 +440,11 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                     external_function_list.add(t[1])
                     if t not in new_consumer_list:
                         new_consumer_list.append(t)
+
+    for fun in external_function_list:
+        for child in fun.child_list.copy():
+            if not any(t == child for t in external_function_list):
+                fun.child_list.remove(child)
 
     url_diagram, _ = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
                                                                  allocated_function_list,
