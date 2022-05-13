@@ -41,10 +41,14 @@ def parse_xml(input_filename):
     attribute_list = get_attributes(root)
     # Looking for functional interfaces
     functional_interface_list = get_functional_interface(root)
+    # Looking for physical elements
+    physical_element_list = get_physical_element(root)
+    # Looking for physical interfaces
+    physical_interface_list = get_physical_interface(root)
 
     all_lists = [function_list, consumer_function_list, producer_function_list, data_list,
                  state_list, transition_list, functional_element_list, chain_list, attribute_list,
-                 functional_interface_list]
+                 functional_interface_list, physical_element_list, physical_interface_list]
     return all_lists
 
 

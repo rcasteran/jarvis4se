@@ -15,6 +15,7 @@ from IPython.display import display, HTML, Markdown
 # Modules
 from . import functional_orchestrator
 from . import viewpoint_orchestrator
+from . import physical_orchestrator
 from .question_answer import find_question, get_object_list
 from .diagram_generator import filter_show_command
 from xml_adapter import parse_xml, generate_xml
@@ -57,6 +58,8 @@ class MyMagics(Magics):
                     xml_chain_list = xml_lists[7]
                     xml_attribute_list = xml_lists[8]
                     xml_fun_inter_list = xml_lists[9]
+                    xml_phy_elem_list = xml_lists[10]
+                    xml_phy_inter_list = xml_lists[11]
                     output_xml = generate_xml(f"{xml_name}.xml")
             # Else create an empty xml named by "xml_name"(and associated empty lists)
             # or will be named by default "Outpout"
@@ -71,6 +74,8 @@ class MyMagics(Magics):
                 xml_chain_list = set()
                 xml_attribute_list = set()
                 xml_fun_inter_list = set()
+                xml_phy_elem_list = set()
+                xml_phy_inter_list = set()
                 if len(xml_name) > 1:
                     print(f"Creating {xml_name}.xml !")
                     output_xml = generate_xml(f"{xml_name}.xml")
@@ -90,6 +95,8 @@ class MyMagics(Magics):
                         'xml_chain_list': xml_chain_list,
                         'xml_attribute_list': xml_attribute_list,
                         'xml_fun_inter_list': xml_fun_inter_list,
+                        'xml_phy_elem_list': xml_phy_elem_list,
+                        'xml_phy_inter_list': xml_phy_inter_list,
                         'output_xml': output_xml,
                         'xml_name': xml_name}
 
@@ -137,6 +144,12 @@ commands = [
 
     (r"(?<= |\n)(.*?) is a functional interface(?=.|\n)",
      lambda matched_str, **kwargs: matched_functional_interface(matched_str, **kwargs)),
+
+    (r"(?<= |\n)(.*?) is a physical element(?=.|\n)",
+     lambda matched_str, **kwargs: matched_physical_element(matched_str, **kwargs)),
+
+    (r"(?<= |\n)(.*?) is a physical interface(?=.|\n)",
+     lambda matched_str, **kwargs: matched_physical_interface(matched_str, **kwargs)),
 
     (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)",
      lambda matched_str, **kwargs: matched_attribute(matched_str, **kwargs)),
@@ -223,12 +236,16 @@ def lookup_table(string, commands_table, **kwargs):
 
         if result and not result_chain:
             update = method(result, **kwargs)
+
         elif result_chain:
             string = ''
             update = matched_under(result_chain, **kwargs)
 
-        if update and isinstance(update, list):
-            update_list.append(*update)
+        if update is not None:
+            if isinstance(update, list):
+                update_list.append(*update)
+            elif isinstance(update, int):
+                update_list.append(update)
 
     return update_list
 
@@ -290,6 +307,22 @@ def matched_functional_interface(functional_inter_name_str_list, **kwargs):
     out = functional_orchestrator.add_fun_inter_by_name(functional_inter_name_str_list,
                                                         kwargs['xml_fun_inter_list'],
                                                         kwargs['output_xml'])
+    return out
+
+
+def matched_physical_element(physical_elem_name_str_list, **kwargs):
+    """Get Physical element's declaration"""
+    out = physical_orchestrator.add_phy_elem_by_name(physical_elem_name_str_list,
+                                                     kwargs['xml_phy_elem_list'],
+                                                     kwargs['output_xml'])
+    return out
+
+
+def matched_physical_interface(physical_inter_name_str_list, **kwargs):
+    """Get Physical interface's declaration"""
+    out = physical_orchestrator.add_phy_inter_by_name(physical_inter_name_str_list,
+                                                      kwargs['xml_phy_inter_list'],
+                                                      kwargs['output_xml'])
     return out
 
 
