@@ -789,6 +789,10 @@ def get_object_type(object_to_check):
         object_type = "Attribute"
     elif isinstance(object_to_check, datamodel.FunctionalInterface):
         object_type = "Functional interface"
+    elif isinstance(object_to_check, datamodel.PhysicalElement):
+        object_type = "Physical element"
+    elif isinstance(object_to_check, datamodel.PhysicalInterface):
+        object_type = "Physical interface"
     else:
         object_type = ''
 

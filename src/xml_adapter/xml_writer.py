@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
+import sys
 from lxml import etree
+
+sys.path.append("../datamodel")
+import datamodel # noqa
 
 
 # Class to generate XML
@@ -44,7 +48,8 @@ class GenerateXML:
                                                     {'id': function.id,
                                                      'name': function.name,
                                                      'type': str(function.type),
-                                                     'alias': function.alias})
+                                                     'alias': function.alias,
+                                                     'derived': function.derived})
 
                     _functional_part_list_tag = etree.SubElement(function_tag, "functionalPartList")
 
@@ -371,14 +376,16 @@ class GenerateXML:
                 etree.SubElement(root, 'functionalElementList')
             for functional_element_list_tag in root.findall(".//functionalElementList"):
                 for functional_element in functional_element_list:
-                    functional_element_tag = etree.SubElement(functional_element_list_tag,
-                                                              "functionalElement", {
-                                                                  'id': functional_element.id,
-                                                                  'name': functional_element.name,
-                                                                  'type': str(
-                                                                      functional_element.type),
-                                                                  'alias': functional_element.alias}
-                                                              )
+                    functional_element_tag = etree.SubElement(
+                        functional_element_list_tag, "functionalElement",
+                        {
+                            'id': functional_element.id,
+                            'name': functional_element.name,
+                            'type': str(
+                                functional_element.type),
+                            'alias': functional_element.alias,
+                            'derived': functional_element.derived}
+                    )
 
                     _fun_elem_part_list_tag = etree.SubElement(functional_element_tag,
                                                                "functionalElementPartList")
@@ -435,10 +442,14 @@ class GenerateXML:
 
     # Method to write exposed interfaces by list [fun_elem, exposed_interface]
     def write_exposed_interface(self, fun_elem_inter_list):
+        if isinstance(fun_elem_inter_list[0][0], datamodel.FunctionalElement):
+            string_tag = ".//functionalElement"
+        else:
+            string_tag = ".//physicalElement"
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for functional_element in root.findall(".//functionalElement"):
+            for functional_element in root.findall(string_tag):
                 if functional_element.find('exposedInterfaceList') is None:
                     etree.SubElement(functional_element, 'exposedInterfaceList')
 
@@ -553,7 +564,7 @@ class GenerateXML:
                     attribute_tag.set('type', attribute[1])
         self.write()
 
-    # Method to write interfaces from interface's list
+    # Method to write functional interfaces from interface's list
     def write_functional_interface(self, functional_interface_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
@@ -567,7 +578,8 @@ class GenerateXML:
                                                          {'id': fun_interface.id,
                                                           'name': fun_interface.name,
                                                           'type': str(fun_interface.type),
-                                                          'alias': fun_interface.alias})
+                                                          'alias': fun_interface.alias,
+                                                          'derived': fun_interface.derived})
                     _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
                                                                 "allocatedDataList")
         self.write()
@@ -606,4 +618,172 @@ class GenerateXML:
                 for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
                                                   fun_inter_alias[0].id + "']"):
                     fun_inter_tag.set('alias', fun_inter_alias[1])
+        self.write()
+
+    # Method to write physical element from physical elements list
+    def write_physical_element(self, physical_element_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            if root.find('.//physicalElementList') is None:
+                etree.SubElement(root, 'physicalElementList')
+            for physical_element_list_tag in root.findall(".//physicalElementList"):
+                for physical_element in physical_element_list:
+                    physical_element_tag = etree.SubElement(
+                        physical_element_list_tag, "physicalElement",
+                        {
+                            'id': physical_element.id,
+                            'name': physical_element.name,
+                            'type': str(
+                                physical_element.type),
+                            'alias': physical_element.alias,
+                            'derived': physical_element.derived}
+                    )
+
+                    _phy_elem_part_list_tag = etree.SubElement(physical_element_tag,
+                                                               "physicalElementPartList")
+                    _allocated_fun_elem_list_tag = etree.SubElement(
+                        physical_element_tag, "allocatedFunctionalElementList")
+                    _exposed_interface_list_tag = etree.SubElement(physical_element_tag,
+                                                                   "exposedInterfaceList")
+        self.write()
+
+    # Method to write child by list [parent, child]
+    def write_physical_element_child(self, phy_elem_child_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+
+            for physical_element in root.findall(".//physicalElement"):
+                for parent, child in phy_elem_child_list:
+                    if physical_element.get('id') == parent.id:
+                        tag = physical_element.find('physicalElementPartList')
+                        _phy_element_part_tag = etree.SubElement(tag,
+                                                                 "physicalElementPart",
+                                                                 {'id': child.id})
+        self.write()
+
+    # Method to write allocated fun_elem by list [phy_elem, allocated_fun_elem]
+    def write_allocated_fun_elem(self, phy_elem_fun_elem_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+
+            for physical_element in root.findall(".//physicalElement"):
+                for phy_elem, fun_elem in phy_elem_fun_elem_list:
+                    if physical_element.get('id') == phy_elem.id:
+                        tag = physical_element.find('allocatedFunctionalElementList')
+                        _allocated_fun_elem_tag = etree.SubElement(
+                            tag, "allocatedFunctionalElement", {'id': fun_elem.id})
+        self.write()
+
+    # Method to delete functional element by list [physical element]
+    def delete_physical_element(self, delete_phy_elem_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for phy_elem in delete_phy_elem_list:
+                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id + "']"):
+                    phy_elem_tag.getparent().remove(phy_elem_tag)
+        self.write()
+
+    # Method to write phy_elem's type by list [phy_elem]
+    def write_phy_elem_type(self, phy_elem_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for phy_elem in phy_elem_list:
+                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id
+                                                 + "']"):
+                    phy_elem_tag.set('type', str(phy_elem.type))
+        self.write()
+
+    # Method to write phy_elem's alias by list [phy_elem]
+    def write_phy_elem_alias(self, phy_elem_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for phy_elem in phy_elem_list:
+                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id
+                                                 + "']"):
+                    phy_elem_tag.set('alias', str(phy_elem.alias))
+        self.write()
+
+    # Method to write physical interfaces from interface's list
+    def write_physical_interface(self, physical_interface_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            if root.find('.//physicalInterfaceList') is None:
+                etree.SubElement(root, 'physicalInterfaceList')
+            for phy_interface_list_tag in root.findall(".//physicalInterfaceList"):
+                for phy_interface in physical_interface_list:
+                    phy_interface_tag = etree.SubElement(phy_interface_list_tag,
+                                                         "physicalInterface",
+                                                         {'id': phy_interface.id,
+                                                          'name': phy_interface.name,
+                                                          'type': str(phy_interface.type),
+                                                          'alias': phy_interface.alias,
+                                                          'derived': phy_interface.derived})
+                    _allocated_fun_inter_list_tag = etree.SubElement(
+                        phy_interface_tag, "allocatedFunctionalInterfaceList")
+        self.write()
+
+    # Method to write allocated fun_inter by list [Physical Interface, allocated_fun_inter]
+    def write_phy_interface_allocated_fun_inter(self, phy_inter_fun_inter_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+
+            for phy_interface_tag in root.findall(".//physicalInterface"):
+                for phy_interface, fun_inter in phy_inter_fun_inter_list:
+                    if phy_interface_tag.get('id') == phy_interface.id:
+                        tag = phy_interface_tag.find('allocatedFunctionalInterfaceList')
+                        _allocated_fun_inter_tag = etree.SubElement(
+                            tag, "allocatedFunctionalInterface", {'id': str(fun_inter.id)})
+        self.write()
+
+    # Method to write physical interface's type by list [Phy interface]
+    def write_phy_interface_type(self, phy_inter_type_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for phy_inter in phy_inter_type_list:
+                for phy_inter_tag in root.findall(".//physicalInterface[@id='" +
+                                                  phy_inter.id + "']"):
+                    phy_inter_tag.set('type', str(phy_inter.type))
+        self.write()
+
+    # Method to write phy_inter's alias by list [phy_inter]
+    def write_phy_interface_alias(self, phy_inter_alias_list):
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for phy_inter in phy_inter_alias_list:
+                for phy_inter_tag in root.findall(".//physicalInterface[@id='" +
+                                                  phy_inter.id + "']"):
+                    phy_inter_tag.set('alias', str(phy_inter.alias))
+        self.write()
+
+    # Method to write derived by list [Object]
+    def write_derived(self, derived_list):
+        if isinstance(derived_list[0], datamodel.PhysicalInterface):
+            elem_tag = "physicalInterface"
+        elif isinstance(derived_list[0], datamodel.PhysicalElement):
+            elem_tag = "physicalElement"
+        elif isinstance(derived_list[0], datamodel.Function):
+            elem_tag = "function"
+        elif isinstance(derived_list[0], datamodel.FunctionalElement):
+            elem_tag = "functionalElement"
+        elif isinstance(derived_list[0], datamodel.FunctionalInterface):
+            elem_tag = "functionalInterface"
+        else:
+            return
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            for elem in derived_list:
+                for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
+                                                  elem.id + "']"):
+                    fun_inter_tag.set('derived', str(elem.derived.id))
         self.write()

@@ -15,4 +15,7 @@ from .datamodel import Chain
 from .datamodel import ChainType
 from .datamodel import Attribute
 from .datamodel import FunctionalInterface
+from .datamodel import PhysicalElement
+from .datamodel import PhysicalInterface
+
 

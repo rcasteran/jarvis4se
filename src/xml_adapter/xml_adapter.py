@@ -69,6 +69,7 @@ def get_functions(root):
         function_type = datamodel.FunctionType.get_name(xml_function.get('type'))
         function.set_type(function_type)
         function.set_operand()
+        function.set_derived(xml_function.get('derived'))
 
         function_list.add(function)
         # Looking for functions with "functionalPart" i.e childs and create a list
@@ -87,11 +88,15 @@ def get_functions(root):
                         break
                 break
 
+    for elem in function_list:
+        for derived in function_list:
+            if elem.derived == derived.id:
+                elem.derived = derived
+                break
+
     return function_list
 
 
-# TODO: Change consumer/producer list from [data_name, function] to [data, function] and
-#  extend it to all scripts
 def get_data(root, function_list):
     data_list = set()
     consumer_function_list = []
@@ -216,9 +221,10 @@ def get_functional_element(root):
         fun_elem.set_alias(xml_func_elem.get('alias'))
         fun_elem_type = datamodel.FunctionalElementType.get_name(xml_func_elem.get('type'))
         fun_elem.set_type(fun_elem_type)
+        fun_elem.set_derived(xml_func_elem.get('derived'))
 
         functional_element_list.add(fun_elem)
-        # Looking for states with "functionalElementPart" i.e child and create a list
+        # Looking for "functionalElementPart" i.e child and create a list
         xml_functional_part_list = xml_func_elem.iter('functionalElementPart')
         for xml_state_part in xml_functional_part_list:
             fun_elem_parent_dict[xml_state_part.get('id')] = fun_elem.id
@@ -247,6 +253,12 @@ def get_functional_element(root):
                         child_state.set_parent(parent_state)
                         parent_state.add_child(child_state)
                         break
+                break
+
+    for elem in functional_element_list:
+        for derived in functional_element_list:
+            if elem.derived == derived.id:
+                elem.derived = derived
                 break
 
     return functional_element_list
@@ -307,6 +319,7 @@ def get_functional_interface(root):
         fun_inter.set_name(xml_fun_inter.get('name'))
         fun_inter.set_type(xml_fun_inter.get('type'))
         fun_inter.set_alias(xml_fun_inter.get('alias'))
+        fun_inter.set_derived(xml_fun_inter.get('derived'))
 
         # Looking for allocated data and add them to the fun inter
         xml_allocated_data_list = xml_fun_inter.iter('allocatedData')
@@ -315,4 +328,87 @@ def get_functional_interface(root):
 
         functional_interface_list.add(fun_inter)
 
+    for elem in functional_interface_list:
+        for derived in functional_interface_list:
+            if elem.derived == derived.id:
+                elem.derived = derived
+                break
+
     return functional_interface_list
+
+
+def get_physical_element(root):
+    physical_element_list = set()
+    phy_elem_parent_dict = {}
+    xml_physical_element_list = root.iter('physicalElement')
+    for xml_phy_elem in xml_physical_element_list:
+        # Instantiate functional element and add them to a list
+        phy_elem = datamodel.PhysicalElement()
+        phy_elem.set_id(xml_phy_elem.get('id'))
+        phy_elem.set_name(xml_phy_elem.get('name'))
+        phy_elem.set_alias(xml_phy_elem.get('alias'))
+        phy_elem.set_type(xml_phy_elem.get('type'))
+        phy_elem.set_derived(xml_phy_elem.get('derived'))
+
+        physical_element_list.add(phy_elem)
+        # Looking for "physicalPart" i.e child and create a list
+        xml_functional_part_list = xml_phy_elem.iter('physicalPart')
+        for xml_state_part in xml_functional_part_list:
+            phy_elem_parent_dict[xml_state_part.get('id')] = phy_elem.id
+
+        # Looking for allocated functions and add them to the functional element
+        xml_allocated_fun_elem_list = xml_phy_elem.iter('allocatedFunctionalElement')
+        for xml_allo_fun_elem in xml_allocated_fun_elem_list:
+            phy_elem.add_allocated_fun_elem(xml_allo_fun_elem.get("id"))
+
+        # Looking for exposed interface and add them to the functional element
+        xml_exposed_interface_list = xml_phy_elem.iter('exposedInterface')
+        for xml_exp_inter in xml_exposed_interface_list:
+            phy_elem.add_exposed_interface(xml_exp_inter.get("id"))
+
+    # Loop to set parent() and add_child() to fun elem
+    for child_id in phy_elem_parent_dict:
+        for child_state in physical_element_list:
+            if child_state.id == child_id:
+                for parent_state in physical_element_list:
+                    if parent_state.id == phy_elem_parent_dict[child_id]:
+                        child_state.set_parent(parent_state)
+                        parent_state.add_child(child_state)
+                        break
+                break
+
+    for elem in physical_element_list:
+        for derived in physical_element_list:
+            if elem.derived == derived.id:
+                elem.derived = derived
+                break
+
+    return physical_element_list
+
+
+def get_physical_interface(root):
+    physical_interface_list = set()
+    xml_phy_inter_list = root.iter('physicalInterface')
+    for xml_phy_inter in xml_phy_inter_list:
+        # Instantiate phy_inter and add them to a list
+        phy_inter = datamodel.PhysicalInterface()
+        phy_inter.set_id(xml_phy_inter.get('id'))
+        phy_inter.set_name(xml_phy_inter.get('name'))
+        phy_inter.set_type(xml_phy_inter.get('type'))
+        phy_inter.set_alias(xml_phy_inter.get('alias'))
+        phy_inter.set_derived(xml_phy_inter.get('derived'))
+
+        # Looking for allocated fun_inter and add them to the phy inter
+        xml_allocated_inter_list = xml_phy_inter.iter('allocatedFunctionalInterface')
+        for xml_allo_inter in xml_allocated_inter_list:
+            phy_inter.add_allocated_fun_inter(xml_allo_inter.get("id"))
+
+        physical_interface_list.add(phy_inter)
+
+    for inter in physical_interface_list:
+        for derived in physical_interface_list:
+            if inter.derived == derived.id:
+                inter.derived = derived
+                break
+
+    return physical_interface_list

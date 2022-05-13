@@ -94,6 +94,7 @@ class Function:
         self.port_list = set()
         self.input_role = p_role
         self.operand = p_operand
+        self.derived = "unknown"
 
     def set_id(self, p_id):
         self.id = p_id
@@ -131,7 +132,10 @@ class Function:
             self.operand = "subtractor"
         else:
             # May have further type/operand in the future
-            None
+            pass
+
+    def set_derived(self, p_derived):
+        self.derived = p_derived
 
 
 # System element type
@@ -711,6 +715,7 @@ class FunctionalElement:
         self.allocated_state_list = set()
         self.allocated_function_list = set()
         self.exposed_interface_list = set()
+        self.derived = "unknown"
 
     def set_id(self, p_id):
         self.id = p_id
@@ -738,6 +743,9 @@ class FunctionalElement:
 
     def add_exposed_interface(self, p_interface):
         self.exposed_interface_list.add(p_interface)
+
+    def set_derived(self, p_derived):
+        self.derived = p_derived
 
 
 # Chain type
@@ -841,6 +849,7 @@ class FunctionalInterface:
         self.alias = p_alias
         self.type = p_type
         self.allocated_data_list = set()
+        self.derived = "unknown"
 
     def set_id(self, p_id):
         self.id = p_id
@@ -856,3 +865,76 @@ class FunctionalInterface:
 
     def add_allocated_data(self, p_item):
         self.allocated_data_list.add(p_item)
+
+    def set_derived(self, p_derived):
+        self.derived = p_derived
+
+
+# PhysicalElement class
+class PhysicalElement:
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_parent=None):
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.parent = p_parent
+        self.allocated_fun_elem_list = set()
+        self.exposed_interface_list = set()
+        self.child_list = set()
+        self.derived = "unknown"
+
+    def set_id(self, p_id):
+        self.id = p_id
+
+    def set_name(self, p_name):
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        self.type = p_type
+
+    def set_parent(self, p_parent):
+        self.parent = p_parent
+
+    def add_allocated_fun_elem(self, p_fun_elem):
+        self.allocated_fun_elem_list.add(p_fun_elem)
+
+    def add_exposed_interface(self, p_interface):
+        self.exposed_interface_list.add(p_interface)
+
+    def add_child(self, p_child):
+        self.child_list.add(p_child)
+
+    def set_derived(self, p_derived):
+        self.derived = p_derived
+
+
+# PhysicalInterface class
+class PhysicalInterface:
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.allocated_fun_inter_list = set()
+        self.derived = "unknown"
+
+    def set_id(self, p_id):
+        self.id = p_id
+
+    def set_name(self, p_name):
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        self.type = p_type
+
+    def add_allocated_fun_inter(self, p_fun_inter):
+        self.allocated_fun_inter_list.add(p_fun_inter)
+
+    def set_derived(self, p_derived):
+        self.derived = p_derived
