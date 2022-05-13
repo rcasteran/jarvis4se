@@ -947,7 +947,6 @@ def check_set_object_type(type_str_list, **kwargs):
     for object_str, type_name in type_str_list:
         object_to_set = check_get_object(object_str, **kwargs)
         if object_to_set is None:
-            print(f"The object {object_str} does not exist")
             continue
         if isinstance(object_to_set, datamodel.Attribute):
             if type_name != str(object_to_set.type):
