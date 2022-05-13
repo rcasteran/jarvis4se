@@ -55,15 +55,15 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write function's type by list [function, type]
+    # Method to write function's type by list [function]
     def write_function_type(self, function_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            # Loop on [function, type] list
+
             for function in function_type_list:
-                for function_tag in root.findall(".//function[@id='" + function[0].id + "']"):
-                    function_tag.set('type', function[1])
+                for function_tag in root.findall(".//function[@id='" + function.id + "']"):
+                    function_tag.set('type', function.type)
         self.write()
 
     # Method to write function's alias by list [function, alias]
@@ -117,15 +117,15 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write data's type by list [data, type]
+    # Method to write data's type by list [data]
     def write_data_type(self, data_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            # Loop on [function, type] list
+
             for data in data_type_list:
-                for data_tag in root.findall(".//data[@name='" + data[0].name + "']"):
-                    data_tag.set('type', data[1])
+                for data_tag in root.findall(".//data[@id='" + data.id + "']"):
+                    data_tag.set('type', data.type)
         self.write()
 
     # Method to write consumers by list [data_name, function]
@@ -227,14 +227,14 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
         self.write()
 
-    # Method to write state's type by list [state, type]
+    # Method to write state's type by list [state]
     def write_state_type(self, state_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for state in state_type_list:
-                for state_tag in root.findall(".//state[@id='" + state[0].id + "']"):
-                    state_tag.set('type', state[1])
+                for state_tag in root.findall(".//state[@id='" + state.id + "']"):
+                    state_tag.set('type', state.type)
         self.write()
 
     # Method to write state's alias by list [function, alias]
@@ -304,14 +304,14 @@ class GenerateXML:
                     _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
         self.write()
 
-    # Method to write transition's type by list [transition, type]
+    # Method to write transition's type by list [transition]
     def write_transition_type(self, transition_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for transition in transition_type_list:
-                for transition_tag in root.findall(".//transition[@id='" + transition[0].id + "']"):
-                    transition_tag.set('type', transition[1])
+                for transition_tag in root.findall(".//transition[@id='" + transition.id + "']"):
+                    transition_tag.set('type', transition.type)
         self.write()
 
     # Method to write transition's alias by list [transition, alias]
@@ -470,15 +470,15 @@ class GenerateXML:
                     fun_elem_tag.getparent().remove(fun_elem_tag)
         self.write()
 
-    # Method to write fun_elem's type by list [fun_elem, type]
+    # Method to write fun_elem's type by list [fun_elem]
     def write_fun_elem_type(self, fun_elem_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for fun_elem in fun_elem_type_list:
-                for fun_elem_tag in root.findall(".//functionalElement[@id='" + fun_elem[0].id
+                for fun_elem_tag in root.findall(".//functionalElement[@id='" + fun_elem.id
                                                  + "']"):
-                    fun_elem_tag.set('type', fun_elem[1])
+                    fun_elem_tag.set('type', fun_elem.type)
         self.write()
 
     # Method to write fun_elem's alias by list [fun_elem, alias]
@@ -553,15 +553,15 @@ class GenerateXML:
                                                                {'id': item[0].id, 'value': item[1]})
         self.write()
 
-    # Method to write attribute's type by list [Attribute, type_str]
+    # Method to write attribute's type by list [Attribute]
     def write_attribute_type(self, attribute_type_list):
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
             for attribute in attribute_type_list:
-                for attribute_tag in root.findall(".//attribute[@id='" + attribute[0].id
+                for attribute_tag in root.findall(".//attribute[@id='" + attribute.id
                                                   + "']"):
-                    attribute_tag.set('type', attribute[1])
+                    attribute_tag.set('type', attribute.type)
         self.write()
 
     # Method to write functional interfaces from interface's list
@@ -603,10 +603,10 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for fun_inter_type in fun_inter_type_list:
+            for fun_inter in fun_inter_type_list:
                 for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
-                                                  fun_inter_type[0].id + "']"):
-                    fun_inter_tag.set('type', fun_inter_type[1])
+                                                  fun_inter.id + "']"):
+                    fun_inter_tag.set('type', fun_inter.type)
         self.write()
 
     # Method to write fun_inter's alias by list [fun_inter, alias]
@@ -695,7 +695,7 @@ class GenerateXML:
             for phy_elem in phy_elem_list:
                 for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id
                                                  + "']"):
-                    phy_elem_tag.set('type', str(phy_elem.type))
+                    phy_elem_tag.set('type', phy_elem.type)
         self.write()
 
     # Method to write phy_elem's alias by list [phy_elem]
@@ -751,7 +751,7 @@ class GenerateXML:
             for phy_inter in phy_inter_type_list:
                 for phy_inter_tag in root.findall(".//physicalInterface[@id='" +
                                                   phy_inter.id + "']"):
-                    phy_inter_tag.set('type', str(phy_inter.type))
+                    phy_inter_tag.set('type', phy_inter.type)
         self.write()
 
     # Method to write phy_inter's alias by list [phy_inter]

@@ -430,14 +430,7 @@ def matched_delete(delete_str_list, **kwargs):
 def matched_type(type_str_list, **kwargs):
     """Get set_type declaration"""
     out = functional_orchestrator.check_set_object_type(type_str_list,
-                                                        kwargs['xml_function_list'],
-                                                        kwargs['xml_data_list'],
-                                                        kwargs['xml_state_list'],
-                                                        kwargs['xml_transition_list'],
-                                                        kwargs['xml_fun_elem_list'],
-                                                        kwargs['xml_attribute_list'],
-                                                        kwargs['xml_fun_inter_list'],
-                                                        kwargs['output_xml'])
+                                                        **kwargs)
     return out
 
 

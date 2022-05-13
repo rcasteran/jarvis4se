@@ -107,6 +107,7 @@ class Function:
 
     def set_type(self, p_type):
         self.type = p_type
+        self.set_operand()
 
     def set_parent(self, p_parent):
         self.parent = p_parent

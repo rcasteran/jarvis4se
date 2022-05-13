@@ -48,7 +48,6 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
                 function.set_alias(alias_str.group(1))
             # Set function's type
             function.set_type(datamodel.FunctionType.UNKNOWN)
-            function.set_operand()
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             function.set_id(str(identifier.int)[:10])
@@ -912,9 +911,7 @@ def delete_objects(to_be_deleted_lists, xml_lists, output_xml):
 
 
 # TODO: Clean this method
-def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_state_list,
-                          xml_transition_list, xml_fun_elem_list, xml_attribute_list,
-                          xml_fun_inter_list, output_xml):
+def check_set_object_type(type_str_list, **kwargs):
     """
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
     [object, type] lists for objects : Data/State/Function/Transition/FunctionalElement.
@@ -922,38 +919,18 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
 
         Parameters:
             type_str_list ([str]) : Lists of string from jarvis cell
-            xml_function_list ([Function]) : function list from xml parsing
-            xml_data_list ([Data]) : Data list from xml parsing
-            xml_state_list ([State]) : State list from xml parsing
-            xml_transition_list ([Transition]) : Transition list from xml parsing
-            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            xml_attribute_list ([Attribute]) : Attribute list from xml parsing
-            xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            kwargs (dict) : whole xml lists
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    object_from_xml_function_list = []
-    object_from_xml_data_list = []
-    object_from_xml_state_list = []
-    object_from_xml_transition_list = []
-    object_from_xml_fun_elem_list = []
-    object_from_xml_attribute_list = []
-    object_from_xml_fun_inter_list = []
+
+    object_type_lists = [[] for _ in range(9)]
     function_type_list = []
     state_type_list = []
     data_type_list = []
     transition_type_list = []
     fun_elem_type_list = []
-    # Create object names/aliases lists
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_data_name_list = get_object_name(xml_data_list)
-    xml_state_name_list = get_object_name(xml_state_list)
-    xml_trnansition_name_list = get_object_name(xml_transition_list)
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_attribute_name_list = get_object_name(xml_attribute_list)
-    xml_fun_inter_name_list = get_object_name(xml_fun_inter_list)
     # Get __str__ list from FUNCTION_TYPE, DataType, StateType
     for i in datamodel.FunctionType:
         function_type_list.append(str(i).upper())
@@ -966,172 +943,126 @@ def check_set_object_type(type_str_list, xml_function_list, xml_data_list, xml_s
     for n in datamodel.FunctionalElementType:
         fun_elem_type_list.append(str(n).upper())
 
-    concatenated_lists = [*xml_function_name_list, *xml_data_name_list, *xml_state_name_list,
-                          *xml_trnansition_name_list, *xml_fun_elem_name_list,
-                          *xml_attribute_name_list, *xml_fun_inter_name_list]
-    concatenated_type_lists = [*function_type_list, *data_type_list, *state_type_list,
-                               *transition_type_list, *fun_elem_type_list]
-    no_specific_type_lists = [*xml_attribute_name_list, *xml_fun_inter_name_list]
-
     # Check if the wanted to object exists and the type can be set
-    for object_to_set_type, type_name in type_str_list:
-        is_elem_found = True
-        if not any(s == object_to_set_type for s in concatenated_lists):
-            is_elem_found = False
-            print(f"The object {object_to_set_type} does not exist")
-            # Else do nothing
-        elif not any(s == type_name.upper() for s in concatenated_type_lists) and \
-                not any(s == object_to_set_type for s in no_specific_type_lists):
-            is_elem_found = False
-            if object_to_set_type in xml_function_name_list:
-                print(
-                    f"The type {type_name} does not exist, available types are "
-                    f": {', '.join(function_type_list)}.")
-            elif object_to_set_type in xml_data_name_list:
-                print(
-                    f"The type {type_name} does not exist, available types are "
-                    f": {', '.join(data_type_list)}.")
-            elif object_to_set_type in xml_state_name_list:
-                print(
-                    f"The type {type_name} does not exist, available types are "
-                    f": {', '.join(state_type_list)}.")
-            elif object_to_set_type in xml_trnansition_name_list:
-                print(
-                    f"The type {type_name} does not exist, available types are "
-                    f": {', '.join(transition_type_list)}.")
-            elif object_to_set_type in xml_fun_elem_name_list:
-                print(
-                    f"The type {type_name} does not exist, available types are "
-                    f": {', '.join(fun_elem_type_list)}.")
-        if is_elem_found:
-            if any(s == object_to_set_type for s in xml_attribute_name_list):
-                for attribute in xml_attribute_list:
-                    if object_to_set_type == attribute.name or \
-                            object_to_set_type == attribute.alias:
-                        if type_name != str(attribute.type):
-                            object_from_xml_attribute_list.append([attribute, type_name])
+    for object_str, type_name in type_str_list:
+        object_to_set = check_get_object(object_str, **kwargs)
+        if object_to_set is None:
+            print(f"The object {object_str} does not exist")
+            continue
+        if isinstance(object_to_set, datamodel.Attribute):
+            if type_name != str(object_to_set.type):
+                object_to_set.set_type(type_name)
+                object_type_lists[5].append(object_to_set)
 
-            elif any(s == object_to_set_type for s in xml_fun_inter_name_list):
-                for fun_inter in xml_fun_inter_list:
-                    if object_to_set_type == fun_inter.name or \
-                            object_to_set_type == fun_inter.alias:
-                        if type_name != str(fun_inter.type):
-                            object_from_xml_fun_inter_list.append([fun_inter, type_name])
+        elif isinstance(object_to_set, datamodel.FunctionalInterface):
+            if type_name != str(object_to_set.type):
+                object_to_set.set_type(type_name)
+                object_type_lists[6].append(object_to_set)
 
-            elif type_name.upper() in function_type_list:
-                for fun in xml_function_list:
-                    if object_to_set_type == fun.name or object_to_set_type == fun.alias:
-                        if type_name.capitalize() != str(fun.type):
-                            object_from_xml_function_list.append([fun, type_name.capitalize()])
-
-            elif type_name.upper() in data_type_list:
-                for d in xml_data_list:
-                    if object_to_set_type == d.name:
-                        if type_name.capitalize() != str(d.type):
-                            object_from_xml_data_list.append([d, type_name.capitalize()])
-
-            elif type_name.upper() in state_type_list:
-                for sta in xml_state_list:
-                    if object_to_set_type == sta.name or object_to_set_type == sta.alias:
-                        if type_name.capitalize() != str(sta.type):
-                            object_from_xml_state_list.append([sta, type_name.capitalize()])
-
-            elif type_name.upper() in transition_type_list:
-                for transition in xml_transition_list:
-                    if object_to_set_type == transition.name or \
-                            object_to_set_type == transition.alias:
-                        if type_name.capitalize() != str(transition.type):
-                            object_from_xml_transition_list.append([transition,
-                                                                    type_name.capitalize()])
-
-            elif type_name.upper() in fun_elem_type_list:
-                for fun_elem in xml_fun_elem_list:
-                    if object_to_set_type == fun_elem.name or object_to_set_type == fun_elem.alias:
-                        if type_name.capitalize() != str(fun_elem.type):
-                            object_from_xml_fun_elem_list.append([fun_elem, type_name.capitalize()])
-
+        elif isinstance(object_to_set, datamodel.Function):
+            if type_name.upper() in function_type_list:
+                if type_name.capitalize() != str(object_to_set.type):
+                    object_to_set.set_type(type_name.capitalize())
+                    object_type_lists[0].append(object_to_set)
             else:
-                print(f"{object_to_set_type} can not be of type: {type_name}")
+                print_not_available_type(type_name, function_type_list)
 
-    object_type_lists = [object_from_xml_function_list, object_from_xml_data_list,
-                         object_from_xml_state_list, object_from_xml_transition_list,
-                         object_from_xml_fun_elem_list, object_from_xml_attribute_list,
-                         object_from_xml_fun_inter_list]
-    update_list = set_object_type(object_type_lists, output_xml)
+        elif isinstance(object_to_set, datamodel.Data):
+            if type_name.upper() in data_type_list:
+                if type_name.capitalize() != str(object_to_set.type):
+                    object_to_set.set_type(type_name.capitalize())
+                    object_type_lists[1].append(object_to_set)
+            else:
+                print_not_available_type(type_name, data_type_list)
 
-    return update_list
+        elif isinstance(object_to_set, datamodel.State):
+            if type_name.upper() in state_type_list:
+                if type_name.capitalize() != str(object_to_set.type):
+                    object_to_set.set_type(type_name.capitalize())
+                    object_type_lists[2].append(object_to_set)
+            else:
+                print_not_available_type(type_name, state_type_list)
+
+        elif isinstance(object_to_set, datamodel.Transition):
+            if type_name.upper() in transition_type_list:
+                if type_name.capitalize() != str(object_to_set.type):
+                    object_to_set.set_type(type_name.capitalize())
+                    object_type_lists[3].append(object_to_set)
+            else:
+                print_not_available_type(type_name, transition_type_list)
+
+        elif isinstance(object_to_set, datamodel.FunctionalElement):
+            if type_name.upper() in fun_elem_type_list:
+                if type_name.capitalize() != str(object_to_set.type):
+                    object_to_set.set_type(type_name.capitalize())
+                    object_type_lists[4].append(object_to_set)
+            else:
+                print_not_available_type(type_name, fun_elem_type_list)
+        else:
+            print(f"{object_to_set.name} can not be typed")
+
+    update = set_object_type(object_type_lists, kwargs['output_xml'])
+
+    return update
 
 
-def set_object_type(object_type_lists, output_xml):
+def print_not_available_type(type_name, type_list):
+    print(
+        f"The type {type_name} does not exist, available types are "
+        f": {', '.join(type_list)}.")
+
+
+def set_object_type(object_lists, output_xml):
     """
     Check if input lists are not empty, write in xml for each list and return update list if some
     updates has been made
 
         Parameters:
-            object_type_lists ([Object Data/State/Function/Transition/FunctionalElement, type]) :
-            object with new type
+            object_lists : see order in comments below
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
-    update_list = []
-    if any(object_type_lists):
-        new_type_in_xml_function_list = object_type_lists[0]
-        new_type_in_xml_data_list = object_type_lists[1]
-        new_type_in_xml_state_list = object_type_lists[2]
-        new_type_in_xml_transition_list = object_type_lists[3]
-        new_type_in_xml_fun_elem_list = object_type_lists[4]
-        new_type_in_xml_attribute_list = object_type_lists[5]
-        new_type_in_xml_fun_inter_list = object_type_lists[6]
-        if new_type_in_xml_function_list:
-            output_xml.write_function_type(new_type_in_xml_function_list)
-            for elem in new_type_in_xml_function_list:
-                elem[0].set_type(elem[1])
-                elem[0].set_operand()
-                print(f"The type of {elem[0].name} is {elem[0].type}")
+    if any(object_lists):
+        # Function
+        if object_lists[0]:
+            output_xml.write_function_type(object_lists[0])
+            print_type_message(object_lists[0])
+        # Data
+        if object_lists[1]:
+            output_xml.write_data_type(object_lists[1])
+            print_type_message(object_lists[1])
+        # State
+        if object_lists[2]:
+            output_xml.write_state_type(object_lists[2])
+            print_type_message(object_lists[2])
+        # Transition
+        if object_lists[3]:
+            output_xml.write_transition_type(object_lists[3])
+            print_type_message(object_lists[3])
+        # Functional element
+        if object_lists[4]:
+            output_xml.write_fun_elem_type(object_lists[4])
+            print_type_message(object_lists[4])
+        # Attribute
+        if object_lists[5]:
+            output_xml.write_attribute_type(object_lists[5])
+            print_type_message(object_lists[5])
+        # Functional Interface
+        if object_lists[6]:
+            output_xml.write_fun_interface_type(object_lists[6])
+            print_type_message(object_lists[6])
 
-        if new_type_in_xml_data_list:
-            output_xml.write_data_type(new_type_in_xml_data_list)
-            for data_type in new_type_in_xml_data_list:
-                data_type[0].set_type(data_type[1])
-                print(f"The type of {data_type[0].name} is {data_type[0].type}")
-
-        if new_type_in_xml_state_list:
-            output_xml.write_state_type(new_type_in_xml_state_list)
-            for state_type in new_type_in_xml_state_list:
-                state_type[0].set_type(state_type[1])
-                print(f"The type of {state_type[0].name} is {state_type[0].type}")
-
-        if new_type_in_xml_transition_list:
-            output_xml.write_transition_type(new_type_in_xml_transition_list)
-            for transition_type in new_type_in_xml_transition_list:
-                transition_type[0].set_type(transition_type[1])
-                print(f"The type of {transition_type[0].name} is {transition_type[0].type}")
-
-        if new_type_in_xml_fun_elem_list:
-            output_xml.write_fun_elem_type(new_type_in_xml_fun_elem_list)
-            for fun_elem_type in new_type_in_xml_fun_elem_list:
-                fun_elem_type[0].set_type(fun_elem_type[1])
-                print(f"The type of {fun_elem_type[0].name} is {fun_elem_type[0].type}")
-
-        if new_type_in_xml_attribute_list:
-            output_xml.write_attribute_type(new_type_in_xml_attribute_list)
-            for attribute_type in new_type_in_xml_attribute_list:
-                attribute_type[0].set_type(attribute_type[1])
-                print(f"The type of {attribute_type[0].name} is {attribute_type[0].type}")
-
-        if new_type_in_xml_fun_inter_list:
-            output_xml.write_fun_interface_type(new_type_in_xml_fun_inter_list)
-            for fun_inter_type in new_type_in_xml_fun_inter_list:
-                fun_inter_type[0].set_type(fun_inter_type[1])
-                print(f"The type of {fun_inter_type[0].name} is {fun_inter_type[0].type}")
-
-        update_list.append(1)
+        return 1
     else:
-        update_list.append(0)
+        return 0
 
-    return update_list
+
+def print_type_message(object_type_list):
+    """Print "set_type" user's message """
+    for object_type in object_type_list:
+        print(f"The type of {object_type.name} is {object_type.type}")
 
 
 def check_set_object_alias(alias_str_list, xml_function_list, xml_state_list, xml_transition_list,
