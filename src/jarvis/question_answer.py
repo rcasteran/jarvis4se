@@ -69,29 +69,26 @@ def matched_allocated(object_str, **kwargs):
 
 def get_objects_name_lists(**kwargs):
     """Returns lists of objects with their names depending on kwargs"""
-    xml_function_name_list, xml_data_name_list, xml_state_name_list = [], [], []
-    xml_fun_elem_name_list, xml_transition_name_list, xml_fun_inter_name_list = [], [], []
 
+    whole_objects_name_list = [[] for _ in range(8)]
     # Create object names/aliases lists
     if kwargs.get('xml_function_list', False):
-        xml_function_name_list = get_object_name(kwargs['xml_function_list'])
+        whole_objects_name_list[0] = get_object_name(kwargs['xml_function_list'])
     if kwargs.get('xml_data_list', False):
-        xml_data_name_list = get_object_name(kwargs['xml_data_list'])
+        whole_objects_name_list[1] = get_object_name(kwargs['xml_data_list'])
     if kwargs.get('xml_state_list', False):
-        xml_state_name_list = get_object_name(kwargs['xml_state_list'])
+        whole_objects_name_list[2] = get_object_name(kwargs['xml_state_list'])
     if kwargs.get('xml_fun_elem_list', False):
-        xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+        whole_objects_name_list[3] = get_object_name(kwargs['xml_fun_elem_list'])
     if kwargs.get('xml_transition_list', False):
-        xml_transition_name_list = get_object_name(kwargs['xml_transition_list'])
+        whole_objects_name_list[4] = get_object_name(kwargs['xml_transition_list'])
     if kwargs.get('xml_fun_inter_list', False):
-        xml_fun_inter_name_list = get_object_name(kwargs['xml_fun_inter_list'])
+        whole_objects_name_list[5] = get_object_name(kwargs['xml_fun_inter_list'])
+    if kwargs.get('xml_phy_elem_list', False):
+        whole_objects_name_list[6] = get_object_name(kwargs['xml_phy_elem_list'])
+    if kwargs.get('xml_phy_inter_list', False):
+        whole_objects_name_list[7] = get_object_name(kwargs['xml_phy_inter_list'])
 
-    whole_objects_name_list = [xml_function_name_list,
-                               xml_data_name_list,
-                               xml_state_name_list,
-                               xml_fun_elem_name_list,
-                               xml_transition_name_list,
-                               xml_fun_inter_name_list]
     return whole_objects_name_list
 
 
@@ -111,14 +108,16 @@ def check_get_object(object_str, **kwargs):
     if not [object_str in s for s in whole_objects_name_list]:
         print(f"{object_str} does not exist")
     else:
-        result_function = [object_str in whole_objects_name_list[0]]
-        result_data = [object_str in whole_objects_name_list[1]]
-        resul_state = [object_str in whole_objects_name_list[2]]
-        result_fun_elem = [object_str in whole_objects_name_list[3]]
-        result_transition = [object_str in whole_objects_name_list[4]]
-        result_fun_inter = [object_str in whole_objects_name_list[5]]
-        result = [*result_function, *result_data, *resul_state,  *result_fun_elem,
-                  *result_transition, *result_fun_inter]
+        result = [False]*8
+        result[0] = any(a == object_str for a in whole_objects_name_list[0])
+        result[1] = any(a == object_str for a in whole_objects_name_list[1])
+        result[2] = any(a == object_str for a in whole_objects_name_list[2])
+        result[3] = any(a == object_str for a in whole_objects_name_list[3])
+        result[4] = any(a == object_str for a in whole_objects_name_list[4])
+        result[5] = any(a == object_str for a in whole_objects_name_list[5])
+        result[6] = any(a == object_str for a in whole_objects_name_list[6])
+        result[7] = any(a == object_str for a in whole_objects_name_list[7])
+
         wanted_object = match_object(object_str, result, **kwargs)
         return wanted_object
 
@@ -149,6 +148,14 @@ def match_object(object_str, result, **kwargs):
         for fun_inter in kwargs['xml_fun_inter_list']:
             if object_str in (fun_inter.name, fun_inter.alias):
                 return fun_inter
+    elif result[6]:
+        for phy_elem in kwargs['xml_phy_elem_list']:
+            if object_str in (phy_elem.name, phy_elem.alias):
+                return phy_elem
+    elif result[7]:
+        for phy_inter in kwargs['xml_phy_inter_list']:
+            if object_str in (phy_inter.name, phy_inter.alias):
+                return phy_inter
 
 
 def get_object_info(wanted_object, **kwargs):
