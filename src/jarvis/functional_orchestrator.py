@@ -477,7 +477,7 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                                     if par:
                                         new_consumer_list.append(par)
                         elif [elem[0], function] in xml_producer_function_list:
-                            None
+                            pass
 
     update_list = add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml)
 
@@ -679,7 +679,7 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                                         new_producer_list.append(par)
 
                         elif [elem[0], function] in xml_consumer_function_list:
-                            None
+                            pass
 
     update_list = add_producer_function(new_producer_list, xml_producer_function_list, output_xml)
 
@@ -1309,7 +1309,7 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
             state_list.add(state)
         else:
             # print(state_name + " already exists (not added)")
-            None
+            pass
     if not state_list:
         update_list.append(0)
     else:
@@ -1358,7 +1358,7 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
             transition_list.add(transition)
         else:
             # print(state_name + " already exists (not added)")
-            None
+            pass
     if not transition_list:
         update_list.append(0)
     else:
@@ -1564,8 +1564,6 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
             alias_str = re.search(r"(.*)\s[-]\s", fun_elem_name, re.MULTILINE)
             if alias_str:
                 fun_elem.set_alias(alias_str.group(1))
-            # Set FunctionalElement's type
-            fun_elem.set_type(datamodel.StateType.UNKNOWN)
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             fun_elem.set_id(str(identifier.int)[:10])
@@ -1574,7 +1572,7 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
             functional_element_list.add(fun_elem)
         else:
             # print(fun_elem_name + " already exists (not added)")
-            None
+            pass
 
     if not functional_element_list:
         update_list.append(0)
@@ -1937,7 +1935,7 @@ def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, ou
             functional_interface_list.add(fun_inter)
         else:
             # print(fun_elem_name + " already exists (not added)")
-            None
+            pass
 
     if not functional_interface_list:
         update_list.append(0)
@@ -1967,10 +1965,8 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
     """
     output = False
     for exposes_str in exposes_str_list:
-        fun_elem = check_get_object(exposes_str[0],
-                                                    **{'xml_fun_elem_list': xml_fun_elem_list})
-        fun_inter = check_get_object(exposes_str[1],
-                                                     **{'xml_fun_inter_list': xml_fun_inter_list})
+        fun_elem = check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
+        fun_inter = check_get_object(exposes_str[1], **{'xml_fun_inter_list': xml_fun_inter_list})
 
         check_print_wrong_pair_object((exposes_str[0], fun_elem, 'Functional Element'),
                                       (exposes_str[1], fun_inter, 'Functional Interface'),
@@ -2011,10 +2007,9 @@ def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
             opposite_fun_elem_list.append(elem)
 
     for idx in range(0, len(opposite_fun_elem_list)-1):
-        if not check_parentality(opposite_fun_elem_list[idx],
-                                                 opposite_fun_elem_list[idx+1]) and \
-                not check_parentality(opposite_fun_elem_list[idx+1],
-                                                      opposite_fun_elem_list[idx]):
+        if not check_parentality(
+                opposite_fun_elem_list[idx], opposite_fun_elem_list[idx+1]) and \
+                not check_parentality(opposite_fun_elem_list[idx+1], opposite_fun_elem_list[idx]):
             check = False
             return check
 
