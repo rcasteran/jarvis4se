@@ -277,7 +277,7 @@ def case_chain_diagram(**kwargs):
 def case_sequence_diagram(**kwargs):
     # Create object names/aliases list
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(", ", ","))
-
+    object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
         if len(object_list_str) == 1 and \
                 any(s == object_list_str[0] for s in get_object_name(kwargs['xml_fun_inter_list'])):
