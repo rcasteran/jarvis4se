@@ -910,11 +910,11 @@ def delete_objects(to_be_deleted_lists, xml_lists, output_xml):
     return update_list
 
 
-# TODO: Clean this method
 def check_set_object_type(type_str_list, **kwargs):
     """
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
-    [object, type] lists for objects : Data/State/Function/Transition/FunctionalElement.
+    [object] lists for objects :
+    Data/State/Function/Transition/FunctionalElement/PhysicalElement/PhysicalInterface.
     Send lists to set_object_type() to write them within xml and then returns update_list from it.
 
         Parameters:
@@ -924,31 +924,45 @@ def check_set_object_type(type_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-
     object_type_lists = [[] for _ in range(9)]
-    function_type_list = []
-    state_type_list = []
-    data_type_list = []
-    transition_type_list = []
-    fun_elem_type_list = []
-    # Get __str__ list from FUNCTION_TYPE, DataType, StateType
-    for i in datamodel.FunctionType:
-        function_type_list.append(str(i).upper())
-    for j in datamodel.DataType:
-        data_type_list.append(str(j).upper())
-    for k in datamodel.StateType:
-        state_type_list.append(str(k).upper())
-    for m in datamodel.TransitionType:
-        transition_type_list.append(str(m).upper())
-    for n in datamodel.FunctionalElementType:
-        fun_elem_type_list.append(str(n).upper())
+    # Get __str__ list from FunctionType, DataType, StateType, TransitionType, FuncitonalElementType
+    function_type_list = [str(i).upper() for i in datamodel.FunctionType]
+    data_type_list = [str(i).upper() for i in datamodel.DataType]
+    state_type_list = [str(i).upper() for i in datamodel.StateType]
+    transition_type_list = [str(i).upper() for i in datamodel.TransitionType]
+    fun_elem_type_list = [str(i).upper() for i in datamodel.FunctionalElementType]
 
-    # Check if the wanted to object exists and the type can be set
+    # Check if the wanted object exists and the type can be set
     for object_str, type_name in type_str_list:
         object_to_set = check_get_object(object_str, **kwargs)
         if object_to_set is None:
             continue
-        if isinstance(object_to_set, datamodel.Attribute):
+        if isinstance(object_to_set, datamodel.Function):
+            check = check_new_type_in_list(object_to_set, type_name, function_type_list)
+            if check:
+                object_type_lists[0].append(object_to_set)
+
+        elif isinstance(object_to_set, datamodel.Data):
+            check = check_new_type_in_list(object_to_set, type_name, data_type_list)
+            if check:
+                object_type_lists[1].append(object_to_set)
+
+        elif isinstance(object_to_set, datamodel.State):
+            check = check_new_type_in_list(object_to_set, type_name, state_type_list)
+            if check:
+                object_type_lists[2].append(object_to_set)
+
+        elif isinstance(object_to_set, datamodel.Transition):
+            check = check_new_type_in_list(object_to_set, type_name, transition_type_list)
+            if check:
+                object_type_lists[3].append(object_to_set)
+
+        elif isinstance(object_to_set, datamodel.FunctionalElement):
+            check = check_new_type_in_list(object_to_set, type_name, fun_elem_type_list)
+            if check:
+                object_type_lists[4].append(object_to_set)
+
+        elif isinstance(object_to_set, datamodel.Attribute):
             if type_name != str(object_to_set.type):
                 object_to_set.set_type(type_name)
                 object_type_lists[5].append(object_to_set)
@@ -958,45 +972,15 @@ def check_set_object_type(type_str_list, **kwargs):
                 object_to_set.set_type(type_name)
                 object_type_lists[6].append(object_to_set)
 
-        elif isinstance(object_to_set, datamodel.Function):
-            if type_name.upper() in function_type_list:
-                if type_name.capitalize() != str(object_to_set.type):
-                    object_to_set.set_type(type_name.capitalize())
-                    object_type_lists[0].append(object_to_set)
-            else:
-                print_not_available_type(type_name, function_type_list)
+        elif isinstance(object_to_set, datamodel.PhysicalElement):
+            if type_name != str(object_to_set.type):
+                object_to_set.set_type(type_name)
+                object_type_lists[7].append(object_to_set)
 
-        elif isinstance(object_to_set, datamodel.Data):
-            if type_name.upper() in data_type_list:
-                if type_name.capitalize() != str(object_to_set.type):
-                    object_to_set.set_type(type_name.capitalize())
-                    object_type_lists[1].append(object_to_set)
-            else:
-                print_not_available_type(type_name, data_type_list)
-
-        elif isinstance(object_to_set, datamodel.State):
-            if type_name.upper() in state_type_list:
-                if type_name.capitalize() != str(object_to_set.type):
-                    object_to_set.set_type(type_name.capitalize())
-                    object_type_lists[2].append(object_to_set)
-            else:
-                print_not_available_type(type_name, state_type_list)
-
-        elif isinstance(object_to_set, datamodel.Transition):
-            if type_name.upper() in transition_type_list:
-                if type_name.capitalize() != str(object_to_set.type):
-                    object_to_set.set_type(type_name.capitalize())
-                    object_type_lists[3].append(object_to_set)
-            else:
-                print_not_available_type(type_name, transition_type_list)
-
-        elif isinstance(object_to_set, datamodel.FunctionalElement):
-            if type_name.upper() in fun_elem_type_list:
-                if type_name.capitalize() != str(object_to_set.type):
-                    object_to_set.set_type(type_name.capitalize())
-                    object_type_lists[4].append(object_to_set)
-            else:
-                print_not_available_type(type_name, fun_elem_type_list)
+        elif isinstance(object_to_set, datamodel.PhysicalInterface):
+            if type_name != str(object_to_set.type):
+                object_to_set.set_type(type_name)
+                object_type_lists[8].append(object_to_set)
         else:
             print(f"{object_to_set.name} can not be typed")
 
@@ -1005,10 +989,20 @@ def check_set_object_type(type_str_list, **kwargs):
     return update
 
 
-def print_not_available_type(type_name, type_list):
-    print(
-        f"The type {type_name} does not exist, available types are "
-        f": {', '.join(type_list)}.")
+def check_new_type_in_list(object_to_set, type_name, object_type_list):
+    """Check if type in specity object's type list and if changed"""
+    check = False
+    if type_name.upper() in object_type_list:
+        if type_name.capitalize() != str(object_to_set.type):
+            check = True
+            object_to_set.set_type(type_name.capitalize())
+
+        return check
+    else:
+        print(
+            f"The type {type_name} does not exist, available types are "
+            f": {', '.join(object_type_list)}.")
+        return check
 
 
 def set_object_type(object_lists, output_xml):
@@ -1052,6 +1046,14 @@ def set_object_type(object_lists, output_xml):
         if object_lists[6]:
             output_xml.write_fun_interface_type(object_lists[6])
             print_type_message(object_lists[6])
+        # Physical Element
+        if object_lists[7]:
+            output_xml.write_phy_elem_type(object_lists[7])
+            print_type_message(object_lists[7])
+        # Physical Interface
+        if object_lists[8]:
+            output_xml.write_phy_interface_type(object_lists[8])
+            print_type_message(object_lists[8])
 
         return 1
     else:
