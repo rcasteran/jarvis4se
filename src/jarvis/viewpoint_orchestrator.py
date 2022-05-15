@@ -25,7 +25,6 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
             Returns:
                 update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
         """
-    update_list = []
     chain_list = set()
     # Create a list with all chain names already in the xml
     xml_chain_name_list = get_object_name(xml_chain_list)
@@ -49,14 +48,12 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
         activate_chain(chain_name_str, xml_chain_list)
 
     if not chain_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_chain(chain_list)
         for chain in chain_list:
             print(chain.name + " is a chain")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def activate_chain(chain_name, xml_chain_list):
@@ -204,7 +201,6 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
     new_attribute_list = set()
     # Create attribute names list already in xml
     xml_attribute_name_list = get_object_name(xml_attribute_list)
@@ -222,15 +218,13 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
             new_attribute_list.add(new_attribute)
 
     if not new_attribute_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_attribute(new_attribute_list)
         for attribute in new_attribute_list:
             xml_attribute_list.add(attribute)
             print(attribute.name + " is an attribute")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml_function_list,
@@ -309,9 +303,9 @@ def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml
                             new_described_attribute_list.append(
                                 [current_attrib, (fun_inter, str(elem[2]))])
 
-    update_list = add_object_attribute(new_described_attribute_list, output_xml)
+    update = add_object_attribute(new_described_attribute_list, output_xml)
 
-    return update_list
+    return update
 
 
 def add_object_attribute(new_obj_attribute_list, output_xml):
@@ -326,9 +320,8 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
     if not new_obj_attribute_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_described_attribute_item(new_obj_attribute_list)
         # Warn the user once added within xml
@@ -336,6 +329,4 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
             described_attribute[0].add_described_item(described_attribute[1])
             print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
                   f"with value {described_attribute[1][1]}")
-        update_list.append(1)
-
-    return update_list
+        return 1
