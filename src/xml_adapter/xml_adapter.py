@@ -75,7 +75,7 @@ def get_functions(root):
 
         function_list.add(function)
         # Looking for functions with "functionalPart" i.e childs and create a list
-        xml_function_part_list = xml_function.iter('functionalPart')
+        xml_function_part_list = xml_function.iter('functionPart')
         for xml_function_part in xml_function_part_list:
             parent_list[xml_function_part.get('id')] = function.id
 
@@ -354,7 +354,7 @@ def get_physical_element(root):
 
         physical_element_list.add(phy_elem)
         # Looking for "physicalPart" i.e child and create a list
-        xml_functional_part_list = xml_phy_elem.iter('physicalPart')
+        xml_functional_part_list = xml_phy_elem.iter('physicalElementPart')
         for xml_state_part in xml_functional_part_list:
             phy_elem_parent_dict[xml_state_part.get('id')] = phy_elem.id
 
