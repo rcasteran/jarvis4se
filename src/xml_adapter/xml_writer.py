@@ -718,4 +718,6 @@ def get_object_tag(wanted_object):
         elem_tag = "state"
     elif isinstance(wanted_object, datamodel.Data):
         elem_tag = "data"
+    elif isinstance(wanted_object, datamodel.Chain):
+        elem_tag = "chain"
     return elem_tag

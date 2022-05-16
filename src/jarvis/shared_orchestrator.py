@@ -449,7 +449,7 @@ def check_set_object_type(type_str_list, **kwargs):
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
     [objects] ordered lists for:
     [[Function],[Data],[State],[Transition],[FunctionalElement],[Attribute],
-    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface]]
+    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface],[Chain]]
     Send lists to get_specific_obj_type() to write them within xml and then returns update from it.
 
         Parameters:
@@ -459,11 +459,12 @@ def check_set_object_type(type_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    object_type_lists = [[] for _ in range(9)]
+    object_type_lists = [[] for _ in range(10)]
     # Check if the wanted object exists and the type can be set
     for object_str, type_name in type_str_list:
         object_to_set = check_get_object(object_str, **kwargs)
         if object_to_set is None:
+            print(f"{object_str} does not exist")
             continue
 
         check, list_idx = check_new_type(object_to_set, type_name)
@@ -479,7 +480,7 @@ def check_new_type(object_to_set, type_name):
     """Check if type in specity object's type list and if changed"""
     check = False
     specific_obj_type_list, list_idx = get_specific_obj_type(object_to_set)
-    if list_idx in (0, 1, 2, 3, 4):
+    if list_idx in (0, 1, 2, 3, 4, 5):
         if type_name.upper() in specific_obj_type_list:
             if type_name.capitalize() != str(object_to_set.type):
                 check = True
@@ -489,7 +490,7 @@ def check_new_type(object_to_set, type_name):
                 f"The type {type_name} does not exist, available types are "
                 f": {', '.join(specific_obj_type_list)}.")
 
-    elif list_idx in (5, 6, 7, 8):
+    elif list_idx in (6, 7, 8, 9):
         if type_name != str(object_to_set.type):
             check = True
             object_to_set.set_type(type_name)
@@ -517,14 +518,17 @@ def get_specific_obj_type(object_to_set):
     elif isinstance(object_to_set, datamodel.FunctionalElement):
         specific_obj_type_list = [str(i).upper() for i in datamodel.FunctionalElementType]
         list_idx = 4
-    elif isinstance(object_to_set, datamodel.Attribute):
+    elif isinstance(object_to_set, datamodel.Chain):
+        specific_obj_type_list = [str(i).upper() for i in datamodel.ChainType]
         list_idx = 5
-    elif isinstance(object_to_set, datamodel.FunctionalInterface):
+    elif isinstance(object_to_set, datamodel.Attribute):
         list_idx = 6
-    elif isinstance(object_to_set, datamodel.PhysicalElement):
+    elif isinstance(object_to_set, datamodel.FunctionalInterface):
         list_idx = 7
-    elif isinstance(object_to_set, datamodel.PhysicalInterface):
+    elif isinstance(object_to_set, datamodel.PhysicalElement):
         list_idx = 8
+    elif isinstance(object_to_set, datamodel.PhysicalInterface):
+        list_idx = 9
 
     return specific_obj_type_list, list_idx
 
@@ -542,7 +546,7 @@ def set_object_type(object_lists, output_xml):
             1 if update, else 0
     """
     if any(object_lists):
-        for i in range(0, 9):
+        for i in range(0, 10):
             if object_lists[i]:
                 output_xml.write_object_type(object_lists[i])
                 print_type_message(object_lists[i])

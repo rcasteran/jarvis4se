@@ -70,7 +70,7 @@ def matched_allocated(object_str, **kwargs):
 def get_objects_name_lists(**kwargs):
     """Returns lists of objects with their names depending on kwargs"""
 
-    whole_objects_name_list = [[] for _ in range(9)]
+    whole_objects_name_list = [[] for _ in range(10)]
     # Create object names/aliases lists
     if kwargs.get('xml_function_list', False):
         whole_objects_name_list[0] = get_object_name(kwargs['xml_function_list'])
@@ -90,11 +90,13 @@ def get_objects_name_lists(**kwargs):
         whole_objects_name_list[7] = get_object_name(kwargs['xml_phy_inter_list'])
     if kwargs.get('xml_attribute_list', False):
         whole_objects_name_list[8] = get_object_name(kwargs['xml_attribute_list'])
+    if kwargs.get('xml_chain_list', False):
+        whole_objects_name_list[9] = get_object_name(kwargs['xml_chain_list'])
 
     return whole_objects_name_list
 
 
-# TODO: Use this method within functional_orchestrator.py
+# TODO: Use this method within xxxxxxx_orchestrator.py
 def check_get_object(object_str, **kwargs):
     """
     Returns the desired object from object's string
@@ -106,11 +108,10 @@ def check_get_object(object_str, **kwargs):
         wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
     """
     whole_objects_name_list = get_objects_name_lists(**kwargs)
-
-    if not [object_str in s for s in whole_objects_name_list]:
-        print(f"{object_str} does not exist")
+    if not any(object_str in s for s in whole_objects_name_list):
+        return None
     else:
-        result = [False]*9
+        result = [False]*10
         result[0] = any(a == object_str for a in whole_objects_name_list[0])  # Function
         result[1] = any(a == object_str for a in whole_objects_name_list[1])  # Data
         result[2] = any(a == object_str for a in whole_objects_name_list[2])  # State
@@ -120,6 +121,7 @@ def check_get_object(object_str, **kwargs):
         result[6] = any(a == object_str for a in whole_objects_name_list[6])  # Phy Elem
         result[7] = any(a == object_str for a in whole_objects_name_list[7])  # Phy Inter
         result[8] = any(a == object_str for a in whole_objects_name_list[8])  # Attribute
+        result[9] = any(a == object_str for a in whole_objects_name_list[9])  # Chain
         wanted_object = match_object(object_str, result, **kwargs)
         return wanted_object
 
@@ -162,6 +164,10 @@ def match_object(object_str, result, **kwargs):
         for attribute in kwargs['xml_attribute_list']:
             if object_str in (attribute.name, attribute.alias):
                 return attribute
+    elif result[9]:
+        for chain in kwargs['xml_chain_list']:
+            if object_str == chain.name:
+                return chain
 
 
 def get_object_info(wanted_object, **kwargs):
