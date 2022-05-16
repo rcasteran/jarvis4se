@@ -53,16 +53,6 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write function's type by list [function]
-    def write_function_type(self, function_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for function in function_type_list:
-                for function_tag in root.findall(".//function[@id='" + function.id + "']"):
-                    function_tag.set('type', function.type)
-        self.write()
-
     # Method to write function's alias by list [function, alias]
     def write_function_alias(self, function_alias_list):
         with open(self.file, 'rb') as file:
@@ -112,17 +102,6 @@ class GenerateXML:
 
                     _predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
 
-        self.write()
-
-    # Method to write data's type by list [data]
-    def write_data_type(self, data_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-
-            for data in data_type_list:
-                for data_tag in root.findall(".//data[@id='" + data.id + "']"):
-                    data_tag.set('type', data.type)
         self.write()
 
     # Method to write consumers by list [data_name, function]
@@ -224,16 +203,6 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
         self.write()
 
-    # Method to write state's type by list [state]
-    def write_state_type(self, state_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for state in state_type_list:
-                for state_tag in root.findall(".//state[@id='" + state.id + "']"):
-                    state_tag.set('type', state.type)
-        self.write()
-
     # Method to write state's alias by list [function, alias]
     def write_state_alias(self, state_alias_list):
         with open(self.file, 'rb') as file:
@@ -299,16 +268,6 @@ class GenerateXML:
                                                        'source': str(transition.source),
                                                        'destination': str(transition.destination)})
                     _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
-        self.write()
-
-    # Method to write transition's type by list [transition]
-    def write_transition_type(self, transition_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for transition in transition_type_list:
-                for transition_tag in root.findall(".//transition[@id='" + transition.id + "']"):
-                    transition_tag.set('type', transition.type)
         self.write()
 
     # Method to write transition's alias by list [transition, alias]
@@ -467,17 +426,6 @@ class GenerateXML:
                     fun_elem_tag.getparent().remove(fun_elem_tag)
         self.write()
 
-    # Method to write fun_elem's type by list [fun_elem]
-    def write_fun_elem_type(self, fun_elem_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for fun_elem in fun_elem_type_list:
-                for fun_elem_tag in root.findall(".//functionalElement[@id='" + fun_elem.id
-                                                 + "']"):
-                    fun_elem_tag.set('type', fun_elem.type)
-        self.write()
-
     # Method to write fun_elem's alias by list [fun_elem, alias]
     def write_fun_elem_alias(self, fun_elem_alias_list):
         with open(self.file, 'rb') as file:
@@ -550,17 +498,6 @@ class GenerateXML:
                                                                {'id': item[0].id, 'value': item[1]})
         self.write()
 
-    # Method to write attribute's type by list [Attribute]
-    def write_attribute_type(self, attribute_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for attribute in attribute_type_list:
-                for attribute_tag in root.findall(".//attribute[@id='" + attribute.id
-                                                  + "']"):
-                    attribute_tag.set('type', attribute.type)
-        self.write()
-
     # Method to write functional interfaces from interface's list
     def write_functional_interface(self, functional_interface_list):
         with open(self.file, 'rb') as file:
@@ -593,17 +530,6 @@ class GenerateXML:
                         tag = fun_interface_tag.find('allocatedDataList')
                         _allocated_data_tag = etree.SubElement(tag, "allocatedData",
                                                                {'id': data.id})
-        self.write()
-
-    # Method to write functional interface's type by list [Fun interface, type_str]
-    def write_fun_interface_type(self, fun_inter_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for fun_inter in fun_inter_type_list:
-                for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
-                                                  fun_inter.id + "']"):
-                    fun_inter_tag.set('type', fun_inter.type)
         self.write()
 
     # Method to write fun_inter's alias by list [fun_inter, alias]
@@ -684,17 +610,6 @@ class GenerateXML:
                     phy_elem_tag.getparent().remove(phy_elem_tag)
         self.write()
 
-    # Method to write phy_elem's type by list [phy_elem]
-    def write_phy_elem_type(self, phy_elem_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for phy_elem in phy_elem_list:
-                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id
-                                                 + "']"):
-                    phy_elem_tag.set('type', phy_elem.type)
-        self.write()
-
     # Method to write phy_elem's alias by list [phy_elem]
     def write_phy_elem_alias(self, phy_elem_list):
         with open(self.file, 'rb') as file:
@@ -740,17 +655,6 @@ class GenerateXML:
                             tag, "allocatedFunctionalInterface", {'id': str(fun_inter.id)})
         self.write()
 
-    # Method to write physical interface's type by list [Phy interface]
-    def write_phy_interface_type(self, phy_inter_type_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for phy_inter in phy_inter_type_list:
-                for phy_inter_tag in root.findall(".//physicalInterface[@id='" +
-                                                  phy_inter.id + "']"):
-                    phy_inter_tag.set('type', phy_inter.type)
-        self.write()
-
     # Method to write phy_inter's alias by list [phy_inter]
     def write_phy_interface_alias(self, phy_inter_alias_list):
         with open(self.file, 'rb') as file:
@@ -764,23 +668,54 @@ class GenerateXML:
 
     # Method to write derived by list [Object]
     def write_derived(self, derived_list):
-        if isinstance(derived_list[0], datamodel.PhysicalInterface):
-            elem_tag = "physicalInterface"
-        elif isinstance(derived_list[0], datamodel.PhysicalElement):
-            elem_tag = "physicalElement"
-        elif isinstance(derived_list[0], datamodel.Function):
-            elem_tag = "function"
-        elif isinstance(derived_list[0], datamodel.FunctionalElement):
-            elem_tag = "functionalElement"
-        elif isinstance(derived_list[0], datamodel.FunctionalInterface):
-            elem_tag = "functionalInterface"
-        else:
-            return
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for elem in derived_list:
-                for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
-                                                  elem.id + "']"):
-                    fun_inter_tag.set('derived', str(elem.derived.id))
-        self.write()
+        elem_tag = get_object_tag(derived_list[0])
+        if elem_tag in derived_obj_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for elem in derived_list:
+                    for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
+                                                      elem.id + "']"):
+                        fun_inter_tag.set('derived', str(elem.derived.id))
+            self.write()
+
+    def write_object_type(self, object_list):
+        elem_tag = get_object_tag(object_list[0])
+        if elem_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for obj in object_list:
+                    for object_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        object_tag.set('type', obj.type)
+            self.write()
+
+
+derived_obj_tag = ("physicalInterface",
+                   "physicalElement",
+                   "function",
+                   "functionalElement",
+                   "functionalInterface")
+
+
+def get_object_tag(wanted_object):
+    elem_tag = None
+    if isinstance(wanted_object, datamodel.PhysicalInterface):
+        elem_tag = "physicalInterface"
+    elif isinstance(wanted_object, datamodel.PhysicalElement):
+        elem_tag = "physicalElement"
+    elif isinstance(wanted_object, datamodel.Function):
+        elem_tag = "function"
+    elif isinstance(wanted_object, datamodel.FunctionalElement):
+        elem_tag = "functionalElement"
+    elif isinstance(wanted_object, datamodel.FunctionalInterface):
+        elem_tag = "functionalInterface"
+    elif isinstance(wanted_object, datamodel.Attribute):
+        elem_tag = "attribute"
+    elif isinstance(wanted_object, datamodel.Transition):
+        elem_tag = "transition"
+    elif isinstance(wanted_object, datamodel.State):
+        elem_tag = "state"
+    elif isinstance(wanted_object, datamodel.Data):
+        elem_tag = "data"
+    return elem_tag
