@@ -178,40 +178,6 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
     return update_list
 
 
-def get_allocated_child(i, xml_fun_elem_list):
-    """
-    Check if the parent state/function is already allocated to a fun elem and create list to add
-    its child also (if not already allocated)
-
-        Parameters:
-            i ([State/Function]) : parent object, child object
-            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-
-        Returns:
-            output_list ([FunctionalElement, State/Function]) : Allocation Relationships that need
-            to be added
-    """
-    output_list = []
-    object_type = get_object_type(i[0])
-    allocated_list = None
-    for fun_elem in xml_fun_elem_list:
-        if object_type == "state":
-            allocated_list = fun_elem.allocated_state_list.copy()
-        elif object_type == "function":
-            allocated_list = fun_elem.allocated_function_list.copy()
-        if allocated_list:
-            for allocated_object in allocated_list:
-                if allocated_object == i[0].id:
-                    if i[1].id not in allocated_list:
-                        if object_type == "state":
-                            fun_elem.add_allocated_state(i[1].id)
-                        elif object_type == "function":
-                            fun_elem.add_allocated_function(i[1].id)
-                        output_list.append([fun_elem, i[1]])
-
-    return output_list
-
-
 def check_add_allocated_item(item, xml_item_list, xml_chain_list):
     """
     Checks if a chain is already activated, if yes check if item isn't already
@@ -450,7 +416,7 @@ def check_set_object_type(type_str_list, **kwargs):
     [objects] ordered lists for:
     [[Function],[Data],[State],[Transition],[FunctionalElement],[Attribute],
     [FuncitonalInterface],[PhysicalElement],[PhysicalInterface],[Chain]]
-    Send lists to get_specific_obj_type() to write them within xml and then returns update from it.
+    Send lists to set_object_type() to write them within xml and then returns update from it.
 
         Parameters:
             type_str_list ([str]) : Lists of string from jarvis cell
@@ -549,153 +515,92 @@ def set_object_type(object_lists, output_xml):
         for i in range(0, 10):
             if object_lists[i]:
                 output_xml.write_object_type(object_lists[i])
-                print_type_message(object_lists[i])
+                for object_type in object_lists[i]:
+                    print(f"The type of {object_type.name} is {object_type.type}")
         return 1
     else:
         return 0
 
 
-def print_type_message(object_type_list):
-    """Print "set_type" user's message """
-    for object_type in object_type_list:
-        print(f"The type of {object_type.name} is {object_type.type}")
-
-
-def check_set_object_alias(alias_str_list, xml_function_list, xml_state_list, xml_transition_list,
-                           xml_fun_elem_list, xml_fun_inter_list, output_xml):
+def check_set_object_alias(alias_str_list, **kwargs):
     """
     Check if each string in alias_str_list are corresponding to an actual object's name/alias,
-    create [object, alias] lists for objects : State/Function/Transition/FunctionalElement.
-    Send lists to set_object_alias() to write them within xml and then returns update_list from it.
+    create [objects] ordered lists for:
+    [[Function],[State],[Transition],[FunctionalElement],[Attribute],
+    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface]]
+    Send lists to set_object_type() to write them within xml and then returns update from it.
 
         Parameters:
             alias_str_list ([str]) : Lists of string from jarvis cell
-            xml_function_list ([Function]) : function list from xml parsing
-            xml_state_list ([State]) : state list from xml parsing
-            xml_transition_list ([Transition]) : Transition list from xml parsing
-            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            xml_fun_inter_list ([FunctionalINterface]) : functional interface list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            kwargs (dict) : whole xml lists
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    object_from_xml_function_list = []
-    object_from_xml_state_list = []
-    object_from_xml_transition_list = []
-    object_from_xml_fun_elem_list = []
-    object_from_xml_fun_inter_list = []
-    # Create object names/aliases lists
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_state_name_list = get_object_name(xml_state_list)
-    xml_transition_name_list = get_object_name(xml_transition_list)
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_fun_inter_name_list = get_object_name(xml_fun_inter_list)
-
-    concatenated_lists = [*xml_function_name_list, *xml_state_name_list, *xml_transition_name_list,
-                          *xml_fun_elem_name_list, *xml_fun_inter_name_list]
-
+    object_lists = [[] for _ in range(8)]
     # Check if the wanted to object exists and the type can be set
-    for object_to_set_alias, alias_name in alias_str_list:
-        if not any(object_to_set_alias in s for s in concatenated_lists):
-            print(f"The object {object_to_set_alias} does not exist")
-        else:
-            if object_to_set_alias in xml_function_name_list:
-                for fun in xml_function_list:
-                    if object_to_set_alias == fun.name or object_to_set_alias == fun.alias:
-                        if fun.alias != alias_name:
-                            object_from_xml_function_list.append([fun, alias_name])
-                        # Else do nothing
-            elif object_to_set_alias in xml_state_name_list:
-                for sta in xml_state_list:
-                    if object_to_set_alias == sta.name or object_to_set_alias == sta.alias:
-                        if sta.alias != alias_name:
-                            object_from_xml_state_list.append([sta, alias_name])
-                        # Else do nothing
-            elif object_to_set_alias in xml_transition_name_list:
-                for transition in xml_transition_list:
-                    if object_to_set_alias == transition.name or \
-                            object_to_set_alias == transition.alias:
-                        if transition.alias != alias_name:
-                            object_from_xml_transition_list.append([transition, alias_name])
-                        # Else do nothing
-            elif object_to_set_alias in xml_fun_elem_name_list:
-                for fun_elem in xml_fun_elem_list:
-                    if object_to_set_alias == fun_elem.name or \
-                            object_to_set_alias == fun_elem.alias:
-                        if fun_elem.alias != alias_name:
-                            object_from_xml_fun_elem_list.append([fun_elem, alias_name])
+    for object_to_set_alias, alias_str in alias_str_list:
+        object_to_set = check_get_object(object_to_set_alias, **kwargs)
+        if object_to_set is None:
+            print(f"{object_to_set_alias} does not exist")
+            continue
 
-            elif object_to_set_alias in xml_fun_inter_name_list:
-                for fun_inter in xml_fun_inter_list:
-                    if object_to_set_alias == fun_inter.name or \
-                            object_to_set_alias == fun_inter.alias:
-                        if fun_inter.alias != alias_name:
-                            object_from_xml_fun_inter_list.append([fun_inter, alias_name])
+        idx = check_new_alias(object_to_set, alias_str)
+        if isinstance(idx, int):
+            object_lists[idx].append(object_to_set)
 
-    output_lists = [object_from_xml_function_list, object_from_xml_state_list,
-                    object_from_xml_transition_list, object_from_xml_fun_elem_list,
-                    object_from_xml_fun_inter_list]
-    update_list = set_object_alias(output_lists, output_xml)
+    update_list = set_object_alias(object_lists, kwargs['output_xml'])
 
     return update_list
 
 
-def set_object_alias(object_alias_lists, output_xml):
-    """
-    Check if input lists are not empty, write in xml for each list and return update list if some
-    updates has been made
+def check_new_alias(object_to_set, alias_str):
+    """Check that alias is new and object has en alias attribute, then returns corresponding
+    object's type index"""
+    list_idx = None
+    if object_to_set.alias != alias_str:
+        object_to_set.set_alias(alias_str)
+        if isinstance(object_to_set, datamodel.Function):
+            list_idx = 0
+        elif isinstance(object_to_set, datamodel.State):
+            list_idx = 1
+        elif isinstance(object_to_set, datamodel.Transition):
+            list_idx = 2
+        elif isinstance(object_to_set, datamodel.FunctionalElement):
+            list_idx = 3
+        elif isinstance(object_to_set, datamodel.Attribute):
+            list_idx = 4
+        elif isinstance(object_to_set, datamodel.FunctionalInterface):
+            list_idx = 5
+        elif isinstance(object_to_set, datamodel.PhysicalElement):
+            list_idx = 6
+        elif isinstance(object_to_set, datamodel.PhysicalInterface):
+            list_idx = 7
 
+    return list_idx
+
+
+def set_object_alias(object_lists, output_xml):
+    """
+    Check if input lists are not empty, write in xml for each list and return update if some
+    updates has been made.
         Parameters:
-            object_alias_lists ([Object State/Function/Transition/FunctionalElement, alias]) :
-            object with new alias
+            object_lists ([Object]) : object with new alias
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
-    update_list = []
-    if any(object_alias_lists):
-        new_alias_in_xml_function_list = object_alias_lists[0]
-        new_alias_in_xml_state_list = object_alias_lists[1]
-        new_alias_in_xml_transition_list = object_alias_lists[2]
-        new_alias_in_xml_fun_elem_list = object_alias_lists[3]
-        new_alias_in_xml_fun_inter_list = object_alias_lists[4]
-        if new_alias_in_xml_function_list:
-            output_xml.write_function_alias(new_alias_in_xml_function_list)
-            for elem in new_alias_in_xml_function_list:
-                elem[0].set_alias(elem[1])
-                print(f"The alias for {elem[0].name} is {elem[1]}")
+    if any(object_lists):
+        for i in range(0, 8):
+            if object_lists[i]:
+                output_xml.write_object_alias(object_lists[i])
+                for object_alias in object_lists[i]:
+                    print(f"The alias for {object_alias.name} is {object_alias.alias}")
 
-        if new_alias_in_xml_state_list:
-            output_xml.write_state_alias(new_alias_in_xml_state_list)
-            for elem in new_alias_in_xml_state_list:
-                elem[0].set_alias(elem[1])
-                print(f"The alias for {elem[0].name} is {elem[1]}")
-
-        if new_alias_in_xml_transition_list:
-            output_xml.write_transition_alias(new_alias_in_xml_transition_list)
-            for transition_alias in new_alias_in_xml_transition_list:
-                transition_alias[0].set_alias(transition_alias[1])
-                print(f"The alias for {transition_alias[0].name} is {transition_alias[1]}")
-
-        if new_alias_in_xml_fun_elem_list:
-            output_xml.write_fun_elem_alias(new_alias_in_xml_fun_elem_list)
-            for fun_elem_alias in new_alias_in_xml_fun_elem_list:
-                fun_elem_alias[0].set_alias(fun_elem_alias[1])
-                print(f"The alias for {fun_elem_alias[0].name} is {fun_elem_alias[1]}")
-
-        if new_alias_in_xml_fun_inter_list:
-            output_xml.write_fun_interface_alias(new_alias_in_xml_fun_inter_list)
-            for fun_inter_alias in new_alias_in_xml_fun_inter_list:
-                fun_inter_alias[0].set_alias(fun_inter_alias[1])
-                print(f"The alias for {fun_inter_alias[0].name} is {fun_inter_alias[1]}")
-
-        update_list.append(1)
+        return 1
     else:
-        update_list.append(0)
-
-    return update_list
+        return 0
 
 
 def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list, xml_function_list,
@@ -1010,3 +915,37 @@ def recursive_allocation(elem, output_xml):
                   f"element {elem[0].name}")
 
     return None
+
+
+def get_allocated_child(i, xml_fun_elem_list):
+    """
+    Check if the parent state/function is already allocated to a fun elem and create list to add
+    its child also (if not already allocated)
+
+        Parameters:
+            i ([State/Function]) : parent object, child object
+            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
+
+        Returns:
+            output_list ([FunctionalElement, State/Function]) : Allocation Relationships that need
+            to be added
+    """
+    output_list = []
+    object_type = get_object_type(i[0])
+    allocated_list = None
+    for fun_elem in xml_fun_elem_list:
+        if object_type == "state":
+            allocated_list = fun_elem.allocated_state_list.copy()
+        elif object_type == "function":
+            allocated_list = fun_elem.allocated_function_list.copy()
+        if allocated_list:
+            for allocated_object in allocated_list:
+                if allocated_object == i[0].id:
+                    if i[1].id not in allocated_list:
+                        if object_type == "state":
+                            fun_elem.add_allocated_state(i[1].id)
+                        elif object_type == "function":
+                            fun_elem.add_allocated_function(i[1].id)
+                        output_list.append([fun_elem, i[1]])
+
+    return output_list

@@ -203,13 +203,7 @@ def matched_attribute(attribute_name_str, **kwargs):
 
 def matched_alias(alias_str_list, **kwargs):
     """Get "alias" declaration"""
-    out = shared_orchestrator.check_set_object_alias(alias_str_list,
-                                                     kwargs['xml_function_list'],
-                                                     kwargs['xml_state_list'],
-                                                     kwargs['xml_transition_list'],
-                                                     kwargs['xml_fun_elem_list'],
-                                                     kwargs['xml_fun_inter_list'],
-                                                     kwargs['output_xml'])
+    out = shared_orchestrator.check_set_object_alias(alias_str_list, **kwargs)
     return out
 
 

@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module containing class methods to write within xml"""
 # Libraries
 from lxml import etree
 
 import datamodel
 
 
-# Class to generate XML
 class GenerateXML:
+    """Class to generate XML"""
     def __init__(self, xml_file):
-        # Initialize XML structure/tags
+        """Initialize XML structure/tags and file's object"""
         self.root = etree.Element("systemAnalysis")
         fun_arch = etree.SubElement(self.root, "funcArch")
         fun_arch_tags = ['functionList', 'dataList', 'stateList', 'transitionList',
@@ -31,8 +32,8 @@ class GenerateXML:
         else:
             self.file = "Output.xml"
 
-    # Method to write functions from function's list
     def write_function(self, function_list):
+        """Method to write functions from function's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -53,19 +54,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write function's alias by list [function, alias]
-    def write_function_alias(self, function_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on [function, type] list
-            for function in function_alias_list:
-                for function_tag in root.findall(".//function[@id='" + function[0].id + "']"):
-                    function_tag.set('alias', function[1])
-        self.write()
-
-    # Method to write child by list [parent, child]
     def write_function_child(self, child_function_list):
+        """Method to write child by list [parent, child]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -78,8 +68,8 @@ class GenerateXML:
                                                                 {'id': child.id})
         self.write()
 
-    # Method to add data flows
     def write_data(self, data_list):
+        """Method to add data flows"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -104,8 +94,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write consumers by list [data_name, function]
     def write_consumer(self, consumer_list):
+        """Method to write consumers by list [data_name, function]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -121,8 +111,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write producers by list [data_name, function]
     def write_producer(self, producer_list):
+        """Method to write producers by list [data_name, function]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -134,8 +124,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write predecessors by list [data, predecessor]
     def write_predecessor(self, predecessor_list):
+        """Method to write predecessors by list [data, predecessor]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -148,8 +138,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to remove function by list [function]
     def delete_function(self, delete_function_list):
+        """Method to remove function by list [function]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -158,8 +148,8 @@ class GenerateXML:
                     function_tag.getparent().remove(function_tag)
         self.write()
 
-    # Method to remove data by list [data]
     def delete_data(self, delete_data_list):
+        """Method to remove data by list [data]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -168,8 +158,8 @@ class GenerateXML:
                     data_tag.getparent().remove(data_tag)
         self.write()
 
-    # Method to delete the parents (consumer or producer) when flow is within a component
     def delete_single_consumer_producer(self, data, function, value):
+        """Method to delete the parents (consumer or producer) when flow is within a component"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -180,13 +170,13 @@ class GenerateXML:
                 tag.getparent().remove(tag)
         self.write()
 
-    # Method to write within XML file
     def write(self):
+        """Method to write within XML file"""
         with open(self.file, "wb") as file:
             self.tree.write(file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
-    # Method to write states from state's list
     def write_state(self, state_list):
+        """Method to write states from state's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -203,18 +193,8 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
         self.write()
 
-    # Method to write state's alias by list [function, alias]
-    def write_state_alias(self, state_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for state in state_alias_list:
-                for state_tag in root.findall(".//state[@id='" + state[0].id + "']"):
-                    state_tag.set('alias', state[1])
-        self.write()
-
-    # Method to write child's state by list [parent, child]
     def write_state_child(self, child_state_list):
+        """Method to write child's state by list [parent, child]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -227,8 +207,8 @@ class GenerateXML:
                                                            {'id': child.id})
         self.write()
 
-    # Method to write allocated function by list [state, allocated_function]
     def write_allocated_function_to_state(self, state_function_list):
+        """Method to write allocated function by list [state, allocated_function]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -241,8 +221,8 @@ class GenerateXML:
                                                                 {'id': function.id})
         self.write()
 
-    # Method to delete state by list [state]
     def delete_state(self, delete_state_list):
+        """Method to delete state by list [state]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -251,8 +231,8 @@ class GenerateXML:
                     state_tag.getparent().remove(state_tag)
         self.write()
 
-    # Method to write transition from transition's list
     def write_transition(self, transition_list):
+        """Method to write transition from transition's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -270,18 +250,8 @@ class GenerateXML:
                     _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
         self.write()
 
-    # Method to write transition's alias by list [transition, alias]
-    def write_transition_alias(self, transition_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for transition in transition_alias_list:
-                for transition_tag in root.findall(".//transition[@id='" + transition[0].id + "']"):
-                    transition_tag.set('alias', transition[1])
-        self.write()
-
-    # Method to write transition's condition by list [transition, condition]
     def write_transition_condition(self, transition_condition_list):
+        """Method to write transition's condition by list [transition, condition]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -293,8 +263,8 @@ class GenerateXML:
                                                            {'text': str(condition)})
         self.write()
 
-    # Method to write transition's source by list [transition, source]
     def write_source(self, transition_source_list):
+        """Method to write transition's source by list [transition, source]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -303,8 +273,8 @@ class GenerateXML:
                     state_tag.set('source', transition_src[1].id)
         self.write()
 
-    # Method to write transition's destination by list [transition, destination]
     def write_destination(self, transition_destination_list):
+        """Method to write transition's destination by list [transition, destination]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -313,8 +283,8 @@ class GenerateXML:
                     state_tag.set('destination', transition_dest[1].id)
         self.write()
 
-    # Method to delete transition by list [transition]
     def delete_transition(self, delete_transition_list):
+        """Method to delete transition by list [transition]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -323,8 +293,8 @@ class GenerateXML:
                     transition_tag.getparent().remove(transition_tag)
         self.write()
 
-    # Method to write functional element from functional elements list
     def write_functional_element(self, functional_element_list):
+        """Method to write functional element from functional elements list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -353,8 +323,8 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    # Method to write child by list [parent, child]
     def write_functional_element_child(self, fun_elem_child_list):
+        """Method to write child by list [parent, child]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -368,8 +338,8 @@ class GenerateXML:
                                                                         {'id': child.id})
         self.write()
 
-    # Method to write allocated state by list [fun_elem, allocated_state]
     def write_allocated_state(self, fun_elem_state_list):
+        """Method to write allocated state by list [fun_elem, allocated_state]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -382,8 +352,8 @@ class GenerateXML:
                                                                 {'id': state.id})
         self.write()
 
-    # Method to write allocated function by list [fun_elem, allocated_function]
     def write_allocated_function(self, fun_elem_function_list):
+        """Method to write allocated function by list [fun_elem, allocated_function]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -396,8 +366,8 @@ class GenerateXML:
                                                                 {'id': function.id})
         self.write()
 
-    # Method to write exposed interfaces by list [fun_elem, exposed_interface]
     def write_exposed_interface(self, fun_elem_inter_list):
+        """Method to write exposed interfaces by list [fun_elem, exposed_interface]"""
         if isinstance(fun_elem_inter_list[0][0], datamodel.FunctionalElement):
             string_tag = ".//functionalElement"
         else:
@@ -416,8 +386,8 @@ class GenerateXML:
                                                                   {'id': inter.id})
         self.write()
 
-    # Method to delete functional element by list [functional element]
     def delete_functional_element(self, delete_fun_elem_list):
+        """Method to delete functional element by list [functional element]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -426,19 +396,8 @@ class GenerateXML:
                     fun_elem_tag.getparent().remove(fun_elem_tag)
         self.write()
 
-    # Method to write fun_elem's alias by list [fun_elem, alias]
-    def write_fun_elem_alias(self, fun_elem_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for fun_elem in fun_elem_alias_list:
-                for fun_elem_tag in root.findall(".//functionalElement[@id='" + fun_elem[0].id
-                                                 + "']"):
-                    fun_elem_tag.set('alias', fun_elem[1])
-        self.write()
-
-    # Method to write chains from chain's list
     def write_chain(self, chain_list):
+        """Method to write chains from chain's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -452,8 +411,8 @@ class GenerateXML:
                     _allocated_item_list_tag = etree.SubElement(chain_tag, "allocatedItemList")
         self.write()
 
-    # Method to write allocated item by list [chain, allocated_item]
     def write_allocated_chain_item(self, chain_item_list):
+        """Method to write allocated item by list [chain, allocated_item]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -466,8 +425,8 @@ class GenerateXML:
                                                                {'id': item.id})
         self.write()
 
-    # Method to write attributes from attribute's list
     def write_attribute(self, attribute_list):
+        """Method to write attributes from attribute's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -484,8 +443,8 @@ class GenerateXML:
 
         self.write()
 
-    # Method to write described item by list [attribute, (described_item, value)]
     def write_described_attribute_item(self, attribute_item_list):
+        """Method to write described item by list [attribute, (described_item, value)]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -498,8 +457,8 @@ class GenerateXML:
                                                                {'id': item[0].id, 'value': item[1]})
         self.write()
 
-    # Method to write functional interfaces from interface's list
     def write_functional_interface(self, functional_interface_list):
+        """Method to write functional interfaces from interface's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -518,8 +477,8 @@ class GenerateXML:
                                                                 "allocatedDataList")
         self.write()
 
-    # Method to write allocated data by list [Functional Interface, allocated_data]
     def write_fun_interface_allocated_data(self, fun_inter_data_list):
+        """Method to write allocated data by list [Functional Interface, allocated_data]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -532,19 +491,8 @@ class GenerateXML:
                                                                {'id': data.id})
         self.write()
 
-    # Method to write fun_inter's alias by list [fun_inter, alias]
-    def write_fun_interface_alias(self, fun_inter_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for fun_inter_alias in fun_inter_alias_list:
-                for fun_inter_tag in root.findall(".//functionalInterface[@id='" +
-                                                  fun_inter_alias[0].id + "']"):
-                    fun_inter_tag.set('alias', fun_inter_alias[1])
-        self.write()
-
-    # Method to write physical element from physical elements list
     def write_physical_element(self, physical_element_list):
+        """Method to write physical element from physical elements list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -571,8 +519,8 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    # Method to write child by list [parent, child]
     def write_physical_element_child(self, phy_elem_child_list):
+        """Method to write child by list [parent, child]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -586,8 +534,8 @@ class GenerateXML:
                                                                  {'id': child.id})
         self.write()
 
-    # Method to write allocated fun_elem by list [phy_elem, allocated_fun_elem]
     def write_allocated_fun_elem(self, phy_elem_fun_elem_list):
+        """Method to write allocated fun_elem by list [phy_elem, allocated_fun_elem]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -600,8 +548,8 @@ class GenerateXML:
                             tag, "allocatedFunctionalElement", {'id': fun_elem.id})
         self.write()
 
-    # Method to delete functional element by list [physical element]
     def delete_physical_element(self, delete_phy_elem_list):
+        """Method to delete functional element by list [physical element]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -610,19 +558,8 @@ class GenerateXML:
                     phy_elem_tag.getparent().remove(phy_elem_tag)
         self.write()
 
-    # Method to write phy_elem's alias by list [phy_elem]
-    def write_phy_elem_alias(self, phy_elem_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for phy_elem in phy_elem_list:
-                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id
-                                                 + "']"):
-                    phy_elem_tag.set('alias', str(phy_elem.alias))
-        self.write()
-
-    # Method to write physical interfaces from interface's list
     def write_physical_interface(self, physical_interface_list):
+        """Method to write physical interfaces from interface's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -641,8 +578,8 @@ class GenerateXML:
                         phy_interface_tag, "allocatedFunctionalInterfaceList")
         self.write()
 
-    # Method to write allocated fun_inter by list [Physical Interface, allocated_fun_inter]
     def write_phy_interface_allocated_fun_inter(self, phy_inter_fun_inter_list):
+        """Method to write allocated fun_inter by list [Physical Interface, allocated_fun_inter]"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
@@ -655,19 +592,20 @@ class GenerateXML:
                             tag, "allocatedFunctionalInterface", {'id': str(fun_inter.id)})
         self.write()
 
-    # Method to write phy_inter's alias by list [phy_inter]
-    def write_phy_interface_alias(self, phy_inter_alias_list):
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for phy_inter in phy_inter_alias_list:
-                for phy_inter_tag in root.findall(".//physicalInterface[@id='" +
-                                                  phy_inter.id + "']"):
-                    phy_inter_tag.set('alias', str(phy_inter.alias))
-        self.write()
+    def write_object_alias(self, object_list):
+        """Method to write object's alias by list [object]"""
+        elem_tag = get_object_tag(object_list[0])
+        if elem_tag not in no_alias_obj_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for obj in object_list:
+                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        obj_tag.set('alias', str(obj.alias))
+            self.write()
 
-    # Method to write derived by list [Object]
     def write_derived(self, derived_list):
+        """Method to write derived by list [Object]"""
         elem_tag = get_object_tag(derived_list[0])
         if elem_tag in derived_obj_tag:
             with open(self.file, 'rb') as file:
@@ -680,6 +618,7 @@ class GenerateXML:
             self.write()
 
     def write_object_type(self, object_list):
+        """Method to write object's type by list [object]"""
         elem_tag = get_object_tag(object_list[0])
         if elem_tag:
             with open(self.file, 'rb') as file:
@@ -697,8 +636,11 @@ derived_obj_tag = ("physicalInterface",
                    "functionalElement",
                    "functionalInterface")
 
+no_alias_obj_tag = ("chain", "data")
+
 
 def get_object_tag(wanted_object):
+    """Get tag correspond to wanted_object"""
     elem_tag = None
     if isinstance(wanted_object, datamodel.PhysicalInterface):
         elem_tag = "physicalInterface"
