@@ -50,22 +50,8 @@ class GenerateXML:
                                                      'alias': function.alias,
                                                      'derived': function.derived})
 
-                    _functional_part_list_tag = etree.SubElement(function_tag, "functionalPartList")
+                    _functional_part_list_tag = etree.SubElement(function_tag, "functionPartList")
 
-        self.write()
-
-    def write_function_child(self, child_function_list):
-        """Method to write child by list [parent, child]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for function in root.findall(".//function"):
-                for parent, child in child_function_list:
-                    if function.get('id') == parent.id:
-                        tag = function.find('functionalPartList')
-                        _functional_part_tag = etree.SubElement(tag, "functionalPart",
-                                                                {'id': child.id})
         self.write()
 
     def write_data(self, data_list):
@@ -193,20 +179,6 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
         self.write()
 
-    def write_state_child(self, child_state_list):
-        """Method to write child's state by list [parent, child]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each state
-            for state in root.findall(".//state"):
-                for parent, child in child_state_list:
-                    if state.get('id') == parent.id:
-                        tag = state.find('statePartList')
-                        _state_part_tag = etree.SubElement(tag, "statePart",
-                                                           {'id': child.id})
-        self.write()
-
     def write_allocated_function_to_state(self, state_function_list):
         """Method to write allocated function by list [state, allocated_function]"""
         with open(self.file, 'rb') as file:
@@ -321,21 +293,6 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
                     _exposed_interface_list_tag = etree.SubElement(functional_element_tag,
                                                                    "exposedInterfaceList")
-        self.write()
-
-    def write_functional_element_child(self, fun_elem_child_list):
-        """Method to write child by list [parent, child]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for functional_element in root.findall(".//functionalElement"):
-                for parent, child in fun_elem_child_list:
-                    if functional_element.get('id') == parent.id:
-                        tag = functional_element.find('functionalElementPartList')
-                        _functional_element_part_tag = etree.SubElement(tag,
-                                                                        "functionalElementPart",
-                                                                        {'id': child.id})
         self.write()
 
     def write_allocated_state(self, fun_elem_state_list):
@@ -519,21 +476,6 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    def write_physical_element_child(self, phy_elem_child_list):
-        """Method to write child by list [parent, child]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-
-            for physical_element in root.findall(".//physicalElement"):
-                for parent, child in phy_elem_child_list:
-                    if physical_element.get('id') == parent.id:
-                        tag = physical_element.find('physicalElementPartList')
-                        _phy_element_part_tag = etree.SubElement(tag,
-                                                                 "physicalElementPart",
-                                                                 {'id': child.id})
-        self.write()
-
     def write_allocated_fun_elem(self, phy_elem_fun_elem_list):
         """Method to write allocated fun_elem by list [phy_elem, allocated_fun_elem]"""
         with open(self.file, 'rb') as file:
@@ -595,7 +537,7 @@ class GenerateXML:
     def write_object_alias(self, object_list):
         """Method to write object's alias by list [object]"""
         elem_tag = get_object_tag(object_list[0])
-        if elem_tag not in no_alias_obj_tag:
+        if elem_tag:
             with open(self.file, 'rb') as file:
                 parser = etree.XMLParser(remove_blank_text=True)
                 root = self.tree.parse(file, parser)
@@ -629,14 +571,28 @@ class GenerateXML:
                         object_tag.set('type', obj.type)
             self.write()
 
+    def write_object_child(self, object_child_list):
+        """Method to write child by list [parent, child]"""
+        elem_tag = get_object_tag(object_child_list[0][0])
+        if elem_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for obj in root.findall(".//" + elem_tag):
+                    for parent, child in object_child_list:
+                        if obj.get('id') == parent.id:
+                            tag = obj.find(elem_tag + 'PartList')
+                            _obj_element_part_tag = etree.SubElement(tag,
+                                                                     elem_tag + 'Part',
+                                                                     {'id': child.id})
+            self.write()
+
 
 derived_obj_tag = ("physicalInterface",
                    "physicalElement",
                    "function",
                    "functionalElement",
                    "functionalInterface")
-
-no_alias_obj_tag = ("chain", "data")
 
 
 def get_object_tag(wanted_object):
