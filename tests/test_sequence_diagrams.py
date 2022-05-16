@@ -39,7 +39,8 @@ def test_fun_inter_simple_sequence(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_sequence_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_inter_simple_sequence"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Fun_inter is a functional interface\n"

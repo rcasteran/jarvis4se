@@ -17,7 +17,8 @@ def test_simple_function_context(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "simple_function_context"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -56,7 +57,8 @@ def test_simple_function_context_in_out(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "simple_function_in_out"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -105,7 +107,8 @@ def test_function_context_with_attribute(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "test_function_with_attribute"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n")
@@ -152,7 +155,8 @@ def test_fun_elem_context_with_attribute(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_context_with_attribute"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -211,7 +215,8 @@ def test_function_context_with_grandkids(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "function_context_with_grandkids"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -279,7 +284,8 @@ def test_fun_elem_context_with_interfaces(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_context_with_interfaces"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -344,7 +350,8 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_context_interface_with_no_flow"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "E is a functional element\n"
@@ -403,7 +410,8 @@ def test_fun_elem_context_interface_not_exposed(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_context_interface_not_exposed"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F is a function\n"
@@ -479,7 +487,8 @@ def test_fun_elem_context_interface_with_child(mocker):
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_context_interface_with_child"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F is a function\n"

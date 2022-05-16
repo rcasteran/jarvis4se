@@ -14,7 +14,8 @@ def test_attribute_declaration_input(capsys):
 
      """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "attribute_declaration_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "A is an attribute\n"
@@ -56,7 +57,8 @@ def test_described_attribute_input(capsys):
 
      """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "described_attribute_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -99,7 +101,8 @@ def test_set_object_type_alias_input(capsys):
 
     """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "set_object_type_alias_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function. The type of F1 is high level function\n"
@@ -140,7 +143,8 @@ def test_consider_object_input(capsys):
     consider F1, F2, F3, F4
     """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "consider_object_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -192,7 +196,8 @@ def test_functional_interface_input(capsys):
     Fun_inter allocates A.
     """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "functional_interface_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Color is an attribute\n"
@@ -251,7 +256,8 @@ def test_fun_elem_exposes_interface_input(capsys):
     Fun_elem exposes coco
     """
     ip = get_ipython()
-    my_magic = jarvis.MyMagics(ip)
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
     file_name = "fun_elem_exposes_interface_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Fun_inter is a functional interface\n"
