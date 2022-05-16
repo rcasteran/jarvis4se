@@ -13,26 +13,25 @@ def cut_string_list(string_tuple_list):
     (Function_name, Function_name_C)}
 
         Parameters:
-            string_tuple_list ({(str, str), ...}) : Lists of string tuple from jarvis cell
+            string_tuple_list ([(str, str), ...]) : Lists of string tuple from jarvis cell
         Returns:
             output_list ([0/1]) : output list
     """
 
-    output_list = set()
+    output_list = []
     for parent, child in string_tuple_list:
         if "," in child:
             child_str = child.replace(" ", "")
             child_list_str = re.split(r',(?![^[]*\])', child_str)
             for elem in child_list_str:
-                output_list.add((parent, elem))
+                output_list.append((parent, elem))
         else:
-            output_list.add((parent, child))
+            output_list.append((parent, child))
 
     return output_list
 
 
-def check_add_child(parent_child_name_str_list, xml_function_list, xml_state_list,
-                    xml_fun_elem_list, output_xml):
+def check_add_child(parent_child_name_str_list, **kwargs):
     """
     Check if each string in parent_child_name_str_list are corresponding to an actual object,
     create new [parent, child] objects lists for object's type : State/Function/FunctionalElement.
@@ -40,92 +39,53 @@ def check_add_child(parent_child_name_str_list, xml_function_list, xml_state_lis
 
         Parameters:
             parent_child_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_function_list ([Function]) : function list from xml parsing
-            xml_state_list ([State]) : state list from xml parsing
-            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            fun elem's dict
-            output_xml (GenerateXML object) : XML's file object
+            kwargs (dict) : 4 xml lists( see matched_composition() within command_parser.py
+            + xml's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    # Instanciate new lists
-    parent_child_function_list = []
-    parent_child_state_list = []
-    parent_child_fun_elem_list = []
-    # Create the xml [function_name/function_alias] list
-    xml_function_name_list = get_object_name(xml_function_list)
-    # Create the xml [state_name/state_alias] list
-    xml_state_name_list = get_object_name(xml_state_list)
-    # Create the xml [fun_elem_name/fun_elem_alias] list
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-
-    concatenated_lists = [*xml_function_name_list, *xml_state_name_list, *xml_fun_elem_name_list]
+    parent_child_lists = [[] for _ in range(4)]
+    available_objects = (datamodel.Function, datamodel.State,
+                         datamodel.FunctionalElement,  datamodel.PhysicalElement)
 
     cleaned_parent_child_list_str = cut_string_list(parent_child_name_str_list)
-
+    # print(parent_child_name_str_list, cleaned_parent_child_list_str)
     for elem in cleaned_parent_child_list_str:
-        is_elem_found = True
-        if not any(elem[0] in j for j in concatenated_lists) or \
-                not any(elem[1] in j for j in concatenated_lists):
-            is_elem_found = False
-            if any(elem[0] in j for j in concatenated_lists) and \
-                    not any(elem[1] in j for j in concatenated_lists):
-                print(f"{elem[1]} does not exist")
-            elif any(elem[1] in j for j in concatenated_lists) and \
-                    not any(elem[0] in j for j in concatenated_lists):
-                print(f"{elem[0]} does not exist")
+        parent_object = check_get_object(elem[0], **kwargs)
+        child_object = check_get_object(elem[1], **kwargs)
+        if parent_object is None:
+            if child_object is None:
+                print(f"{elem[0]} and {elem[1]} are not Function/State/FunctionalElement"
+                      f"/PhysicalElement or the object does not exist")
+                continue
             else:
-                print(f"{elem[0]} and {elem[1]} do not exist")
-        if is_elem_found:
-            result_function = all(t in xml_function_name_list for t in elem)
-            result_state = all(t in xml_state_name_list for t in elem)
-            result_fun_elem = all(t in xml_fun_elem_name_list for t in elem)
-            if result_function:
-                for function in xml_function_list:
-                    if elem[0] == function.name or elem[0] == function.alias:
-                        for fu in xml_function_list:
-                            if elem[1] == fu.name or elem[1] == fu.alias:
-                                if fu.parent is None:
-                                    fu.set_parent(function)
-                                    function.add_child(fu)
-                                    parent_child_function_list.append([function, fu])
-
-            elif result_state:
-                for state in xml_state_list:
-                    if elem[0] == state.name or elem[0] == state.alias:
-                        for sta in xml_state_list:
-                            if elem[1] == sta.name or elem[1] == sta.alias:
-                                if sta.parent is None:
-                                    sta.set_parent(state)
-                                    state.add_child(sta)
-                                    parent_child_state_list.append([state, sta])
-
-            elif result_fun_elem:
-                for fun_elem in xml_fun_elem_list:
-                    if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
-                        for fe in xml_fun_elem_list:
-                            if elem[1] == fe.name or elem[1] == fe.alias:
-                                if fe.parent is None:
-                                    fe.set_parent(fun_elem)
-                                    fun_elem.add_child(fe)
-                                    parent_child_fun_elem_list.append([fun_elem, fe])
-
+                print(f"{elem[0]} is not Function/State/FunctionalElement"
+                      f"/PhysicalElement or the object does not exist")
+                continue
+        elif child_object is None:
+            print(f"{elem[1]} is not Function/State/FunctionalElement"
+                  f"/PhysicalElement or the object does not exist")
+            continue
+        check_pair = None
+        for idx, obj_type in enumerate(available_objects):
+            if isinstance(parent_object, obj_type) and isinstance(child_object, obj_type):
+                check_pair = idx
+                break
             else:
-                if any(elem[0] in j for j in xml_function_name_list) and not any(
-                        elem[1] in j for j in xml_function_name_list):
-                    print(f"{elem[1]} is not a function object")
-                elif any(elem[0] in j for j in xml_state_name_list) and not any(
-                        elem[1] in j for j in xml_state_name_list):
-                    print(f"{elem[1]} is not a state object")
-                elif any(elem[0] in j for j in xml_fun_elem_name_list) and not any(
-                        elem[1] in j for j in xml_fun_elem_name_list):
-                    print(f"{elem[1]} is not a functional element object")
+                check_pair = None
+        if isinstance(check_pair, int):
+            if child_object.parent is None:
+                parent_object.add_child(child_object)
+                child_object.set_parent(parent_object)
+                parent_child_lists[check_pair].append([parent_object, child_object])
+        else:
+            print(f"Please choose a valid pair of element(Function/State/FunctionalElement"
+                  f"/PhysicalElement) for {parent_object.name} and {child_object.name}")
 
-    all_lists = [parent_child_function_list, parent_child_state_list, parent_child_fun_elem_list]
-    update_list = add_child(all_lists, xml_fun_elem_list, output_xml)
+    update = add_child(parent_child_lists, kwargs['xml_fun_elem_list'], kwargs['output_xml'])
 
-    return update_list
+    return update
 
 
 def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
@@ -134,48 +94,27 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
     updates has been made
 
         Parameters:
-            parent_child_lists ([Parent State/Function/fun elem, Child State/Function/fun elem]) :
-            parent object
+            parent_child_lists ([Parent, Child]) : [[Function],[State],[FunctionalElement],
+            [PhysicalElement]]
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
     if any(parent_child_lists):
-        parent_child_function_list = parent_child_lists[0]
-        parent_child_state_list = parent_child_lists[1]
-        paren_child_fun_elem_list = parent_child_lists[2]
-        if parent_child_function_list:
-            output_xml.write_function_child(parent_child_function_list)
-            # Warn the user once added within xml
-            for i in parent_child_function_list:
-                print(f"{i[0].name} is composed of {i[1].name}")
-                for fun_elem in xml_fun_elem_list:
-                    if i[0].id in fun_elem.allocated_function_list:
-                        recursive_allocation([fun_elem, i[1]], output_xml)
-
-        if parent_child_state_list:
-            output_xml.write_state_child(parent_child_state_list)
-            # Warn the user once added within xml
-            for i in parent_child_state_list:
-                print(f"{i[0].name} is composed of {i[1].name}")
-                for fun_elem in xml_fun_elem_list:
-                    if i[0].id in fun_elem.allocated_state_list:
-                        recursive_allocation([fun_elem, i[1]], output_xml)
-
-        if paren_child_fun_elem_list:
-            output_xml.write_functional_element_child(paren_child_fun_elem_list)
-            # Warn the user once added within xml
-            for i in paren_child_fun_elem_list:
-                print(f"{i[0].name} is composed of {i[1].name}")
-
-        update_list.append(1)
+        for i in range(4):
+            if parent_child_lists[i]:
+                output_xml.write_object_child(parent_child_lists[i])
+                for k in parent_child_lists[i]:
+                    print(f"{k[0].name} is composed of {k[1].name}")
+                    if i in (0, 1):
+                        for fun_elem in xml_fun_elem_list:
+                            if k[0].id in fun_elem.allocated_function_list:
+                                recursive_allocation([fun_elem, k[1]], output_xml)
+        return 1
     else:
-        update_list.append(0)
-
-    return update_list
+        return 0
 
 
 def check_add_allocated_item(item, xml_item_list, xml_chain_list):
@@ -420,7 +359,7 @@ def check_set_object_type(type_str_list, **kwargs):
 
         Parameters:
             type_str_list ([str]) : Lists of string from jarvis cell
-            kwargs (dict) : whole xml lists
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
             update ([0/1]) : 1 if update, else 0
@@ -466,7 +405,7 @@ def check_new_type(object_to_set, type_name):
 
 def get_specific_obj_type(object_to_set):
     """Get __str__ list from FunctionType, DataType, StateType, TransitionType,
-    FunctionalElementType and index for output_list (depends on the type)"""
+    FunctionalElementType, ChainType and index for output_list (depends on the type)"""
     specific_obj_type_list = []
     list_idx = None
     if isinstance(object_to_set, datamodel.Function):
@@ -478,7 +417,7 @@ def get_specific_obj_type(object_to_set):
     elif isinstance(object_to_set, datamodel.State):
         specific_obj_type_list = [str(i).upper() for i in datamodel.StateType]
         list_idx = 2
-    elif isinstance(object_to_set, datamodel.Transition):
+    elif isinstance(object_to_set, datamodel.Transition):  # TBC
         specific_obj_type_list = [str(i).upper() for i in datamodel.TransitionType]
         list_idx = 3
     elif isinstance(object_to_set, datamodel.FunctionalElement):
@@ -512,7 +451,7 @@ def set_object_type(object_lists, output_xml):
             1 if update, else 0
     """
     if any(object_lists):
-        for i in range(0, 10):
+        for i in range(10):
             if object_lists[i]:
                 output_xml.write_object_type(object_lists[i])
                 for object_type in object_lists[i]:
@@ -532,7 +471,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
 
         Parameters:
             alias_str_list ([str]) : Lists of string from jarvis cell
-            kwargs (dict) : whole xml lists
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
             update ([0/1]) : 1 if update, else 0
@@ -576,6 +515,8 @@ def check_new_alias(object_to_set, alias_str):
             list_idx = 6
         elif isinstance(object_to_set, datamodel.PhysicalInterface):
             list_idx = 7
+        else:
+            print(f"{object_to_set.name} does not have alias attribute")
 
     return list_idx
 
@@ -592,7 +533,7 @@ def set_object_alias(object_lists, output_xml):
             1 if update, else 0
     """
     if any(object_lists):
-        for i in range(0, 8):
+        for i in range(8):
             if object_lists[i]:
                 output_xml.write_object_alias(object_lists[i])
                 for object_alias in object_lists[i]:

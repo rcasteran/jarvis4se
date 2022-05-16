@@ -221,10 +221,13 @@ def matched_consider(consider_str_list, **kwargs):
 def matched_composition(parent_child_name_str_list, **kwargs):
     """Get composition relationship command (match for "is composed by' or "composes")"""
     out = shared_orchestrator.check_add_child(parent_child_name_str_list,
-                                              kwargs['xml_function_list'],
-                                              kwargs['xml_state_list'],
-                                              kwargs['xml_fun_elem_list'],
-                                              kwargs['output_xml'])
+                                              **{
+                                                  'xml_function_list': kwargs['xml_function_list'],
+                                                  'xml_state_list': kwargs['xml_state_list'],
+                                                  'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                  'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                                  'output_xml': kwargs['output_xml'],
+                                              })
     return out
 
 
