@@ -21,10 +21,9 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    update_list = []
-    function_list = set()
+    function_list = []
     # Create a list with all function names/aliases already in the xml
     xml_function_name_list = get_object_name(xml_function_list)
     # Loop on the list and create set for functions
@@ -44,17 +43,15 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
             function.set_id(str(identifier.int)[:10])
             # Add function to a set()
             xml_function_list.add(function)
-            function_list.add(function)
+            function_list.append(function)
 
     if not function_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_function(function_list)
         for fun in function_list:
             print(fun.name + " is a function")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def add_data(data_str_list, xml_data_list, output_xml):
@@ -69,10 +66,9 @@ def add_data(data_str_list, xml_data_list, output_xml):
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    update_list = []
-    new_data_list = set()
+    new_data_list = []
     # Create data names list already in xml
     xml_data_name_list = get_object_name(xml_data_list)
     # Filter data_list, keeping only the the ones not already in the xml
@@ -85,18 +81,16 @@ def add_data(data_str_list, xml_data_list, output_xml):
             new_data.set_id(str(identifier.int)[:10])
             new_data.set_type(datamodel.DataType.UNKNOWN)
 
-            new_data_list.add(new_data)
+            new_data_list.append(new_data)
 
     if not new_data_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_data(new_data_list)
         for data in new_data_list:
             xml_data_list.add(data)
             print(data.name + " is a data" + "")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_list, output_xml):
@@ -112,7 +106,7 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
     data_predecessor_list = []
 
@@ -509,8 +503,7 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    state_list = set()
+    state_list = []
     # Create a list with all state names/aliases already in the xml
     xml_state_name = get_object_name(xml_state_list)
     # Loop on the list and create set for states
@@ -530,18 +523,17 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
             state.set_id(str(identifier.int)[:10])
             # Add state to a set()
             xml_state_list.add(state)
-            state_list.add(state)
+            state_list.append(state)
         else:
             # print(state_name + " already exists (not added)")
             pass
     if not state_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_state(state_list)
         for state in state_list:
             print(state.name + " is a state")
-        update_list.append(1)
-    return update_list
+        return 1
 
 
 def add_transition_by_name(transition_name_str_list, xml_transition_list, output_xml):
@@ -558,8 +550,7 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    transition_list = set()
+    transition_list = []
     # Create a list with all transition's name already in the xml
     xml_transition_name_list = get_object_name(xml_transition_list)
     # Loop on the list and create set for transitions
@@ -579,19 +570,15 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
             transition.set_id(str(identifier.int)[:10])
             # Add state to a set()
             xml_transition_list.add(transition)
-            transition_list.add(transition)
-        else:
-            # print(state_name + " already exists (not added)")
-            pass
+            transition_list.append(transition)
+
     if not transition_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_transition(transition_list)
         for transition in transition_list:
             print(transition.name + " is a transition")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 # TODO: Check condition_str on data and (add LogicalType, ArithmeticType in datamodel.py)
@@ -625,9 +612,9 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
                     if not condition_str.lstrip(' ') in transition.condition_list:
                         condition_list.append([transition, condition_str.lstrip(' ')])
 
-    update_list = add_transition_condition(condition_list, output_xml)
+    update = add_transition_condition(condition_list, output_xml)
 
-    return update_list
+    return update
 
 
 def add_transition_condition(condition_list, output_xml):
@@ -642,17 +629,14 @@ def add_transition_condition(condition_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
     if not condition_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_transition_condition(condition_list)
         for elem in condition_list:
             elem[0].add_condition(elem[1])
             print(f"Condition for {elem[0].name} : {elem[1]}")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output_xml):
@@ -718,9 +702,9 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                                         new_dest_list.append([transition, state])
 
     src_dest_lists = [new_src_list, new_dest_list]
-    update_list = add_src_dest(src_dest_lists, output_xml)
+    update = add_src_dest(src_dest_lists, output_xml)
 
-    return update_list
+    return update
 
 
 def add_src_dest(src_dest_lists, output_xml):
@@ -736,7 +720,6 @@ def add_src_dest(src_dest_lists, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
     if any(src_dest_lists):
         new_src_list = src_dest_lists[0]
         new_dest_list = src_dest_lists[1]
@@ -753,11 +736,9 @@ def add_src_dest(src_dest_lists, output_xml):
             for destination in new_dest_list:
                 destination[0].set_destination(destination[1].id)
                 print(f"{destination[1].name} destination for {destination[0].name}")
-        update_list.append(1)
+        return 1
     else:
-        update_list.append(0)
-
-    return update_list
+        return 0
 
 
 def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, output_xml):
@@ -774,8 +755,7 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    functional_element_list = set()
+    functional_element_list = []
     # Create a list with all functional element names/aliases already in the xml
     xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
     # Loop on the list and create set for fun elem
@@ -793,20 +773,15 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
             fun_elem.set_id(str(identifier.int)[:10])
             # Add FunctionalElement to a set()
             xml_fun_elem_list.add(fun_elem)
-            functional_element_list.add(fun_elem)
-        else:
-            # print(fun_elem_name + " already exists (not added)")
-            pass
+            functional_element_list.append(fun_elem)
 
     if not functional_element_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_functional_element(functional_element_list)
         for func_elem in functional_element_list:
             print(func_elem.name + " is a functional element")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, output_xml):
@@ -823,8 +798,7 @@ def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, ou
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    functional_interface_list = set()
+    functional_interface_list = []
     # Create a list with all functional interface names/aliases already in the xml
     xml_fun_inter_name_list = get_object_name(xml_fun_inter_list)
     # Loop on the list and create set for fun inter
@@ -842,20 +816,18 @@ def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, ou
             fun_inter.set_id(str(identifier.int)[:10])
             # Add FunctionalInterface to a set()
             xml_fun_inter_list.add(fun_inter)
-            functional_interface_list.add(fun_inter)
+            functional_interface_list.append(fun_inter)
         else:
             # print(fun_elem_name + " already exists (not added)")
             pass
 
     if not functional_interface_list:
-        update_list.append(0)
+        return 0
     else:
         output_xml.write_functional_interface(functional_interface_list)
         for func_inter in functional_interface_list:
             print(func_inter.name + " is a functional interface")
-        update_list.append(1)
-
-    return update_list
+        return 1
 
 
 def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, xml_data_list,
@@ -890,9 +862,9 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
                 print(f"{fun_elem.name} exposes {fun_inter.name}")
 
     if output:
-        return [1]
+        return 1
     else:
-        return [0]
+        return 0
 
 
 def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
