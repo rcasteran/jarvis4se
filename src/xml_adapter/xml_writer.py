@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
-import sys
 from lxml import etree
 
-sys.path.append("../datamodel")
-import datamodel # noqa
+import datamodel
 
 
 # Class to generate XML
@@ -60,7 +58,6 @@ class GenerateXML:
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-
             for function in function_type_list:
                 for function_tag in root.findall(".//function[@id='" + function.id + "']"):
                     function_tag.set('type', function.type)
@@ -87,8 +84,8 @@ class GenerateXML:
                 for parent, child in child_function_list:
                     if function.get('id') == parent.id:
                         tag = function.find('functionalPartList')
-                        functional_part_tag = etree.SubElement(tag, "functionalPart",
-                                                               {'id': child.id})
+                        _functional_part_tag = etree.SubElement(tag, "functionalPart",
+                                                                {'id': child.id})
         self.write()
 
     # Method to add data flows
@@ -137,11 +134,11 @@ class GenerateXML:
                 for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
                                                       + "']/consumerList"):
                     if not i[1].operand:
-                        consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
-                                                        {'id': i[1].id, 'role': "none"})
+                        _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
+                                                         {'id': i[1].id, 'role': "none"})
                     else:
-                        consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
-                                                        {'id': i[1].id, 'role': i[1].operand})
+                        _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
+                                                         {'id': i[1].id, 'role': i[1].operand})
 
         self.write()
 
@@ -154,7 +151,7 @@ class GenerateXML:
                 for producer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
                                                       + "']/producerList"):
 
-                    producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': i[1].id})
+                    _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': i[1].id})
 
         self.write()
 
@@ -219,8 +216,8 @@ class GenerateXML:
             for state_list_tag in root.findall(".//stateList"):
                 for state in state_list:
                     state_tag = etree.SubElement(state_list_tag, "state",
-                                                    {'id': state.id, 'name': state.name,
-                                                     'type': str(state.type), 'alias': state.alias})
+                                                 {'id': state.id, 'name': state.name,
+                                                  'type': str(state.type), 'alias': state.alias})
 
                     _state_part_list_tag = etree.SubElement(state_tag, "statePartList")
                     _allocated_function_list_tag = etree.SubElement(state_tag,
@@ -257,8 +254,8 @@ class GenerateXML:
                 for parent, child in child_state_list:
                     if state.get('id') == parent.id:
                         tag = state.find('statePartList')
-                        state_part_tag = etree.SubElement(tag, "statePart",
-                                                               {'id': child.id})
+                        _state_part_tag = etree.SubElement(tag, "statePart",
+                                                           {'id': child.id})
         self.write()
 
     # Method to write allocated function by list [state, allocated_function]
@@ -271,8 +268,8 @@ class GenerateXML:
                 for fun_elem, function in state_function_list:
                     if xml_state.get('id') == fun_elem.id:
                         tag = xml_state.find('allocatedFunctionList')
-                        allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
-                                                               {'id': function.id})
+                        _allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
+                                                                {'id': function.id})
         self.write()
 
     # Method to delete state by list [state]
@@ -333,8 +330,8 @@ class GenerateXML:
                 for tra, condition in transition_condition_list:
                     if transition.get('id') == tra.id:
                         tag = transition.find('conditionList')
-                        state_part_tag = etree.SubElement(tag, "condition",
-                                                          {'text': str(condition)})
+                        _state_part_tag = etree.SubElement(tag, "condition",
+                                                           {'text': str(condition)})
         self.write()
 
     # Method to write transition's source by list [transition, source]
@@ -422,8 +419,8 @@ class GenerateXML:
                 for fun_elem, state in fun_elem_state_list:
                     if functional_element.get('id') == fun_elem.id:
                         tag = functional_element.find('allocatedStateList')
-                        allocated_state_tag = etree.SubElement(tag, "allocatedState",
-                                                               {'id': state.id})
+                        _allocated_state_tag = etree.SubElement(tag, "allocatedState",
+                                                                {'id': state.id})
         self.write()
 
     # Method to write allocated function by list [fun_elem, allocated_function]

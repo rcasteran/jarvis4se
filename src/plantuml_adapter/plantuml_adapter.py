@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 # Libraries
 import inspect
-import sys
 
 # Modules
+import datamodel
 from .util import MakePlantUml
-sys.path.append("../datamodel")
-import datamodel # noqa
 
 
 def write_function_child(function, input_flow_list, output_flow_list, xml_attribute_list):

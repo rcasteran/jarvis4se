@@ -3,14 +3,11 @@
 # Libraries
 import re
 import copy
-import sys
 
+import plantuml_adapter
 from .viewpoint_orchestrator import filter_allocated_item_from_chain
 from .question_answer import check_parentality, get_object_name, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
-
-sys.path.append("../plantuml_adapter")
-import plantuml_adapter # noqa
 
 
 def filter_show_command(diagram_name_str, **kwargs):

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
-import sys
 from lxml import etree
 
 # Modules
+import datamodel
 from .xml_writer import GenerateXML
-sys.path.append("../datamodel")
-import datamodel # noqa
 
 
 def generate_xml(xml_file):

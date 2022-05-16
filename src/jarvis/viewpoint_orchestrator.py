@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
-import sys
 import uuid
 import re
 
-from . import functional_orchestrator
+import datamodel
+from . import shared_orchestrator
 from .question_answer import get_object_name
-sys.path.append("../datamodel")
-import datamodel # noqa
 
 
 def add_chain(chain_name_str, xml_chain_list, output_xml):
@@ -65,41 +63,6 @@ def activate_chain(chain_name, xml_chain_list):
             chain.set_activation(False)
 
 
-def check_add_allocated_item(item, xml_item_list, xml_chain_list):
-    """
-    Checks if a chain is already activated, if yes check if item isn't already
-    allocated and returns corresponding [Chain, Object].
-    Args:
-        item (string): Object's name/alias from user's input
-        xml_item_list ([Object]): List of xml's item (same type as item)
-        xml_chain_list ([Chain]) : Chain list from xml parsing
-
-    Returns:
-        [Chain, Object]
-    """
-    if not any(s.activated for s in xml_chain_list):
-        return
-    else:
-        activated_chain = None
-        for chain in xml_chain_list:
-            if chain.activated:
-                activated_chain = chain
-        if activated_chain:
-            for i in xml_item_list:
-                if item == i.name:
-                    if i.id not in activated_chain.allocated_item_list:
-                        activated_chain.add_allocated_item(i.id)
-                        return [activated_chain, i]
-                # To avoid errors for i.alias when i is Data (no such attriute)
-                try:
-                    if item == i.alias:
-                        if i.id not in activated_chain.allocated_item_list:
-                            activated_chain.add_allocated_item(i.id)
-                            return [activated_chain, i]
-                except AttributeError:
-                    pass
-
-
 def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
     """For a type of item from xml, check if a Chain is activated and if the item is in its
     allocated item's list"""
@@ -153,23 +116,22 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
             result_data = any(item == consider_str for item in xml_data_name_list)
 
             if result_function:
-                allocated_fun = check_add_allocated_item(consider_str, xml_function_list,
-                                                         xml_chain_list)
+                allocated_fun = shared_orchestrator.check_add_allocated_item(
+                    consider_str, xml_function_list, xml_chain_list)
                 if allocated_fun:
                     allocated_item_list.append(allocated_fun)
             elif result_fun_elem:
-                allocated_fun_elem = check_add_allocated_item(consider_str, xml_fun_elem_list,
-                                                              xml_chain_list)
+                allocated_fun_elem = shared_orchestrator.check_add_allocated_item(
+                    consider_str, xml_fun_elem_list, xml_chain_list)
                 if allocated_fun_elem:
                     allocated_item_list.append(allocated_fun_elem)
             elif result_data:
-                allocated_data = check_add_allocated_item(consider_str, xml_data_list,
-                                                          xml_chain_list)
+                allocated_data = shared_orchestrator.check_add_allocated_item(
+                    consider_str, xml_data_list, xml_chain_list)
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 
-    update_list = functional_orchestrator.add_allocation([0, 0, 0, allocated_item_list, 0],
-                                                         output_xml)
+    update_list = shared_orchestrator.add_allocation([0, 0, 0, allocated_item_list, 0], output_xml)
 
     return update_list
 

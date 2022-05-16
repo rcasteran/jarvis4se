@@ -345,7 +345,7 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
         return case_no_list(wanted_object, object_type, **kwargs)
 
 
-def switch_in(wanted_object, object_type, **kwargs):
+def switch_in(wanted_object, _, **kwargs):
     """Case 'list input Function/Functional ELement' """
     input_list = get_input(wanted_object, **kwargs)
     if input_list:
@@ -354,7 +354,7 @@ def switch_in(wanted_object, object_type, **kwargs):
         return input_list
 
 
-def switch_out(wanted_object, object_type, **kwargs):
+def switch_out(wanted_object, _, **kwargs):
     """Case 'list output Function/Functional ELement' """
     output_list = get_output(wanted_object, **kwargs)
     if output_list:
@@ -391,7 +391,7 @@ def switch_child(wanted_object, object_type, **kwargs):
         return child_list
 
 
-def switch_state_function(wanted_object, object_type, **kwargs):
+def switch_state_function(wanted_object, _, **kwargs):
     """Case 'list function State' """
 
     function_list = []
@@ -408,7 +408,7 @@ def switch_state_function(wanted_object, object_type, **kwargs):
         return function_list
 
 
-def switch_state_transition(wanted_object, object_type, **kwargs):
+def switch_state_transition(wanted_object, _, **kwargs):
     transition_list = []
     for transition in kwargs['xml_transition_list']:
         if wanted_object.id == transition.source:
@@ -437,7 +437,7 @@ def switch_state_transition(wanted_object, object_type, **kwargs):
         return transition_list
 
 
-def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
+def switch_fun_elem_interface(wanted_object, _, **kwargs):
     """Case for 'list interface Functional element'"""
     fun_inter_list = get_objects_from_id_list([i for i in wanted_object.exposed_interface_list],
                                               kwargs['xml_fun_inter_list'])
@@ -474,10 +474,12 @@ def switch_fun_elem_interface(wanted_object, object_type, **kwargs):
             return interface_list
 
 
-def switch_data(wanted_object, object_type, **kwargs):
+def switch_data(wanted_object, _, **kwargs):
     """Case for 'list data Functional Interface' """
     data_list = []
     fun_elem_exposing = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
+    if not fun_elem_exposing:
+        return f"Not any functional element exosing {wanted_object.name}"
     last_fun_elem_exposing = [check_latest(j, fun_elem_exposing) for j in fun_elem_exposing]
     for allocated_id in wanted_object.allocated_data_list:
         for data in kwargs['xml_data_list']:
@@ -742,13 +744,13 @@ def get_object_name(xml_object_list):
     return object_name_list
 
 
-def check_parentality(a, b):
+def check_parentality(object_a, object_b):
     """Check recursively if object 'a' is not parent of object 'b'"""
-    if b.parent:
-        if a == b.parent:
+    if object_b.parent:
+        if object_a == object_b.parent:
             return True
         else:
-            return check_parentality(a, b.parent)
+            return check_parentality(object_a, object_b.parent)
     else:
         return False
 

@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
-import sys
 import uuid
 import re
 
-from . import functional_orchestrator
-from .question_answer import get_object_name, check_get_object
-sys.path.append("../datamodel")
-import datamodel # noqa
+import datamodel
+from .question_answer import check_get_object
 
 
 def add_phy_elem_by_name(physical_elem_name_str_list, xml_phy_elem_list, output_xml):
