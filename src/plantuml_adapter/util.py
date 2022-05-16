@@ -276,10 +276,6 @@ class MakePlantUml:
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
         participant_str = "participant " + function_name
-        # TODO: In order to be more concise, need to change inputs lists for other
-        #  methods by function and not function.name
-        # if function.alias:
-        #     participant_str += " as " + function.alias
         participant_str += ' <<' + str(function.type) + '>>' + "\n"
         return participant_str
 
