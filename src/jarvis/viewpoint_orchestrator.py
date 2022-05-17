@@ -21,9 +21,9 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
                 output_xml (GenerateXML object) : XML's file object
 
             Returns:
-                update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+                1 if update, else 0
         """
-    chain_list = set()
+    chain_list = []
     # Create a list with all chain names already in the xml
     xml_chain_name_list = get_object_name(xml_chain_list)
     # Loop on the list and create set for functions
@@ -39,7 +39,7 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
         chain.set_id(str(identifier.int)[:10])
         # Add chain to new set() and existing et() from xml
         xml_chain_list.add(chain)
-        chain_list.add(chain)
+        chain_list.append(chain)
         activate_chain(chain.name, xml_chain_list)
     elif chain_name_str in xml_chain_name_list:
         # print(chain_name + " already exists (not added)")
@@ -95,7 +95,7 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
         output_xml (GenerateXML object) : XML's file object
 
     Returns:
-        update_list ([0/1]) : if update has been made
+        update ([0/1]) : 1 if update, else 0
     """
     allocated_item_list = []
     # Create lists with all object names/aliases already in the xml
@@ -131,9 +131,9 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 
-    update_list = shared_orchestrator.add_allocation([0, 0, 0, allocated_item_list, 0], output_xml)
+    update = shared_orchestrator.add_allocation([0, 0, 0, allocated_item_list, 0], output_xml)
 
-    return update_list
+    return update
 
 
 def split_chain_from_string(consider_str_list):
@@ -161,9 +161,9 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
-    new_attribute_list = set()
+    new_attribute_list = []
     # Create attribute names list already in xml
     xml_attribute_name_list = get_object_name(xml_attribute_list)
     # Filter attribute_list, keeping only the the ones not already in the xml
@@ -177,7 +177,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
             # Not needed, by default unknown
             # new_data.set_type(datamodel.DataType.UNKNOWN)
             # alias is 'none' by default
-            new_attribute_list.add(new_attribute)
+            new_attribute_list.append(new_attribute)
 
     if not new_attribute_list:
         return 0
@@ -207,7 +207,7 @@ def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
     new_described_attribute_list = []
     # Create objects names/aliases list
@@ -280,7 +280,7 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
     if not new_obj_attribute_list:
         return 0
