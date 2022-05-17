@@ -537,7 +537,7 @@ class GenerateXML:
                 for obj in object_list:
                     for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                         obj_tag.getparent().remove(obj_tag)
-        self.write()
+            self.write()
 
 
 derived_obj_tag = ("physicalInterface",
