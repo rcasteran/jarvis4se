@@ -59,11 +59,11 @@ def check_add_child(parent_child_name_str_list, **kwargs):
                 print(f"{elem[0]} and {elem[1]} are not Function/State/FunctionalElement"
                       f"/PhysicalElement or the object does not exist")
                 continue
-            else:
-                print(f"{elem[0]} is not Function/State/FunctionalElement"
-                      f"/PhysicalElement or the object does not exist")
-                continue
-        elif child_object is None:
+
+            print(f"{elem[0]} is not Function/State/FunctionalElement"
+                  f"/PhysicalElement or the object does not exist")
+            continue
+        if child_object is None:
             print(f"{elem[1]} is not Function/State/FunctionalElement"
                   f"/PhysicalElement or the object does not exist")
             continue
@@ -72,8 +72,6 @@ def check_add_child(parent_child_name_str_list, **kwargs):
             if isinstance(parent_object, obj_type) and isinstance(child_object, obj_type):
                 check_pair = idx
                 break
-            else:
-                check_pair = None
         if isinstance(check_pair, int):
             if child_object.parent is None:
                 parent_object.add_child(child_object)
@@ -113,8 +111,8 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
                             if k[0].id in fun_elem.allocated_function_list:
                                 recursive_allocation([fun_elem, k[1]], output_xml)
         return 1
-    else:
-        return 0
+
+    return 0
 
 
 def check_add_allocated_item(item, xml_item_list, xml_chain_list):
@@ -130,26 +128,27 @@ def check_add_allocated_item(item, xml_item_list, xml_chain_list):
         [Chain, Object]
     """
     if not any(s.activated for s in xml_chain_list):
-        return
-    else:
-        activated_chain = None
-        for chain in xml_chain_list:
-            if chain.activated:
-                activated_chain = chain
-        if activated_chain:
-            for i in xml_item_list:
-                if item == i.name:
+        return None
+
+    activated_chain = None
+    for chain in xml_chain_list:
+        if chain.activated:
+            activated_chain = chain
+            break
+    if activated_chain:
+        for i in xml_item_list:
+            if item == i.name:
+                if i.id not in activated_chain.allocated_item_list:
+                    activated_chain.add_allocated_item(i.id)
+                    return [activated_chain, i]
+            # To avoid errors for i.alias when i is Data (no such attriute)
+            try:
+                if item == i.alias:
                     if i.id not in activated_chain.allocated_item_list:
                         activated_chain.add_allocated_item(i.id)
                         return [activated_chain, i]
-                # To avoid errors for i.alias when i is Data (no such attriute)
-                try:
-                    if item == i.alias:
-                        if i.id not in activated_chain.allocated_item_list:
-                            activated_chain.add_allocated_item(i.id)
-                            return [activated_chain, i]
-                except AttributeError:
-                    pass
+            except AttributeError:
+                pass
 
 
 def check_and_delete(delete_str_list, xml_function_list, xml_producer_function_list,
@@ -457,8 +456,7 @@ def set_object_type(object_lists, output_xml):
                 for object_type in object_lists[i]:
                     print(f"The type of {object_type.name} is {object_type.type}")
         return 1
-    else:
-        return 0
+    return 0
 
 
 def check_set_object_alias(alias_str_list, **kwargs):
@@ -540,8 +538,8 @@ def set_object_alias(object_lists, output_xml):
                     print(f"The alias for {object_alias.name} is {object_alias.alias}")
 
         return 1
-    else:
-        return 0
+
+    return 0
 
 
 def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list, xml_function_list,
