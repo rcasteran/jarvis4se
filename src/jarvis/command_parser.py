@@ -281,15 +281,7 @@ def matched_exposes(exposes_str_list, **kwargs):
 
 def matched_delete(delete_str_list, **kwargs):
     """Get delete declaration"""
-    out = shared_orchestrator.check_and_delete(delete_str_list,
-                                               kwargs['xml_function_list'],
-                                               kwargs['xml_producer_function_list'],
-                                               kwargs['xml_consumer_function_list'],
-                                               kwargs['xml_data_list'],
-                                               kwargs['xml_state_list'],
-                                               kwargs['xml_transition_list'],
-                                               kwargs['xml_fun_elem_list'],
-                                               kwargs['output_xml'])
+    out = shared_orchestrator.check_and_delete_object(delete_str_list, **kwargs)
     return out
 
 

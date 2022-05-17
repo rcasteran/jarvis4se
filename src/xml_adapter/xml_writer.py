@@ -124,26 +124,6 @@ class GenerateXML:
 
         self.write()
 
-    def delete_function(self, delete_function_list):
-        """Method to remove function by list [function]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for function in delete_function_list:
-                for function_tag in root.findall(".//function[@id='" + function.id + "']"):
-                    function_tag.getparent().remove(function_tag)
-        self.write()
-
-    def delete_data(self, delete_data_list):
-        """Method to remove data by list [data]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for data in delete_data_list:
-                for data_tag in root.findall(".//data[@name='" + data.name + "']"):
-                    data_tag.getparent().remove(data_tag)
-        self.write()
-
     def delete_single_consumer_producer(self, data, function, value):
         """Method to delete the parents (consumer or producer) when flow is within a component"""
         with open(self.file, 'rb') as file:
@@ -191,16 +171,6 @@ class GenerateXML:
                         tag = xml_state.find('allocatedFunctionList')
                         _allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
                                                                 {'id': function.id})
-        self.write()
-
-    def delete_state(self, delete_state_list):
-        """Method to delete state by list [state]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for state in delete_state_list:
-                for state_tag in root.findall(".//state[@id='" + state.id + "']"):
-                    state_tag.getparent().remove(state_tag)
         self.write()
 
     def write_transition(self, transition_list):
@@ -253,16 +223,6 @@ class GenerateXML:
             for transition_dest in transition_destination_list:
                 for state_tag in root.findall(".//transition[@id='" + transition_dest[0].id + "']"):
                     state_tag.set('destination', transition_dest[1].id)
-        self.write()
-
-    def delete_transition(self, delete_transition_list):
-        """Method to delete transition by list [transition]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for transition in delete_transition_list:
-                for transition_tag in root.findall(".//transition[@id='" + transition.id + "']"):
-                    transition_tag.getparent().remove(transition_tag)
         self.write()
 
     def write_functional_element(self, functional_element_list):
@@ -341,16 +301,6 @@ class GenerateXML:
                         tag = functional_element.find('exposedInterfaceList')
                         _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
                                                                   {'id': inter.id})
-        self.write()
-
-    def delete_functional_element(self, delete_fun_elem_list):
-        """Method to delete functional element by list [functional element]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for fun_elem in delete_fun_elem_list:
-                for fun_elem_tag in root.findall(".//functionalElement[@id='" + fun_elem.id + "']"):
-                    fun_elem_tag.getparent().remove(fun_elem_tag)
         self.write()
 
     def write_chain(self, chain_list):
@@ -490,16 +440,6 @@ class GenerateXML:
                             tag, "allocatedFunctionalElement", {'id': fun_elem.id})
         self.write()
 
-    def delete_physical_element(self, delete_phy_elem_list):
-        """Method to delete functional element by list [physical element]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for phy_elem in delete_phy_elem_list:
-                for phy_elem_tag in root.findall(".//physicalElement[@id='" + phy_elem.id + "']"):
-                    phy_elem_tag.getparent().remove(phy_elem_tag)
-        self.write()
-
     def write_physical_interface(self, physical_interface_list):
         """Method to write physical interfaces from interface's list"""
         with open(self.file, 'rb') as file:
@@ -586,6 +526,18 @@ class GenerateXML:
                                                                      elem_tag + 'Part',
                                                                      {'id': child.id})
             self.write()
+
+    def delete_object(self, object_list):
+        """Method to delete objects by list [object]"""
+        elem_tag = get_object_tag(object_list[0])
+        if elem_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for obj in object_list:
+                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        obj_tag.getparent().remove(obj_tag)
+        self.write()
 
 
 derived_obj_tag = ("physicalInterface",

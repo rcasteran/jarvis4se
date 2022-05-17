@@ -39,7 +39,7 @@ def check_add_child(parent_child_name_str_list, **kwargs):
 
         Parameters:
             parent_child_name_str_list ([str]) : Lists of string from jarvis cell
-            kwargs (dict) : 4 xml lists( see matched_composition() within command_parser.py
+            kwargs (dict) : 4 xml lists(see matched_composition() within command_parser.py)
             + xml's file object
 
         Returns:
@@ -151,201 +151,371 @@ def check_add_allocated_item(item, xml_item_list, xml_chain_list):
                 pass
 
 
-def check_and_delete(delete_str_list, xml_function_list, xml_producer_function_list,
-                     xml_consumer_function_list, xml_data_list, xml_state_list,
-                     xml_transition_list, xml_fun_elem_list, output_xml):
+def check_and_delete_object(delete_str_list, **kwargs):
     """
-    Check if each string in consumer_str_list are corresponding to an actual object, create new
-    objects list for objects to delete : Data/State/Function/FunctionalElement/transition.
-    Send list to delete_objects() to delete them within xml and then returns update_list from it.
+    Check if each string in delete_str_list are corresponding to an actual object, create new
+    objects list for objects to delete.
+    Send lists to delete_objects() to delete them within xml and then returns update from it.
 
         Parameters:
             delete_str_list ([str]) : List of string from jarvis cell
-            xml_function_list ([Function]) : Function list from xml parsing
-            xml_producer_function_list ([Data_name_str, Function]) : Data's name and producer's
-            function list from xml
-            xml_consumer_function_list ([Data_name_str, Function]) : Data's name and consumer's
-            function list from xml
-            xml_data_list ([Data]) : Data list from xml parsing
-            xml_state_list ([State]) : State list from xml parsing
-            xml_transition_list ([Transition]) : Transition list from xml parsing
-            xml_fun_elem_list ([FunctionalElement]) : FunctionalElement list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    to_be_deleted_function_list = []
-    to_be_deleted_data_list = []
-    to_be_deleted_state_list = []
-    to_be_deleted_fun_elem_list = []
-    to_be_deleted_transition_list = []
-    xml_consumer_function_name_list = []
-    xml_producer_function_name_list = []
-    xml_src_dest_list = []
-    xml_allocated_object_id_list = []
-    # Create object names/aliases lists
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_data_name_list = get_object_name(xml_data_list)
-    xml_state_name_list = get_object_name(xml_state_list)
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_transition_name_list = get_object_name(xml_transition_list)
-    # Create the xml [flow, consumer_name] list
-    for xml_consumer in xml_consumer_function_list:
-        xml_consumer_function_name_list.append([xml_consumer[0], xml_consumer[1].name])
-    # Create the xml [flow, producer_name] list
-    for xml_producer in xml_producer_function_list:
-        xml_producer_function_name_list.append([xml_producer[0], xml_producer[1].name])
-    # Create the list with all xml [source_id, destination_id] for transitions
-    for transitions in xml_transition_list:
-        xml_src_dest_list.append(transitions.source)
-        xml_src_dest_list.append(transitions.destination)
-    # Create the list with all xml [allocated_function, allocated_state] for transitions
-    for fun_elem in xml_fun_elem_list:
-        for i in fun_elem.allocated_state_list:
-            xml_allocated_object_id_list.append(i)
-        for j in fun_elem.allocated_function_list:
-            xml_allocated_object_id_list.append(j)
-    for state in xml_state_list:
-        if state.allocated_function_list:
-            for k in state.allocated_function_list:
-                xml_allocated_object_id_list.append(k)
-
-    concatenated_lists = [*xml_function_name_list, *xml_data_name_list, *xml_state_name_list,
-                          *xml_fun_elem_name_list, *xml_transition_name_list]
+    to_be_deleted_obj_lists = [[] for _ in range(10)]
     # Check if the wanted to delete object exists and can be deleted
-    for elem in delete_str_list:
-        if not any(s == elem for s in concatenated_lists):
-            print(f"{elem} does not exist")
-        elif any(elem in flow_consumer for flow_consumer in xml_consumer_function_name_list):
-            print(f"{elem} in [flow, consumer] list (not deleted)")
-        elif any(elem in flow_producer for flow_producer in xml_producer_function_name_list):
-            print(f"{elem} in [flow, producer] list (not deleted)")
+    for obj_str in delete_str_list:
+        object_to_del = check_get_object(obj_str, **kwargs)
+        if object_to_del is None:
+            print(f"{obj_str} does not exist")
+            continue
+        check, list_idx = check_relationship_before_delete(object_to_del, **kwargs)
+        if check:
+            to_be_deleted_obj_lists[list_idx].append(object_to_del)
         else:
-            result_function = any(s == elem for s in xml_function_name_list)
-            resul_state = any(s == elem for s in xml_state_name_list)
-            result_data = any(s == elem for s in xml_data_name_list)
-            result_fun_elem = any(s == elem for s in xml_fun_elem_name_list)
-            result_transition = any(s == elem for s in xml_transition_name_list)
-            if result_function:
-                for function in xml_function_list:
-                    if elem == function.name or elem == function.alias:
-                        if function.id in xml_allocated_object_id_list:
-                            print(f"{elem} allocated to a functional element or state "
-                                  f"(not deleted)")
-                        else:
-                            if function.parent is None and function.child_list == set():
-                                to_be_deleted_function_list.append(function)
-                            else:
-                                print(f"{elem} is already composed or composes a function "
-                                      f"(not deleted)")
-            elif result_data:
-                for xml_data in xml_data_list:
-                    if elem == xml_data.name:
-                        if xml_data.predecessor_list == set():
-                            to_be_deleted_data_list.append(xml_data)
-            elif resul_state:
-                for state in xml_state_list:
-                    if elem == state.name or elem == state.alias:
-                        if state.id in xml_src_dest_list:
-                            print(f"{elem} associated to transition (not deleted)")
-                        elif state.id in xml_allocated_object_id_list:
-                            print(f"{elem} allocated to a functional element (not deleted)")
-                        else:
-                            if state.parent is None and state.child_list == set():
-                                to_be_deleted_state_list.append(state)
-                            else:
-                                print(f"{elem} is already composed of or composes a state "
-                                      f"(not deleted)")
-            elif result_fun_elem:
-                for fun_elem in xml_fun_elem_list:
-                    if elem == fun_elem.name or elem == fun_elem.alias:
-                        if fun_elem.allocated_state_list != set():
-                            print(f"{elem} has allocated state(s) (not deleted)")
-                        elif fun_elem.allocated_function_list != set():
-                            print(f"{elem} has allocated function(s) (not deleted)")
-                        else:
-                            if fun_elem.parent is None and fun_elem.child_list == set():
-                                to_be_deleted_fun_elem_list.append(fun_elem)
-                            else:
-                                print(f"{elem} is already composed or composes a functional "
-                                      f"element (not deleted)")
-            elif result_transition:
-                for transition in xml_transition_list:
-                    if elem == transition.name or elem == transition.alias:
-                        if transition.source != 'None':
-                            print(f"{elem} attached to a source's state (not deleted)")
-                        elif transition.destination != 'None':
-                            print(f"{elem} attached to a destination's state (not deleted)")
-                        elif transition.condition_list != set():
-                            print(f"{elem} has conditions (not deleted)")
-                        else:
-                            to_be_deleted_transition_list.append(transition)
+            print(f"{object_to_del.name} can not be deleted")
 
-    to_be_deleted_lists = [to_be_deleted_function_list, to_be_deleted_data_list,
-                           to_be_deleted_state_list, to_be_deleted_fun_elem_list,
-                           to_be_deleted_transition_list]
-    xml_lists = [xml_function_list, xml_data_list, xml_state_list, xml_fun_elem_list,
-                 xml_transition_list]
-    update_list = delete_objects(to_be_deleted_lists, xml_lists, output_xml)
+    update = delete_objects(to_be_deleted_obj_lists, kwargs['output_xml'])
 
-    return update_list
+    return update
 
 
-def delete_objects(to_be_deleted_lists, xml_lists, output_xml):
+def check_relationship_before_delete(object_to_del, **kwargs):
+    _, idx = get_specific_obj_type_and_idx(object_to_del)
+    switch_check = {
+        0: check_function,
+        1: check_data,
+        2: check_state,
+        3: check_transition,
+        4: check_fun_elem,
+        5: check_chain,
+        6: check_attribute,
+        7: check_fun_inter,
+        8: check_phy_elem,
+        9: check_phy_inter,
+    }
+    check_obj = switch_check.get(idx, "Object can not be deleted")
+    check = check_obj(object_to_del, **kwargs)
+    return check, idx
+
+
+def check_object_not_in_prod_cons(object_to_check, consumer_list, producer_list):
+    """Check if object/data_name not in producer or consumer lists"""
+    check = False
+    if not any(object_to_check in o for o in consumer_list + producer_list):
+        check = True
+    return check
+
+
+def check_object_no_parent_and_child(object_to_check):
+    """Check if an object has not parent and not child"""
+    check = False
+    if not object_to_check.child_list and object_to_check.parent is None:
+        check = True
+
+    return check
+
+
+def check_object_not_allocated(object_to_check, allocated_to_object_list):
+    """Check if object in allocated_list of allocated objects"""
+    check = False
+    if not allocated_to_object_list:
+        check = True
+        return check
+    else:
+        converted_list = list(allocated_to_object_list)
+        if isinstance(object_to_check, datamodel.Function):
+            if isinstance(converted_list[0], (datamodel.State, datamodel.FunctionalElement)):
+                if not any(object_to_check.id in obj.allocated_function_list for obj
+                           in converted_list):
+                    check = True
+            if isinstance(converted_list[0], datamodel.Chain):
+                if not any(object_to_check.id in obj.allocated_item_list for obj
+                           in converted_list):
+                    check = True
+        if isinstance(object_to_check, datamodel.Data):
+            if isinstance(converted_list[0], datamodel.Chain):
+                if not any(object_to_check.id in obj.allocated_item_list for obj
+                           in converted_list):
+                    check = True
+            if isinstance(converted_list[0], datamodel.FunctionalInterface):
+                if not any(object_to_check.id in obj.allocated_data_list for obj
+                           in converted_list):
+                    check = True
+        if isinstance(object_to_check, datamodel.State):
+            if isinstance(converted_list[0], datamodel.FunctionalElement):
+                if not any(object_to_check.id in obj.allocated_state_list for obj
+                           in converted_list):
+                    check = True
+        if isinstance(object_to_check, datamodel.FunctionalElement):
+            if isinstance(converted_list[0], datamodel.PhysicalElement):
+                if not any(object_to_check.id in obj.allocated_fun_elem_list for obj
+                           in converted_list):
+                    check = True
+        if isinstance(object_to_check, datamodel.FunctionalInterface):
+            if isinstance(converted_list[0], datamodel.FunctionalElement):
+                if not any(object_to_check.id in obj.exposed_interface_list for obj
+                           in converted_list):
+                    check = True
+            if isinstance(converted_list[0], datamodel.PhysicalInterface):
+                if not any(object_to_check.id in obj.allocated_fun_inter_list for obj
+                           in converted_list):
+                    check = True
+        if isinstance(object_to_check, datamodel.PhysicalInterface):
+            if isinstance(converted_list[0], datamodel.PhysicalElement):
+                if not any(object_to_check.id in obj.exposed_interface_list for obj
+                           in converted_list):
+                    check = True
+        return check
+
+
+def check_object_no_attribute(object_to_check, attribute_list):
+    """Check that object has not attribute set"""
+    check = False
+    described_item_list = [obj.described_item_list for obj in attribute_list]
+    if not any(object_to_check.id in obj for obj in described_item_list):
+        check = True
+    return check
+
+
+def check_function(object_to_del, **kwargs):
+    """Checks for Function's object"""
+    check = False
+    check_list = [False]*6
+    check_list[0] = check_object_no_parent_and_child(object_to_del)
+    if not check_list[0]:
+        print(f"{object_to_del.name} has composition relationship(s)")
+
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_state_list'])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
+    if not check_list[1] or not check_list[2]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    check_list[3] = check_object_not_in_prod_cons(object_to_del,
+                                                  kwargs['xml_consumer_function_list'],
+                                                  kwargs['xml_producer_function_list'])
+    if not check_list[3]:
+        print(f"{object_to_del.name} has production/consumption relationship(s)")
+
+    check_list[4] = check_object_no_attribute(object_to_del, kwargs['xml_attribute_list'])
+    if not check_list[4]:
+        print(f"{object_to_del.name} has attribute(s) set")
+
+    check_list[5] = check_object_not_allocated(object_to_del, kwargs['xml_chain_list'])
+    if not check_list[5]:
+        print(f"{object_to_del.name} has chain relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_function_list'].remove(object_to_del)
+    return check
+
+
+def check_data(object_to_del, **kwargs):
+    """Checks for Data's object"""
+    check = False
+    check_list = [False]*3
+    check_list[0] = check_object_not_in_prod_cons(object_to_del.name,
+                                                  kwargs['xml_consumer_function_list'],
+                                                  kwargs['xml_producer_function_list'])
+    if not check_list[0]:
+        print(f"{object_to_del.name} has production/consumption relationship(s)")
+
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_chain_list'])
+    if not check_list[1]:
+        print(f"{object_to_del.name} has chain relationship(s)")
+
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_inter_list'])
+    if not check_list[2]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_data_list'].remove(object_to_del)
+    return check
+
+
+def check_state(object_to_del, **kwargs):
+    """Checks for State's object"""
+    check = False
+    check_list = [False] * 4
+
+    check_list[0] = check_object_no_parent_and_child(object_to_del)
+    if not check_list[0]:
+        print(f"{object_to_del.name} has composition relationship(s)")
+
+    check_list[1] = not object_to_del.allocated_function_list
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
+    if not check_list[1] or not check_list[2]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    check_list[3] = not any(object_to_del.id in (trans.source, trans.destination)
+                            for trans in kwargs['xml_transition_list'])
+    if not check_list[3]:
+        print(f"{object_to_del.name} has transition relationship(s)")
+    if all(check_list):
+        check = True
+        kwargs['xml_state_list'].remove(object_to_del)
+    return check
+
+
+def check_transition(object_to_del, **kwargs):
+    """Checks for State's object"""
+    check = False
+    check_list = [False] * 1
+
+    check_list[0] = object_to_del.source is None and object_to_del.destination is None
+    if not check_list[0]:
+        print(f"{object_to_del.name} has source/destination relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_transition_list'].remove(object_to_del)
+    return check
+
+
+def check_fun_elem(object_to_del, **kwargs):
+    """Checks for Functional Element's object"""
+    check = False
+    check_list = [False] * 4
+
+    check_list[0] = check_object_no_parent_and_child(object_to_del)
+    if not check_list[0]:
+        print(f"{object_to_del.name} has composition relationship(s)")
+
+    check_list[1] = not object_to_del.allocated_function_list \
+                    and not object_to_del.allocated_state_list
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
+    if not check_list[1] or not check_list[2]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    check_list[3] = not object_to_del.exposed_interface_list
+    if not check_list[3]:
+        print(f"{object_to_del.name} has interface relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_fun_elem_list'].remove(object_to_del)
+
+    return check
+
+
+def check_chain(object_to_del, **kwargs):
+    """Checks for Chain's object"""
+    check = False
+    check_list = [False] * 1
+
+    check_list[0] = not object_to_del.allocated_item_list
+    if not check_list[0]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_chain_list'].remove(object_to_del)
+
+    return check
+
+
+def check_attribute(object_to_del, **kwargs):
+    """Checks for Attribute's object"""
+    check = False
+    check_list = [False] * 1
+
+    check_list[0] = not object_to_del.described_item_list
+    if not check_list[0]:
+        print(f"{object_to_del.name} has attribute relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_attribute_list'].remove(object_to_del)
+
+    return check
+
+
+def check_fun_inter(object_to_del, **kwargs):
+    """Checks for Functional Interface's object"""
+    check = False
+    check_list = [False] * 3
+
+    check_list[0] = not object_to_del.allocated_data_list
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_inter_list'])
+    if not check_list[0] or not check_list[1] or not check_list[2]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_fun_inter_list'].remove(object_to_del)
+
+    return check
+
+
+def check_phy_elem(object_to_del, **kwargs):
+    """Checks for Physical Element's object"""
+    check = False
+    check_list = [False] * 3
+
+    check_list[0] = check_object_no_parent_and_child(object_to_del)
+    if not check_list[0]:
+        print(f"{object_to_del.name} has composition relationship(s)")
+
+    check_list[1] = not object_to_del.allocated_fun_elem_list
+    if not check_list[1]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    check_list[2] = not object_to_del.exposed_interface_list
+    if not check_list[2]:
+        print(f"{object_to_del.name} has interface relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_phy_elem_list'].remove(object_to_del)
+
+    return check
+
+
+def check_phy_inter(object_to_del, **kwargs):
+    """Checks for Physical Interface's object"""
+    check = False
+    check_list = [False] * 2
+
+    check_list[0] = not object_to_del.allocated_fun_inter_list
+    if not check_list[0]:
+        print(f"{object_to_del.name} has allocation relationship(s)")
+
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
+    if not check_list[1]:
+        print(f"{object_to_del.name} has interface relationship(s)")
+
+    if all(check_list):
+        check = True
+        kwargs['xml_phy_inter_list'].remove(object_to_del)
+
+    return check
+
+
+def delete_objects(object_lists, output_xml):
     """
-    Check if input lists are not empty, delete each element and return update list if some updates
-    has been made
+    Check if input lists are not empty, write in xml for each list and return update list if some
+    updates has been made
 
         Parameters:
-            to_be_deleted_lists ([[Function], [Data], [State], ...]) : Objects to delete
-            xml_lists ([Data_name_str, Function]) : Current xml objects to remove object from it
+            object_lists : see order in get_specific_obj_type_and_idx()
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
-    update_list = []
-    if any(to_be_deleted_lists):
-        to_be_deleted_function_list = to_be_deleted_lists[0]
-        to_be_deleted_data_list = to_be_deleted_lists[1]
-        to_be_deleted_state_list = to_be_deleted_lists[2]
-        to_be_deleted_fun_elem_list = to_be_deleted_lists[3]
-        to_be_deleted_transition_list = to_be_deleted_lists[4]
-        if to_be_deleted_function_list:
-            output_xml.delete_function(to_be_deleted_function_list)
-            for deleted_function in to_be_deleted_function_list:
-                xml_lists[0].remove(deleted_function)
-                print(f"{deleted_function.name} deleted")
-
-        if to_be_deleted_data_list:
-            output_xml.delete_data(to_be_deleted_data_list)
-            for deleted_data in to_be_deleted_data_list:
-                xml_lists[1].remove(deleted_data)
-                print(f"{deleted_data.name} deleted")
-
-        if to_be_deleted_state_list:
-            output_xml.delete_state(to_be_deleted_state_list)
-            for deleted_state in to_be_deleted_state_list:
-                xml_lists[2].remove(deleted_state)
-                print(f"{deleted_state.name} deleted")
-
-        if to_be_deleted_fun_elem_list:
-            output_xml.delete_functional_element(to_be_deleted_fun_elem_list)
-            for deleted_fun_elem in to_be_deleted_fun_elem_list:
-                xml_lists[3].remove(deleted_fun_elem)
-                print(f"{deleted_fun_elem.name} deleted")
-
-        if to_be_deleted_transition_list:
-            output_xml.delete_transition(to_be_deleted_transition_list)
-            for deleted_transition in to_be_deleted_transition_list:
-                xml_lists[4].remove(deleted_transition)
-                print(f"{deleted_transition.name} deleted")
-        update_list.append(1)
-    else:
-        update_list.append(0)
-
-    return update_list
+    if any(object_lists):
+        for i in range(10):
+            if object_lists[i]:
+                output_xml.delete_object(object_lists[i])
+                for object_type in object_lists[i]:
+                    print(f"{object_type.name} deleted")
+        return 1
+    return 0
 
 
 def check_set_object_type(type_str_list, **kwargs):
@@ -383,7 +553,7 @@ def check_set_object_type(type_str_list, **kwargs):
 def check_new_type(object_to_set, type_name):
     """Check if type in specity object's type list and if changed"""
     check = False
-    specific_obj_type_list, list_idx = get_specific_obj_type(object_to_set)
+    specific_obj_type_list, list_idx = get_specific_obj_type_and_idx(object_to_set)
     if list_idx in (0, 1, 2, 3, 4, 5):
         if type_name.upper() in specific_obj_type_list:
             if type_name.capitalize() != str(object_to_set.type):
@@ -402,7 +572,7 @@ def check_new_type(object_to_set, type_name):
     return check, list_idx
 
 
-def get_specific_obj_type(object_to_set):
+def get_specific_obj_type_and_idx(object_to_set):
     """Get __str__ list from FunctionType, DataType, StateType, TransitionType,
     FunctionalElementType, ChainType and index for output_list (depends on the type)"""
     specific_obj_type_list = []
@@ -443,7 +613,7 @@ def set_object_type(object_lists, output_xml):
     updates has been made
 
         Parameters:
-            object_lists : see order in comments below
+            object_lists : see order in get_specific_obj_type_and_idx()
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
