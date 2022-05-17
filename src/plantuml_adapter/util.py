@@ -212,7 +212,8 @@ class MakePlantUml:
                               form_auth={}, http_opts={}, request_opts={})
             out = server.get_url(full_string)
         else:
-            full_string = "@startuml\n" + string + "@enduml"
+            full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
+                          + string + "@enduml"
             # Generate and set unique identifier of length 10 integers
             identi = uuid.uuid4()
             identi = str(identi.int)[:10]
