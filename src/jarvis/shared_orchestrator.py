@@ -185,6 +185,7 @@ def check_and_delete_object(delete_str_list, **kwargs):
 
 
 def check_relationship_before_delete(object_to_del, **kwargs):
+    """Switch to trigger differents methods depend object's type"""
     _, idx = get_specific_obj_type_and_idx(object_to_del)
     switch_check = {
         0: check_function,
@@ -226,51 +227,51 @@ def check_object_not_allocated(object_to_check, allocated_to_object_list):
     if not allocated_to_object_list:
         check = True
         return check
-    else:
-        converted_list = list(allocated_to_object_list)
-        if isinstance(object_to_check, datamodel.Function):
-            if isinstance(converted_list[0], (datamodel.State, datamodel.FunctionalElement)):
-                if not any(object_to_check.id in obj.allocated_function_list for obj
-                           in converted_list):
-                    check = True
-            if isinstance(converted_list[0], datamodel.Chain):
-                if not any(object_to_check.id in obj.allocated_item_list for obj
-                           in converted_list):
-                    check = True
-        if isinstance(object_to_check, datamodel.Data):
-            if isinstance(converted_list[0], datamodel.Chain):
-                if not any(object_to_check.id in obj.allocated_item_list for obj
-                           in converted_list):
-                    check = True
-            if isinstance(converted_list[0], datamodel.FunctionalInterface):
-                if not any(object_to_check.id in obj.allocated_data_list for obj
-                           in converted_list):
-                    check = True
-        if isinstance(object_to_check, datamodel.State):
-            if isinstance(converted_list[0], datamodel.FunctionalElement):
-                if not any(object_to_check.id in obj.allocated_state_list for obj
-                           in converted_list):
-                    check = True
-        if isinstance(object_to_check, datamodel.FunctionalElement):
-            if isinstance(converted_list[0], datamodel.PhysicalElement):
-                if not any(object_to_check.id in obj.allocated_fun_elem_list for obj
-                           in converted_list):
-                    check = True
-        if isinstance(object_to_check, datamodel.FunctionalInterface):
-            if isinstance(converted_list[0], datamodel.FunctionalElement):
-                if not any(object_to_check.id in obj.exposed_interface_list for obj
-                           in converted_list):
-                    check = True
-            if isinstance(converted_list[0], datamodel.PhysicalInterface):
-                if not any(object_to_check.id in obj.allocated_fun_inter_list for obj
-                           in converted_list):
-                    check = True
-        if isinstance(object_to_check, datamodel.PhysicalInterface):
-            if isinstance(converted_list[0], datamodel.PhysicalElement):
-                if not any(object_to_check.id in obj.exposed_interface_list for obj
-                           in converted_list):
-                    check = True
-        return check
+
+    converted_list = list(allocated_to_object_list)
+    if isinstance(object_to_check, datamodel.Function):
+        if isinstance(converted_list[0], (datamodel.State, datamodel.FunctionalElement)):
+            if not any(object_to_check.id in obj.allocated_function_list for obj
+                       in converted_list):
+                check = True
+        if isinstance(converted_list[0], datamodel.Chain):
+            if not any(object_to_check.id in obj.allocated_item_list for obj
+                       in converted_list):
+                check = True
+    if isinstance(object_to_check, datamodel.Data):
+        if isinstance(converted_list[0], datamodel.Chain):
+            if not any(object_to_check.id in obj.allocated_item_list for obj
+                       in converted_list):
+                check = True
+        if isinstance(converted_list[0], datamodel.FunctionalInterface):
+            if not any(object_to_check.id in obj.allocated_data_list for obj
+                       in converted_list):
+                check = True
+    if isinstance(object_to_check, datamodel.State):
+        if isinstance(converted_list[0], datamodel.FunctionalElement):
+            if not any(object_to_check.id in obj.allocated_state_list for obj
+                       in converted_list):
+                check = True
+    if isinstance(object_to_check, datamodel.FunctionalElement):
+        if isinstance(converted_list[0], datamodel.PhysicalElement):
+            if not any(object_to_check.id in obj.allocated_fun_elem_list for obj
+                       in converted_list):
+                check = True
+    if isinstance(object_to_check, datamodel.FunctionalInterface):
+        if isinstance(converted_list[0], datamodel.FunctionalElement):
+            if not any(object_to_check.id in obj.exposed_interface_list for obj
+                       in converted_list):
+                check = True
+        if isinstance(converted_list[0], datamodel.PhysicalInterface):
+            if not any(object_to_check.id in obj.allocated_fun_inter_list for obj
+                       in converted_list):
+                check = True
+    if isinstance(object_to_check, datamodel.PhysicalInterface):
+        if isinstance(converted_list[0], datamodel.PhysicalElement):
+            if not any(object_to_check.id in obj.exposed_interface_list for obj
+                       in converted_list):
+                check = True
+    return check
 
 
 def check_object_no_attribute(object_to_check, attribute_list):
@@ -735,7 +736,8 @@ def check_add_allocation(allocation_str_list, **kwargs):
         2: [],  # [FunctionalInterface, Data]
         3: [],  # [PhysicalElement, FunctionalElement]
         4: [],  # [PhysicalInterface, FunctionalInterface]
-
+        # 5: [],  [Chain, Object] in other modules or [Fun_elem_Parent, Function/State] in
+        # check_parent_allocation() it's just a key with no recursivety
     }
     for elem in allocation_str_list:
         alloc_obj = check_get_object(elem[0],
@@ -790,12 +792,12 @@ def print_wrong_obj_allocation(obj_str):
     else:
         name_str = f"Object {obj_str}"
     print(name_str + " not found or can not be allocated, "
-          f"available allocations are: \n"
-          f"(Functional Element allocates State/Function) OR \n"
-          f"(State allocates Function) OR \n"
-          f"(Functional Interface allocates Data) OR \n"
-          f"(Physical Element allocates Functional Element) OR \n"
-          f"(Physical Interface allocates Functional Interface)\n")
+                     "available allocations are: \n"
+                     "(Functional Element allocates State/Function) OR \n"
+                     "(State allocates Function) OR \n"
+                     "(Functional Interface allocates Data) OR \n"
+                     "(Physical Element allocates Functional Element) OR \n"
+                     "(Physical Interface allocates Functional Interface)\n")
 
 
 def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
@@ -947,16 +949,16 @@ def add_allocation(allocation_dict, output_xml):
             1 if update, else 0
     """
     if any(allocation_dict.items()):
-        for i in range(len(allocation_dict)):
-            if allocation_dict[i]:
-                output_xml.write_objects_allocation(allocation_dict[i])
+        for _, k in enumerate(allocation_dict):
+            if allocation_dict[k]:
+                output_xml.write_objects_allocation(allocation_dict[k])
                 # Warn the user once added within xml
-                for elem in allocation_dict[i]:
+                for elem in allocation_dict[k]:
                     print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                           f"{elem[0].__class__.__name__} {elem[0].name}")
                     # Check the dict length, if this method is called from viewpoint_orchestrator
                     # or functional_orchestrator for Chain => Only key[0] and no recursion wanted
-                    if i in (0, 1) and len(allocation_dict) > 1:
+                    if k in (0, 1):
                         recursive_allocation(elem, output_xml)
         return 1
     return 0
@@ -985,7 +987,7 @@ def check_parent_allocation(elem, output_xml):
                 else:
                     fun_elem_parent.add_allocated_function(object_parent.id)
 
-                add_allocation({0: [[fun_elem_parent, object_parent]]}, output_xml)
+                add_allocation({5: [[fun_elem_parent, object_parent]]}, output_xml)
                 check_parent_allocation([fun_elem_parent, object_parent], output_xml)
             else:
                 print(f"Error: {object_parent.name} is not allocated despite at least one "
@@ -1001,13 +1003,13 @@ def recursive_allocation(elem, output_xml):
             parent_child = [elem[1], i]
             allocated_child_list = get_allocated_child(parent_child, [elem[0]])
             if allocated_child_list:
-                for e in allocated_child_list:
+                for item in allocated_child_list:
                     if isinstance(elem[1], datamodel.State):
-                        e[0].add_allocated_state(e[1].id)
+                        item[0].add_allocated_state(item[1].id)
                     else:
-                        e[0].add_allocated_function(e[1].id)
-                # Dummy dict key 1 to add recursivety depending on dict length see add_allocation()
-                add_allocation({0: allocated_child_list, 1: []}, output_xml)
+                        item[0].add_allocated_function(item[1].id)
+                # We want recursivety so it trigger for (0, 1) keys in the dict
+                add_allocation({0: allocated_child_list}, output_xml)
     else:
         # TBT/TBC
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:

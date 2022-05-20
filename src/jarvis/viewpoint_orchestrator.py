@@ -132,7 +132,7 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 
-    update = shared_orchestrator.add_allocation({0: allocated_item_list}, output_xml)
+    update = shared_orchestrator.add_allocation({5: allocated_item_list}, output_xml)
 
     return update
 
