@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module with class & methods for parsing jarvis4se commands"""
 import re
 import pandas as pd
 from IPython.display import display, HTML, Markdown
@@ -257,15 +258,7 @@ def matched_producer(producer_str_list, **kwargs):
 
 def matched_allocation(allocation_str_list, **kwargs):
     """Get allocation declaration"""
-    out = shared_orchestrator.check_add_allocation(allocation_str_list,
-                                                   kwargs['xml_fun_elem_list'],
-                                                   kwargs['xml_state_list'],
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_fun_inter_list'],
-                                                   kwargs['xml_data_list'],
-                                                   kwargs['xml_consumer_function_list'],
-                                                   kwargs['xml_producer_function_list'],
-                                                   kwargs['output_xml'])
+    out = shared_orchestrator.check_add_allocation(allocation_str_list, **kwargs)
     return out
 
 

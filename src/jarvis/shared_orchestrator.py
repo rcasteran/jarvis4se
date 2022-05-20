@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Module containing methods shared between objects/orchestrator"""
 import re
 
 import datamodel
-from .question_answer import get_object_name, get_object_type, check_get_object, \
-    get_allocation_object, check_parentality
+from .question_answer import get_object_type, check_get_object, get_allocation_object, \
+    check_not_family
 
 
 def cut_string_list(string_tuple_list):
@@ -712,168 +714,207 @@ def set_object_alias(object_lists, output_xml):
     return 0
 
 
-def check_add_allocation(allocation_str_list, xml_fun_elem_list, xml_state_list, xml_function_list,
-                         xml_fun_inter_list, xml_data_list,
-                         xml_consumer_function_list, xml_producer_function_list, output_xml):
+def check_add_allocation(allocation_str_list, **kwargs):
     """
-    Check if each string in allocation_str_list are corresponding to an actual object, create new
-    [FunctionalElement, allocated State/Function] lists.
-    Send lists to add_allocation() to write them within xml and then returns update_list from it.
+    Check if each string in allocation_str_list are corresponding to an actual object's name/alias,
+    create lists for:
+    [[FunctionalElement, Function/State], [FunctionalInterface, Data],[State, Function],
+    [PhysicalElement, FunctionalElement], [PhysicalInterface, FunctionalInterface]]
+    Send lists to add_allocation() to write them within xml and then returns update from it.
 
         Parameters:
             allocation_str_list ([str]) : Lists of string from jarvis cell
-            xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            xml_state_list ([State]) : state list from xml parsing
-            xml_function_list ([Function]) : function list from xml parsing
-            xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
-            xml_data_list ([Data]) : Data list from xml parsing
-            xml_consumer_function_list ([flow_name, Function]): consumer's list
-            xml_producer_function_list ([flow_name, Function]): producer's list
-            output_xml (GenerateXML object) : XML's file object
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update ([0/1]) : 1 if update, else 0
     """
-    fun_elem_allocated_function_list = []
-    fun_elem_allocated_state_list = []
-    state_allocated_function_list = []
-    fun_inter_allocated_data_list = []
-    # Create lists with all object names/aliases already in the xml
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_state_name_list = get_object_name(xml_state_list)
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_data_name_list = get_object_name(xml_data_list)
-    xml_fun_inter_name_list = get_object_name(xml_fun_inter_list)
+    new_allocation = {
+        0: [],  # [FunctionalElement, Function/State]
+        1: [],  # [State, Function]
+        2: [],  # [FunctionalInterface, Data]
+        3: [],  # [PhysicalElement, FunctionalElement]
+        4: [],  # [PhysicalInterface, FunctionalInterface]
 
-    concatenated_lists = [*xml_fun_elem_name_list, *xml_state_name_list, *xml_function_name_list,
-                          *xml_data_name_list, *xml_fun_inter_name_list]
-    available_objects_list = [*xml_state_name_list, *xml_function_name_list]
-
-    # elem = [state/functional_element_name/alias, state/function_name/alias]
+    }
     for elem in allocation_str_list:
-        is_elem_found = True
-        if not all(t in concatenated_lists for t in elem):
-            is_elem_found = False
-            if any(s == elem[0] for s in xml_fun_elem_name_list) and not any(
-                    j == elem[1] for j in available_objects_list):
-                print(f"Object {elem[1]} does not exist")
-            elif any(s == elem[1] for s in available_objects_list) and not any(
-                    j == elem[0] for j in xml_fun_elem_name_list):
-                print(f"Functional Element {elem[0]} does not exist")
-            elif any(s == elem[1] for s in xml_data_name_list) and not any(
-                    j == elem[0] for j in xml_fun_inter_name_list):
-                print(f"Functional Interface {elem[0]} does not exist")
-            elif any(s == elem[0] for s in xml_fun_inter_name_list) and not any(
-                    j == elem[1] for j in xml_data_name_list):
-                print(f"Data {elem[0]} does not exist")
-            else:
-                print(f"{elem[0]} and {elem[1]} do not exist")
+        alloc_obj = check_get_object(elem[0],
+                                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                        'xml_state_list': kwargs['xml_state_list'],
+                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                        })
+        obj_to_alloc = check_get_object(elem[1],
+                                        **{'xml_function_list': kwargs['xml_function_list'],
+                                            'xml_state_list': kwargs['xml_state_list'],
+                                           'xml_data_list': kwargs['xml_data_list'],
+                                           'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                           'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                           })
+        check_obj = check_allocation_objects_types(alloc_obj, obj_to_alloc, elem)
+        if not check_obj:
+            continue
+        check_rule, alloc = check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs)
+        if check_rule and alloc:
+            new_allocation[alloc[0]].append(alloc[1])
 
-        if is_elem_found:
-            result_fun_elem_function = (elem[0] in xml_fun_elem_name_list) and (
-                        elem[1] in xml_function_name_list)
-            result_fun_elem_state = (elem[0] in xml_fun_elem_name_list) and (
-                        elem[1] in xml_state_name_list)
-            result_state_function = (elem[0] in xml_state_name_list) and (
-                    elem[1] in xml_function_name_list)
-            result_fun_inter_data = any(s == elem[0] for s in xml_fun_inter_name_list) and any(
-                    s == elem[1] for s in xml_data_name_list)
+    update = add_allocation(new_allocation, kwargs['output_xml'])
 
-            if result_fun_elem_function:
-                for fun_elem in xml_fun_elem_list:
-                    if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
-                        for fun in xml_function_list:
-                            if elem[1] == fun.name or elem[1] == fun.alias:
-                                check_allocation = \
-                                    get_allocation_object(fun, xml_fun_elem_list)
-                                count = None
-                                if check_allocation is not None:
-                                    count = len(check_allocation)
-                                    for item in check_allocation:
-                                        if check_parentality(item, fun_elem):
-                                            count -= 1
-                                if count in (None, 0):
-                                    fun_elem.add_allocated_function(fun.id)
-                                    fun_elem_allocated_function_list.append([fun_elem, fun])
+    return update
 
-            elif result_fun_elem_state:
-                for fun_elem in xml_fun_elem_list:
-                    if elem[0] == fun_elem.name or elem[0] == fun_elem.alias:
-                        for state in xml_state_list:
-                            if elem[1] == state.name or elem[1] == state.alias:
-                                check_allocation = \
-                                    get_allocation_object(state, xml_fun_elem_list)
-                                count = None
-                                if check_allocation is not None:
-                                    count = len(check_allocation)
-                                    for item in check_allocation:
-                                        if check_parentality(item, fun_elem):
-                                            count -= 1
-                                if count in (None, 0):
-                                    fun_elem.add_allocated_state(state.id)
-                                    fun_elem_allocated_state_list.append([fun_elem, state])
 
-            elif result_state_function:
-                for state in xml_state_list:
-                    if elem[0] == state.name or elem[0] == state.alias:
-                        for fun in xml_function_list:
-                            if elem[1] == fun.name or elem[1] == fun.alias:
-                                check_allocation = \
-                                    get_allocation_object(fun, xml_state_list)
-                                if check_allocation is None:
-                                    state.add_allocated_function(fun.id)
-                                    state_allocated_function_list.append([state, fun])
-                                else:
-                                    if state not in check_allocation:
-                                        state.add_allocated_function(fun.id)
-                                        state_allocated_function_list.append([state, fun])
+def check_allocation_objects_types(alloc_obj, obj_to_alloc, elem):
+    """Check that alloc_obj within is FunctionalElement or FunctionalInterface or State or
+    PhysicalElement or PhysicalInterface AND obj_to_alloc is Function/State or Data or
+    FunctionalElement or FunctionalInterface"""
+    check = True
+    if alloc_obj is None and obj_to_alloc is None:
+        print_wrong_obj_allocation(elem)
+        check = False
+    elif alloc_obj is None or obj_to_alloc is None:
+        if alloc_obj is None:
+            print_wrong_obj_allocation(elem[0])
+            check = False
+        elif obj_to_alloc is None:
+            print_wrong_obj_allocation(elem[1])
+            check = False
 
-            elif result_fun_inter_data:
-                for fun_inter in xml_fun_inter_list:
-                    if elem[0] == fun_inter.name or elem[0] == fun_inter.alias:
-                        for data in xml_data_list:
-                            if elem[1] == data.name:
-                                check_allocation_fun_inter = \
-                                    get_allocation_object(data, xml_fun_inter_list)
-                                if check_allocation_fun_inter is None:
-                                    check_fe = check_fun_elem_data_consumption(
-                                        data, fun_inter,
-                                        xml_fun_elem_list,
-                                        xml_function_list,
-                                        xml_consumer_function_list,
-                                        xml_producer_function_list)
-                                    if all(i for i in check_fe):
-                                        fun_inter_allocated_data_list.append([fun_inter, data])
-                                        fun_inter.add_allocated_data(data.id)
-                                    elif True in check_fe:
-                                        if check_fe[0] is True:
-                                            print(f"Data {data.name} has only consumer(s) "
-                                                  f"allocated to a functional element exposing "
-                                                  f"{fun_inter.name}, {data.name} not "
-                                                  f"allocated to {fun_inter.name}")
-                                        elif check_fe[1] is True:
-                                            print(f"Data {data.name} has only producer(s) "
-                                                  f"allocated to a functional element exposing "
-                                                  f"{fun_inter.name}, {data.name} not "
-                                                  f"allocated to {fun_inter.name}")
-                                    else:
-                                        print(f"Data {data.name} has no producer(s) nor "
-                                              f"consumer(s) allocated to functional elements "
-                                              f"exposing {fun_inter.name}, {data.name} not "
-                                              f"allocated to {fun_inter.name}")
-            else:
-                print(f"Available allocation types are: (State/Function with Functional Element) OR"
-                      f" (State with Function) OR (Data with Functional Interface)")
+    return check
 
-    allocation_lists = [fun_elem_allocated_function_list, fun_elem_allocated_state_list,
-                        state_allocated_function_list, [], fun_inter_allocated_data_list]
-    update_list = add_allocation(allocation_lists, output_xml)
 
-    return update_list
+def print_wrong_obj_allocation(obj_str):
+    """Print relative message to wrong pair allocations"""
+    if isinstance(obj_str, tuple):
+        name_str = f"Objects {obj_str[0]} and {obj_str[1]}"
+    else:
+        name_str = f"Object {obj_str}"
+    print(name_str + " not found or can not be allocated, "
+          f"available allocations are: \n"
+          f"(Functional Element allocates State/Function) OR \n"
+          f"(State allocates Function) OR \n"
+          f"(Functional Interface allocates Data) OR \n"
+          f"(Physical Element allocates Functional Element) OR \n"
+          f"(Physical Interface allocates Functional Interface)\n")
+
+
+def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
+    """Check "good" combinations, trigger specific check and then return check and new tuple
+    allocation"""
+    check = False
+    new_alloc = None
+    if isinstance(alloc_obj, datamodel.FunctionalElement):
+        if isinstance(obj_to_alloc, (datamodel.Function, datamodel.State)):
+            check = True
+            pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs['xml_fun_elem_list'])
+            if pair:
+                new_alloc = [0, pair]
+        else:
+            print_wrong_obj_allocation(obj_to_alloc.name)
+    elif isinstance(alloc_obj, datamodel.State):
+        if isinstance(obj_to_alloc, datamodel.Function):
+            check = True
+            pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs['xml_state_list'])
+            if pair:
+                new_alloc = [1, pair]
+        else:
+            print_wrong_obj_allocation(obj_to_alloc.name)
+    elif isinstance(alloc_obj, datamodel.FunctionalInterface):
+        if isinstance(obj_to_alloc, datamodel.Data):
+            check = True
+            pair = check_fun_inter_allocation(alloc_obj, obj_to_alloc, **kwargs)
+            if pair:
+                new_alloc = [2, pair]
+        else:
+            print_wrong_obj_allocation(obj_to_alloc.name)
+    elif isinstance(alloc_obj, datamodel.PhysicalElement):
+        if isinstance(obj_to_alloc, datamodel.FunctionalElement):
+            check = True
+        else:
+            print_wrong_obj_allocation(obj_to_alloc.name)
+    elif isinstance(alloc_obj, datamodel.PhysicalInterface):
+        if isinstance(obj_to_alloc, datamodel.FunctionalInterface):
+            check = True
+        else:
+            print_wrong_obj_allocation(obj_to_alloc.name)
+
+    return check, new_alloc
+
+
+def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list):
+    """Check allocation rules for fun_elem then returns objects if check"""
+    count = None
+    out = None
+    check_allocation = get_allocation_object(obj_to_alloc, fun_elem_list)
+    if check_allocation is not None:
+        count = len(check_allocation)
+        for item in check_allocation:
+            # Checks if they are in the same family
+            if not check_not_family(item, fun_elem) and item != fun_elem:
+                count -= 1
+
+    if count in (None, 0):
+        if isinstance(obj_to_alloc, datamodel.State):
+            fun_elem.add_allocated_state(obj_to_alloc.id)
+        else:
+            fun_elem.add_allocated_function(obj_to_alloc.id)
+        out = [fun_elem, obj_to_alloc]
+
+    return out
+
+
+def check_state_allocation(state, function, state_list):
+    """Check allocation rules for state then returns objects if check"""
+    out = None
+    check_allocation = get_allocation_object(function, state_list)
+    if check_allocation is None:
+        state.add_allocated_function(function.id)
+        out = [state, function]
+    else:
+        if state not in check_allocation:
+            state.add_allocated_function(function.id)
+            out = [state, function]
+
+    return out
+
+
+def check_fun_inter_allocation(fun_inter, data, **kwargs):
+    """Check allocation rules for fun_inter then returns objects if check"""
+    out = None
+    check_allocation_fun_inter = get_allocation_object(data, kwargs['xml_fun_inter_list'])
+    if check_allocation_fun_inter is None:
+        check_fe = check_fun_elem_data_consumption(
+            data, fun_inter,
+            kwargs['xml_fun_elem_list'],
+            kwargs['xml_function_list'],
+            kwargs['xml_consumer_function_list'],
+            kwargs['xml_producer_function_list'])
+        if all(i for i in check_fe):
+            out = [fun_inter, data]
+            fun_inter.add_allocated_data(data.id)
+        elif True in check_fe:
+            if check_fe[0] is True:
+                print(f"Data {data.name} has only consumer(s) "
+                      f"allocated to a functional element exposing "
+                      f"{fun_inter.name}, {data.name} not "
+                      f"allocated to {fun_inter.name}")
+            elif check_fe[1] is True:
+                print(f"Data {data.name} has only producer(s) "
+                      f"allocated to a functional element exposing "
+                      f"{fun_inter.name}, {data.name} not "
+                      f"allocated to {fun_inter.name}")
+        else:
+            print(f"Data {data.name} has no producer(s) nor "
+                  f"consumer(s) allocated to functional elements "
+                  f"exposing {fun_inter.name}, {data.name} not "
+                  f"allocated to {fun_inter.name}")
+    return out
 
 
 def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_list,
-                                    xml_consumer_function_list, xml_producer_function_list,):
+                                    xml_consumer_function_list, xml_producer_function_list):
+    """Check if for a fun_inter, the fun_elem exposing it has allocated functions producing and
+    consumming that data"""
     fun_elem_exposes = set()
     for fun_elem in fun_elem_list:
         if any(a == fun_inter.id for a in fun_elem.exposed_interface_list):
@@ -893,103 +934,66 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
     return [cons_list, prod_list]
 
 
-def add_allocation(allocation_lists, output_xml):
+def add_allocation(allocation_dict, output_xml):
     """
-    Check if input lists are not empty, write in xml for each list and return update list if some
-    updates has been made.
+    Check if allocation_lists is not empty, write in xml for each list and return 0/1
+    if some update has been made.
 
         Parameters:
-            allocation_lists ([FunctionalElement, allocated State/Function]) : FunctionalElement
-            with object to allocate
+            allocation_dict : Containing all allocation to write within xml
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            1 if update, else 0
     """
-    update_list = []
-    if any(allocation_lists):
-        fun_elem_allocated_function_list = allocation_lists[0]
-        fun_elem_allocated_state_list = allocation_lists[1]
-        state_allocated_function_list = allocation_lists[2]
-        chain_allocated_item_list = allocation_lists[3]
-        fun_inter_allocated_data_list = allocation_lists[4]
-        if fun_elem_allocated_function_list:
-            output_xml.write_allocated_function(fun_elem_allocated_function_list)
-            # Warn the user once added within xml
-            for elem in fun_elem_allocated_function_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to functional "
-                      f"element {elem[0].name}")
-                recursive_allocation(elem, output_xml)
-        if fun_elem_allocated_state_list:
-            output_xml.write_allocated_state(fun_elem_allocated_state_list)
-            # Warn the user once added within xml
-            for elem in fun_elem_allocated_state_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to functional "
-                      f"element {elem[0].name}")
-                recursive_allocation(elem, output_xml)
-        if state_allocated_function_list:
-            output_xml.write_allocated_function_to_state(state_allocated_function_list)
-            # Warn the user once added within xml
-            for elem in state_allocated_function_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to state "
-                      f"{elem[0].name}")
-                recursive_allocation(elem, output_xml)
-        if chain_allocated_item_list:
-            output_xml.write_allocated_chain_item(chain_allocated_item_list)
-            # Warn the user once added within xml
-            for elem in chain_allocated_item_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
-                      f"chain {elem[0].name}")
-        if fun_inter_allocated_data_list:
-            output_xml.write_fun_interface_allocated_data(fun_inter_allocated_data_list)
-            # Warn the user once added within xml
-            for elem in fun_inter_allocated_data_list:
-                print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
-                      f"functional interface {elem[0].name}")
-        update_list.append(1)
-    else:
-        update_list.append(0)
-
-    return update_list
+    if any(allocation_dict.items()):
+        for i in range(len(allocation_dict)):
+            if allocation_dict[i]:
+                output_xml.write_objects_allocation(allocation_dict[i])
+                # Warn the user once added within xml
+                for elem in allocation_dict[i]:
+                    print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
+                          f"{elem[0].__class__.__name__} {elem[0].name}")
+                    # Check the dict length, if this method is called from viewpoint_orchestrator
+                    # or functional_orchestrator for Chain => Only key[0] and no recursion wanted
+                    if i in (0, 1) and len(allocation_dict) > 1:
+                        recursive_allocation(elem, output_xml)
+        return 1
+    return 0
 
 
 def check_parent_allocation(elem, output_xml):
+    """Check if parent's Function/Sate are allocated to parent's Fucntional Element:
+    if not print message to user asking if he wants to, if yes write it in xml then continue
+    with parents"""
     if elem[0].parent is not None and elem[1].parent is not None:
         fun_elem_parent = elem[0].parent
         object_parent = elem[1].parent
-        object_type = get_object_type(elem[1])
         check = False
-        if object_type == "state":
+        if isinstance(elem[1], datamodel.State):
             if object_parent.id in fun_elem_parent.allocated_state_list:
                 check = True
-        elif object_type == "function":
+        elif isinstance(elem[1], datamodel.Function):
             if object_parent.id in fun_elem_parent.allocated_function_list:
                 check = True
         if not check:
             answer = input(f"Do you also want to allocate parents(i.e. {object_parent.name} "
                            f"to {fun_elem_parent.name}) ?(Y/N)")
             if answer.lower() == "y":
-                if object_type == "state":
-                    output_xml.write_allocated_state([[fun_elem_parent, object_parent]])
+                if isinstance(elem[1], datamodel.State):
                     fun_elem_parent.add_allocated_state(object_parent.id)
-                    print(f"State {object_parent.name} is allocated to functional "
-                          f"element {fun_elem_parent.name}")
-                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
-                elif object_type == "function":
-                    output_xml.write_allocated_function([[fun_elem_parent, object_parent]])
+                else:
                     fun_elem_parent.add_allocated_function(object_parent.id)
-                    print(f"Function {object_parent.name} is allocated to functional "
-                          f"element {fun_elem_parent.name}")
-                    check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+
+                add_allocation({0: [[fun_elem_parent, object_parent]]}, output_xml)
+                check_parent_allocation([fun_elem_parent, object_parent], output_xml)
             else:
                 print(f"Error: {object_parent.name} is not allocated despite at least one "
                       f"of its child is")
-                return
-    else:
-        return
 
 
 def recursive_allocation(elem, output_xml):
+    """Recursive allocation for childs of State/Function"""
     check_parent_allocation(elem, output_xml)
     object_type = get_object_type(elem[1])
     if elem[1].child_list:
@@ -997,23 +1001,15 @@ def recursive_allocation(elem, output_xml):
             parent_child = [elem[1], i]
             allocated_child_list = get_allocated_child(parent_child, [elem[0]])
             if allocated_child_list:
-                if object_type == "state":
-                    output_xml.write_allocated_state(allocated_child_list)
-                elif object_type == "function":
-                    output_xml.write_allocated_function(allocated_child_list)
                 for e in allocated_child_list:
-                    if object_type == "state":
+                    if isinstance(elem[1], datamodel.State):
                         e[0].add_allocated_state(e[1].id)
-                        print(f"State {e[1].name} is allocated to functional "
-                              f"element {e[0].name}")
-                    elif object_type == "function":
+                    else:
                         e[0].add_allocated_function(e[1].id)
-                        print(f"Function {e[1].name} is allocated to functional "
-                              f"element {e[0].name}")
-                    if e[1].child_list:
-                        recursive_allocation(e, output_xml)
-
+                # Dummy dict key 1 to add recursivety depending on dict length see add_allocation()
+                add_allocation({0: allocated_child_list, 1: []}, output_xml)
     else:
+        # TBT/TBC
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             elem[0].add_allocated_state(elem[1].id)
             print(f"State {elem[1].name} is allocated to functional "
@@ -1023,16 +1019,14 @@ def recursive_allocation(elem, output_xml):
             print(f"Function {elem[1].name} is allocated to functional "
                   f"element {elem[0].name}")
 
-    return None
 
-
-def get_allocated_child(i, xml_fun_elem_list):
+def get_allocated_child(elem, xml_fun_elem_list):
     """
     Check if the parent state/function is already allocated to a fun elem and create list to add
     its child also (if not already allocated)
 
         Parameters:
-            i ([State/Function]) : parent object, child object
+            elem ([State/Function]) : parent object, child object
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
 
         Returns:
@@ -1040,21 +1034,20 @@ def get_allocated_child(i, xml_fun_elem_list):
             to be added
     """
     output_list = []
-    object_type = get_object_type(i[0])
-    allocated_list = None
     for fun_elem in xml_fun_elem_list:
-        if object_type == "state":
+        if isinstance(elem[0], datamodel.State):
+            # To avoid "RuntimeError: Set changed size during iteration" copy()
             allocated_list = fun_elem.allocated_state_list.copy()
-        elif object_type == "function":
+        else:
             allocated_list = fun_elem.allocated_function_list.copy()
         if allocated_list:
             for allocated_object in allocated_list:
-                if allocated_object == i[0].id:
-                    if i[1].id not in allocated_list:
-                        if object_type == "state":
-                            fun_elem.add_allocated_state(i[1].id)
-                        elif object_type == "function":
-                            fun_elem.add_allocated_function(i[1].id)
-                        output_list.append([fun_elem, i[1]])
+                if allocated_object == elem[0].id:
+                    if elem[1].id not in allocated_list:
+                        if isinstance(elem[0], datamodel.State):
+                            fun_elem.add_allocated_state(elem[1].id)
+                        else:
+                            fun_elem.add_allocated_function(elem[1].id)
+                        output_list.append([fun_elem, elem[1]])
 
     return output_list

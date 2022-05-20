@@ -159,20 +159,6 @@ class GenerateXML:
                                                                     "allocatedFunctionList")
         self.write()
 
-    def write_allocated_function_to_state(self, state_function_list):
-        """Method to write allocated function by list [state, allocated_function]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for xml_state in root.findall(".//state"):
-                for fun_elem, function in state_function_list:
-                    if xml_state.get('id') == fun_elem.id:
-                        tag = xml_state.find('allocatedFunctionList')
-                        _allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
-                                                                {'id': function.id})
-        self.write()
-
     def write_transition(self, transition_list):
         """Method to write transition from transition's list"""
         with open(self.file, 'rb') as file:
@@ -255,36 +241,8 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    def write_allocated_state(self, fun_elem_state_list):
-        """Method to write allocated state by list [fun_elem, allocated_state]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for functional_element in root.findall(".//functionalElement"):
-                for fun_elem, state in fun_elem_state_list:
-                    if functional_element.get('id') == fun_elem.id:
-                        tag = functional_element.find('allocatedStateList')
-                        _allocated_state_tag = etree.SubElement(tag, "allocatedState",
-                                                                {'id': state.id})
-        self.write()
-
-    def write_allocated_function(self, fun_elem_function_list):
-        """Method to write allocated function by list [fun_elem, allocated_function]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for functional_element in root.findall(".//functionalElement"):
-                for fun_elem, function in fun_elem_function_list:
-                    if functional_element.get('id') == fun_elem.id:
-                        tag = functional_element.find('allocatedFunctionList')
-                        _allocated_state_tag = etree.SubElement(tag, "allocatedFunction",
-                                                                {'id': function.id})
-        self.write()
-
     def write_exposed_interface(self, fun_elem_inter_list):
-        """Method to write exposed interfaces by list [fun_elem, exposed_interface]"""
+        """Method to write exposed interfaces by list [fun_elem/phy_elem, exposed_interface]"""
         if isinstance(fun_elem_inter_list[0][0], datamodel.FunctionalElement):
             string_tag = ".//functionalElement"
         else:
@@ -316,20 +274,6 @@ class GenerateXML:
                                                  {'id': chain.id, 'name': chain.name,
                                                   'type': str(chain.type)})
                     _allocated_item_list_tag = etree.SubElement(chain_tag, "allocatedItemList")
-        self.write()
-
-    def write_allocated_chain_item(self, chain_item_list):
-        """Method to write allocated item by list [chain, allocated_item]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for chain_element in root.findall(".//chain"):
-                for chain, item in chain_item_list:
-                    if chain_element.get('id') == chain.id:
-                        tag = chain_element.find('allocatedItemList')
-                        _allocated_item_tag = etree.SubElement(tag, "allocatedItem",
-                                                               {'id': item.id})
         self.write()
 
     def write_attribute(self, attribute_list):
@@ -384,20 +328,6 @@ class GenerateXML:
                                                                 "allocatedDataList")
         self.write()
 
-    def write_fun_interface_allocated_data(self, fun_inter_data_list):
-        """Method to write allocated data by list [Functional Interface, allocated_data]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            # Loop on each flow/data
-            for fun_interface_tag in root.findall(".//functionalInterface"):
-                for fun_interface, data in fun_inter_data_list:
-                    if fun_interface_tag.get('id') == fun_interface.id:
-                        tag = fun_interface_tag.find('allocatedDataList')
-                        _allocated_data_tag = etree.SubElement(tag, "allocatedData",
-                                                               {'id': data.id})
-        self.write()
-
     def write_physical_element(self, physical_element_list):
         """Method to write physical element from physical elements list"""
         with open(self.file, 'rb') as file:
@@ -426,20 +356,6 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    def write_allocated_fun_elem(self, phy_elem_fun_elem_list):
-        """Method to write allocated fun_elem by list [phy_elem, allocated_fun_elem]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-
-            for physical_element in root.findall(".//physicalElement"):
-                for phy_elem, fun_elem in phy_elem_fun_elem_list:
-                    if physical_element.get('id') == phy_elem.id:
-                        tag = physical_element.find('allocatedFunctionalElementList')
-                        _allocated_fun_elem_tag = etree.SubElement(
-                            tag, "allocatedFunctionalElement", {'id': fun_elem.id})
-        self.write()
-
     def write_physical_interface(self, physical_interface_list):
         """Method to write physical interfaces from interface's list"""
         with open(self.file, 'rb') as file:
@@ -458,20 +374,6 @@ class GenerateXML:
                                                           'derived': phy_interface.derived})
                     _allocated_fun_inter_list_tag = etree.SubElement(
                         phy_interface_tag, "allocatedFunctionalInterfaceList")
-        self.write()
-
-    def write_phy_interface_allocated_fun_inter(self, phy_inter_fun_inter_list):
-        """Method to write allocated fun_inter by list [Physical Interface, allocated_fun_inter]"""
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-
-            for phy_interface_tag in root.findall(".//physicalInterface"):
-                for phy_interface, fun_inter in phy_inter_fun_inter_list:
-                    if phy_interface_tag.get('id') == phy_interface.id:
-                        tag = phy_interface_tag.find('allocatedFunctionalInterfaceList')
-                        _allocated_fun_inter_tag = etree.SubElement(
-                            tag, "allocatedFunctionalInterface", {'id': str(fun_inter.id)})
         self.write()
 
     def write_object_alias(self, object_list):
@@ -539,6 +441,25 @@ class GenerateXML:
                         obj_tag.getparent().remove(obj_tag)
             self.write()
 
+    def write_objects_allocation(self, objects_list):
+        """Method to write allocated objects from list [Object, Object]"""
+        elem_tag = get_object_tag(objects_list[0][0])
+        if elem_tag:
+            with open(self.file, 'rb') as file:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(file, parser)
+                for obj_tag in root.findall(".//" + elem_tag):
+                    for obj, obj_to_alloc in objects_list:
+                        if obj_tag.get('id') == obj.id:
+                            if elem_tag == "chain":
+                                alloc_tag = get_allocation_tag(obj)
+                            else:
+                                alloc_tag = get_allocation_tag(obj_to_alloc)
+                            tag = obj_tag.find(alloc_tag + 'List')
+                            _allocated_obj_tag = etree.SubElement(
+                                tag, alloc_tag, {'id': str(obj_to_alloc.id)})
+            self.write()
+
 
 derived_obj_tag = ("physicalInterface",
                    "physicalElement",
@@ -548,7 +469,7 @@ derived_obj_tag = ("physicalInterface",
 
 
 def get_object_tag(wanted_object):
-    """Get tag correspond to wanted_object"""
+    """Get xml element tag corresponding to wanted_object"""
     elem_tag = None
     if isinstance(wanted_object, datamodel.PhysicalInterface):
         elem_tag = "physicalInterface"
@@ -570,4 +491,22 @@ def get_object_tag(wanted_object):
         elem_tag = "data"
     elif isinstance(wanted_object, datamodel.Chain):
         elem_tag = "chain"
+    return elem_tag
+
+
+def get_allocation_tag(wanted_object):
+    """Get xml allocation tag corresponding to wanted_object"""
+    elem_tag = None
+    if isinstance(wanted_object, datamodel.Function):
+        elem_tag = "allocatedFunction"
+    elif isinstance(wanted_object, datamodel.FunctionalElement):
+        elem_tag = "allocatedFunctionalElement"
+    elif isinstance(wanted_object, datamodel.FunctionalInterface):
+        elem_tag = "allocatedFunctionalInterface"
+    elif isinstance(wanted_object, datamodel.State):
+        elem_tag = "allocatedState"
+    elif isinstance(wanted_object, datamodel.Data):
+        elem_tag = "allocatedData"
+    elif isinstance(wanted_object, datamodel.Chain):
+        elem_tag = "allocatedItem"
     return elem_tag

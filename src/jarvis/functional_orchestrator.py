@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module with methods relative to Functional section"""
 # Libraries
 import re
 import uuid
@@ -158,7 +159,7 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
                 allocated_item_list.append(allocation_chain_2)
 
     update_list = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
-    shared_orchestrator.add_allocation([0, 0, 0, allocated_item_list, 0], output_xml)
+    shared_orchestrator.add_allocation({0: allocated_item_list}, output_xml)
 
     return update_list
 

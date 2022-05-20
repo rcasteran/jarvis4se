@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Notebook interface, this module contains ipython Magic class with cell_magic as entry point of
+jarvi4se"""
 # Libraries
 import re
 import os

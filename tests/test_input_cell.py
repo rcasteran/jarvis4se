@@ -166,12 +166,12 @@ def test_consider_object_input(capsys):
                 "Functional Element, Function and Data\n",
                 "Object tata does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
-                "Function F1 is allocated to chain test_chain\n",
-                "Data a is allocated to chain test_chain\n",
-                "FunctionalElement Fun_elem is allocated to chain test_chain\n",
-                "Function F2 with a long name is allocated to chain test_chain\n",
-                "Function F3 is allocated to chain test_chain\n",
-                "Function F4 is allocated to chain test_chain\n",
+                "Function F1 is allocated to Chain test_chain\n",
+                "Data a is allocated to Chain test_chain\n",
+                "FunctionalElement Fun_elem is allocated to Chain test_chain\n",
+                "Function F2 with a long name is allocated to Chain test_chain\n",
+                "Function F3 is allocated to Chain test_chain\n",
+                "Function F4 is allocated to Chain test_chain\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
