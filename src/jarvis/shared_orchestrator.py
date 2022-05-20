@@ -948,7 +948,7 @@ def add_allocation(allocation_dict, output_xml):
         Returns:
             1 if update, else 0
     """
-    if any(allocation_dict.items()):
+    if any(allocation_dict.values()):
         for _, k in enumerate(allocation_dict):
             if allocation_dict[k]:
                 output_xml.write_objects_allocation(allocation_dict[k])
