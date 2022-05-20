@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module for xml parsing and object lists creation"""
 # Libraries
 from lxml import etree
 
@@ -9,13 +10,17 @@ from .xml_writer import GenerateXML
 
 
 def generate_xml(xml_file):
+    """Call for xml class"""
     xml = GenerateXML(xml_file)
     return xml
 
 
 def parse_xml(input_filename):
+    """Parses the whole xml then returns lists of objects/relationship"""
+    # To speed up parsing (see lxml doc) : TBC if can be extended to xml_writer
+    parser = etree.XMLParser(collect_ids=False)
     # Parse the XML file
-    tree = etree.parse(input_filename)
+    tree = etree.parse(input_filename, parser)
     # Get the XML tree
     root = tree.getroot()
     # Check xml root tag
@@ -59,6 +64,7 @@ def check_xml(root):
 
 
 def get_functions(root):
+    """Get Function objects"""
     function_list = set()
     parent_list = {}
     xml_function_list = root.iter('function')
@@ -100,6 +106,7 @@ def get_functions(root):
 
 
 def get_data(root, function_list):
+    """Get Data objects"""
     data_list = set()
     consumer_function_list = []
     producer_function_list = []
@@ -150,6 +157,7 @@ def get_data(root, function_list):
 
 
 def get_state(root):
+    """Get State objects"""
     state_list = set()
     state_parent_dict = {}
     xml_state_list = root.iter('state')
@@ -188,6 +196,7 @@ def get_state(root):
 
 
 def get_transition(root):
+    """Get Transition objects"""
     transition_list = set()
     xml_transition_list = root.iter('transition')
     for xml_transition in xml_transition_list:
@@ -212,6 +221,7 @@ def get_transition(root):
 
 
 def get_functional_element(root):
+    """Get Functional Element objects"""
     functional_element_list = set()
     fun_elem_parent_dict = {}
     xml_functional_element_list = root.iter('functionalElement')
@@ -267,6 +277,7 @@ def get_functional_element(root):
 
 
 def get_chains(root):
+    """Get Chain objects"""
     chain_list = set()
     xml_chain_list = root.iter('chain')
     for xml_chain in xml_chain_list:
@@ -288,6 +299,7 @@ def get_chains(root):
 
 
 def get_attributes(root):
+    """Get Attribute objects"""
     attribute_list = set()
     xml_attribute_list = root.iter('attribute')
     for xml_attribute in xml_attribute_list:
@@ -312,6 +324,7 @@ def get_attributes(root):
 
 
 def get_functional_interface(root):
+    """Get Functional Interface objects"""
     functional_interface_list = set()
     xml_fun_inter_list = root.iter('functionalInterface')
     for xml_fun_inter in xml_fun_inter_list:
@@ -340,6 +353,7 @@ def get_functional_interface(root):
 
 
 def get_physical_element(root):
+    """Get Physical Element objects"""
     physical_element_list = set()
     phy_elem_parent_dict = {}
     xml_physical_element_list = root.iter('physicalElement')
@@ -389,6 +403,7 @@ def get_physical_element(root):
 
 
 def get_physical_interface(root):
+    """Get Physical Interface objects"""
     physical_interface_list = set()
     xml_phy_inter_list = root.iter('physicalInterface')
     for xml_phy_inter in xml_phy_inter_list:
