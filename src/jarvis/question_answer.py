@@ -399,7 +399,6 @@ def switch_child(wanted_object, object_type, **kwargs):
 
 def switch_state_function(wanted_object, _, **kwargs):
     """Case 'list function State' """
-
     function_list = []
     for allocated_fun in wanted_object.allocated_function_list:
         for fun in kwargs['xml_function_list']:
@@ -415,6 +414,7 @@ def switch_state_function(wanted_object, _, **kwargs):
 
 
 def switch_state_transition(wanted_object, _, **kwargs):
+    """Case 'list transition State' """
     transition_list = []
     for transition in kwargs['xml_transition_list']:
         if wanted_object.id == transition.source:
@@ -719,16 +719,15 @@ def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_rela
 
 def get_objects_from_id_list(id_list, object_list):
     """From a list of id (from same type) returns list of corresponding objects"""
+    output_list = set()
     if not id_list:
-        return
-    else:
-        output_list = set()
-        for wanted_object in object_list:
-            if wanted_object.id in id_list:
-                output_list.add(wanted_object)
+        return output_list
 
-        if output_list:
-            return output_list
+    for wanted_object in object_list:
+        if wanted_object.id in id_list:
+            output_list.add(wanted_object)
+
+    return output_list
 
 
 def get_object_name(xml_object_list):

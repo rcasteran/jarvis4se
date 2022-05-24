@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module with methods relative to plantuml text generation"""
 # Libraries
 import inspect
 
