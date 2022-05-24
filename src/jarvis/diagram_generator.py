@@ -11,6 +11,7 @@ from .question_answer import check_parentality, get_object_name, check_get_objec
 
 
 def filter_show_command(diagram_name_str, **kwargs):
+    """Entry point for all diagrams (i.e. 'show' command) from command_parser.py"""
     wanted_diagram_str = diagram_name_str.group(1)
 
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
@@ -35,6 +36,7 @@ def filter_show_command(diagram_name_str, **kwargs):
 
 
 def switch_show_filter(**kwargs):
+    """Switch case between diagram types"""
     switch = {
         "function": case_function_diagram,
         "context": case_context_diagram,
@@ -49,7 +51,7 @@ def switch_show_filter(**kwargs):
 
 
 def case_function_diagram(**kwargs):
-    # Create object names/aliases list
+    """Case for 'show function <functional_element>'"""
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         filename = show_fun_elem_function(kwargs['diagram_object_str'],
@@ -64,7 +66,7 @@ def case_function_diagram(**kwargs):
 
 
 def case_context_diagram(**kwargs):
-    # Create object names/aliases lists
+    """Case for 'show context <functional_element>/<function>'"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
@@ -96,7 +98,7 @@ def case_context_diagram(**kwargs):
 
 
 def case_decomposition_diagram(**kwargs):
-    """Cases for decomposition diagrams"""
+    """Case for 'show decomposition <functional_element>/<function>'"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
 
@@ -224,7 +226,7 @@ def get_object_list_from_chain(obj_str, xml_obj_list, xml_chain_list):
 
 
 def case_chain_diagram(**kwargs):
-    # Create object names/aliases lists
+    """Case for 'show chain <states>/<functions>'"""
     xml_function_name_list = get_object_name(kwargs['xml_function_list'])
     xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(" ", ""))
@@ -272,7 +274,7 @@ def case_chain_diagram(**kwargs):
 
 
 def case_sequence_diagram(**kwargs):
-    # Create object names/aliases list
+    """Case for 'show sequence <functional_elements>/<functions>/<functional_interface>'"""
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(", ", ","))
     object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
@@ -305,7 +307,7 @@ def case_sequence_diagram(**kwargs):
 
 
 def case_state_diagram(**kwargs):
-    # Create object names/aliases list
+    """Case for 'show state <functional_element>'"""
     xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         filename = show_fun_elem_state_machine(kwargs['diagram_object_str'],
@@ -319,7 +321,7 @@ def case_state_diagram(**kwargs):
 
 
 def case_state_sequence_diagram(**kwargs):
-    # Create object names/aliases list
+    """Case for 'show state sequence <state>'"""
     xml_state_name_list = get_object_name(kwargs['xml_state_list'])
     if kwargs['diagram_object_str'] in xml_state_name_list:
         filename = show_state_allocated_function(kwargs['diagram_object_str'],
@@ -335,11 +337,13 @@ def case_state_sequence_diagram(**kwargs):
 
 
 def case_no_diagram(**kwargs):
-
+    """Default Case when no command has been found"""
     print(f"Jarvis does not understand the command {kwargs['diagram_type_str']}")
 
 
 def check_level_0_allocated_child(fun_elem, function):
+    """Returns True if the function can be "shown" by the functional element (i.e. no function
+    children allocated to fun_elem children => TODO: Clean 2 above methods"""
     if fun_elem.child_list == set():
         return True
     elif function.child_list == set() and \
@@ -363,6 +367,7 @@ def check_level_0_allocated_child(fun_elem, function):
 
 
 def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
+    """Recursively get functions allocated to main_fun_elem and its descendant"""
     if allocated_function_list is None:
         allocated_function_list = set()
         if fun_elem.child_list == set():
@@ -382,11 +387,8 @@ def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
 def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
                                 xml_data_list, xml_fun_inter_list, diagram_level=None):
-
-    external_function_list = set()
-    new_producer_list = []
-    new_consumer_list = []
-
+    """Creates lists with desired objects for <functional_element> decomposition, send them to
+    plantuml_adapter.py then returns url_diagram"""
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
         return
@@ -411,6 +413,40 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
 
     allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
 
+    if allocated_function_list:
+        external_function_list, new_consumer_list, new_producer_list = \
+            get_cons_prod_from_allocated_functions(
+                allocated_function_list,
+                xml_producer_function_list,
+                xml_consumer_function_list)
+
+        for fun in external_function_list:
+            for child in fun.child_list.copy():
+                if not any(t == child for t in external_function_list):
+                    fun.child_list.remove(child)
+    else:
+        external_function_list, xml_fun_elem_list = set(), set()
+        new_consumer_list, new_producer_list = [], []
+
+    url_diagram, _ = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
+                                                                 allocated_function_list,
+                                                                 new_consumer_list,
+                                                                 new_producer_list,
+                                                                 external_function_list,
+                                                                 xml_attribute_list,
+                                                                 xml_data_list,
+                                                                 xml_fun_inter_list)
+    print("Decomposition Diagram for " + fun_elem_str + " generated")
+    return url_diagram
+
+
+def get_cons_prod_from_allocated_functions(allocated_function_list,
+                                           xml_producer_function_list,
+                                           xml_consumer_function_list):
+    """Get consumers/producers from function's allocated to main_fun_elem (and its descendant)"""
+    external_function_list = set()
+    new_producer_list = []
+    new_consumer_list = []
     for allocated_function in allocated_function_list:
         allocated_function.child_list.clear()
         allocated_function.parent = None
@@ -437,21 +473,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                     if t not in new_consumer_list:
                         new_consumer_list.append(t)
 
-    for fun in external_function_list:
-        for child in fun.child_list.copy():
-            if not any(t == child for t in external_function_list):
-                fun.child_list.remove(child)
-
-    url_diagram, _ = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
-                                                                 allocated_function_list,
-                                                                 new_consumer_list,
-                                                                 new_producer_list,
-                                                                 external_function_list,
-                                                                 xml_attribute_list,
-                                                                 xml_data_list,
-                                                                 xml_fun_inter_list)
-    print("Decomposition Diagram for " + fun_elem_str + " generated")
-    return url_diagram
+    return external_function_list, new_consumer_list, new_producer_list
 
 
 def show_state_allocated_function(state_str, state_list, function_list, xml_consumer_function_list,

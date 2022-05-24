@@ -152,7 +152,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
 
     show decomposition E1
      """
-    monkeypatch.setattr('sys.stdin', io.StringIO('y')) # Say yes for adding F3 alloacted to E1
+    monkeypatch.setattr('sys.stdin', io.StringIO('y'))  # Say yes for adding F3 alloacted to E1
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
@@ -222,6 +222,46 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 11*len("\'id: xxxxxxxxxx\n")
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_fun_elem_decompo_with_no_childs(mocker):
+    """See Issue #13, Notebook equivalent:
+    %%jarvis
+    with fun_elem_decompo_with_no_childs
+    F1 is a function
+    F2 is a function
+    F1 is composed of F2
+    E1 is a functional element
+    E1 allocates F1
+
+    show decomposition E1
+     """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
+    ip = get_ipython()
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
+    file_name = "fun_elem_decompo_with_no_childs"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "F1 is a function\n"
+                    "F2 is a function\n"
+                    "F1 is composed of F2\n"
+                    "E1 is a functional element\n"
+                    "E1 allocates F1\n"
+                    "\n"
+                    "show decomposition E1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
+    expected = ['component "E1" as e1 <<unknown>>{\n',
+                '}\n']
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
