@@ -4,12 +4,11 @@
 them to plantuml_adapter.py"""
 # Libraries
 import re
-import copy
 
 import plantuml_adapter
 from .viewpoint_orchestrator import filter_allocated_item_from_chain
 from .question_answer import check_parentality, get_object_name, check_get_object, switch_data, \
-    get_children, check_not_family, switch_fun_elem_interface, get_objects_from_id_list
+    get_children, check_not_family, switch_fun_elem_interface
 
 
 def filter_show_command(diagram_name_str, **kwargs):
@@ -291,15 +290,31 @@ def case_sequence_diagram(**kwargs):
             if all(i in get_object_name(kwargs['xml_function_list']) for i in object_list_str):
                 xml_data_list = filter_allocated_item_from_chain(
                     kwargs['xml_data_list'], kwargs['xml_chain_list'])
+                if len(xml_data_list) != len(kwargs['xml_data_list']):
+                    xml_cons = [i for i in kwargs['xml_consumer_function_list']
+                                if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                    xml_prod = [i for i in kwargs['xml_producer_function_list']
+                                if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                else:
+                    xml_cons = kwargs['xml_consumer_function_list']
+                    xml_prod = kwargs['xml_producer_function_list']
                 filename = show_functions_sequence(object_list_str,
                                                    kwargs['xml_function_list'],
-                                                   kwargs['xml_consumer_function_list'],
-                                                   kwargs['xml_producer_function_list'],
+                                                   xml_cons,
+                                                   xml_prod,
                                                    xml_data_list)
 
             elif all(i in get_object_name(kwargs['xml_fun_elem_list']) for i in object_list_str):
-                kwargs['xml_data_list'] = filter_allocated_item_from_chain(
+                xml_data_list = filter_allocated_item_from_chain(
                     kwargs['xml_data_list'], kwargs['xml_chain_list'])
+                if len(xml_data_list) != len(kwargs['xml_data_list']):
+                    kwargs['xml_consumer_function_list'] = \
+                        [i for i in kwargs['xml_consumer_function_list']
+                         if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                    kwargs['xml_producer_function_list'] = \
+                        [i for i in kwargs['xml_producer_function_list']
+                         if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                kwargs['xml_data_list'] = xml_data_list
                 filename = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
 
             else:
@@ -548,10 +563,6 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
     """Creates lists with desired objects for <functional_element> function's allocation,
     send them to plantuml_adapter.py then returns url_diagram"""
     url_diagram = None
-    allocated_function_id_list = set()
-    new_function_list = set()
-    new_consumer_list = []
-    new_producer_list = []
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
@@ -563,27 +574,19 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
 
     main_fun_elem.parent = None
     main_fun_elem.child_list.clear()
-    for fun_id in main_fun_elem.allocated_function_list:
-        allocated_function_id_list.add(fun_id)
+    new_function_list = {f for f in xml_function_list
+                         if f.id in main_fun_elem.allocated_function_list and f.parent is None}
+    if not new_function_list:
+        print(f"No parent function allocated to {main_fun_elem.name} (no display)")
+        return url_diagram
 
-    for function_id in allocated_function_id_list:
-        for fun in xml_function_list:
-            if function_id == fun.id and fun.parent is None:
-                new_function_list.add(fun)
+    new_consumer_list = get_cons_or_prod_paired(new_function_list,
+                                                xml_consumer_function_list,
+                                                xml_producer_function_list)
 
-    for func in new_function_list:
-        for cons in xml_consumer_function_list:
-            if func in cons and cons not in new_consumer_list:
-                for prod in xml_producer_function_list:
-                    if prod[0] == cons[0] and prod[1] in new_function_list:
-                        new_consumer_list.append(cons)
-
-    for func in new_function_list:
-        for prod in xml_producer_function_list:
-            if func in prod and prod not in new_producer_list:
-                for cons in xml_consumer_function_list:
-                    if cons[0] == prod[0] and cons[1] in new_function_list:
-                        new_producer_list.append(prod)
+    new_producer_list = get_cons_or_prod_paired(new_function_list,
+                                                xml_producer_function_list,
+                                                xml_consumer_function_list)
 
     _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
                                                             new_consumer_list,
@@ -594,64 +597,43 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
     return url_diagram
 
 
+def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list):
+    """Get flow list if opposite flow is existing: e.g. if flow A is consumed and produced by
+    function within function_list => Add it"""
+    new_flow_list = []
+    for func in function_list:
+        # Flow = [Data_name, Function]
+        for flow in xml_flow_list:
+            if func in flow and flow not in new_flow_list:
+                # Oppo = [Data_name, Function]
+                for oppo in xml_opposite_flow_list:
+                    if oppo[0] == flow[0] and oppo[1] in function_list:
+                        new_flow_list.append(flow)
+                        break
+    return new_flow_list
+
+
 def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                           xml_consumer_function_list, xml_producer_function_list,
                           xml_attribute_list, xml_fun_inter_list, xml_data_list):
     """Creates lists with desired objects for <functional_element> context, send them to
     plantuml_adapter.py then returns url_diagram"""
-    new_function_list = set()
-    fun_elem_list = set()
-    interface_list = set()
-    fun_elem_inter_list = []
-    cons = []
-    prod = []
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
-        return
+        return None
 
-    # main_fun_elem.child_list.clear()
-    # main_fun_elem.parent = None
-    fun_elem_list.add(main_fun_elem)
-    xml_fun_elem_list.remove(main_fun_elem)
     # Get allocated function to main_fun_elem
-    allocated_function_list = get_objects_from_id_list(main_fun_elem.allocated_function_list,
-                                                       xml_function_list)
-    for i in allocated_function_list.copy():
-        if i.parent is None:
-            returned_list = show_function_context(i.name, allocated_function_list,
-                                                  xml_consumer_function_list,
-                                                  xml_producer_function_list, set(),
-                                                  set(), list_out=True)
-            for k in returned_list[0]:
-                new_function_list.add(k)
-            for c in returned_list[1]:
-                if c not in cons:
-                    cons.append(c)
-            for p in returned_list[2]:
-                if p not in prod:
-                    prod.append(p)
+    allocated_function_list = {f for f in xml_function_list
+                               if f.id in main_fun_elem.allocated_function_list}
 
-    # Get exposed interfaces of fun_elem
-    for interface in xml_fun_inter_list:
-        if any(i == interface.id for i in main_fun_elem.exposed_interface_list):
-            interface_list.add(interface)
+    new_function_list, cons, prod = get_allocated_function_context_lists(
+        allocated_function_list,
+        xml_consumer_function_list,
+        xml_producer_function_list)
 
-    # Get fun_elem pair for fun_inter
-    for fun_inter in interface_list:
-        for fun_elem in xml_fun_elem_list:
-            if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
-                if get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
-                        check_not_family(main_fun_elem, fun_elem):
-                    fun_elem_list.add(fun_elem)
-                    if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
-                        fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
-
-    # for fun in new_function_list:
-    #     for elem in xml_fun_elem_list:
-    #         if any(i == fun.id for i in elem.exposed_interface_list) and
-    #         elem not in fun_elem_list:
-    #             fun_elem_list.add(elem)
+    fun_elem_list, interface_list, fun_elem_inter_list = get_fun_inter_for_fun_elem_context(
+        main_fun_elem, xml_fun_inter_list, xml_fun_elem_list)
 
     for fun in new_function_list:
         for elem in xml_fun_elem_list:
@@ -677,38 +659,87 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     return url_diagram
 
 
+def get_allocated_function_context_lists(allocated_function_list,
+                                         xml_consumer_function_list,
+                                         xml_producer_function_list):
+    """For each function within allocated_function_list, asks the context of the function then
+    adds returned list from show_function_context() to current lists"""
+    new_function_list = set()
+    cons = []
+    prod = []
+    for fun in allocated_function_list:
+        if fun.parent is None:
+            returned_list = show_function_context(fun.name, allocated_function_list,
+                                                  xml_consumer_function_list,
+                                                  xml_producer_function_list, set(),
+                                                  set(), list_out=True)
+            for k in returned_list[0]:
+                new_function_list.add(k)
+            for i in returned_list[1]:
+                if i not in cons:
+                    cons.append(i)
+            for j in returned_list[2]:
+                if j not in prod:
+                    prod.append(j)
+
+    return new_function_list, cons, prod
+
+
+def get_fun_inter_for_fun_elem_context(main_fun_elem, xml_fun_inter_list, xml_fun_elem_list):
+    """Get functional interfaces and associated functional elements"""
+    fun_elem_list = set()
+    interface_list = set()
+    fun_elem_inter_list = []
+
+    # Add main_fun_elem to filtered fun_elem_list and remove it from xml_fun_elem_list
+    fun_elem_list.add(main_fun_elem)
+    xml_fun_elem_list.remove(main_fun_elem)
+
+    # Get exposed interfaces of fun_elem
+    for interface in xml_fun_inter_list:
+        if any(i == interface.id for i in main_fun_elem.exposed_interface_list):
+            interface_list.add(interface)
+
+    # Get fun_elem pair for fun_inter
+    for fun_inter in interface_list:
+        for fun_elem in xml_fun_elem_list:
+            if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
+                if get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
+                        check_not_family(main_fun_elem, fun_elem):
+                    fun_elem_list.add(fun_elem)
+                    if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
+                        fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
+
+    return fun_elem_list, interface_list, fun_elem_inter_list
+
+
 def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
     """Retruns True if it's highest fun_elem exposing fun_inter"""
     check = False
     if not fun_elem.parent:
         check = True
-        return check
-    else:
-        if not any(a == fun_inter.id for a in fun_elem.parent.exposed_interface_list):
-            check = True
-            return check
-        return check
+    elif not any(a == fun_inter.id for a in fun_elem.parent.exposed_interface_list):
+        check = True
+
+    return check
 
 
 def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_list,
                                 xml_fun_elem_list):
-    new_state_list = set()
+    """Creates lists with desired objects for <functional_element> state, send them to
+    plantuml_adapter.py then returns url_diagram"""
     new_fun_elem_list = set()
-    allocated_state_id_list = set()
-    for fun_elem in xml_fun_elem_list:
-        if fun_elem_str in (fun_elem.name, fun_elem.alias):
-            if not fun_elem.allocated_state_list:
-                print(f"No state allocated to {fun_elem.name} (no display)")
-                return
-            else:
-                new_fun_elem_list.add(fun_elem)
-                for s in fun_elem.allocated_state_list:
-                    allocated_state_id_list.add(s)
 
-    for state_id in allocated_state_id_list:
-        for state in xml_state_list:
-            if state_id == state.id:
-                new_state_list.add(state)
+    main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
+    if not main_fun_elem:
+        return None
+    if not main_fun_elem.allocated_state_list:
+        print(f"No state allocated to {main_fun_elem.name} (no display)")
+        return None
+
+    new_fun_elem_list.add(main_fun_elem)
+
+    new_state_list = {s for s in xml_state_list if s.id in main_fun_elem.allocated_state_list}
 
     new_transition_list = get_transitions(new_state_list, xml_transition_list)
 
@@ -720,6 +751,7 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
 
 
 def get_transitions(state_list, xml_transition_list):
+    """Get transitions if state(s) from state_list are source/destination"""
     new_transition_list = set()
     for new_state in state_list:
         for transition in xml_transition_list:
@@ -732,12 +764,12 @@ def get_transitions(state_list, xml_transition_list):
 
 
 def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
+    """Creates lists with desired objects for <states> chain, send them to plantuml_adapter.py
+    then returns url_diagram"""
     new_state_list = set()
-    # To avoid alterate original objects => TBC if useful or not
-    copied_xml_state_list = copy.deepcopy(xml_state_list)
     for state_str in state_list_str:
-        for state in copied_xml_state_list:
-            if state_str == state.name or state_str == state.alias:
+        for state in xml_state_list:
+            if state_str in (state.name, state.alias):
                 state.child_list.clear()
                 state.set_parent(None)
                 new_state_list.add(state)
@@ -756,52 +788,28 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
 
 def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_function_list,
                             xml_producer_function_list, xml_data_list, str_out=False):
+    """Creates lists with desired objects for <functions> sequence, send them to plantuml_adapter.py
+    then returns url_diagram"""
     new_function_list = set()
-    new_parent_dict = {}
-    new_producer_list = []
-    new_consumer_list = []
-    new_data_list = set()
-    new_function_id_list = []
+
     for i in function_list_str:
-        for fun in xml_function_list:
-            if i == fun.name or i == fun.alias:
-                fun.child_list.clear()
-                new_function_list.add(fun)
-                new_function_id_list.append(fun.id)
+        fun = check_get_object(i, **{'xml_function_list': xml_function_list})
+        if not fun:
+            continue
+        fun.child_list.clear()
+        new_function_list.add(fun)
 
-    for function in new_function_list:
-        for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
-            if function == xml_consumer:
-                for prod_flow, prod in xml_producer_function_list:
-                    if prod_flow == xml_consumer_flow and prod in new_function_list and \
-                            prod != function:
-                        if [xml_consumer_flow, function] not in new_consumer_list:
-                            new_consumer_list.append([xml_consumer_flow, function])
+    new_consumer_list = get_cons_or_prod_paired(new_function_list,
+                                                xml_consumer_function_list,
+                                                xml_producer_function_list)
 
-        for xml_producer_flow, xml_producer in xml_producer_function_list:
-            if function == xml_producer:
-                for cons_flow, cons in xml_consumer_function_list:
-                    if cons_flow == xml_producer_flow and cons in new_function_list and \
-                            cons != function:
-                        if [xml_producer_flow, function] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, function])
-
-    # TODO: Check if still usefull TBC/TBT
-    for prod_elem in new_producer_list.copy():
-        for cons_elem in new_consumer_list.copy():
-            if cons_elem == prod_elem:
-                new_producer_list.remove(prod_elem)
-                new_consumer_list.remove(cons_elem)
-
-    for prod_elem in new_producer_list:
-        for data in xml_data_list:
-            if data.name == prod_elem[0]:
-                new_data_list.add(data)
-
-    for cons_elem in new_consumer_list:
-        for data in xml_data_list:
-            if data.name == cons_elem[0]:
-                new_data_list.add(data)
+    new_producer_list = get_cons_or_prod_paired(new_function_list,
+                                                xml_producer_function_list,
+                                                xml_consumer_function_list)
+    # (Re)Filter data_list with only produced(same data in consumed since paired) and functions
+    # asked for sequence i.e. new_function_list used in get_cons_or_prod_paired()
+    # => TBC/TBT
+    new_data_list = {s for s in xml_data_list if any(s.name in j for j in new_producer_list)}
 
     for new_data in new_data_list:
         for pred in new_data.predecessor_list.copy():
@@ -811,14 +819,13 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
     plant_uml_text, url_diagram = plantuml_adapter.get_sequence_diagram(new_function_list,
                                                                         new_consumer_list,
                                                                         new_producer_list,
-                                                                        new_parent_dict,
+                                                                        {},
                                                                         new_data_list, str_out)
     if str_out:
         out = plant_uml_text
     else:
         out = url_diagram
-        spaced_function_list = ", ".join(function_list_str)
-        print("Sequence Diagram " + str(spaced_function_list) + " generated")
+        print("Sequence Diagram " + str(", ".join(function_list_str)) + " generated")
     return out
 
 
