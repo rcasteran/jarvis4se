@@ -4,6 +4,8 @@ Latest stable release: ![GitHub release (latest by date)](https://img.shields.io
 
 Current CI status: [![CircleCI](https://circleci.com/gh/rcasteran/jarvis4se/tree/main.svg?style=svg)](https://circleci.com/gh/rcasteran/jarvis4se/tree/main)
 
+Playground (latest release) : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Not2behere/PlayJarvis4se/HEAD)
+
 ## Introduction
 
 JARVIS4SE allows systems engineers to build the single source of truth of the knowledge they develop about the system of interest they want to master, preventing this knowledge from being:
