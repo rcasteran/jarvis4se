@@ -62,6 +62,8 @@ class CmdParser:
 
             (r"The type of (.*?) is ([^\.\n]*)", matched_type),
 
+            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
+
             (r"([^\. \.\n]*) implies ([^\.\n]*)", matched_implies),
 
             (r"Condition for (.*?) is:([^\.\n]*)", matched_condition),
@@ -281,6 +283,12 @@ def matched_delete(delete_str_list, **kwargs):
 def matched_type(type_str_list, **kwargs):
     """Get set_type declaration"""
     out = shared_orchestrator.check_set_object_type(type_str_list, **kwargs)
+    return out
+
+
+def matched_extend(type_str_list, **kwargs):
+    """Get set_type declaration"""
+    out = viewpoint_orchestrator.check_set_extends(type_str_list, **kwargs)
     return out
 
 
