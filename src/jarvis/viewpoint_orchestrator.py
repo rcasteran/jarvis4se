@@ -7,7 +7,7 @@ import re
 
 import datamodel
 from . import shared_orchestrator
-from .question_answer import get_object_name
+from .question_answer import get_object_name, check_get_object
 
 
 def add_chain(chain_name_str, xml_chain_list, output_xml):
@@ -293,3 +293,63 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
             print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
                   f"with value {described_attribute[1][1]}")
         return 1
+
+
+def check_set_extends(extends_str_list, xml_type_list, output_xml):
+    """
+    Check if each string in extends_str_list are corresponding to actual objects name/alias,
+    create lists for all objects that needs to write "derived" attribute
+    Send lists to add_extends() to write them within xml and then returns update from it.
+
+        Parameters:
+            extends_str_list ([str]) : Lists of string from jarvis cell
+            xml_type_list ([Type]) : xml list of type
+            output_xml : xml's file object
+
+        Returns:
+            update ([0/1]) : 1 if update, else 0
+    """
+    new_type_list = []
+    # Capitalyze the reference type for datamodel matching
+    for elem in extends_str_list:
+        if any(t == elem[0] for t in get_object_name(xml_type_list)):
+            # print(f"{elem[0]} already exists")
+            continue
+        type_to_extend = check_get_type_to_extend(elem[1], xml_type_list)
+        if not type_to_extend:
+            print(f"Enable to find referenced type '{elem[1]}'")
+            continue
+        new_type = datamodel.Type()
+        new_type.set_name(elem[0])
+        # Generate and set unique identifier of length 10 integers
+        identifier = uuid.uuid4()
+        new_type.set_id(str(identifier.int)[:10])
+        if isinstance(type_to_extend, datamodel.Type):
+            new_type.set_base(type_to_extend.name)
+        else:
+            new_type.set_base(type_to_extend.get_enum(elem[1].capitalize()))
+        new_type_list.append(new_type)
+        xml_type_list.add(new_type)
+
+    if not new_type_list:
+        return 0
+    else:
+        output_xml.write_type_element(new_type_list)
+        for obj_type in new_type_list:
+            print(f"{obj_type.name} is a type extending {obj_type.base}")
+        return 1
+
+
+def check_get_type_to_extend(type_str, xml_type_list):
+    """Checks if type_str is within BaseType or xml_type_list, then return Basetype or
+    type object"""
+    check = None
+    if any(a == type_str.capitalize() for a in [str(i) for i in datamodel.BaseType]):
+        check = datamodel.BaseType
+        return check
+
+    if any(a == type_str for a in get_object_name(xml_type_list)):
+        check = check_get_object(type_str, **{'xml_type_list': xml_type_list})
+        return check
+
+    return check
