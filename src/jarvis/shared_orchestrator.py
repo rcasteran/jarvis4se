@@ -647,7 +647,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    object_lists = [[] for _ in range(8)]
+    object_lists = [[] for _ in range(9)]
     # Check if the wanted to object exists and the type can be set
     for object_to_set_alias, alias_str in alias_str_list:
         object_to_set = check_get_object(object_to_set_alias, **kwargs)
@@ -686,6 +686,8 @@ def check_new_alias(object_to_set, alias_str):
             list_idx = 6
         elif isinstance(object_to_set, datamodel.PhysicalInterface):
             list_idx = 7
+        elif isinstance(object_to_set, datamodel.Type):
+            list_idx = 8
         else:
             print(f"{object_to_set.name} does not have alias attribute")
 
@@ -704,7 +706,7 @@ def set_object_alias(object_lists, output_xml):
             1 if update, else 0
     """
     if any(object_lists):
-        for i in range(8):
+        for i in range(9):
             if object_lists[i]:
                 output_xml.write_object_alias(object_lists[i])
                 for object_alias in object_lists[i]:
