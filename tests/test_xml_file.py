@@ -37,6 +37,7 @@ def test_generate_xml_file_template():
                    "  <viewPoint>\n" \
                    "    <chainList/>\n" \
                    "    <attributeList/>\n" \
+                   "    <typeList/>\n" \
                    "  </viewPoint>\n" \
                    "</systemAnalysis>\n"
         assert base_xml in s
