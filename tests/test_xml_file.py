@@ -450,7 +450,7 @@ def test_functional_interface_within_xml():
                     "Fun_elem_1 allocates F1\n"
                     "Fun_elem_2 allocates F2\n"
                     "Fun_inter is a functional interface.\n"
-                    "The type of Fun_inter is a_type\n"
+                    "The type of Fun_inter is functional interface\n"
                     "The alias of Fun_inter is FI\n"
                     "The Color of Fun_inter is pink\n"
                     "Fun_elem_1 exposes Fun_inter\n"
@@ -468,7 +468,7 @@ def test_functional_interface_within_xml():
     assert data.name == 'A'
     assert fun_inter.name == 'Fun_inter'
     assert fun_inter.alias == 'FI'
-    assert fun_inter.type == 'a_type'
+    assert fun_inter.type == 'Functional interface'
     assert attribute.name == 'Color'
     described_item = attribute.described_item_list.pop()
     assert described_item[0] == fun_inter.id and described_item[1] == 'pink'
@@ -554,6 +554,66 @@ def test_fun_elem_exposes_interface_within_xml():
 
     assert expected_child == result_child
     assert expected_exposed == result_exposed
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_type_within_xml():
+    """ Issue #56 Notebook equivalent:
+    %%jarvis
+    with extends_object_input
+    Safety interface extends functional interface
+    The alias of Safety interface is sf
+    ========================================
+    %%jarvis
+    sf_a extends sf
+    sf_a_b extends sf_a
+    final one extends sf_a_b
+    Fun_inter is a functional interface
+    The type of Fun_inter is final one
+    """
+    ip = get_ipython()
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
+    file_name = "extends_object_input"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Safety interface extends functional interface\n"
+                    "The alias of Safety interface is sf\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "sf_a extends sf\n"
+                    "sf_a_b extends sf_a\n"
+                    "final one extends sf_a_b\n"
+                    "Fun_inter is a functional interface\n"
+                    "The type of Fun_inter is final one\n")
+
+    xml_lists = xml_adapter.parse_xml(file_name + ".xml")
+    # 9: Functional_interface_list, 12: Type_list
+    assert len([x for x in xml_lists if x]) == 2
+    for idx, k in enumerate(xml_lists):
+        if k:
+            assert idx in (9, 12)
+            if idx == 9:
+                assert len(k) == 1
+            elif idx == 12:
+                assert len(k) == 4
+
+    expected_type = {('sf_a', 'Safety interface'), ('sf_a_b', 'sf_a'),
+                     ('Safety interface', 'Functional interface'), ('final one', 'sf_a_b')}
+    captured_type = set()
+    for type_elem in xml_lists[12]:
+        if type_elem.name == 'Safety interface':
+            assert type_elem.alias == 'sf'
+        if isinstance(type_elem.base, str):
+            base_type = type_elem.base
+        else:
+            base_type = type_elem.base.name
+        captured_type.add((type_elem.name, base_type))
+
+    assert expected_type == captured_type
+    assert xml_lists[9].pop().type == "final one"
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)

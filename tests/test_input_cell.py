@@ -203,7 +203,7 @@ def test_functional_interface_input(capsys):
                     "Color is an attribute\n"
                     "A is a data\n"
                     "Fun_inter is a functional interface.\n"
-                    "The type of Fun_inter is a_type\n"
+                    "The type of Fun_inter is functional interface\n"
                     "The alias of Fun_inter is FI\n"
                     "The Color of Fun_inter is pink\n"
                     "Fun_inter allocates A.\n")
@@ -216,7 +216,7 @@ def test_functional_interface_input(capsys):
                 "The alias for Fun_inter is FI\n",
                 "Data A has no producer(s) nor consumer(s) allocated to functional "
                 "elements exposing Fun_inter, A not allocated to Fun_inter\n",
-                "The type of Fun_inter is a_type\n",
+                "The type of Fun_inter is Functional interface\n",
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]
 
@@ -296,6 +296,55 @@ def test_fun_elem_exposes_interface_input(capsys):
     # Get last part from capsys
     last_out = captured.out[-len(''.join(expected)):len(captured.out)]
     assert all(i in last_out for i in expected)
+
+    fname = os.path.join("./", file_name + ".xml")
+    path = Path(fname)
+    if path:
+        os.remove(path)
+
+
+def test_extends_object_input(capsys):
+    """ Issue #56 Notebook equivalent:
+    %%jarvis
+    with extends_object_input
+    Safety interface extends functional interface
+    The alias of Safety interface is sf
+    ========================================
+    %%jarvis
+    sf_a extends sf
+    sf_a_b extends sf_a
+    final one extends sf_a_b
+    Fun_inter is a functional interface
+    The type of Fun_inter is final one
+    """
+    ip = get_ipython()
+    parser = jarvis.command_parser.CmdParser()
+    my_magic = jarvis.MyMagics(ip, parser)
+    file_name = "extends_object_input"
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "Safety interface extends functional interface\n"
+                    "The alias of Safety interface is sf\n")
+    my_magic.jarvis("", "with %s\n" % file_name +
+                    "sf_a extends sf\n"
+                    "sf_a_b extends sf_a\n"
+                    "final one extends sf_a_b\n"
+                    "Fun_inter is a functional interface\n"
+                    "The type of Fun_inter is final one\n")
+
+    captured = capsys.readouterr()
+    expected = [f"Creating {file_name}.xml !\n",
+                "Safety interface is a type extending Functional interface\n",
+                "The alias for Safety interface is sf\n",
+                f"{file_name}.xml updated\n"
+                f"{file_name}.xml parsed\n",
+                "Fun_inter is a functional interface\n",
+                "sf_a is a type extending Safety interface\n",
+                "sf_a_b is a type extending sf_a\n",
+                "final one is a type extending sf_a_b\n",
+                "The type of Fun_inter is final one\n",
+                f"{file_name}.xml updated\n"]
+
+    assert all(i in captured.out for i in expected)
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
