@@ -36,6 +36,8 @@ class CmdParser:
 
             (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)", matched_attribute),
 
+            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
+
             (r"The alias of (.*?) is ([^\.\n]*)", matched_alias),
 
             (r"(?<= |\n)consider ([^\.\n]*)", matched_consider),
@@ -62,8 +64,6 @@ class CmdParser:
 
             (r"The type of (.*?) is ([^\.\n]*)", matched_type),
 
-            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
-
             (r"([^\. \.\n]*) implies ([^\.\n]*)", matched_implies),
 
             (r"Condition for (.*?) is:([^\.\n]*)", matched_condition),
@@ -85,7 +85,6 @@ class CmdParser:
         """Lookup table with conditions depending on the match"""
         update_list = []
         for idx, (regex, method) in enumerate(self.commands):
-            # 14, 15, 17, 20
             result_chain = None
             result = None
             update = None
@@ -102,7 +101,9 @@ class CmdParser:
                  if x not in result]
 
             if result and not result_chain:
-                if idx in (13, 14, 16, 19):
+                # (14, 15, 17, 20) Corresponds to :
+                # "composes", "consumes", "produces", "is allocated to"
+                if idx in (14, 15, 17, 20):
                     result = reverse(result)
                 update = method(result, **kwargs)
 
@@ -204,6 +205,14 @@ def matched_attribute(attribute_name_str, **kwargs):
     return out
 
 
+def matched_extend(type_str_list, **kwargs):
+    """Get extend declaration"""
+    out = viewpoint_orchestrator.check_set_extends(type_str_list,
+                                                   kwargs['xml_type_list'],
+                                                   kwargs['output_xml'])
+    return out
+
+
 def matched_alias(alias_str_list, **kwargs):
     """Get "alias" declaration"""
     out = shared_orchestrator.check_set_object_alias(alias_str_list, **kwargs)
@@ -283,12 +292,6 @@ def matched_delete(delete_str_list, **kwargs):
 def matched_type(type_str_list, **kwargs):
     """Get set_type declaration"""
     out = shared_orchestrator.check_set_object_type(type_str_list, **kwargs)
-    return out
-
-
-def matched_extend(type_str_list, **kwargs):
-    """Get set_type declaration"""
-    out = viewpoint_orchestrator.check_set_extends(type_str_list, **kwargs)
     return out
 
 
