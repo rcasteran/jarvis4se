@@ -324,7 +324,7 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
         identifier = uuid.uuid4()
         new_type.set_id(str(identifier.int)[:10])
         if isinstance(type_to_extend, datamodel.Type):
-            new_type.set_base(type_to_extend.name)
+            new_type.set_base(type_to_extend)
         else:
             new_type.set_base(type_to_extend.get_enum(elem[1].capitalize()))
         new_type_list.append(new_type)
@@ -335,7 +335,11 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
     else:
         output_xml.write_type_element(new_type_list)
         for obj_type in new_type_list:
-            print(f"{obj_type.name} is a type extending {obj_type.base}")
+            if isinstance(obj_type.base, datamodel.Type):
+                base_type = obj_type.base.name
+            else:
+                base_type = obj_type.base
+            print(f"{obj_type.name} is a type extending {str(base_type)}")
         return 1
 
 

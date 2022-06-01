@@ -469,10 +469,14 @@ class GenerateXML:
                 etree.SubElement(root.find('./viewPoint'), 'typeList')
             for type_list_tag in root.findall(".//typeList"):
                 for type_elem in type_list:
+                    if isinstance(type_elem.base, datamodel.Type):
+                        base_type = type_elem.base.name
+                    else:
+                        base_type = type_elem.base
                     elem_tag = etree.SubElement(type_list_tag, "type",
                                                 {'id': type_elem.id, 'name': type_elem.name,
                                                  'alias': type_elem.alias,
-                                                 'base': str(type_elem.base)})
+                                                 'base': str(base_type)})
 
                     # _described_item_list_tag = etree.SubElement(elem_tag, "describedItemList")
 
