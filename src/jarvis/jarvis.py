@@ -64,7 +64,7 @@ class MyMagics(Magics):
             # or will be named by default "Outpout"
             else:
                 xml_lists = [set(), [], [], set(), set(), set(), set(), set(), set(), set(), set(),
-                             set()]
+                             set(), set()]
                 if len(xml_name) > 1:
                     print(f"Creating {xml_name}.xml !")
                     output_xml = generate_xml(f"{xml_name}.xml")
@@ -86,6 +86,7 @@ class MyMagics(Magics):
                         'xml_fun_inter_list': xml_lists[9],
                         'xml_phy_elem_list': xml_lists[10],
                         'xml_phy_inter_list': xml_lists[11],
+                        'xml_type_list': xml_lists[12],
                         'output_xml': output_xml,
                         'xml_name': xml_name}
 
