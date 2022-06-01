@@ -297,9 +297,8 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
 
 def check_set_extends(extends_str_list, xml_type_list, output_xml):
     """
-    Check if each string in extends_str_list are corresponding to actual objects name/alias,
-    create lists for all objects that needs to write "derived" attribute
-    Send lists to add_extends() to write them within xml and then returns update from it.
+    Check if each type_to_extend string in extends_str_list are corresponding to actual objects
+    name/alias, create lists for all <type> objects that needs to be added.
 
         Parameters:
             extends_str_list ([str]) : Lists of string from jarvis cell
