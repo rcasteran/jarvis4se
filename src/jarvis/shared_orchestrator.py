@@ -5,7 +5,7 @@ import re
 
 import datamodel
 from .question_answer import get_object_type, check_get_object, get_allocation_object, \
-    check_not_family
+    check_not_family, get_object_name
 
 
 def cut_string_list(string_tuple_list):
@@ -544,7 +544,7 @@ def check_set_object_type(type_str_list, **kwargs):
             print(f"{object_str} does not exist")
             continue
 
-        check, list_idx = check_new_type(object_to_set, type_name)
+        check, list_idx = check_new_type(object_to_set, type_name, kwargs['xml_type_list'])
         if check:
             object_type_lists[list_idx].append(object_to_set)
 
@@ -553,26 +553,45 @@ def check_set_object_type(type_str_list, **kwargs):
     return update
 
 
-def check_new_type(object_to_set, type_name):
+def check_new_type(object_to_set, type_name, xml_type_list):
     """Check if type in specity object's type list and if changed"""
     check = False
     specific_obj_type_list, list_idx = get_specific_obj_type_and_idx(object_to_set)
-    if list_idx in (0, 1, 2, 3, 4, 5):
-        if type_name.upper() in specific_obj_type_list:
+    if list_idx in (0, 1, 2, 3, 4, 5, 7, 8, 9):
+        if any(t == type_name.upper() for t in specific_obj_type_list):
             if type_name.capitalize() != str(object_to_set.type):
                 check = True
                 object_to_set.set_type(type_name.capitalize())
+        elif any(t == type_name for t in get_object_name(xml_type_list)):
+            obj_type = check_get_object(type_name, **{'xml_type_list': xml_type_list})
+            check = check_type_recursively(obj_type, specific_obj_type_list)
+            if not check:
+                print(f"{obj_type.name} is not base type: "
+                      f"{specific_obj_type_list[0].capitalize()}")
+            else:
+                object_to_set.set_type(obj_type.name)
         else:
             print(
                 f"The type {type_name} does not exist, available types are "
                 f": {', '.join(specific_obj_type_list)}.")
 
-    elif list_idx in (6, 7, 8, 9):
+    elif list_idx == 6:
         if type_name != str(object_to_set.type):
             check = True
             object_to_set.set_type(type_name)
 
     return check, list_idx
+
+
+def check_type_recursively(obj_type, specific_obj_type_list):
+    """Checks type.base recursively if it within specific_obj_type_list"""
+    check = False
+    if isinstance(obj_type.base, str) and obj_type.base.upper() in specific_obj_type_list:
+        check = True
+        return check
+    elif isinstance(obj_type.base, datamodel.Type):
+        return check_type_recursively(obj_type.base, specific_obj_type_list)
+    return check
 
 
 def get_specific_obj_type_and_idx(object_to_set):
@@ -601,10 +620,13 @@ def get_specific_obj_type_and_idx(object_to_set):
     elif isinstance(object_to_set, datamodel.Attribute):
         list_idx = 6
     elif isinstance(object_to_set, datamodel.FunctionalInterface):
+        specific_obj_type_list = [str(datamodel.BaseType.FUNCTIONAL_INTERFACE).upper()]
         list_idx = 7
     elif isinstance(object_to_set, datamodel.PhysicalElement):
+        specific_obj_type_list = [str(datamodel.BaseType.PHYSICAL_ELEMENT).upper()]
         list_idx = 8
     elif isinstance(object_to_set, datamodel.PhysicalInterface):
+        specific_obj_type_list = [str(datamodel.BaseType.PHYSICAL_INTERFACE).upper()]
         list_idx = 9
 
     return specific_obj_type_list, list_idx
