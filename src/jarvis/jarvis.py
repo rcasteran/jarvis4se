@@ -9,8 +9,10 @@ import shutil
 import getpass
 from datetime import datetime
 from io import StringIO
+from importlib.metadata import version
+from sys import version as py_ver
 
-from IPython.core.magic import (Magics, magics_class, cell_magic)
+from IPython.core.magic import (Magics, magics_class, cell_magic, line_magic)
 
 # Modules
 from xml_adapter import parse_xml, generate_xml
@@ -24,6 +26,14 @@ class MyMagics(Magics):
         # You must call the parent constructor
         super().__init__(shell)
         self.parser = parser
+
+    @line_magic
+    def retrieve_pkg_version(self, _):
+        """Get dependecies versions, for users to share when they create issues"""
+        pkg = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas']
+        pkg_ver = "\n".join(['=='.join(tups) for tups in list(zip(pkg, list(map(version, pkg))))])
+        print(pkg_ver, f"\npython=={py_ver[:6]}")
+        return
 
     @cell_magic
     def jarvis(self, _, cell):
