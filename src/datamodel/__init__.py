@@ -1,6 +1,6 @@
 from .datamodel import FunctionType
 from .datamodel import Function
-from .datamodel import SYSTEM_ELEMENT_TYPE
+from .datamodel import SystemElementType
 from .datamodel import Element
 from .datamodel import Interface
 from .datamodel import DataType
@@ -17,5 +17,7 @@ from .datamodel import Attribute
 from .datamodel import FunctionalInterface
 from .datamodel import PhysicalElement
 from .datamodel import PhysicalInterface
+from .datamodel import Type
+from .datamodel import BaseType
 
 

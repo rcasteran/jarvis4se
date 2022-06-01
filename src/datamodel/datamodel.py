@@ -22,50 +22,50 @@ class FunctionType(Enum):
     DIVIDE = 9
 
     def __str__(self):
-        type = 'unknown'
+        function_type = 'unknown'
 
         if self == self.ENABLING:
-            type = 'Enabling function'
+            function_type = 'Enabling function'
         elif self == self.HIGH_LEVEL_FUNCTION:
-            type = 'High level function'
+            function_type = 'High level function'
         elif self == self.FUNCTION:
-            type = 'Function'
+            function_type = 'Function'
         elif self == self.HIGH_LEVEL_SAFETY:
-            type = 'High level safety function'
+            function_type = 'High level safety function'
         elif self == self.SAFETY:
-            type = 'Safety function'
+            function_type = 'Safety function'
         elif self == self.ADD:
-            type = 'Add'
+            function_type = 'Add'
         elif self == self.SUBTRACT:
-            type = 'Subtract'
+            function_type = 'Subtract'
         elif self == self.MULTIPLY:
-            type = 'Multiply'
+            function_type = 'Multiply'
         elif self == self.DIVIDE:
-            type = 'Divide'
+            function_type = 'Divide'
 
-        return type
+        return function_type
 
     @classmethod
-    def get_name(cls, type):
+    def get_name(cls, function_type):
         name = cls.UNKNOWN
 
-        if type == 'Enabling function':
+        if function_type == 'Enabling function':
             name = cls.ENABLING
-        elif type == 'High level function':
+        elif function_type == 'High level function':
             name = cls.HIGH_LEVEL_FUNCTION
-        elif type == 'Function':
+        elif function_type == 'Function':
             name = cls.FUNCTION
-        elif type == 'High level safety function':
+        elif function_type == 'High level safety function':
             name = cls.HIGH_LEVEL_SAFETY
-        elif type == 'Safety function':
+        elif function_type == 'Safety function':
             name = cls.SAFETY
-        elif type == 'Add':
+        elif function_type == 'Add':
             name = cls.ADD
-        elif type == 'Subtract':
+        elif function_type == 'Subtract':
             name = cls.SUBTRACT
-        elif type == 'Multiply':
+        elif function_type == 'Multiply':
             name = cls.MULTIPLY
-        elif type == 'Divide':
+        elif function_type == 'Divide':
             name = cls.DIVIDE
 
         return name
@@ -141,7 +141,7 @@ class Function:
 
 # System element type
 # Compatible with LT SPICE
-class SYSTEM_ELEMENT_TYPE(Enum):
+class SystemElementType(Enum):
     UNKNOWN = 0
     HIGH_LEVEL = 1
     SYSTEM = 2
@@ -155,62 +155,62 @@ class SYSTEM_ELEMENT_TYPE(Enum):
     LED = 10
 
     def __str__(self):
-        type = 'unknown'
+        sys_elem_type = 'unknown'
 
         if self == self.HIGH_LEVEL:
-            type = 'High level system element'
+            sys_elem_type = 'High level system element'
         elif self == self.SYSTEM:
-            type = 'System element'
+            sys_elem_type = 'System element'
         elif self == self.RESISTOR:
-            type = 'res'
+            sys_elem_type = 'res'
         elif self == self.CAPACITOR:
-            type = 'cap'
+            sys_elem_type = 'cap'
         elif self == self.ZENER:
-            type = 'zener'
+            sys_elem_type = 'zener'
         elif self == self.NPN:
-            type = 'npn'
+            sys_elem_type = 'npn'
         elif self == self.PNP:
-            type = 'pnp'
+            sys_elem_type = 'pnp'
         elif self == self.DIODE:
-            type = 'diode'
+            sys_elem_type = 'diode'
         elif self == self.VOLTAGE:
-            type = 'voltage'
+            sys_elem_type = 'voltage'
         elif self == self.LED:
-            type = 'LED'
+            sys_elem_type = 'LED'
 
-        return type
+        return sys_elem_type
 
     @classmethod
-    def get_name(cls, type):
+    def get_name(cls, sys_elem_type):
         name = cls.UNKNOWN
 
-        if type == 'High level system element':
+        if sys_elem_type == 'High level system element':
             name = cls.HIGH_LEVEL
-        elif type == 'System element':
+        elif sys_elem_type == 'System element':
             name = cls.SYSTEM
         # LTSPICE compatible
-        elif type == 'res':
+        elif sys_elem_type == 'res':
             name = cls.RESISTOR
         # LTSPICE compatible
-        elif type == 'cap':
+        elif sys_elem_type == 'cap':
             name = cls.CAPACITOR
         # LTSPICE compatible
-        elif type == 'zener':
+        elif sys_elem_type == 'zener':
             name = cls.ZENER
         # LTSPICE compatible
-        elif type == 'npn':
+        elif sys_elem_type == 'npn':
             name = cls.NPN
         # LTSPICE compatible
-        elif type == 'pnp':
+        elif sys_elem_type == 'pnp':
             name = cls.PNP
         # LTSPICE compatible
-        elif type == 'diode':
+        elif sys_elem_type == 'diode':
             name = cls.DIODE
         # LTSPICE compatible
-        elif type == 'voltage':
+        elif sys_elem_type == 'voltage':
             name = cls.VOLTAGE
         # LTSPICE compatible
-        elif type == 'LED':
+        elif sys_elem_type == 'LED':
             name = cls.LED
 
         return name
@@ -220,7 +220,7 @@ class SYSTEM_ELEMENT_TYPE(Enum):
 # Compatible with LTSPICE
 # Depends on EndPoint class
 class Element:
-    def __init__(self, p_id='', p_name='', p_alias='', p_type=SYSTEM_ELEMENT_TYPE.UNKNOWN,
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=SystemElementType.UNKNOWN,
                  p_parent=None, p_ark_obj=None, p_role=None, p_spice_rotation='',
                  p_spice_prefix='', p_spice_model=''):
         self.id = p_id
@@ -495,7 +495,7 @@ class Interface:
             elif abs(point.x - self.point_list[1].x) == 0 \
                     and abs(point.y - self.point_list[1].y) == 0:
                 self.user_list.add(p_element)
-            #Else do nothing
+            # Else do nothing
 
 
 # Data type
@@ -939,3 +939,66 @@ class PhysicalInterface:
 
     def set_derived(self, p_derived):
         self.derived = p_derived
+
+
+class Type:
+    def __init__(self, p_id='', p_name='', p_alias='', p_base=''):
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.base = p_base
+
+    def set_id(self, p_id):
+        self.id = p_id
+
+    def set_name(self, p_name):
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        self.alias = p_alias
+
+    def set_base(self, p_base):
+        self.base = p_base
+
+
+class BaseType(Enum):
+    DATA = 0
+    FUNCTION = 1
+    FUNCTIONAL_ELEMENT = 2
+    FUNCTIONAL_INTERFACE = 3
+    PHYSICAL_ELEMENT = 4
+    PHYSICAL_INTERFACE = 5
+
+    def __str__(self):
+        type_str = ''
+        if self == self.DATA:
+            type_str = 'Data'
+        elif self == self.FUNCTION:
+            type_str = 'Function'
+        elif self == self.FUNCTIONAL_ELEMENT:
+            type_str = 'Functional element'
+        elif self == self.FUNCTIONAL_INTERFACE:
+            type_str = 'Functional interface'
+        elif self == self.PHYSICAL_ELEMENT:
+            type_str = 'Physical element'
+        elif self == self.PHYSICAL_INTERFACE:
+            type_str = 'Physical interface'
+        return type_str
+
+    @classmethod
+    def get_enum(cls, obj_type):
+        enum_type = None
+        if obj_type == 'Data':
+            enum_type = cls.DATA
+        elif obj_type == 'Function':
+            enum_type = cls.FUNCTION
+        elif obj_type == 'Functional element':
+            enum_type = cls.FUNCTIONAL_ELEMENT
+        elif obj_type == 'Functional interface':
+            enum_type = cls.FUNCTIONAL_INTERFACE
+        elif obj_type == 'Physical element':
+            enum_type = cls.PHYSICAL_ELEMENT
+        elif obj_type == 'Physical interface':
+            enum_type = cls.PHYSICAL_INTERFACE
+
+        return enum_type
