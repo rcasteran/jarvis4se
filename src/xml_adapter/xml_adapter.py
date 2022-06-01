@@ -28,6 +28,8 @@ def parse_xml(input_filename):
         user_msg = f"Xml's file structure has changed, please delete {input_filename} " \
                    f"and re-execute your whole notebook"
         return user_msg
+    # Looking for Type
+    type_list = get_type_list(root)
     # looking for elements with tag "function" and create function objects and list
     function_list = get_functions(root)
     # Create data(and set predecessors), consumers, producers lists
@@ -51,7 +53,8 @@ def parse_xml(input_filename):
 
     all_lists = [function_list, consumer_function_list, producer_function_list, data_list,
                  state_list, transition_list, functional_element_list, chain_list, attribute_list,
-                 functional_interface_list, physical_element_list, physical_interface_list]
+                 functional_interface_list, physical_element_list, physical_interface_list,
+                 type_list]
     return all_lists
 
 
@@ -429,3 +432,26 @@ def get_physical_interface(root):
                 break
 
     return physical_interface_list
+
+
+def get_type_list(root):
+    """Get Type objects"""
+    type_list = set()
+    xml_type_list = root.iter('type')
+    for xml_type in xml_type_list:
+        # Instantiate Type and add them to a list
+        type_obj = datamodel.Type()
+        type_obj.set_id(xml_type.get('id'))
+        type_obj.set_name(xml_type.get('name'))
+        type_obj.set_alias(xml_type.get('alias'))
+        type_obj.set_base(xml_type.get('base'))
+
+        type_list.add(type_obj)
+
+    for obj_type in type_list:
+        for base in type_list:
+            if obj_type.base == base.name:
+                obj_type.base = base
+                break
+
+    return type_list

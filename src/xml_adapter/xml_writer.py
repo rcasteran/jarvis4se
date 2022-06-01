@@ -22,7 +22,7 @@ class GenerateXML:
         for tag in phy_arch_tags:
             etree.SubElement(phy_arch, tag)
         viewpoint = etree.SubElement(self.root, "viewPoint")
-        viewpoint_tags = ['chainList', 'attributeList']
+        viewpoint_tags = ['chainList', 'attributeList', 'typeList']
         for tag in viewpoint_tags:
             etree.SubElement(viewpoint, tag)
         self.tree = etree.ElementTree(self.root)
@@ -460,6 +460,24 @@ class GenerateXML:
                                 tag, alloc_tag, {'id': str(obj_to_alloc.id)})
             self.write()
 
+    def write_type_element(self, type_list):
+        """Method to write type element from type's list"""
+        with open(self.file, 'rb') as file:
+            parser = etree.XMLParser(remove_blank_text=True)
+            root = self.tree.parse(file, parser)
+            if root.find('.//typeList') is None:
+                etree.SubElement(root.find('./viewPoint'), 'typeList')
+            for type_list_tag in root.findall(".//typeList"):
+                for type_elem in type_list:
+                    elem_tag = etree.SubElement(type_list_tag, "type",
+                                                {'id': type_elem.id, 'name': type_elem.name,
+                                                 'alias': type_elem.alias,
+                                                 'base': str(type_elem.base)})
+
+                    # _described_item_list_tag = etree.SubElement(elem_tag, "describedItemList")
+
+        self.write()
+
 
 derived_obj_tag = ("physicalInterface",
                    "physicalElement",
@@ -491,6 +509,8 @@ def get_object_tag(wanted_object):
         elem_tag = "data"
     elif isinstance(wanted_object, datamodel.Chain):
         elem_tag = "chain"
+    elif isinstance(wanted_object, datamodel.Type):
+        elem_tag = "type"
     return elem_tag
 
 
