@@ -423,10 +423,8 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
     # Create object names/aliases list
     xml_function_name_list = get_object_name(xml_function_list)
     xml_data_name_list = get_object_name(xml_data_list)
-    print(xml_function_name_list, xml_data_name_list)
     # Loop to filter producer and create a new list
     for elem in producer_str_list:
-        print(elem[0], elem[1])
         is_elem_found = True
         if not any(item == elem[1] for item in xml_function_name_list) and \
                 not any(item == elem[0] for item in xml_data_name_list):
