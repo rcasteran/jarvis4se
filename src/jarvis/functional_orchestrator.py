@@ -38,7 +38,7 @@ def add_function_by_name(function_name_str_list, xml_function_list, output_xml):
             if alias_str:
                 function.set_alias(alias_str.group(1))
             # Set function's type
-            function.set_type(datamodel.FunctionType.UNKNOWN)
+            function.set_type(str(datamodel.FunctionType.UNKNOWN))
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             function.set_id(str(identifier.int)[:10])
@@ -80,8 +80,9 @@ def add_data(data_str_list, xml_data_list, output_xml):
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             new_data.set_id(str(identifier.int)[:10])
-            new_data.set_type(datamodel.DataType.UNKNOWN)
+            new_data.set_type(str(datamodel.DataType.UNKNOWN))
 
+            xml_data_list.add(new_data)
             new_data_list.append(new_data)
 
     if not new_data_list:
@@ -89,7 +90,6 @@ def add_data(data_str_list, xml_data_list, output_xml):
     else:
         output_xml.write_data(new_data_list)
         for data in new_data_list:
-            xml_data_list.add(data)
             print(data.name + " is a data" + "")
         return 1
 
@@ -423,8 +423,10 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
     # Create object names/aliases list
     xml_function_name_list = get_object_name(xml_function_list)
     xml_data_name_list = get_object_name(xml_data_list)
+    print(xml_function_name_list, xml_data_name_list)
     # Loop to filter producer and create a new list
     for elem in producer_str_list:
+        print(elem[0], elem[1])
         is_elem_found = True
         if not any(item == elem[1] for item in xml_function_name_list) and \
                 not any(item == elem[0] for item in xml_data_name_list):
@@ -518,7 +520,7 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
             if alias_str:
                 state.set_alias(alias_str.group(1))
             # Set state's type
-            state.set_type(datamodel.StateType.UNKNOWN)
+            state.set_type(str(datamodel.StateType.UNKNOWN))
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             state.set_id(str(identifier.int)[:10])
@@ -565,7 +567,7 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
             if alias_str:
                 transition.set_alias(alias_str.group(1))
             # Set state's type
-            transition.set_type(datamodel.StateType.UNKNOWN)
+            transition.set_type(str(datamodel.StateType.UNKNOWN))
             # Generate and set unique identifier of length 10 integers
             identifier = uuid.uuid4()
             transition.set_id(str(identifier.int)[:10])

@@ -7,9 +7,12 @@ import inspect
 # Modules
 import datamodel
 from .util import MakePlantUml
+from jarvis.shared_orchestrator import check_type_recursively
+from jarvis.question_answer import get_object_name, check_get_object
 
 
 def write_function_child(function, input_flow_list, output_flow_list, xml_attribute_list):
+    """Construct plantuml_text recursively"""
     function_input_port = []
     function_output_port = []
     external_input_port = []
@@ -102,6 +105,8 @@ def count_composed_component(function, count):
 
 def write_function_object(function, input_flow_list, output_flow_list, check, xml_attribute_list,
                           component_obj=None, compo_diagram=False):
+    """Write 'simple' function object with associated ports for flow_lists,
+    close a pevious component if needed, returns plantuml_text"""
     plantuml_text = ''
     if function.operand:
         plantuml_text += MakePlantUml.create_object_with_operand(function, xml_attribute_list)
@@ -133,7 +138,9 @@ def write_function_object(function, input_flow_list, output_flow_list, check, xm
 
 
 def get_function_diagrams(function_list, consumer_function_list, producer_function_list,
-                          parent_child_dict, data_list, xml_attribute_list=None):
+                          parent_child_dict, data_list, xml_type_list, xml_attribute_list=None):
+    """For fun_elem_function, function_context, function_decomposition and functions_chain,
+    returns plantuml_text and url_diagram"""
     plantuml_text = ""
     interface_list = None
 
@@ -174,8 +181,7 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
         for function in function_list:
             if function.id in parent_child_dict.values() and \
                     function.id not in parent_child_dict.keys():
-                if function.type in datamodel.FunctionType.get_parent_function_type_list():
-
+                if check_function_type(function, xml_type_list):
                     plantuml_text += MakePlantUml.create_component(function)
                     plantuml_text += write_function_child(function,
                                                           input_flow_list,
@@ -200,10 +206,26 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     return plantuml_text, diagram_url
 
 
+def check_function_type(function, xml_type_list):
+    """Checks if function's type(or recursive base type) from [Function, High level function,
+    Safety function, High level safety function, unknown]"""
+    specific_obj_type_list = datamodel.FunctionType.get_parent_function_type_list()
+    check = False
+    if any(a == function.type for a in specific_obj_type_list):
+        check = True
+        return check
+    if any(a == function.type for a in get_object_name(xml_type_list)):
+        obj_type = check_get_object(function.type, **{'xml_type_list': xml_type_list})
+        check = check_type_recursively(obj_type, [str(i).upper() for i in specific_obj_type_list])
+        return check
+
+    return check
+
+
 def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
                                  data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
                                  fun_elem_inter_list):
-
+    """Returns plantuml_text, diagram_url for fun_elem_context"""
     plantuml_text = ""
 
     if fun_inter_list:
@@ -575,6 +597,7 @@ def clean_predecessor_list(message_object_list):
 
 
 def get_sequence(message, message_object_list, sequence_list, sequence=None, index=None):
+    """Returns a sequence i.e. more than one message followed by an other one"""
     if not sequence:
         sequence = []
         index = 0
@@ -590,6 +613,7 @@ def get_sequence(message, message_object_list, sequence_list, sequence=None, ind
 
 
 def get_sequences(message_object_list):
+    """Groups all sequences"""
     sequence_list = []
     for message in message_object_list:
         if not message[2].predecessor_list:
@@ -600,7 +624,8 @@ def get_sequences(message_object_list):
 
 
 def post_check_sequence(sequence_list):
-
+    """Check if message isn't missing in sequence, insert it at the good place and loop if not
+    well ordered (predecessor after each one)"""
     for (idx, i) in enumerate(sequence_list):
         pred = i[2].predecessor_list
         if check_sequence(pred, sequence_list[:idx]) is True:
@@ -627,10 +652,11 @@ def post_check_sequence(sequence_list):
 
 
 def get_sequence_list(message_object_list):
+    """Call for sequences then clean_up and post_check"""
     sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
-    # Could be possible ot implement this part within post_check_sequence()
+    # Could be possible to implement this part within post_check_sequence()
     for (index, i) in enumerate(sequence_list):
         main_list = sequence_list[0]
         if index > 0:
@@ -648,6 +674,7 @@ def get_sequence_list(message_object_list):
 
 
 def order_list(message_list, data_list):
+    """Orders functions and messages"""
     ordered_message_list = []
     ordered_function_list = []
     message_object_list = []
@@ -679,6 +706,8 @@ def order_list(message_list, data_list):
 
 def get_exchanged_flows(consumer_function_list, producer_function_list, parent_child_dict,
                         concatenate=False):
+    """Returns list of exchanged flow [[producer, consumer, data]],
+    i.e. data that have producer and consumer"""
     output_list = []
 
     for producer_flow, producer_function in producer_function_list:
@@ -702,6 +731,8 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
 
 
 def get_output_flows(consumer_function_list, producer_function_list, concatenate=False):
+    """Returns list of output flow [[None/parent_name, producer, data]],
+    i.e. data that have only producer"""
     flow_consumer_name_list = []
     flow_child_consumer_list = []
     temp_input_list = []
@@ -739,6 +770,8 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
 
 
 def get_input_flows(consumer_function_list, producer_function_list, concatenate=False):
+    """Returns list of output flow [[None/parent_name, consumer, data]],
+    i.e. data that have only consumer"""
     flow_producer_name_list = []
     flow_child_producer_list = []
     temp_input_list = []
@@ -778,6 +811,9 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
 # from [[cons=A, prod=B, flow_1], [cons=A, prod=B, flow_2]] to
 # [[cons=A, prod=B, [flow_1, flow_2]]. Adaptation for flow notation in plantuml
 def concatenate_flows(input_list):
+    """Concatenate with same consumer and producer the flows :
+    from [[cons=A, prod=B, flow_1], [cons=A, prod=B, flow_2]] to
+    [[cons=A, prod=B, [flow_1, flow_2]]. Adaptation for flow notation in plantuml"""
     output_list = []
     per_function_name_filtered_list = set(map(lambda x: (x[0], x[1]), input_list))
     per_flow_filtered_list = [[y[2] for y in input_list if y[0] == x and y[1] == z] for x, z in
@@ -789,7 +825,7 @@ def concatenate_flows(input_list):
 
 
 def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list=None):
-
+    """Returns state_machine_text and url_diagram for state_machine_diagrams"""
     state_machine_text = inspect.cleandoc("""skinparam useBetaStyle true
                                             hide empty description
                                             <style>
@@ -845,6 +881,7 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
 
 
 def get_objects_conditions_list(xml_state_list, xml_transition_list):
+    """Returns all conditions associated to state_list within transiton_list"""
     objects_conditions_list = []
     formatted_transition_list = []
     # Create transition's list [src_id, dest_id, [conditions]]
@@ -861,7 +898,7 @@ def get_objects_conditions_list(xml_state_list, xml_transition_list):
 
 
 def write_state(state, new, objects_conditions_list, output_str=''):
-
+    """Returns simple state string for plantuml_text"""
     if not state.parent and not state.child_list:
         output_str += MakePlantUml.create_state(state)
         new.append(state.id)
@@ -875,6 +912,7 @@ def write_state(state, new, objects_conditions_list, output_str=''):
 
 
 def write_composed_state(state, new, objects_conditions_list, output_str='', count=0):
+    """Returns composed state string for plantuml_text"""
     output_str += MakePlantUml.create_state(state, parent=True)
     new.insert(count, state.id)
     count += 1
@@ -895,6 +933,8 @@ def write_composed_state(state, new, objects_conditions_list, output_str='', cou
 
 
 def match_transition_states(transition, xml_state_list):
+    """Returns transition with associated state, if not create default ENTRY or EXIT if one is
+    missing"""
     source_state = None
     destination_state = None
     out = None

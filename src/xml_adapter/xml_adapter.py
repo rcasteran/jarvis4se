@@ -77,8 +77,7 @@ def get_functions(root):
         function.set_id(xml_function.get('id'))
         function.set_name(xml_function.get('name'))
         function.set_alias(xml_function.get('alias'))
-        function_type = datamodel.FunctionType.get_name(xml_function.get('type'))
-        function.set_type(function_type)
+        function.set_type(xml_function.get('type'))
         function.set_operand()
         function.set_derived(xml_function.get('derived'))
 
@@ -120,8 +119,7 @@ def get_data(root, function_list):
         data = datamodel.Data()
         data.set_id(xml_data.get('id'))
         data.set_name(xml_data.get('name'))
-        data_type = datamodel.DataType.get_name(xml_data.get('type'))
-        data.set_type(data_type)
+        data.set_type(xml_data.get('type'))
 
         data_list.add(data)
         # looking for all elements with tag "consumer" and create a list [flow, consumer_function]
@@ -170,8 +168,7 @@ def get_state(root):
         state.set_id(xml_state.get('id'))
         state.set_name(xml_state.get('name'))
         state.set_alias(xml_state.get('alias'))
-        state_type = datamodel.StateType.get_name(xml_state.get('type'))
-        state.set_type(state_type)
+        state.set_type(xml_state.get('type'))
 
         state_list.add(state)
         # Looking for states with "statePart" i.e child and create a list
@@ -208,8 +205,7 @@ def get_transition(root):
         transition.set_id(xml_transition.get('id'))
         transition.set_name(xml_transition.get('name'))
         transition.set_alias(xml_transition.get('alias'))
-        transition_type = datamodel.TransitionType.get_name(xml_transition.get('type'))
-        transition.set_type(transition_type)
+        transition.set_type(xml_transition.get('type'))
         transition.set_source(xml_transition.get('source'))
         transition.set_destination(xml_transition.get('destination'))
 
@@ -234,8 +230,7 @@ def get_functional_element(root):
         fun_elem.set_id(xml_func_elem.get('id'))
         fun_elem.set_name(xml_func_elem.get('name'))
         fun_elem.set_alias(xml_func_elem.get('alias'))
-        fun_elem_type = datamodel.FunctionalElementType.get_name(xml_func_elem.get('type'))
-        fun_elem.set_type(fun_elem_type)
+        fun_elem.set_type(xml_func_elem.get('type'))
         fun_elem.set_derived(xml_func_elem.get('derived'))
 
         functional_element_list.add(fun_elem)
@@ -288,8 +283,7 @@ def get_chains(root):
         chain = datamodel.Chain()
         chain.set_id(xml_chain.get('id'))
         chain.set_name(xml_chain.get('name'))
-        chain_type = datamodel.ChainType.get_name(xml_chain.get('type'))
-        chain.set_type(chain_type)
+        chain.set_type(xml_chain.get('type'))
 
         # Looking for allocated items and add them to the chain
         xml_allocated_item_list = xml_chain.iter('allocatedItem')
@@ -311,8 +305,6 @@ def get_attributes(root):
         attribute.set_id(xml_attribute.get('id'))
         attribute.set_name(xml_attribute.get('name'))
         attribute.set_alias(xml_attribute.get('alias'))
-        # No AttritubeType defined in datamodel yet
-        # attribute_type = datamodel.AttributeType.get_name(xml_attribute.get('type'))
         attribute.set_type(xml_attribute.get('type'))
 
         # Looking for described items and add them to the attribute

@@ -42,6 +42,8 @@ class FunctionType(Enum):
             function_type = 'Multiply'
         elif self == self.DIVIDE:
             function_type = 'Divide'
+        elif self == self.UNKNOWN:
+            function_type = 'unknown'
 
         return function_type
 
@@ -72,11 +74,9 @@ class FunctionType(Enum):
 
     @classmethod
     def get_parent_function_type_list(cls):
-        return [FunctionType.FUNCTION,
-                FunctionType.HIGH_LEVEL_FUNCTION,
-                FunctionType.SAFETY,
-                FunctionType.HIGH_LEVEL_SAFETY,
-                FunctionType.UNKNOWN]
+        base_function_type = [cls.FUNCTION, cls.HIGH_LEVEL_FUNCTION, cls.SAFETY,
+                              cls.HIGH_LEVEL_SAFETY, cls.UNKNOWN]
+        return [str(i) for i in base_function_type]
 
 
 # Function class

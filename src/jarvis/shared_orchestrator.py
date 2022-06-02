@@ -543,7 +543,8 @@ def check_set_object_type(type_str_list, **kwargs):
         if object_to_set is None:
             print(f"{object_str} does not exist")
             continue
-
+        if object_to_set.type == type_name:
+            continue
         check, list_idx = check_new_type(object_to_set, type_name, kwargs['xml_type_list'])
         if check:
             object_type_lists[list_idx].append(object_to_set)
@@ -576,9 +577,8 @@ def check_new_type(object_to_set, type_name, xml_type_list):
                 f": {', '.join(specific_obj_type_list)}.")
 
     elif list_idx == 6:
-        if type_name != str(object_to_set.type):
-            check = True
-            object_to_set.set_type(type_name)
+        check = True
+        object_to_set.set_type(type_name)
 
     return check, list_idx
 

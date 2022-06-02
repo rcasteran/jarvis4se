@@ -58,7 +58,8 @@ def case_function_diagram(**kwargs):
                                           kwargs['xml_fun_elem_list'],
                                           kwargs['xml_function_list'],
                                           kwargs['xml_consumer_function_list'],
-                                          kwargs['xml_producer_function_list'])
+                                          kwargs['xml_producer_function_list'],
+                                          kwargs['xml_type_list'])
 
     else:
         print(f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
@@ -77,7 +78,8 @@ def case_context_diagram(**kwargs):
         filename = show_function_context(kwargs['diagram_object_str'], kwargs['xml_function_list'],
                                          kwargs['xml_consumer_function_list'],
                                          kwargs['xml_producer_function_list'],
-                                         kwargs['xml_data_list'], kwargs['xml_attribute_list'])
+                                         kwargs['xml_data_list'], kwargs['xml_attribute_list'],
+                                         kwargs['xml_type_list'])
 
     elif kwargs['diagram_object_str'] in xml_state_name_list:
         filename = show_states_chain([kwargs['diagram_object_str']], kwargs['xml_state_list'],
@@ -137,7 +139,8 @@ def case_decomposition_diagram(**kwargs):
                                                consumer_list,
                                                producer_list,
                                                kwargs['xml_attribute_list'],
-                                               diagram_level)
+                                               kwargs['xml_type_list'],
+                                               diagram_level=diagram_level)
 
     elif diagram_object_str in xml_fun_elem_name_list:
         function_list = get_object_list_from_chain(diagram_object_str,
@@ -262,7 +265,8 @@ def case_chain_diagram(**kwargs):
                 filename = show_functions_chain(object_list_str,
                                                 function_list,
                                                 consumer_list,
-                                                producer_list)
+                                                producer_list,
+                                                kwargs['xml_type_list'])
             elif result_state:
                 state_list = get_object_list_from_chain(object_list_str,
                                                         kwargs['xml_state_list'],
@@ -559,7 +563,7 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
 
 
 def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
-                           xml_consumer_function_list, xml_producer_function_list):
+                           xml_consumer_function_list, xml_producer_function_list, xml_type_list):
     """Creates lists with desired objects for <functional_element> function's allocation,
     send them to plantuml_adapter.py then returns url_diagram"""
     url_diagram = None
@@ -591,7 +595,7 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
     _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
                                                             new_consumer_list,
                                                             new_producer_list,
-                                                            {}, None)
+                                                            {}, None, xml_type_list)
 
     print("Function Diagram for " + fun_elem_str + " generated")
     return url_diagram
@@ -672,7 +676,7 @@ def get_allocated_function_context_lists(allocated_function_list,
             returned_list = show_function_context(fun.name, allocated_function_list,
                                                   xml_consumer_function_list,
                                                   xml_producer_function_list, set(),
-                                                  set(), list_out=True)
+                                                  set(), set(), list_out=True)
             for k in returned_list[0]:
                 new_function_list.add(k)
             for i in returned_list[1]:
@@ -830,7 +834,7 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
 
 
 def show_functions_chain(function_list_str, xml_function_list, xml_consumer_function_list,
-                         xml_producer_function_list):
+                         xml_producer_function_list, xml_type_list):
     new_function_list = set()
     new_parent_dict = {}
     new_producer_list = []
@@ -861,14 +865,17 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
     _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
                                                             new_consumer_list,
                                                             new_producer_list,
-                                                            new_parent_dict, None)
+                                                            new_parent_dict,
+                                                            None,
+                                                            xml_type_list)
     spaced_function_list = ", ".join(function_list_str)
     print("Chain Diagram " + str(spaced_function_list) + " generated")
     return url_diagram
 
 
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_attribute_list, diagram_level=None):
+                                xml_producer_function_list, xml_attribute_list, xml_type_list,
+                                diagram_level=None):
 
     main_fun = check_get_object(diagram_function_str, **{'xml_function_list': xml_function_list})
     if not main_fun:
@@ -916,7 +923,8 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                             new_producer_list,
                                                             new_parent_dict,
                                                             None,
-                                                            xml_attribute_list)
+                                                            xml_type_list,
+                                                            xml_attribute_list=xml_attribute_list)
 
     print("Decomposition Diagram " + diagram_function_str + " generated")
     return url_diagram
@@ -997,7 +1005,7 @@ def check_get_child_flows(function_list, xml_flow_list, new_flow_list=None):
 
 def show_function_context(diagram_function_str, xml_function_list, xml_consumer_function_list,
                           xml_producer_function_list, xml_data_list, xml_attribute_list,
-                          list_out=False):
+                          xml_type_list, list_out=False):
     new_function_list = set()
     new_parent_dict = {}
     new_producer_list = []
@@ -1061,12 +1069,14 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
     if list_out:
         out = new_function_list, new_consumer_list, new_producer_list
     else:
-        plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                                             new_consumer_list,
-                                                                             new_producer_list,
-                                                                             new_parent_dict,
-                                                                             xml_data_list,
-                                                                             xml_attribute_list)
+        plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(
+            new_function_list,
+            new_consumer_list,
+            new_producer_list,
+            new_parent_dict,
+            xml_data_list,
+            xml_type_list,
+            xml_attribute_list=xml_attribute_list)
 
         out = url_diagram
         print("Context Diagram " + diagram_function_str + " generated")
