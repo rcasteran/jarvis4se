@@ -197,23 +197,23 @@ class MakePlantUml:
         return flow_str
 
     @staticmethod
-    def get_url_from_local(string):
+    def get_url_from_local(string, from_diagram_cell=False):
         """Generate unique .svg from string using  plantuml default server or plantuml.jar client,
         depending on the diagram's size (limit around 15000 char.)
         """
         current_file_path = None
-        out = None
-        if len(string) < 15000:
+        if not from_diagram_cell:
             full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
                           + string + "@enduml"
+        else:
+            full_string = string
+        if len(string) < 15000:
             # Quickest by HTTP request to plantuml server (only for small diagrams)
             server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
                               basic_auth={},
                               form_auth={}, http_opts={}, request_opts={})
             out = server.get_url(full_string)
         else:
-            full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
-                          + string + "@enduml"
             # Generate and set unique identifier of length 10 integers
             identi = uuid.uuid4()
             identi = str(identi.int)[:10]

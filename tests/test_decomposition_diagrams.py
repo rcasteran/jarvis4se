@@ -47,7 +47,7 @@ def test_function_with_childs_decomposition(mocker):
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_with_childs_decomposition"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -156,7 +156,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_flow"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -244,7 +244,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_childs"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -330,7 +330,7 @@ def test_fun_elem_decompo_with_interface(mocker):
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_interface"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"

@@ -13,7 +13,7 @@ def test_generate_xml_file_template():
      """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "generate_xml_file_template"
     my_magic.jarvis("", "with %s\n" % file_name)
     fname = os.path.join("./", file_name + ".xml")
@@ -54,7 +54,7 @@ def test_simple_function_within_xml():
      """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "simple_function_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n")
@@ -92,7 +92,7 @@ def test_described_attribute_within_xml():
      """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "described_attribute_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -145,7 +145,7 @@ def test_set_attribute_type_within_xml():
      """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "set_attribute_type_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "A is an attribute\n"
@@ -191,7 +191,7 @@ def test_set_allocated_item_to_chain_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "set_allocated_item_to_chain_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -257,7 +257,7 @@ def test_function_with_grandkids_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_with_grandkids_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -344,7 +344,7 @@ def test_function_childs_cons_prod_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_childs_cons_prod_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -436,7 +436,7 @@ def test_functional_interface_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "functional_interface_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Color is an attribute\n"
@@ -506,7 +506,7 @@ def test_fun_elem_exposes_interface_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_exposes_interface_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Fun_inter is a functional interface\n"
@@ -577,7 +577,7 @@ def test_type_within_xml():
     """
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "extends_object_input"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Safety interface extends functional interface\n"

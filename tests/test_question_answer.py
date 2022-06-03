@@ -39,7 +39,7 @@ def test_list_data_functional_interface(mocker):
     spy = mocker.spy(question_answer, "switch_data")
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MyMagics(ip, parser)
+    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "list_data_functional_interface"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
