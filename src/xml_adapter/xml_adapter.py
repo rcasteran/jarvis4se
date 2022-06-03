@@ -73,13 +73,12 @@ def get_functions(root):
     xml_function_list = root.iter('function')
     for xml_function in xml_function_list:
         # Instantiate functions and add them to a list
-        function = datamodel.Function()
-        function.set_id(xml_function.get('id'))
-        function.set_name(xml_function.get('name'))
-        function.set_alias(xml_function.get('alias'))
-        function.set_type(xml_function.get('type'))
+        function = datamodel.Function(p_id=xml_function.get('id'),
+                                      p_name=xml_function.get('name'),
+                                      p_type=xml_function.get('type'),
+                                      p_alias=xml_function.get('alias'),
+                                      p_derived=xml_function.get('derived'))
         function.set_operand()
-        function.set_derived(xml_function.get('derived'))
 
         function_list.add(function)
         # Looking for functions with "functionalPart" i.e childs and create a list
@@ -116,11 +115,9 @@ def get_data(root, function_list):
     xml_data_list = root.iter('data')
     for xml_data in xml_data_list:
         # Instantiate data and add it to a list
-        data = datamodel.Data()
-        data.set_id(xml_data.get('id'))
-        data.set_name(xml_data.get('name'))
-        data.set_type(xml_data.get('type'))
-
+        data = datamodel.Data(p_id=xml_data.get('id'),
+                              p_name=xml_data.get('name'),
+                              p_type=xml_data.get('type'))
         data_list.add(data)
         # looking for all elements with tag "consumer" and create a list [flow, consumer_function]
         xml_consumer_list = xml_data.iter('consumer')
@@ -164,12 +161,10 @@ def get_state(root):
     xml_state_list = root.iter('state')
     for xml_state in xml_state_list:
         # Instantiate states and add them to a list
-        state = datamodel.State()
-        state.set_id(xml_state.get('id'))
-        state.set_name(xml_state.get('name'))
-        state.set_alias(xml_state.get('alias'))
-        state.set_type(xml_state.get('type'))
-
+        state = datamodel.State(p_id=xml_state.get('id'),
+                                p_name=xml_state.get('name'),
+                                p_alias=xml_state.get('alias'),
+                                p_type=xml_state.get('type'))
         state_list.add(state)
         # Looking for states with "statePart" i.e child and create a list
         xml_state_part_list = xml_state.iter('statePart')
@@ -201,14 +196,12 @@ def get_transition(root):
     xml_transition_list = root.iter('transition')
     for xml_transition in xml_transition_list:
         # Instantiate transitions and add them to a list
-        transition = datamodel.Transition()
-        transition.set_id(xml_transition.get('id'))
-        transition.set_name(xml_transition.get('name'))
-        transition.set_alias(xml_transition.get('alias'))
-        transition.set_type(xml_transition.get('type'))
-        transition.set_source(xml_transition.get('source'))
-        transition.set_destination(xml_transition.get('destination'))
-
+        transition = datamodel.Transition(p_id=xml_transition.get('id'),
+                                          p_name=xml_transition.get('name'),
+                                          p_alias=xml_transition.get('alias'),
+                                          p_type=xml_transition.get('type'),
+                                          p_source=xml_transition.get('source'),
+                                          p_destination=xml_transition.get('destination'))
         # Looking for conditions and add them to the transition
         xml_transition_condition_list = xml_transition.iter('condition')
         for xml_condition in xml_transition_condition_list:
@@ -226,13 +219,11 @@ def get_functional_element(root):
     xml_functional_element_list = root.iter('functionalElement')
     for xml_func_elem in xml_functional_element_list:
         # Instantiate functional element and add them to a list
-        fun_elem = datamodel.FunctionalElement()
-        fun_elem.set_id(xml_func_elem.get('id'))
-        fun_elem.set_name(xml_func_elem.get('name'))
-        fun_elem.set_alias(xml_func_elem.get('alias'))
-        fun_elem.set_type(xml_func_elem.get('type'))
-        fun_elem.set_derived(xml_func_elem.get('derived'))
-
+        fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
+                                               p_name=xml_func_elem.get('name'),
+                                               p_alias=xml_func_elem.get('alias'),
+                                               p_type=xml_func_elem.get('type'),
+                                               p_derived=xml_func_elem.get('derived'))
         functional_element_list.add(fun_elem)
         # Looking for "functionalElementPart" i.e child and create a list
         xml_functional_part_list = xml_func_elem.iter('functionalElementPart')
@@ -280,11 +271,9 @@ def get_chains(root):
     xml_chain_list = root.iter('chain')
     for xml_chain in xml_chain_list:
         # Instantiate chain and add them to a list
-        chain = datamodel.Chain()
-        chain.set_id(xml_chain.get('id'))
-        chain.set_name(xml_chain.get('name'))
-        chain.set_type(xml_chain.get('type'))
-
+        chain = datamodel.Chain(p_id=xml_chain.get('id'),
+                                p_name=xml_chain.get('name'),
+                                p_type=xml_chain.get('type'))
         # Looking for allocated items and add them to the chain
         xml_allocated_item_list = xml_chain.iter('allocatedItem')
         for xml_allo_item in xml_allocated_item_list:
@@ -301,12 +290,10 @@ def get_attributes(root):
     xml_attribute_list = root.iter('attribute')
     for xml_attribute in xml_attribute_list:
         # Instantiate Attribute and add them to a list
-        attribute = datamodel.Attribute()
-        attribute.set_id(xml_attribute.get('id'))
-        attribute.set_name(xml_attribute.get('name'))
-        attribute.set_alias(xml_attribute.get('alias'))
-        attribute.set_type(xml_attribute.get('type'))
-
+        attribute = datamodel.Attribute(p_id=xml_attribute.get('id'),
+                                        p_name=xml_attribute.get('name'),
+                                        p_alias=xml_attribute.get('alias'),
+                                        p_type=xml_attribute.get('type'))
         # Looking for described items and add them to the attribute
         xml_described_item_list = xml_attribute.iter('describedItem')
         for xml_described_item in xml_described_item_list:
@@ -324,13 +311,11 @@ def get_functional_interface(root):
     xml_fun_inter_list = root.iter('functionalInterface')
     for xml_fun_inter in xml_fun_inter_list:
         # Instantiate fun_inter and add them to a list
-        fun_inter = datamodel.FunctionalInterface()
-        fun_inter.set_id(xml_fun_inter.get('id'))
-        fun_inter.set_name(xml_fun_inter.get('name'))
-        fun_inter.set_type(xml_fun_inter.get('type'))
-        fun_inter.set_alias(xml_fun_inter.get('alias'))
-        fun_inter.set_derived(xml_fun_inter.get('derived'))
-
+        fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
+                                                  p_name=xml_fun_inter.get('name'),
+                                                  p_alias=xml_fun_inter.get('alias'),
+                                                  p_type=xml_fun_inter.get('type'),
+                                                  p_derived=xml_fun_inter.get('derived'))
         # Looking for allocated data and add them to the fun inter
         xml_allocated_data_list = xml_fun_inter.iter('allocatedData')
         for xml_allo_data in xml_allocated_data_list:
@@ -354,13 +339,11 @@ def get_physical_element(root):
     xml_physical_element_list = root.iter('physicalElement')
     for xml_phy_elem in xml_physical_element_list:
         # Instantiate functional element and add them to a list
-        phy_elem = datamodel.PhysicalElement()
-        phy_elem.set_id(xml_phy_elem.get('id'))
-        phy_elem.set_name(xml_phy_elem.get('name'))
-        phy_elem.set_alias(xml_phy_elem.get('alias'))
-        phy_elem.set_type(xml_phy_elem.get('type'))
-        phy_elem.set_derived(xml_phy_elem.get('derived'))
-
+        phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
+                                             p_name=xml_phy_elem.get('name'),
+                                             p_alias=xml_phy_elem.get('alias'),
+                                             p_type=xml_phy_elem.get('type'),
+                                             p_derived=xml_phy_elem.get('derived'))
         physical_element_list.add(phy_elem)
         # Looking for "physicalPart" i.e child and create a list
         xml_functional_part_list = xml_phy_elem.iter('physicalElementPart')
@@ -403,13 +386,11 @@ def get_physical_interface(root):
     xml_phy_inter_list = root.iter('physicalInterface')
     for xml_phy_inter in xml_phy_inter_list:
         # Instantiate phy_inter and add them to a list
-        phy_inter = datamodel.PhysicalInterface()
-        phy_inter.set_id(xml_phy_inter.get('id'))
-        phy_inter.set_name(xml_phy_inter.get('name'))
-        phy_inter.set_type(xml_phy_inter.get('type'))
-        phy_inter.set_alias(xml_phy_inter.get('alias'))
-        phy_inter.set_derived(xml_phy_inter.get('derived'))
-
+        phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
+                                                p_name=xml_phy_inter.get('name'),
+                                                p_alias=xml_phy_inter.get('alias'),
+                                                p_type=xml_phy_inter.get('type'),
+                                                p_derived=xml_phy_inter.get('derived'))
         # Looking for allocated fun_inter and add them to the phy inter
         xml_allocated_inter_list = xml_phy_inter.iter('allocatedFunctionalInterface')
         for xml_allo_inter in xml_allocated_inter_list:
@@ -432,12 +413,10 @@ def get_type_list(root):
     xml_type_list = root.iter('type')
     for xml_type in xml_type_list:
         # Instantiate Type and add them to a list
-        type_obj = datamodel.Type()
-        type_obj.set_id(xml_type.get('id'))
-        type_obj.set_name(xml_type.get('name'))
-        type_obj.set_alias(xml_type.get('alias'))
-        type_obj.set_base(xml_type.get('base'))
-
+        type_obj = datamodel.Type(p_id=xml_type.get('id'),
+                                  p_name=xml_type.get('name'),
+                                  p_alias=xml_type.get('alias'),
+                                  p_base=xml_type.get('base'))
         type_list.add(type_obj)
 
     for obj_type in type_list:

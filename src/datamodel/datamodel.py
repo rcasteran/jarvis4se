@@ -83,7 +83,7 @@ class FunctionType(Enum):
 # Compatible with ArKItect and XMI
 class Function:
     def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionType.UNKNOWN, p_parent=None,
-                 p_ark_obj=None, p_role=None, p_operand=None):
+                 p_ark_obj=None, p_role=None, p_operand=None, p_derived=''):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -94,7 +94,7 @@ class Function:
         self.port_list = set()
         self.input_role = p_role
         self.operand = p_operand
-        self.derived = "unknown"
+        self.derived = p_derived
 
     def set_id(self, p_id):
         self.id = p_id
@@ -706,7 +706,7 @@ class FunctionalElementType(Enum):
 # FunctionalElement class
 class FunctionalElement:
     def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionalElementType.UNKNOWN,
-                 p_parent=None):
+                 p_parent=None, p_derived=''):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -716,7 +716,7 @@ class FunctionalElement:
         self.allocated_state_list = set()
         self.allocated_function_list = set()
         self.exposed_interface_list = set()
-        self.derived = "unknown"
+        self.derived = p_derived
 
     def set_id(self, p_id):
         self.id = p_id
@@ -844,13 +844,13 @@ class Attribute:
 
 # Functional Interface class
 class FunctionalInterface:
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
         self.type = p_type
         self.allocated_data_list = set()
-        self.derived = "unknown"
+        self.derived = p_derived
 
     def set_id(self, p_id):
         self.id = p_id
@@ -873,7 +873,8 @@ class FunctionalInterface:
 
 # PhysicalElement class
 class PhysicalElement:
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_parent=None):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_parent=None,
+                 p_derived=''):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -882,7 +883,7 @@ class PhysicalElement:
         self.allocated_fun_elem_list = set()
         self.exposed_interface_list = set()
         self.child_list = set()
-        self.derived = "unknown"
+        self.derived = p_derived
 
     def set_id(self, p_id):
         self.id = p_id
@@ -914,13 +915,13 @@ class PhysicalElement:
 
 # PhysicalInterface class
 class PhysicalInterface:
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
         self.type = p_type
         self.allocated_fun_inter_list = set()
-        self.derived = "unknown"
+        self.derived = p_derived
 
     def set_id(self, p_id):
         self.id = p_id
