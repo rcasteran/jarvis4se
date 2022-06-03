@@ -19,7 +19,7 @@ class MagicTools(Magics):
 
     @cell_magic
     def diagram(self, _, cell):
-        out = get_url_from_string(cell)
+        out = get_url_from_string(cell, True)
         if out:
             hyper = get_hyperlink(out)
             display(HTML(hyper))

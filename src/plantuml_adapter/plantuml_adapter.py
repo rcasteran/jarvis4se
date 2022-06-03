@@ -515,15 +515,17 @@ def check_write_fun_elem(function, fun_elem_list):
     return check, plantuml_text, fun_elem
 
 
-def get_url_from_string(diagram_str):
+def get_url_from_string(diagram_str, from_diagram_cell=False):
     """
     Return diagram url from its string.
         Parameters:
             diagram_str (string) : Plantuml diagram string
+            from_diagram_cell (bool): If comming from %%diagram no skin param and user has to
+            specify tags @startuml @enduml
         Returns:
             diagram_url (string) : Url can be local(big diagram) or hosted by plantuml server
     """
-    diagram_url = MakePlantUml.get_url_from_local(diagram_str)
+    diagram_url = MakePlantUml.get_url_from_local(diagram_str, from_diagram_cell)
     return diagram_url
 
 
