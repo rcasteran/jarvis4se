@@ -38,6 +38,8 @@ class CmdParser:
 
             (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
 
+            (r"(?<= |\n)(.*?) inherits from ([^\.\n]*)", matched_inherits),
+
             (r"The alias of (.*?) is ([^\.\n]*)", matched_alias),
 
             (r"(?<= |\n)consider ([^\.\n]*)", matched_consider),
@@ -103,7 +105,7 @@ class CmdParser:
             if result and not result_chain:
                 # (14, 15, 17, 20) Corresponds to :
                 # "composes", "consumes", "produces", "is allocated to"
-                if idx in (14, 15, 17, 20):
+                if idx in (15, 16, 18, 21):
                     result = reverse(result)
                 update = method(result, **kwargs)
 
@@ -210,6 +212,12 @@ def matched_extend(type_str_list, **kwargs):
     out = viewpoint_orchestrator.check_set_extends(type_str_list,
                                                    kwargs['xml_type_list'],
                                                    kwargs['output_xml'])
+    return out
+
+
+def matched_inherits(inherits_str, **kwargs):
+    """Get inherits from declaration"""
+    out = shared_orchestrator.check_add_inheritance(inherits_str, **kwargs)
     return out
 
 

@@ -1077,3 +1077,116 @@ def get_allocated_child(elem, xml_fun_elem_list):
                         output_list.append([fun_elem, elem[1]])
 
     return output_list
+
+
+def check_add_inheritance(inherit_str_list, **kwargs):
+    """
+    Check if each string in allocation_str_list are corresponding to an actual object's name/alias,
+    set_derive, create lists of objets, write in xml
+    Send lists to add_inheritance() to write them within xml and then returns update from it.
+
+        Parameters:
+            inherit_str_list ([str]) : Lists of string from jarvis cell
+            kwargs (dict) : whole xml lists + xml's file object
+
+        Returns:
+            update ([0/1]) : 1 if update, else 0
+    """
+    for elem in inherit_str_list:
+        # elem_1: inheriting object
+        elem_0 = check_get_object(elem[0],
+                                  **{'xml_function_list': kwargs['xml_function_list'],
+                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                     })
+        # elem_2: object to inherit from
+        elem_1 = check_get_object(elem[1],
+                                  **{'xml_function_list': kwargs['xml_function_list'],
+                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                     })
+        if not elem_0 or not elem_1:
+            if not elem_0 and not elem_1:
+                print_wrong_object_inheritance(elem[0], elem[1])
+            elif not elem_0:
+                print_wrong_object_inheritance(elem[0])
+            else:
+                print_wrong_object_inheritance(elem[1])
+            continue
+        if elem_0 == elem_1:
+            print(f"Same object {elem_0.name}")
+            continue
+
+        check_obj = check_inheritance(elem_0, elem_1, **kwargs)
+        if not check_obj:
+            continue
+    return 0
+
+
+def print_wrong_object_inheritance(*obj):
+    if len(obj) == 2:
+        user_message = f"{obj[0]} and {obj[1]}"
+    else:
+        user_message = f"{obj[0]}"
+    user_message += " not found, available objects for inheritance are:\n"\
+                    f"- Function\n"\
+                    f"- Functional element\n"\
+                    f"- Functional interface\n"\
+                    f"- Physical element\n"\
+                    f"- Physical element\n"
+    print(user_message)
+    return
+
+
+def check_inheritance(elem_0, elem_1, **kwargs):
+    """Returns check if pair are compatible and object list have been updated"""
+    check_pair = False
+    inheritance_type_list = [datamodel.Function, datamodel.FunctionalElement,
+                             datamodel.FunctionalInterface, datamodel.PhysicalElement,
+                             datamodel.PhysicalInterface]
+    type_found = None
+    for idx, inheritance_type in enumerate(inheritance_type_list):
+        if isinstance(elem_0, inheritance_type) and isinstance(elem_1, inheritance_type):
+            check_pair = True
+            type_found = idx
+            break
+    if type_found is None:
+        print(f"{elem_0.__class__.__name__} and {elem_1.__class__.__name__} "
+              f"are not of the same type")
+        return check_pair
+
+    switch_inheritance = {
+        0: function_inheritance,
+        1: fun_elem_inheritance,
+        2: fun_inter_inheritance,
+        3: phy_elem_inheritance,
+        4: phy_inter_inheritance,
+    }
+    inheritance = switch_inheritance.get(type_found, "")
+    inheritance((elem_0, elem_1), **kwargs)
+    return check_pair
+
+
+def function_inheritance(pair, **kwargs):
+    print(pair[0].name, pair[1].name)
+    pass
+
+
+def fun_elem_inheritance(pair, **kwargs):
+    pass
+
+
+def fun_inter_inheritance(pair, **kwargs):
+    pass
+
+
+def phy_elem_inheritance(pair, **kwargs):
+    pass
+
+
+def phy_inter_inheritance(pair, **kwargs):
+    pass
