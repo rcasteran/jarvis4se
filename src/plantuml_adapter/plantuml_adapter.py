@@ -809,9 +809,6 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
     return output_list
 
 
-# Concatenate with same consumer and producer the flows :
-# from [[cons=A, prod=B, flow_1], [cons=A, prod=B, flow_2]] to
-# [[cons=A, prod=B, [flow_1, flow_2]]. Adaptation for flow notation in plantuml
 def concatenate_flows(input_list):
     """Concatenate with same consumer and producer the flows :
     from [[cons=A, prod=B, flow_1], [cons=A, prod=B, flow_2]] to
