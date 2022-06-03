@@ -4,7 +4,7 @@ from . import command_parser
 from .jarvis import MagicJarvis
 from .jarvis import clean_diagram_folder
 from .jarvis import greet_user
-from tools import MagicTools    # Needed to import %retrieve_pkg_version and %%diagram
+from tools import MagicTools
 
 
 def load_ipython_extension(ipython):
