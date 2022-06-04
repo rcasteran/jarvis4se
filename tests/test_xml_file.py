@@ -1,7 +1,7 @@
 import os
 from IPython import get_ipython
 from pathlib import Path
-import xml_adapter
+from xml_adapter import XmlParser3SE
 import jarvis
 
 
@@ -55,11 +55,12 @@ def test_simple_function_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "simple_function_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n")
 
-    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
+    function_list = xml_parser.parse_xml(file_name + ".xml")['xml_function_list']
     assert len(function_list) == 1
     assert [fun.name == "F1" for fun in function_list]
 
@@ -93,6 +94,7 @@ def test_described_attribute_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "described_attribute_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -106,9 +108,10 @@ def test_described_attribute_within_xml():
                     "The B of Fun elem is 8,5.\n"
                     "The A of Fun elem is 100\n")
 
-    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    function_list = obj_dict['xml_function_list']
+    fun_elem_list = obj_dict['xml_fun_elem_list']
+    attribute_list = obj_dict['xml_attribute_list']
 
     expected = {('A', 'F1', '4,2'), ('B', 'Fun elem', '8,5'),
                 ('C', 'F1', 'pink'), ('A', 'Fun elem', '100')}
@@ -146,6 +149,7 @@ def test_set_attribute_type_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "set_attribute_type_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "A is an attribute\n"
@@ -153,7 +157,7 @@ def test_set_attribute_type_within_xml():
                     "The type of A is attribute type A.\n"
                     "The type of B is attribute type B\n")
 
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
+    attribute_list = xml_parser.parse_xml(file_name + ".xml")['xml_attribute_list']
     expected = {('A', 'attribute type A'), ('B', 'attribute type B')}
     # xml_adapter.parse_xml() returns mainly set(), so the order can change
     # thus we have to compare it with a set also
@@ -192,6 +196,7 @@ def test_set_allocated_item_to_chain_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "set_allocated_item_to_chain_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -206,10 +211,11 @@ def test_set_allocated_item_to_chain_within_xml():
                     "consider tata.\n"
                     "consider F1, F2, F3, F4\n")
 
-    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
-    chain_list = xml_adapter.parse_xml(file_name + ".xml")[7]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    function_list = obj_dict['xml_function_list']
+    data_list = obj_dict['xml_data_list']
+    fun_elem_list = obj_dict['xml_fun_elem_list']
+    chain_list = obj_dict['xml_chain_list']
 
     expected = {'F1', 'F2 with a long name', 'F3', 'F4', 'a', 'Fun_elem'}
     # xml_adapter.parse_xml() returns mainly set(), so the order can change
@@ -258,6 +264,7 @@ def test_function_with_grandkids_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "function_with_grandkids_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -274,10 +281,11 @@ def test_function_with_grandkids_within_xml():
                     "d is a data\n"
                     "F1a1 consumes d\n")
 
-    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
-    producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    function_list = obj_dict['xml_function_list']
+    consumer_list = obj_dict['xml_consumer_function_list']
+    producer_list = obj_dict['xml_producer_function_list']
+    data_list = obj_dict['xml_data_list']
 
     expected_cons = {('b', 'F1a'), ('d', 'F1'), ('b', 'F1'), ('d', 'F1a'), ('d', 'F1a1')}
     expected_prod = {('c', 'F1a1'), ('a', 'F1'), ('c', 'F1'), ('c', 'F1a'), ('a', 'F1a')}
@@ -345,6 +353,7 @@ def test_function_childs_cons_prod_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "function_childs_cons_prod_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "F1 is a function\n"
@@ -377,10 +386,11 @@ def test_function_childs_cons_prod_within_xml():
                     "F3 produces c\n"
                     "F1e consumes c\n")
 
-    function_list = xml_adapter.parse_xml(file_name + ".xml")[0]
-    consumer_list = xml_adapter.parse_xml(file_name + ".xml")[1]
-    producer_list = xml_adapter.parse_xml(file_name + ".xml")[2]
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    function_list = obj_dict['xml_function_list']
+    consumer_list = obj_dict['xml_consumer_function_list']
+    producer_list = obj_dict['xml_producer_function_list']
+    data_list = obj_dict['xml_data_list']
 
     expected_cons = {('a', 'F1b'), ('b', 'F1d'), ('a', 'F2'), ('c', 'F1e'), ('c', 'F1')}
     expected_prod = {('b', 'F1c'), ('c', 'F3'), ('a', 'F1a'), ('a', 'F1')}
@@ -437,6 +447,7 @@ def test_functional_interface_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "functional_interface_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Color is an attribute\n"
@@ -457,9 +468,10 @@ def test_functional_interface_within_xml():
                     "Fun_elem_2 exposes Fun_inter\n"
                     "Fun_inter allocates A.\n")
 
-    data_list = xml_adapter.parse_xml(file_name + ".xml")[3]
-    attribute_list = xml_adapter.parse_xml(file_name + ".xml")[8]
-    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[9]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    fun_inter_list = obj_dict['xml_fun_inter_list']
+    attribute_list = obj_dict['xml_attribute_list']
+    data_list = obj_dict['xml_data_list']
 
     assert (len(data_list) == len(attribute_list) == len(fun_inter_list)) == 1
     data = data_list.pop()
@@ -507,6 +519,7 @@ def test_fun_elem_exposes_interface_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
+    xml_parser = XmlParser3SE()
     file_name = "fun_elem_exposes_interface_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Fun_inter is a functional interface\n"
@@ -531,8 +544,9 @@ def test_fun_elem_exposes_interface_within_xml():
                     "tata exposes titi\n"
                     "Fun_elem exposes coco\n")
 
-    fun_elem_list = xml_adapter.parse_xml(file_name + ".xml")[6]
-    fun_inter_list = xml_adapter.parse_xml(file_name + ".xml")[9]
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+    fun_elem_list = obj_dict['xml_fun_elem_list']
+    fun_inter_list = obj_dict['xml_fun_inter_list']
 
     expected_child = {('Fun_elem', 'Fun_elem_2'), ('Fun_elem_2', 'Fun_elem_3'),
                       ('Fun_elem_3', 'Fun_elem_4'), ('Fun_elem_4', 'Fun_elem_5'),
@@ -564,7 +578,7 @@ def test_fun_elem_exposes_interface_within_xml():
 def test_type_within_xml():
     """ Issue #56 Notebook equivalent:
     %%jarvis
-    with extends_object_input
+    with type_within_xml
     Safety interface extends functional interface
     The alias of Safety interface is sf
     ========================================
@@ -578,7 +592,8 @@ def test_type_within_xml():
     ip = get_ipython()
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
-    file_name = "extends_object_input"
+    xml_parser = XmlParser3SE()
+    file_name = "type_within_xml"
     my_magic.jarvis("", "with %s\n" % file_name +
                     "Safety interface extends functional interface\n"
                     "The alias of Safety interface is sf\n")
@@ -589,21 +604,16 @@ def test_type_within_xml():
                     "Fun_inter is a functional interface\n"
                     "The type of Fun_inter is final one\n")
 
-    xml_lists = xml_adapter.parse_xml(file_name + ".xml")
-    # 9: Functional_interface_list, 12: Type_list
-    assert len([x for x in xml_lists if x]) == 2
-    for idx, k in enumerate(xml_lists):
-        if k:
-            assert idx in (9, 12)
-            if idx == 9:
-                assert len(k) == 1
-            elif idx == 12:
-                assert len(k) == 4
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+
+    assert len([x for x in obj_dict.values() if x]) == 2
+    assert len(obj_dict['xml_type_list']) == 4
+    assert len(obj_dict['xml_fun_inter_list']) == 1
 
     expected_type = {('sf_a', 'Safety interface'), ('sf_a_b', 'sf_a'),
                      ('Safety interface', 'Functional interface'), ('final one', 'sf_a_b')}
     captured_type = set()
-    for type_elem in xml_lists[12]:
+    for type_elem in obj_dict['xml_type_list']:
         if type_elem.name == 'Safety interface':
             assert type_elem.alias == 'sf'
         if isinstance(type_elem.base, str):
@@ -613,7 +623,7 @@ def test_type_within_xml():
         captured_type.add((type_elem.name, base_type))
 
     assert expected_type == captured_type
-    assert xml_lists[9].pop().type == "final one"
+    assert obj_dict['xml_fun_inter_list'].pop().type == "final one"
 
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)

@@ -1,2 +1,5 @@
-from .xml_adapter import generate_xml
-from .xml_adapter import parse_xml
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Package for 3SE xml parsing and writing"""
+from .xml_writer import GenerateXML
+from .xml_parser import XmlParser3SE

@@ -13,7 +13,7 @@ from io import StringIO
 from IPython.core.magic import (Magics, magics_class, cell_magic)
 
 # Modules
-from xml_adapter import parse_xml, generate_xml
+from xml_adapter import GenerateXML, XmlParser3SE
 
 
 # The class MUST call this class decorator at creation time
@@ -33,6 +33,9 @@ class MagicJarvis(Magics):
         sio = StringIO(cell)
         # Take the value within the buffer
         input_str = sio.getvalue()
+        # Initialize xml_parser i.e. empty obj_dict that will contain objet's lists
+        xml_parser = XmlParser3SE()
+        obj_dict = xml_parser.xml_dict
         # Delete the '"' from input string, to avoid xml to plantuml errors.
         input_str = input_str.replace('"', "")
         # Delete extra whitespaces
@@ -43,44 +46,27 @@ class MagicJarvis(Magics):
             xml_name = xml_name_str.group(1)
             # If the model(i.e. file) already exists, parse it to extract lists
             if os.path.isfile(f"{xml_name}.xml"):
-                xml_lists = parse_xml(f"{xml_name}.xml")
-                if isinstance(xml_lists, str):
-                    print(xml_lists)
+                obj_dict = xml_parser.parse_xml(f"{xml_name}.xml")
+                if isinstance(obj_dict, str):
+                    print(obj_dict)
                     return
                 else:
                     print(f"{xml_name}.xml parsed")
-                    output_xml = generate_xml(f"{xml_name}.xml")
+                    output_xml = GenerateXML(f"{xml_name}.xml")
             # Else create an empty xml_lists
             # or will be named by default "Outpout"
             else:
-                xml_lists = [set(), [], [], set(), set(), set(), set(), set(), set(), set(), set(),
-                             set(), set()]
                 if len(xml_name) > 1:
                     print(f"Creating {xml_name}.xml !")
-                    output_xml = generate_xml(f"{xml_name}.xml")
-                    output_xml.write()
+                    output_xml = GenerateXML(f"{xml_name}.xml")
                 else:
                     print("Xml's file does not exists, creating it('output.xml' by default) !")
-                    output_xml = generate_xml("")
-                    output_xml.write()
+                    output_xml = GenerateXML("")
+                output_xml.write()
 
-            xml_dict = {'xml_function_list': xml_lists[0],
-                        'xml_consumer_function_list': xml_lists[1],
-                        'xml_producer_function_list': xml_lists[2],
-                        'xml_data_list': xml_lists[3],
-                        'xml_state_list': xml_lists[4],
-                        'xml_transition_list': xml_lists[5],
-                        'xml_fun_elem_list': xml_lists[6],
-                        'xml_chain_list': xml_lists[7],
-                        'xml_attribute_list': xml_lists[8],
-                        'xml_fun_inter_list': xml_lists[9],
-                        'xml_phy_elem_list': xml_lists[10],
-                        'xml_phy_inter_list': xml_lists[11],
-                        'xml_type_list': xml_lists[12],
-                        'output_xml': output_xml,
-                        'xml_name': xml_name}
-
-            update = self.parser.lookup_table(input_str, **xml_dict)
+            obj_dict['output_xml'] = output_xml
+            obj_dict['xml_name'] = xml_name
+            update = self.parser.lookup_table(input_str, **obj_dict)
 
             if not update:
                 return

@@ -1,61 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Module for xml parsing and object lists creation"""
+"""Module for xml parsing"""
 # Libraries
 from lxml import etree
 
 # Modules
 import datamodel
-from .xml_writer import GenerateXML
+from jarvis.shared_orchestrator import (function_inheritance, fun_elem_inheritance,
+                                        fun_inter_inheritance, phy_elem_inheritance,
+                                        phy_inter_inheritance)
 
 
-def generate_xml(xml_file):
-    """Call for xml class"""
-    xml = GenerateXML(xml_file)
-    return xml
+class XmlParser3SE:
 
+    def __init__(self):
+        self.xml_dict = {'xml_function_list': set(),
+                         'xml_consumer_function_list': [],
+                         'xml_producer_function_list': [],
+                         'xml_data_list': set(),
+                         'xml_state_list': set(),
+                         'xml_transition_list': set(),
+                         'xml_fun_elem_list': set(),
+                         'xml_chain_list': set(),
+                         'xml_attribute_list': set(),
+                         'xml_fun_inter_list': set(),
+                         'xml_phy_elem_list': set(),
+                         'xml_phy_inter_list': set(),
+                         'xml_type_list': set()}
+        self.root = None
 
-def parse_xml(input_filename):
-    """Parses the whole xml then returns lists of objects/relationship"""
-    # To speed up parsing (see lxml doc) : TBC if can be extended to xml_writer
-    parser = etree.XMLParser(collect_ids=False)
-    # Parse the XML file
-    tree = etree.parse(input_filename, parser)
-    # Get the XML tree
-    root = tree.getroot()
-    # Check xml root tag
-    if not check_xml(root):
-        user_msg = f"Xml's file structure has changed, please delete {input_filename} " \
-                   f"and re-execute your whole notebook"
-        return user_msg
-    # Looking for Type
-    type_list = get_type_list(root)
-    # looking for elements with tag "function" and create function objects and list
-    function_list = get_functions(root)
-    # Create data(and set predecessors), consumers, producers lists
-    data_list, producer_function_list, consumer_function_list = get_data(root, function_list)
-    # Looking for elements with tag "state" and create state objects and list
-    state_list = get_state(root)
-    # Looking for elements with tag "transition"
-    transition_list = get_transition(root)
-    # Looking for functional elements
-    functional_element_list = get_functional_element(root)
-    # Looking for chains
-    chain_list = get_chains(root)
-    # Looking for attributes
-    attribute_list = get_attributes(root)
-    # Looking for functional interfaces
-    functional_interface_list = get_functional_interface(root)
-    # Looking for physical elements
-    physical_element_list = get_physical_element(root)
-    # Looking for physical interfaces
-    physical_interface_list = get_physical_interface(root)
+    def parse_xml(self, input_filename):
+        """Parses the whole xml then returns lists of objects/relationship"""
+        # To speed up parsing (see lxml doc) : TBC if can be extended to xml_writer
+        parser = etree.XMLParser(collect_ids=False)
+        # Parse the XML file
+        tree = etree.parse(input_filename, parser)
+        # Get the XML tree
+        self.root = tree.getroot()
+        # Check xml root tag
+        if not check_xml(self.root):
+            user_msg = f"Xml's file structure has changed, please delete {input_filename} " \
+                       f"and re-execute your whole notebook"
+            return user_msg
 
-    all_lists = [function_list, consumer_function_list, producer_function_list, data_list,
-                 state_list, transition_list, functional_element_list, chain_list, attribute_list,
-                 functional_interface_list, physical_element_list, physical_interface_list,
-                 type_list]
-    return all_lists
+        self.xml_dict = {'xml_type_list': get_type_list(self.root),
+                         'xml_function_list': get_functions(self.root),
+                         'xml_state_list': get_state(self.root),
+                         'xml_transition_list': get_transition(self.root),
+                         'xml_fun_elem_list': get_functional_element(self.root),
+                         'xml_chain_list': get_chains(self.root),
+                         'xml_attribute_list': get_attributes(self.root),
+                         'xml_fun_inter_list': get_functional_interface(self.root),
+                         'xml_phy_elem_list': get_physical_element(self.root),
+                         'xml_phy_inter_list': get_physical_interface(self.root),
+                         }
+        # Create data(and set predecessors), consumers, producers lists
+        self.xml_dict['xml_data_list'], self.xml_dict['xml_producer_function_list'], self.xml_dict[
+            'xml_consumer_function_list'] = get_data(self.root, self.xml_dict['xml_function_list'])
+
+        return generate_inheritance(**self.xml_dict)
 
 
 def check_xml(root):
@@ -426,3 +429,24 @@ def get_type_list(root):
                 break
 
     return type_list
+
+
+def generate_inheritance(**xml_dict):
+    """For all abjects that are derived/inherited update xml_lists accordingly"""
+    inheritance_list = [xml_dict['xml_function_list'], xml_dict['xml_fun_elem_list'],
+                        xml_dict['xml_fun_inter_list'], xml_dict['xml_phy_elem_list'],
+                        xml_dict['xml_phy_inter_list']]
+    switch_inheritance = {
+        0: function_inheritance,
+        1: fun_elem_inheritance,
+        2: fun_inter_inheritance,
+        3: phy_elem_inheritance,
+        4: phy_inter_inheritance,
+    }
+    for idx, j in enumerate(inheritance_list):
+        call = switch_inheritance.get(idx, "")
+        for elem in inheritance_list[idx]:
+            if elem.derived:
+                call(elem, **xml_dict)
+
+    return xml_dict
