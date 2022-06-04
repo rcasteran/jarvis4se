@@ -1122,7 +1122,6 @@ def check_add_inheritance(inherit_str_list, **kwargs):
             print(f"Same object {elem_0.name}")
             continue
         if elem_0.derived == elem_1:
-            print([[c[0], c[1].name] for c in kwargs['xml_consumer_function_list']])
             continue
 
         check_obj = check_inheritance(elem_0, elem_1, **kwargs)
@@ -1194,7 +1193,7 @@ def function_inheritance(elem, **kwargs):
     new_prod = [[a[0], elem] for a in kwargs['xml_producer_function_list']
                 if a[1] == elem.derived
                 if not any(e == [a[0], elem] for e in kwargs['xml_producer_function_list'])]
-    kwargs['xml_consumer_function_list'].extend(new_prod)
+    kwargs['xml_producer_function_list'].extend(new_prod)
 
     allocation_inheritance(elem, **kwargs)
     viewpoint_inheritance(elem, **kwargs)
