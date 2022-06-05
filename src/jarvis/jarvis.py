@@ -28,14 +28,14 @@ class MagicJarvis(Magics):
     @cell_magic
     def jarvis(self, _, cell):
         """Entry point for jarvi4se"""
+        # Initialize xml_parser i.e. empty obj_dict that will contain objet's lists
+        xml_parser = XmlParser3SE()
+        obj_dict = xml_parser.xml_dict
         # We create a string buffer containing the
         # contents of the cell.
         sio = StringIO(cell)
         # Take the value within the buffer
         input_str = sio.getvalue()
-        # Initialize xml_parser i.e. empty obj_dict that will contain objet's lists
-        xml_parser = XmlParser3SE()
-        obj_dict = xml_parser.xml_dict
         # Delete the '"' from input string, to avoid xml to plantuml errors.
         input_str = input_str.replace('"', "")
         # Delete extra whitespaces
@@ -50,9 +50,8 @@ class MagicJarvis(Magics):
                 if isinstance(obj_dict, str):
                     print(obj_dict)
                     return
-                else:
-                    print(f"{xml_name}.xml parsed")
-                    output_xml = GenerateXML(f"{xml_name}.xml")
+                print(f"{xml_name}.xml parsed")
+                output_xml = GenerateXML(f"{xml_name}.xml")
             # Else create an empty xml_lists
             # or will be named by default "Outpout"
             else:
@@ -65,28 +64,19 @@ class MagicJarvis(Magics):
                 output_xml.write()
 
             obj_dict['output_xml'] = output_xml
-            obj_dict['xml_name'] = xml_name
             update = self.parser.lookup_table(input_str, **obj_dict)
 
             if not update:
                 return
+
+            if 1 in update:
+                print(f"{output_xml.file} updated")
             else:
-                if 1 in update:
-                    self.show_model_update_msg(xml_name)
-                else:
-                    self.show_no_model_update_msg(xml_name)
+                print(f"No update for {output_xml.file}")
         else:
             print(
                 "Bad model's declaration, model's name should be written or add a ' '(blank space) "
                 "after 'with' command to create default 'Output.xml'")
-
-    @classmethod
-    def show_model_update_msg(cls, xml_name):
-        print(f"{xml_name}.xml updated")
-
-    @classmethod
-    def show_no_model_update_msg(cls, xml_name):
-        print(f"No update for {xml_name}.xml")
 
 
 def greet_user():
