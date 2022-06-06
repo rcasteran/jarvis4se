@@ -69,13 +69,14 @@ def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
     allocated item's list"""
     if not any(j.activated for j in xml_chain_list):
         return xml_item_list
-    else:
-        filtered_items_list = []
-        for j in xml_chain_list:
-            if j.activated:
-                for item in xml_item_list:
-                    if item.id in j.allocated_item_list:
-                        filtered_items_list.append(item)
+
+    filtered_items_list = []
+    for j in xml_chain_list:
+        if j.activated:
+            for item in xml_item_list:
+                if item.id in j.allocated_item_list:
+                    filtered_items_list.append(item)
+
     if filtered_items_list:
         return filtered_items_list
 
@@ -285,14 +286,14 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
     """
     if not new_obj_attribute_list:
         return 0
-    else:
-        output_xml.write_described_attribute_item(new_obj_attribute_list)
-        # Warn the user once added within xml
-        for described_attribute in new_obj_attribute_list:
-            described_attribute[0].add_described_item(described_attribute[1])
-            print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
-                  f"with value {described_attribute[1][1]}")
-        return 1
+
+    output_xml.write_described_attribute_item(new_obj_attribute_list)
+    # Warn the user once added within xml
+    for described_attribute in new_obj_attribute_list:
+        described_attribute[0].add_described_item(described_attribute[1])
+        print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
+              f"with value {described_attribute[1][1]}")
+    return 1
 
 
 def check_set_extends(extends_str_list, xml_type_list, output_xml):
