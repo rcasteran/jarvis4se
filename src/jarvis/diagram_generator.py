@@ -1101,7 +1101,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
         fun_inter_str, **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
 
     if fun_inter:
-        data_list_fun_inter = switch_data(fun_inter, None, **kwargs)[1:]
+        data_list_fun_inter = switch_data(fun_inter, None, **kwargs)['data']
         for elem in data_list_fun_inter:
             fun_elem_cons = check_get_object(
                 elem['Last consumer Functional element(s)'].pop(),
@@ -1155,7 +1155,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
             interface = check_get_object(
                 item[0], **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
 
-            data_list_fun_inter = switch_data(interface, None, **kwargs)[1:]
+            data_list_fun_inter = switch_data(interface, None, **kwargs)['data']
             if not data_list_fun_inter:
                 print(f"No data allocated to {interface.name}")
             for elem in data_list_fun_inter:

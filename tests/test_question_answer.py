@@ -67,7 +67,7 @@ def test_list_data_functional_interface(mocker):
                     "\n"
                     "list data I_E1_E2\n")
 
-    result = spy.spy_return
+    result = spy.spy_return['data']
     expected = [{'Data': 'a',
                  'Last consumer Function(s)': ['F2'],
                  'Last consumer Functional element(s)': ['E2'],

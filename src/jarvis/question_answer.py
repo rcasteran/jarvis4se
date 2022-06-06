@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Libraries
 import re
+import pandas as pd
 # Modules
 import datamodel
 
@@ -311,18 +312,20 @@ def switch_in(wanted_object, _, **kwargs):
     """Case 'list input Function/Functional ELement' """
     input_list = get_input(wanted_object, **kwargs)
     if input_list:
-        list_name = f"Input list for {wanted_object.name}:"
-        input_list.insert(0, list_name)
-        return input_list
+        input_dict = {'title': f"Input list for {wanted_object.name}:",
+                      'data': input_list,
+                      'columns': ["Data name", "Producer"]}
+        return input_dict
 
 
 def switch_out(wanted_object, _, **kwargs):
     """Case 'list output Function/Functional ELement' """
     output_list = get_output(wanted_object, **kwargs)
     if output_list:
-        list_name = f"Output list for {wanted_object.name}:"
-        output_list.insert(0, list_name)
-        return output_list
+        output_dict = {'title': f"Output list for {wanted_object.name}:",
+                       'data': output_list,
+                       'columns': ["Data name", "Consumer"]}
+        return output_dict
 
 
 def switch_child(wanted_object, object_type, **kwargs):
@@ -346,11 +349,10 @@ def switch_child(wanted_object, object_type, **kwargs):
                 if state.id == allocated_state:
                     child_list.append((state.name, "State allocation"))
     if child_list:
-        list_name = f"Child list for {wanted_object.name}:"
-        child_list = list(tuple(sorted(child_list)))
-        child_list.insert(0, list_name)
-
-        return child_list
+        child_dict = {'title': f"Child list for {wanted_object.name}:",
+                      'data': list(tuple(sorted(child_list))),
+                      'columns': ["Object's name", "Relationship's type"]}
+        return child_dict
 
 
 def switch_state_function(wanted_object, _, **kwargs):
@@ -362,11 +364,10 @@ def switch_state_function(wanted_object, _, **kwargs):
                 function_list.append((fun.name, "Function allocation"))
 
     if function_list:
-        list_name = f"Function list for {wanted_object.name}:"
-        function_list = list(tuple(sorted(function_list)))
-        function_list.insert(0, list_name)
-
-        return function_list
+        function_dict = {'title': f"Function list for {wanted_object.name}:",
+                         'data': list(tuple(sorted(function_list))),
+                         'columns': ["Object's name", "Relationship's type"]}
+        return function_dict
 
 
 def switch_state_transition(wanted_object, _, **kwargs):
@@ -393,10 +394,9 @@ def switch_state_transition(wanted_object, _, **kwargs):
                     })
 
     if transition_list:
-        list_name = f"Transition list for {wanted_object.name}:"
-        transition_list.insert(0, list_name)
-
-        return transition_list
+        transition_dict = {'title': f"Transition list for {wanted_object.name}:",
+                           'data': transition_list}
+        return transition_dict
 
 
 def switch_fun_elem_interface(wanted_object, _, **kwargs):
@@ -406,34 +406,34 @@ def switch_fun_elem_interface(wanted_object, _, **kwargs):
     main_fun_elem_child_list, _ = get_children(wanted_object)
     if not fun_inter_list:
         return f"Not any exposed interface for {wanted_object.name}"
-    else:
-        exposing_fun_elem = set()
-        for interface in fun_inter_list:
-            for fun_elem in kwargs['xml_fun_elem_list']:
-                if fun_elem not in main_fun_elem_child_list and \
-                        interface.id in fun_elem.exposed_interface_list and \
-                        check_not_family(fun_elem, wanted_object):
-                    exposing_fun_elem.add((interface, fun_elem))
 
-        interface_list = set()
-        for k in exposing_fun_elem:
-            child_list, _ = get_children(k[1])
-            child_list.remove(k[1])
-            if child_list:
-                check = True
-                for p in exposing_fun_elem:
-                    if p[0] == k[0] and any(a == p[1] for a in child_list):
-                        check = False
-                        break
-                if check:
-                    interface_list.add((k[0].name, k[1].name))
-            else:
+    exposing_fun_elem = set()
+    for interface in fun_inter_list:
+        for fun_elem in kwargs['xml_fun_elem_list']:
+            if fun_elem not in main_fun_elem_child_list and \
+                    interface.id in fun_elem.exposed_interface_list and \
+                    check_not_family(fun_elem, wanted_object):
+                exposing_fun_elem.add((interface, fun_elem))
+
+    interface_list = set()
+    for k in exposing_fun_elem:
+        child_list, _ = get_children(k[1])
+        child_list.remove(k[1])
+        if child_list:
+            check = True
+            for p in exposing_fun_elem:
+                if p[0] == k[0] and any(a == p[1] for a in child_list):
+                    check = False
+                    break
+            if check:
                 interface_list.add((k[0].name, k[1].name))
-        if interface_list:
-            list_name = f"Interface list for {wanted_object.name}:"
-            interface_list = list(tuple(sorted(interface_list)))
-            interface_list.insert(0, list_name)
-            return interface_list
+        else:
+            interface_list.add((k[0].name, k[1].name))
+    if interface_list:
+        interface_dict = {'title': f"Interface list for {wanted_object.name}:",
+                          'data': list(tuple(sorted(interface_list))),
+                          'columns': ["Interface ", "Last connected functional element"]}
+        return interface_dict
 
 
 def switch_data(wanted_object, _, **kwargs):
@@ -449,12 +449,12 @@ def switch_data(wanted_object, _, **kwargs):
                 data_list.append(get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
 
     if data_list:
-        list_name = f"Data list for {wanted_object.name}:"
-        data_list.insert(0, list_name)
-        return data_list
+        data_dict = {'title': f"Data list for {wanted_object.name}:",
+                     'data': data_list}
+        return data_dict
 
 
-def case_no_list(wanted_object, object_type, **kwargs):
+def case_no_list(wanted_object, object_type, _):
     """Case when there is incompatible list's type with object's type """
     return f"No list available for object '{wanted_object.name}' " \
            f"of type '{object_type.capitalize()}', possible lists are:\n" \
@@ -537,7 +537,7 @@ def get_object_list(object_str, **kwargs):
         else:
             object_type = get_object_type(wanted_object)
             wanted_list = switch_objects_lists(elem[0], wanted_object, object_type, **kwargs)
-            if isinstance(wanted_list, list):
+            if isinstance(wanted_list, (list, dict)):
                 answer_list.append(wanted_list)
             elif isinstance(wanted_list, str):
                 print(wanted_list)
@@ -749,27 +749,40 @@ def check_not_family(object_a, object_b):
 
 def get_object_type(object_to_check):
     """From an object, returns its type as string"""
-    if isinstance(object_to_check, datamodel.State):
-        object_type = "state"
-    elif isinstance(object_to_check, datamodel.Function):
-        object_type = "function"
-    elif isinstance(object_to_check, datamodel.Data):
-        object_type = "data"
-    elif isinstance(object_to_check, datamodel.FunctionalElement):
-        object_type = "Functional element"
-    elif isinstance(object_to_check, datamodel.Chain):
-        object_type = "Chain"
-    elif isinstance(object_to_check, datamodel.Transition):
-        object_type = "Transition"
-    elif isinstance(object_to_check, datamodel.Attribute):
-        object_type = "Attribute"
-    elif isinstance(object_to_check, datamodel.FunctionalInterface):
-        object_type = "Functional interface"
-    elif isinstance(object_to_check, datamodel.PhysicalElement):
-        object_type = "Physical element"
-    elif isinstance(object_to_check, datamodel.PhysicalInterface):
-        object_type = "Physical interface"
-    else:
-        object_type = ''
-
+    obj_type_list = [(datamodel.State, 'state'), (datamodel.Function, 'function'),
+                     (datamodel.Data, 'data'), (datamodel.FunctionalElement, 'Functional element'),
+                     (datamodel.Chain, 'Chain'), (datamodel.Transition, 'Transition'),
+                     (datamodel.Attribute, 'Attribute'),
+                     (datamodel.FunctionalInterface, 'Functional interface'),
+                     (datamodel.PhysicalElement, 'Physical element'),
+                     (datamodel.PhysicalInterface, 'Physical interface')]
+    object_type = ''
+    for elem in obj_type_list:
+        if isinstance(object_to_check, elem[0]):
+            object_type = elem[1]
+            return object_type
     return object_type
+
+
+def get_pandas_table(data_dict):
+    """Returns pandas data frame called from command_parser.matched_list()
+    with data_dict as list of ..."""
+    if 'columns' in data_dict.keys():
+        data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'])
+    else:
+        data_frame = pd.DataFrame(data_dict['data'])
+    data_frame = data_frame.T
+    if 'Data' in data_dict['title'] or 'Transition' in data_dict['title']:
+        if 'Data' in data_dict['title']:
+            first = 1
+            last = 5
+        else:
+            first = 3
+            last = 4
+        for idx in range(first, last):
+            data_frame.iloc[idx] = data_frame.iloc[idx].str.join("\\n")
+    data_frame = data_frame.style \
+        .set_caption(data_dict['title']) \
+        .set_properties(**{'white-space': 'nowrap'})
+
+    return data_frame.to_html().replace("\\n", "<br>")

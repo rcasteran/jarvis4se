@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 """Module with class & methods for parsing jarvis4se commands"""
 import re
-import pandas as pd
 from IPython.display import display, HTML, Markdown
 
 from . import viewpoint_orchestrator
 from . import functional_orchestrator
 from . import shared_orchestrator
-from . import physical_orchestrator
-from . import question_answer
-from . import diagram_generator
+from .physical_orchestrator import add_phy_elem_by_name, add_phy_inter_by_name
+from .question_answer import get_object_list, get_pandas_table, find_question
+from .diagram_generator import filter_show_command
 
 
 class CmdParser:
@@ -82,11 +81,14 @@ class CmdParser:
             (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
              matched_described_attribute),
         ]
+        self.reverse = (r"([^\. \.\n]*) composes ([^\.\n]*)", r"([^\. \.\n]*) consumes ([^\.\n]*)",
+                        r"([^\. \.\n]*) produces ([^\.\n]*)",
+                        r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)")
 
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
         update_list = []
-        for idx, (regex, method) in enumerate(self.commands):
+        for regex, method in self.commands:
             result_chain = None
             result = None
             update = None
@@ -103,9 +105,8 @@ class CmdParser:
                  if x not in result]
 
             if result and not result_chain:
-                # (14, 15, 17, 20) Corresponds to :
-                # "composes", "consumes", "produces", "is allocated to"
-                if idx in (15, 16, 18, 21):
+                # self.reverse : ("composes", "consumes", "produces", "is allocated to")
+                if regex in self.reverse:
                     result = reverse(result)
                 update = method(result, **kwargs)
 
@@ -114,9 +115,7 @@ class CmdParser:
                 update = self.matched_under(result_chain, **kwargs)
 
             if update is not None:
-                if isinstance(update, list):
-                    update_list.append(*update)
-                elif isinstance(update, int):
+                if isinstance(update, int):
                     update_list.append(update)
 
         return update_list
@@ -132,8 +131,8 @@ class CmdParser:
             self.lookup_table(rest, **kwargs)
         if 1 in out:
             return 1
-        else:
-            return 0
+
+        return 0
 
 
 def matched_function(function_name_str_list, **kwargs):
@@ -185,17 +184,17 @@ def matched_functional_interface(functional_inter_name_str_list, **kwargs):
 
 def matched_physical_element(physical_elem_name_str_list, **kwargs):
     """Get Physical element's declaration"""
-    out = physical_orchestrator.add_phy_elem_by_name(physical_elem_name_str_list,
-                                                     kwargs['xml_phy_elem_list'],
-                                                     kwargs['output_xml'])
+    out = add_phy_elem_by_name(physical_elem_name_str_list,
+                               kwargs['xml_phy_elem_list'],
+                               kwargs['output_xml'])
     return out
 
 
 def matched_physical_interface(physical_inter_name_str_list, **kwargs):
     """Get Physical interface's declaration"""
-    out = physical_orchestrator.add_phy_inter_by_name(physical_inter_name_str_list,
-                                                      kwargs['xml_phy_inter_list'],
-                                                      kwargs['output_xml'])
+    out = add_phy_inter_by_name(physical_inter_name_str_list,
+                                kwargs['xml_phy_inter_list'],
+                                kwargs['output_xml'])
     return out
 
 
@@ -331,7 +330,7 @@ def matched_src_dest(src_dest_str, **kwargs):
 
 def matched_show(diagram_name_str, **kwargs):
     """Get "show" declaration"""
-    out = diagram_generator.filter_show_command(diagram_name_str, **kwargs)
+    out = filter_show_command(diagram_name_str, **kwargs)
     if out:
         hyper = get_hyperlink(out)
         display(HTML(hyper))
@@ -348,7 +347,7 @@ def get_hyperlink(path):
 
 def matched_question_mark(question_str, **kwargs):
     """Gets "?" declaration"""
-    out = question_answer.find_question(question_str, **kwargs)
+    out = find_question(question_str, **kwargs)
     if out:
         for elem in out:
             if isinstance(elem, str):
@@ -359,64 +358,10 @@ def matched_question_mark(question_str, **kwargs):
 
 def matched_list(object_str, **kwargs):
     """Gets list declaration"""
-    out = question_answer.get_object_list(object_str, **kwargs)
+    out = get_object_list(object_str, **kwargs)
     if out:
         for i in out:
-            if "Child" in i[0] or "Function" in i[0]:
-                title = i.pop(0)
-                df = pd.DataFrame(i, columns=["Object's name", "Relationship's type"])
-                df = df.T
-                # Could be usefull to add it with button next to table but needs ipywidgets ...
-                # df.to_clipboard(excel=True)
-                df = df.style\
-                    .set_caption(title)\
-                    .set_properties(**{'white-space': 'nowrap'})
-                display(df)
-            elif "Input" in i[0]:
-                title = i.pop(0)
-                df = pd.DataFrame(i, columns=["Data name", "Producer"])
-                df = df.T
-                df = df.style\
-                    .set_caption(title)\
-                    .set_properties(**{'white-space': 'nowrap'})
-                df = df.to_html().replace("\\n", "<br>")
-                display(HTML(df))
-            elif "Output" in i[0]:
-                title = i.pop(0)
-                df = pd.DataFrame(i, columns=["Data name", "Consumer"])
-                df = df.T
-                df = df.style\
-                    .set_caption(title)\
-                    .set_properties(**{'white-space': 'nowrap'})
-                df = df.to_html().replace("\\n", "<br>")
-                display(HTML(df))
-            elif "Data" in i[0] or "Transition" in i[0]:
-                if "Transition" in i[0]:
-                    first = 3
-                    last = 4
-                else:
-                    first = 1
-                    last = 5
-                title = i.pop(0)
-                df = pd.DataFrame(i)
-                df = df.T
-                for idx in range(first, last):
-                    df.iloc[idx] = df.iloc[idx].str.join("\\n")
-                df = df.style\
-                    .set_caption(title)\
-                    .set_properties(**{'white-space': 'nowrap'})
-                df = df.to_html().replace("\\n", "<br>")
-                display(HTML(df))
-            elif "Interface" in i[0]:
-                title = i.pop(0)
-                df = pd.DataFrame(i,
-                                  columns=["Interface ", "Last connected functional element"])
-                df = df.T
-                df = df.style\
-                    .set_caption(title)\
-                    .set_properties(**{'white-space': 'nowrap'})
-                df = df.to_html().replace("\\n", "<br>")
-                display(HTML(df))
+            display(HTML(get_pandas_table(i)))
 
 
 def matched_described_attribute(described_attribute_str, **kwargs):
