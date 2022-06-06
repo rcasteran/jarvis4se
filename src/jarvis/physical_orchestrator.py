@@ -44,11 +44,11 @@ def add_phy_elem_by_name(physical_elem_name_str_list, xml_phy_elem_list, output_
 
     if not phy_elem_list:
         return 0
-    else:
-        output_xml.write_physical_element(phy_elem_list)
-        for phy_elem in phy_elem_list:
-            print(phy_elem.name + " is a physical element")
-        return 1
+
+    output_xml.write_physical_element(phy_elem_list)
+    for phy_elem in phy_elem_list:
+        print(phy_elem.name + " is a physical element")
+    return 1
 
 
 def add_phy_inter_by_name(physical_inter_name_str_list, xml_phy_inter_list, output_xml):
@@ -88,9 +88,9 @@ def add_phy_inter_by_name(physical_inter_name_str_list, xml_phy_inter_list, outp
 
     if not physical_interface_list:
         return 0
-    else:
-        output_xml.write_physical_interface(physical_interface_list)
-        for phy_inter in physical_interface_list:
-            print(phy_inter.name + " is a physical interface")
 
-        return 1
+    output_xml.write_physical_interface(physical_interface_list)
+    for phy_inter in physical_interface_list:
+        print(phy_inter.name + " is a physical interface")
+
+    return 1

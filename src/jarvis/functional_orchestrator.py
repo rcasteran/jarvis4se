@@ -158,10 +158,10 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
             if allocation_chain_2:
                 allocated_item_list.append(allocation_chain_2)
 
-    update_list = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
+    update = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
     shared_orchestrator.add_allocation({5: allocated_item_list}, output_xml)
 
-    return update_list
+    return update
 
 
 def add_predecessor(predecessor_list, xml_data_list, output_xml):
@@ -178,21 +178,19 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    if not predecessor_list:
-        update_list.append(0)
-    else:
-        output_xml.write_predecessor(predecessor_list)
-        # Warn the user once added within xml
-        for data_predecessor in predecessor_list:
-            for d in xml_data_list:
-                if data_predecessor[0].id == d.id:
-                    d.add_predecessor(data_predecessor[1])
-                    print(f"{data_predecessor[1].name} predecessor for "
-                          f"{data_predecessor[0].name}")
-        update_list.append(1)
 
-    return update_list
+    if not predecessor_list:
+        return 0
+
+    output_xml.write_predecessor(predecessor_list)
+    # Warn the user once added within xml
+    for data_predecessor in predecessor_list:
+        for d in xml_data_list:
+            if data_predecessor[0].id == d.id:
+                d.add_predecessor(data_predecessor[1])
+                print(f"{data_predecessor[1].name} predecessor for "
+                      f"{data_predecessor[0].name}")
+    return 1
 
 
 def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
@@ -258,9 +256,9 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                         elif [elem[0], function] in xml_producer_function_list:
                             pass
 
-    update_list = add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml)
+    update = add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml)
 
-    return update_list
+    return update
 
 
 def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_xml):
@@ -277,18 +275,17 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    update_list = []
-    if not new_consumer_list:
-        update_list.append(0)
-    else:
-        output_xml.write_consumer(new_consumer_list)
-        # Warn the user once added within xml
-        for consumer in new_consumer_list:
-            xml_consumer_function_list.append(consumer)
-            print(f"{consumer[1].name} consumes {consumer[0]}")
-        update_list.append(1)
 
-    return update_list
+    if not new_consumer_list:
+        return 0
+
+    output_xml.write_consumer(new_consumer_list)
+    # Warn the user once added within xml
+    for consumer in new_consumer_list:
+        xml_consumer_function_list.append(consumer)
+        print(f"{consumer[1].name} consumes {consumer[0]}")
+
+    return 1
 
 
 def add_parent_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
@@ -481,13 +478,13 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
     """
     if not new_producer_list:
         return 0
-    else:
-        output_xml.write_producer(new_producer_list)
-        # Warn the user once added within xml
-        for producer in new_producer_list:
-            xml_producer_function_list.append(producer)
-            print(f"{producer[1].name} produces {producer[0]}")
-        return 1
+
+    output_xml.write_producer(new_producer_list)
+    # Warn the user once added within xml
+    for producer in new_producer_list:
+        xml_producer_function_list.append(producer)
+        print(f"{producer[1].name} produces {producer[0]}")
+    return 1
 
 
 def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
@@ -530,11 +527,11 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
             pass
     if not state_list:
         return 0
-    else:
-        output_xml.write_state(state_list)
-        for state in state_list:
-            print(state.name + " is a state")
-        return 1
+
+    output_xml.write_state(state_list)
+    for state in state_list:
+        print(state.name + " is a state")
+    return 1
 
 
 def add_transition_by_name(transition_name_str_list, xml_transition_list, output_xml):
@@ -575,11 +572,11 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
 
     if not transition_list:
         return 0
-    else:
-        output_xml.write_transition(transition_list)
-        for transition in transition_list:
-            print(transition.name + " is a transition")
-        return 1
+
+    output_xml.write_transition(transition_list)
+    for transition in transition_list:
+        print(transition.name + " is a transition")
+    return 1
 
 
 # TODO: Check condition_str on data and (add LogicalType, ArithmeticType in datamodel.py)
@@ -632,12 +629,12 @@ def add_transition_condition(condition_list, output_xml):
     """
     if not condition_list:
         return 0
-    else:
-        output_xml.write_transition_condition(condition_list)
-        for elem in condition_list:
-            elem[0].add_condition(elem[1])
-            print(f"Condition for {elem[0].name} : {elem[1]}")
-        return 1
+
+    output_xml.write_transition_condition(condition_list)
+    for elem in condition_list:
+        elem[0].add_condition(elem[1])
+        print(f"Condition for {elem[0].name} : {elem[1]}")
+    return 1
 
 
 def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output_xml):
@@ -738,8 +735,8 @@ def add_src_dest(src_dest_lists, output_xml):
                 destination[0].set_destination(destination[1].id)
                 print(f"{destination[1].name} destination for {destination[0].name}")
         return 1
-    else:
-        return 0
+
+    return 0
 
 
 def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, output_xml):
@@ -778,11 +775,11 @@ def add_fun_elem_by_name(functional_elem_name_str_list, xml_fun_elem_list, outpu
 
     if not functional_element_list:
         return 0
-    else:
-        output_xml.write_functional_element(functional_element_list)
-        for func_elem in functional_element_list:
-            print(func_elem.name + " is a functional element")
-        return 1
+
+    output_xml.write_functional_element(functional_element_list)
+    for func_elem in functional_element_list:
+        print(func_elem.name + " is a functional element")
+    return 1
 
 
 def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, output_xml):
@@ -824,11 +821,11 @@ def add_fun_inter_by_name(functional_inter_name_str_list, xml_fun_inter_list, ou
 
     if not functional_interface_list:
         return 0
-    else:
-        output_xml.write_functional_interface(functional_interface_list)
-        for func_inter in functional_interface_list:
-            print(func_inter.name + " is a functional interface")
-        return 1
+
+    output_xml.write_functional_interface(functional_interface_list)
+    for func_inter in functional_interface_list:
+        print(func_inter.name + " is a functional interface")
+    return 1
 
 
 def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, xml_data_list,
@@ -864,8 +861,8 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
 
     if output:
         return 1
-    else:
-        return 0
+
+    return 0
 
 
 def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):

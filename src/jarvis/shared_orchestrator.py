@@ -681,9 +681,9 @@ def check_set_object_alias(alias_str_list, **kwargs):
         if isinstance(idx, int):
             object_lists[idx].append(object_to_set)
 
-    update_list = set_object_alias(object_lists, kwargs['output_xml'])
+    update = set_object_alias(object_lists, kwargs['output_xml'])
 
-    return update_list
+    return update
 
 
 def check_new_alias(object_to_set, alias_str):

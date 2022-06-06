@@ -48,11 +48,11 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
 
     if not chain_list:
         return 0
-    else:
-        output_xml.write_chain(chain_list)
-        for chain in chain_list:
-            print(chain.name + " is a chain")
-        return 1
+
+    output_xml.write_chain(chain_list)
+    for chain in chain_list:
+        print(chain.name + " is a chain")
+    return 1
 
 
 def activate_chain(chain_name, xml_chain_list):
@@ -78,8 +78,8 @@ def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
                         filtered_items_list.append(item)
     if filtered_items_list:
         return filtered_items_list
-    else:
-        return xml_item_list
+
+    return xml_item_list
 
 
 def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, xml_data_list,
@@ -182,12 +182,12 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
 
     if not new_attribute_list:
         return 0
-    else:
-        output_xml.write_attribute(new_attribute_list)
-        for attribute in new_attribute_list:
-            xml_attribute_list.add(attribute)
-            print(attribute.name + " is an attribute")
-        return 1
+
+    output_xml.write_attribute(new_attribute_list)
+    for attribute in new_attribute_list:
+        xml_attribute_list.add(attribute)
+        print(attribute.name + " is an attribute")
+    return 1
 
 
 def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml_function_list,
@@ -332,15 +332,15 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
 
     if not new_type_list:
         return 0
-    else:
-        output_xml.write_type_element(new_type_list)
-        for obj_type in new_type_list:
-            if isinstance(obj_type.base, datamodel.Type):
-                base_type = obj_type.base.name
-            else:
-                base_type = obj_type.base
-            print(f"{obj_type.name} is a type extending {str(base_type)}")
-        return 1
+
+    output_xml.write_type_element(new_type_list)
+    for obj_type in new_type_list:
+        if isinstance(obj_type.base, datamodel.Type):
+            base_type = obj_type.base.name
+        else:
+            base_type = obj_type.base
+        print(f"{obj_type.name} is a type extending {str(base_type)}")
+    return 1
 
 
 def check_get_type_to_extend(type_str, xml_type_list):
