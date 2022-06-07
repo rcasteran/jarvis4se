@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Module containing all object's class, i.e. all objects that will be manipulated by
+Systems engineers"""
 # Libraries
 from enum import Enum
 
@@ -7,9 +9,8 @@ from enum import Enum
 from . import util
 
 
-# Function type
-# Compatible with ArKItect and XMI
 class FunctionType(Enum):
+    """Function type: Compatible with ArKItect and XMI"""
     UNKNOWN = 0
     ENABLING = 1
     HIGH_LEVEL_FUNCTION = 2
@@ -22,6 +23,7 @@ class FunctionType(Enum):
     DIVIDE = 9
 
     def __str__(self):
+        """Get the str representation from Enum"""
         function_type = 'unknown'
 
         if self == self.ENABLING:
@@ -49,6 +51,7 @@ class FunctionType(Enum):
 
     @classmethod
     def get_name(cls, function_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
 
         if function_type == 'Enabling function':
@@ -74,16 +77,17 @@ class FunctionType(Enum):
 
     @classmethod
     def get_parent_function_type_list(cls):
+        """Returns string representation of abjects able to be parent i.e. composed"""
         base_function_type = [cls.FUNCTION, cls.HIGH_LEVEL_FUNCTION, cls.SAFETY,
                               cls.HIGH_LEVEL_SAFETY, cls.UNKNOWN]
         return [str(i) for i in base_function_type]
 
 
-# Function class
-# Compatible with ArKItect and XMI
 class Function:
+    """Function class: Compatible with ArKItect and XMI"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionType.UNKNOWN, p_parent=None,
                  p_ark_obj=None, p_role=None, p_operand=None, p_derived=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -97,36 +101,44 @@ class Function:
         self.derived = p_derived
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
         self.set_operand()
 
     def set_parent(self, p_parent):
+        """Set parent"""
         self.parent = p_parent
 
-    # Specific for ArKItect
     def set_ark_obj(self, p_ark_obj):
+        """Specific for ArKItect"""
         self.ark_obj = p_ark_obj
 
     def add_child(self, p_child):
+        """Add child to child_list"""
         self.child_list.add(p_child)
 
-    # Specific for XMI
     def add_port(self, p_port):
+        """Specific for XMI"""
         self.port_list.add(p_port)
 
     def set_input_role(self, p_role):
+        """Set input role"""
         self.input_role = p_role
 
     def set_operand(self):
+        """Set operand"""
         if self.type == FunctionType.DIVIDE:
             self.operand = "denominator"
         elif self.type == FunctionType.SUBTRACT:
@@ -136,12 +148,12 @@ class Function:
             pass
 
     def set_derived(self, p_derived):
+        """Set derived"""
         self.derived = p_derived
 
 
-# System element type
-# Compatible with LT SPICE
 class SystemElementType(Enum):
+    """System element type: Compatible with LT SPICE"""
     UNKNOWN = 0
     HIGH_LEVEL = 1
     SYSTEM = 2
@@ -155,6 +167,7 @@ class SystemElementType(Enum):
     LED = 10
 
     def __str__(self):
+        """Get the str representation from Enum"""
         sys_elem_type = 'unknown'
 
         if self == self.HIGH_LEVEL:
@@ -182,6 +195,7 @@ class SystemElementType(Enum):
 
     @classmethod
     def get_name(cls, sys_elem_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
 
         if sys_elem_type == 'High level system element':
@@ -216,13 +230,12 @@ class SystemElementType(Enum):
         return name
 
 
-# Element class
-# Compatible with LTSPICE
-# Depends on EndPoint class
 class Element:
+    """Element class : Compatible with LTSPICE and Depends on EndPoint class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type=SystemElementType.UNKNOWN,
                  p_parent=None, p_ark_obj=None, p_role=None, p_spice_rotation='',
                  p_spice_prefix='', p_spice_model=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -240,60 +253,67 @@ class Element:
         self.spice_model = p_spice_model
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def set_parent(self, p_parent):
+        """Set parent"""
         self.parent = p_parent
 
-    # Specific for ArKItect
     def set_ark_obj(self, p_ark_obj):
+        """Specific for ArKItect"""
         self.ark_obj = p_ark_obj
 
     def add_child(self, p_child):
+        """Add child to child_list"""
         self.child_list.add(p_child)
 
-    # Specific for XMI
     def add_port(self, p_port):
+        """Specific for XMI"""
         self.port_list.add(p_port)
 
     def set_input_role(self, p_role):
+        """Set input role"""
         self.input_role = p_role
 
-    # Specific for LTSPICE
     def add_spice_window(self, p_window):
+        """Specific for LTSPICE"""
         self.spice_window_list.add(p_window)
 
-    # Specific for LTSPICE
     def set_spice_rotation(self, p_ref):
+        """Specific for LTSPICE"""
         self.spice_rotation = p_ref
 
-    # Specific for LTSPICE
     def add_point(self, p_point):
+        """Specific for LTSPICE"""
         self.point_list.append(p_point)
 
-    # Specific for LTSPICE
     def add_constraint(self, p_constraint):
+        """Specific for LTSPICE"""
         self.constraint_list.add(p_constraint)
 
-    # Specific for LTSPICE
     def set_spice_prefix(self, p_prefix):
+        """Specific for LTSPICE"""
         self.spice_prefix = p_prefix
 
-    # Specific for LTSPICE
     def set_spice_model(self, p_model):
+        """Specific for LTSPICE"""
         self.spice_model = p_model
 
-    # Specific for LTSPICE
     def determine_relative_point(self, p_point):
+        """Specific for LTSPICE"""
         if str(self.type).find("voltage") > -1:
             if self.spice_rotation == "R0":
                 point = util.Point()
@@ -471,23 +491,25 @@ class Element:
             print("Unsupported type value for relative points: " + str(self.type))
 
 
-# Interface class
-# Compatible with LTSPICE
-# Depends on Point class
 class Interface:
+    """Interface class: Compatible with LTSPICE and Depends on Point class"""
     def __init__(self, p_name=''):
+        """Init Object"""
         self.name = p_name
         self.point_list = []
         self.provider_list = set()
         self.user_list = set()
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def add_point(self, p_point):
+        """Add point"""
         self.point_list.append(p_point)
 
     def set_provider_user_list(self, p_element):
+        """Set provider user list"""
         for point in p_element.point_list:
             if abs(point.x - self.point_list[0].x) == 0 \
                     and abs(point.y - self.point_list[0].y) == 0:
@@ -498,13 +520,14 @@ class Interface:
             # Else do nothing
 
 
-# Data type
 class DataType(Enum):
+    """Data type class"""
     UNKNOWN = 0
     FLOW = 1
     SAFETY = 2
 
     def __str__(self):
+        """Get the str representation from Enum"""
         data_type = 'unknown'
         if self == self.FLOW:
             data_type = 'Flow'
@@ -515,6 +538,7 @@ class DataType(Enum):
 
     @classmethod
     def get_name(cls, data_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
 
         if data_type == 'Flow':
@@ -524,29 +548,34 @@ class DataType(Enum):
         return name
 
 
-# Data class
 class Data:
+    """Data class"""
     def __init__(self, p_id='', p_name='', p_type=DataType.UNKNOWN):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.type = p_type
         self.predecessor_list = set()
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def add_predecessor(self, p_predecessor):
+        """Add predecessor to predecessor list"""
         self.predecessor_list.add(p_predecessor)
 
 
-# State type
 class StateType(Enum):
+    """State type"""
     UNKNOWN = 0
     STATE = 1
     HIGH_LEVEL_STATE = 2
@@ -554,8 +583,8 @@ class StateType(Enum):
     EXIT = 4
 
     def __str__(self):
+        """Get the str representation from Enum"""
         state_type = 'unknown'
-        
         if self == self.STATE:
             state_type = 'State'
         elif self == self.HIGH_LEVEL_STATE:
@@ -564,13 +593,12 @@ class StateType(Enum):
             state_type = 'Entry'
         elif self == self.EXIT:
             state_type = 'Exit'
-
         return state_type
 
     @classmethod
     def get_name(cls, state_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
-
         if state_type == 'State':
             name = cls.STATE
         elif state_type == 'High Level State':
@@ -579,13 +607,13 @@ class StateType(Enum):
             name = cls.ENTRY
         elif state_type == 'Exit':
             name = cls.EXIT
-        
         return name
 
 
-# State class
 class State:
+    """State class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type=StateType.UNKNOWN, p_parent=None):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -595,33 +623,41 @@ class State:
         self.allocated_function_list = set()
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def set_parent(self, p_parent):
+        """Set parent"""
         self.parent = p_parent
 
     def add_child(self, p_child):
+        """Add child to child_list"""
         self.child_list.add(p_child)
 
     def add_allocated_function(self, p_function):
+        """Add allocated function to allocated_function_list"""
         self.allocated_function_list.add(p_function)
 
 
-# Transition type
 class TransitionType(Enum):
+    """Transition type"""
     UNKNOWN = 0
     DEFAULT = 1
 
     def __str__(self):
+        """Get the str representation from Enum"""
         state_type = 'unknown'
         if self == self.DEFAULT:
             state_type = 'Default'
@@ -630,6 +666,7 @@ class TransitionType(Enum):
 
     @classmethod
     def get_name(cls, state_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
         if state_type == 'Default':
             name = cls.DEFAULT
@@ -637,10 +674,11 @@ class TransitionType(Enum):
         return name
 
 
-# Transition class
 class Transition:
+    """Transition class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type=StateType.UNKNOWN, p_source=None,
                  p_destination=None):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -650,35 +688,43 @@ class Transition:
         self.condition_list = set()
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def set_source(self, p_source):
+        """Set source"""
         self.source = p_source
 
     def set_destination(self, p_destination):
+        """Set destination"""
         self.destination = p_destination
 
     def add_condition(self, p_condition):
+        """Add condition to condition_list"""
         self.condition_list.add(p_condition)
 
 
-# FunctionalElement type
 class FunctionalElementType(Enum):
+    """FunctionalElement type"""
     UNKNOWN = 0
     ENABLING = 1
     FUNCTIONAL_ELEMENT = 2
     HIGH_LEVEL_FUNCTIONAL_ELEMENT = 3
 
     def __str__(self):
+        """Get the str representation from Enum"""
         functional_element_type = 'unknown'
         if self == self.ENABLING:
             functional_element_type = 'Enabling functional element'
@@ -691,22 +737,22 @@ class FunctionalElementType(Enum):
 
     @classmethod
     def get_name(cls, functional_element_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
-        
         if functional_element_type == 'Enabling functional element':
             name = cls.ENABLING
         elif functional_element_type == 'Functional element':
             name = cls.FUNCTIONAL_ELEMENT
         elif functional_element_type == 'High level functional element':
             name = cls.HIGH_LEVEL_FUNCTIONAL_ELEMENT
-        
         return name
 
 
-# FunctionalElement class
 class FunctionalElement:
+    """FunctionalElement class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionalElementType.UNKNOWN,
                  p_parent=None, p_derived=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -719,38 +765,48 @@ class FunctionalElement:
         self.derived = p_derived
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def set_parent(self, p_parent):
+        """Set parent"""
         self.parent = p_parent
 
     def add_child(self, p_child):
+        """Add child to child_list"""
         self.child_list.add(p_child)
 
     def add_allocated_state(self, p_state):
+        """Add allocated state to allocated_state_list"""
         self.allocated_state_list.add(p_state)
 
     def add_allocated_function(self, p_function):
+        """Add allocated function to allocated_function_list"""
         self.allocated_function_list.add(p_function)
 
     def add_exposed_interface(self, p_interface):
+        """Add interface to exposed_interface_list"""
         self.exposed_interface_list.add(p_interface)
 
     def set_derived(self, p_derived):
+        """Set derived"""
         self.derived = p_derived
 
 
-# Chain type
 class ChainType(Enum):
+    """Chain type"""
     UNKNOWN = 0
     FUNCTION = 1
     STATE = 2
@@ -759,6 +815,7 @@ class ChainType(Enum):
     DATA = 5
 
     def __str__(self):
+        """Get the str representation from Enum"""
         chain_type = 'unknown'
 
         if self == self.FUNCTION:
@@ -776,6 +833,7 @@ class ChainType(Enum):
 
     @classmethod
     def get_name(cls, chain_type):
+        """Get the Enum representation from string"""
         name = cls.UNKNOWN
 
         if chain_type == 'Function':
@@ -792,9 +850,10 @@ class ChainType(Enum):
         return name
 
 
-# Chain class
 class Chain:
+    """Chain class"""
     def __init__(self, p_id='', p_name='', p_type=ChainType.UNKNOWN):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.type = p_type
@@ -802,24 +861,30 @@ class Chain:
         self.allocated_item_list = set()
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def add_allocated_item(self, p_item):
+        """Add allocated item to allocated_item_list"""
         self.allocated_item_list.add(p_item)
 
     def set_activation(self, p_activation):
+        """Set activation"""
         self.activated = p_activation
 
 
-# Attribute class
 class Attribute:
+    """Attribute class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown'):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -827,24 +892,30 @@ class Attribute:
         self.described_item_list = set()
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def add_described_item(self, p_item):
+        """Add described item to described_item_list"""
         self.described_item_list.add(p_item)
 
 
-# Functional Interface class
 class FunctionalInterface:
+    """Functional Interface class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -853,28 +924,35 @@ class FunctionalInterface:
         self.derived = p_derived
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def add_allocated_data(self, p_item):
+        """Add allocated data to allocated_data_list"""
         self.allocated_data_list.add(p_item)
 
     def set_derived(self, p_derived):
+        """Set derived"""
         self.derived = p_derived
 
 
-# PhysicalElement class
 class PhysicalElement:
+    """Physical Element class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_parent=None,
                  p_derived=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -886,36 +964,46 @@ class PhysicalElement:
         self.derived = p_derived
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def set_parent(self, p_parent):
+        """Set parent"""
         self.parent = p_parent
 
     def add_allocated_fun_elem(self, p_fun_elem):
+        """Add allocated fun_elem to allocated_fun_elem_list"""
         self.allocated_fun_elem_list.add(p_fun_elem)
 
     def add_exposed_interface(self, p_interface):
+        """Add interface to exposed_interface_list"""
         self.exposed_interface_list.add(p_interface)
 
     def add_child(self, p_child):
+        """Add child to child_list"""
         self.child_list.add(p_child)
 
     def set_derived(self, p_derived):
+        """Set derived"""
         self.derived = p_derived
 
 
-# PhysicalInterface class
 class PhysicalInterface:
+    """PhysicalInterface class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
@@ -924,45 +1012,58 @@ class PhysicalInterface:
         self.derived = p_derived
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_type(self, p_type):
+        """Set type"""
         self.type = p_type
 
     def add_allocated_fun_inter(self, p_fun_inter):
+        """Add allocated fun_inter to allocated_fun_inter_list"""
         self.allocated_fun_inter_list.add(p_fun_inter)
 
     def set_derived(self, p_derived):
+        """Set derived"""
         self.derived = p_derived
 
 
 class Type:
+    """Type class"""
     def __init__(self, p_id='', p_name='', p_alias='', p_base=''):
+        """Init Object"""
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
         self.base = p_base
 
     def set_id(self, p_id):
+        """Set id"""
         self.id = p_id
 
     def set_name(self, p_name):
+        """Set name"""
         self.name = p_name
 
     def set_alias(self, p_alias):
+        """Set alias"""
         self.alias = p_alias
 
     def set_base(self, p_base):
+        """Set base"""
         self.base = p_base
 
 
 class BaseType(Enum):
+    """BaseType class"""
     DATA = 0
     FUNCTION = 1
     FUNCTIONAL_ELEMENT = 2
@@ -971,6 +1072,7 @@ class BaseType(Enum):
     PHYSICAL_INTERFACE = 5
 
     def __str__(self):
+        """Get the str representation from Enum"""
         type_str = ''
         if self == self.DATA:
             type_str = 'Data'
@@ -988,6 +1090,7 @@ class BaseType(Enum):
 
     @classmethod
     def get_enum(cls, obj_type):
+        """Get the Enum representation from string"""
         enum_type = None
         if obj_type == 'Data':
             enum_type = cls.DATA
