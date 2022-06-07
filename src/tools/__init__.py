@@ -27,7 +27,7 @@ class MagicTools(Magics):
     @staticmethod
     @cell_magic
     def diagram(_, cell):
-        """Magic cell % % diagram """
+        """Magic cell %%diagram """
         out = get_url_from_string(cell, True)
         if out:
             hyper = get_hyperlink(out)
