@@ -1,6 +1,6 @@
 import os
 import io
-from pytest_mock import mocker
+
 from IPython import get_ipython
 from pathlib import Path
 

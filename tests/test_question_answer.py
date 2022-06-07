@@ -1,5 +1,5 @@
 import os
-from pytest_mock import mocker
+
 from IPython import get_ipython
 from pathlib import Path
 
