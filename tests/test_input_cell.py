@@ -1,10 +1,7 @@
 """Modules containing tests to check jarvis ouput i.e. jupyter notebook output messages"""
-import os
-from pathlib import Path
-from IPython import get_ipython
+from conftest import get_jarvis4se, remove_xml_file
 
-
-import jarvis
+jarvis4se = get_jarvis4se()
 
 
 def test_attribute_declaration_input(capsys):
@@ -15,13 +12,10 @@ def test_attribute_declaration_input(capsys):
      B is an attribute. C is an attribute
 
      """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "attribute_declaration_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "A is an attribute\n"
-                    "B is an attribute. C is an attribute\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "A is an attribute\n"
+                         "B is an attribute. C is an attribute\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -31,14 +25,10 @@ def test_attribute_declaration_input(capsys):
                 f"{file_name}.xml updated"]
 
     assert all(i in captured.out for i in expected)
-
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
-def test_described_attribute_input(capsys):
+def test_described_attribute_input(capsys, attribute_cell):
     """Notebook equivalent:
      %%jarvis
      with described_attribute_input
@@ -58,21 +48,10 @@ def test_described_attribute_input(capsys):
      The A of Fun elem is 100
 
      """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "described_attribute_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "Fun elem is a functional element\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "A is an attribute\n"
-                    "B is an attribute. C is an attribute\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "The A of F1 is 4,2\n"
-                    "The C of F1 is pink\n"
-                    "The B of Fun elem is 8,5.\n"
-                    "The A of Fun elem is 100\n")
+    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[0]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[1]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[2]}")
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
@@ -85,10 +64,7 @@ def test_described_attribute_input(capsys):
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
     assert all(i in last_out for i in expected)
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_set_object_type_alias_input(capsys):
@@ -102,13 +78,10 @@ def test_set_object_type_alias_input(capsys):
     ========================================
 
     """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "set_object_type_alias_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function. The type of F1 is high level function\n"
-                    "The alias of F1 is f1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function. The type of F1 is high level function\n"
+                         "The alias of F1 is f1\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -120,13 +93,10 @@ def test_set_object_type_alias_input(capsys):
     assert all(i in captured.out for i in expected)
     assert len(captured.out) == len(''.join(expected))
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
-def test_consider_object_input(capsys):
+def test_consider_object_input(capsys, allocation_item_cell):
     """ Relative to Issue #9 to add new allocated item to a chain(i.e. filter). Notebook equivalent:
     %%jarvis
     with consider_object_input
@@ -144,22 +114,9 @@ def test_consider_object_input(capsys):
     consider tata.
     consider F1, F2, F3, F4
     """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "consider_object_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F2 with a long name is a function. The alias of F2 with a long name is F2.\n"
-                    "F3 is a function\n"
-                    "F4 is a function\n"
-                    "a is a data\n"
-                    "Fun_elem is a functional element\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "under test_chain\n"
-                    "consider F1. consider toto. consider a, Fun_elem\n"
-                    "consider tata.\n"
-                    "consider F1, F2, F3, F4\n")
+    jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[0]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[1]}")
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
@@ -179,10 +136,7 @@ def test_consider_object_input(capsys):
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
     assert all(i in last_out for i in expected)
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_functional_interface_input(capsys):
@@ -197,18 +151,15 @@ def test_functional_interface_input(capsys):
     The Color of Fun_inter is pink
     Fun_inter allocates A.
     """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "functional_interface_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "Color is an attribute\n"
-                    "A is a data\n"
-                    "Fun_inter is a functional interface.\n"
-                    "The type of Fun_inter is functional interface\n"
-                    "The alias of Fun_inter is FI\n"
-                    "The Color of Fun_inter is pink\n"
-                    "Fun_inter allocates A.\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "Color is an attribute\n"
+                         "A is a data\n"
+                         "Fun_inter is a functional interface.\n"
+                         "The type of Fun_inter is functional interface\n"
+                         "The alias of Fun_inter is FI\n"
+                         "The Color of Fun_inter is pink\n"
+                         "Fun_inter allocates A.\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -225,13 +176,10 @@ def test_functional_interface_input(capsys):
     assert len(captured.out) == len("".join(expected))
     assert all(i in captured.out for i in expected)
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
-def test_fun_elem_exposes_interface_input(capsys):
+def test_fun_elem_exposes_interface_input(capsys, fun_elem_exposing_cell):
     """Notebook equivalent:
     %%jarvis
     with fun_elem_exposes_interface_input
@@ -257,32 +205,8 @@ def test_fun_elem_exposes_interface_input(capsys):
     tata exposes titi
     Fun_elem exposes coco
     """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_exposes_interface_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "Fun_inter is a functional interface\n"
-                    "Fun_elem is a functional element\n"
-                    "Fun_elem_2 is a functional element\n"
-                    "Fun_elem_3 is a functional element\n"
-                    "Fun_elem_4 is a functional element\n"
-                    "Fun_elem_5 is a functional element\n"
-                    "Fun_elem_6 is a functional element\n"
-                    "Fun_elem_ext is a functional element\n"
-                    "Fun_elem_ext_2 is a functional element\n"
-                    "Fun_elem is composed of Fun_elem_2\n"
-                    "Fun_elem_2 is composed of Fun_elem_3\n"
-                    "Fun_elem_3 is composed of Fun_elem_4\n"
-                    "Fun_elem_4 is composed of Fun_elem_5\n"
-                    "Fun_elem_5 is composed of Fun_elem_6\n"
-                    "Fun_elem exposes Fun_inter\n"
-                    "Fun_elem_6 exposes Fun_inter\n"
-                    "Fun_elem_ext exposes Fun_inter\n"
-                    "Fun_elem_ext_2 exposes Fun_inter\n"
-                    "toto exposes Fun_inter\n"
-                    "tata exposes titi\n"
-                    "Fun_elem exposes coco\n")
+    jarvis4se.jarvis("", f"with {file_name}\n{fun_elem_exposing_cell}")
 
     captured = capsys.readouterr()
     expected = ["Fun_elem exposes Fun_inter\n",
@@ -299,13 +223,10 @@ def test_fun_elem_exposes_interface_input(capsys):
     last_out = captured.out[-len(''.join(expected)):len(captured.out)]
     assert all(i in last_out for i in expected)
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
-def test_extends_object_input(capsys):
+def test_extends_object_input(capsys, extends_cell):
     """ Issue #56 Notebook equivalent:
     %%jarvis
     with extends_object_input
@@ -319,19 +240,9 @@ def test_extends_object_input(capsys):
     Fun_inter is a functional interface
     The type of Fun_inter is final one
     """
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "extends_object_input"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "Safety interface extends functional interface\n"
-                    "The alias of Safety interface is sf\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "sf_a extends sf\n"
-                    "sf_a_b extends sf_a\n"
-                    "final one extends sf_a_b\n"
-                    "Fun_inter is a functional interface\n"
-                    "The type of Fun_inter is final one\n")
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[0]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[1]}")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -348,7 +259,4 @@ def test_extends_object_input(capsys):
 
     assert all(i in captured.out for i in expected)
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)

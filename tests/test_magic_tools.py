@@ -4,15 +4,15 @@ from IPython import get_ipython
 import jarvis
 import tools
 
+ip = get_ipython()
+my_magic = jarvis.MagicTools(ip)
+
 
 def test_retrieve_pkg_version(capsys):
     """Notebook equivalent:
     %retrieve_pkg_version
     """
-    ip = get_ipython()
-    my_magic = jarvis.MagicTools(ip)
     my_magic.retrieve_pkg_version('')
-
     captured = capsys.readouterr()
     expected = ["lxml==", "notebook==", "plantuml==", "jarvis4se==", "pandas==", "python=="]
     assert all(i in captured.out for i in expected)
@@ -20,11 +20,26 @@ def test_retrieve_pkg_version(capsys):
 
 def test_diagram_cell(capsys, mocker):
     """Notebook equivalent:
-    %retrieve_pkg_version
+    %%diagram
+    @startuml
+    !define Junction_Or circle #black
+    !define Junction_And circle #whitesmoke
+
+    Junction_And JunctionAnd
+    Junction_Or JunctionOr
+
+    archimate #Technology "VPN Server" as vpnServerA <<technology-device>>
+
+    rectangle GO #lightgreen
+    rectangle STOP #red
+    rectangle WAIT #orange
+    GO -up-> JunctionOr
+    STOP -up-> JunctionOr
+    STOP -down-> JunctionAnd
+    WAIT -down-> JunctionAnd
+    @enduml
     """
     spy = mocker.spy(tools, "get_url_from_string")
-    ip = get_ipython()
-    my_magic = jarvis.MagicTools(ip)
     my_magic.diagram('', "@startuml\n"
                          "!define Junction_Or circle #black\n"
                          "!define Junction_And circle #whitesmoke\n"

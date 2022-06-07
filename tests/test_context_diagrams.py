@@ -1,11 +1,8 @@
 """Module that contains tests for context diagrams"""
-import os
-from pathlib import Path
-from IPython import get_ipython
-
-
-import jarvis
+from conftest import get_jarvis4se, remove_xml_file
 import plantuml_adapter
+
+jarvis4se = get_jarvis4se()
 
 
 def test_simple_function_context(mocker):
@@ -17,22 +14,17 @@ def test_simple_function_context(mocker):
 
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "simple_function_context"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "show context F1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = 'object "F1" as f1 <<unknown>>\n'
     assert expected in result
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+
+    remove_xml_file(file_name)
 
 
 def test_simple_function_context_in_out(mocker):
@@ -57,20 +49,17 @@ def test_simple_function_context_in_out(mocker):
 
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "simple_function_in_out"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "a is a data\n"
-                    "b is a data\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 produces b\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 consumes a\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "show context F1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "a is a data\n"
+                         "b is a data\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 produces b\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 consumes a\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = 'object "F1" as f1 <<unknown>>\n' \
@@ -80,10 +69,8 @@ def test_simple_function_context_in_out(mocker):
                'f1 --> f1_o  : b\n'
     assert expected in result
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+
+    remove_xml_file(file_name)
 
 
 def test_function_context_with_attribute(mocker):
@@ -107,20 +94,17 @@ def test_function_context_with_attribute(mocker):
      show context F1
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "test_function_with_attribute"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "A is an attribute\n"
-                    "C is an attribute\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "The A of F1 is 4,2\n"
-                    "The C of F1 is pink\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "show context F1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "A is an attribute\n"
+                         "C is an attribute\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "The A of F1 is 4,2\n"
+                         "The C of F1 is pink\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['object "F1" as f1 <<unknown>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
@@ -128,10 +112,7 @@ def test_function_context_with_attribute(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_with_attribute(mocker):
@@ -155,24 +136,21 @@ def test_fun_elem_context_with_attribute(mocker):
      The A of Fun elem is 100
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_with_attribute"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "Fun elem is a functional element\n"
-                    "F1 is allocated to Fun elem")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "A is an attribute\n"
-                    "B is an attribute. C is an attribute\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "The A of F1 is 4,2\n"
-                    "The C of F1 is pink\n"
-                    "The B of Fun elem is 8,5.\n"
-                    "The A of Fun elem is 100\n")
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "show context Fun elem\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "Fun elem is a functional element\n"
+                         "F1 is allocated to Fun elem")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "A is an attribute\n"
+                         "B is an attribute. C is an attribute\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "The A of F1 is 4,2\n"
+                         "The C of F1 is pink\n"
+                         "The B of Fun elem is 8,5.\n"
+                         "The A of Fun elem is 100\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "show context Fun elem\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
     expected = ['component "Fun elem" as fun_elem <<unknown>>{\n',
@@ -188,13 +166,10 @@ def test_fun_elem_context_with_attribute(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
-def test_function_context_with_grandkids(mocker):
+def test_function_context_with_grandkids(mocker, function_grandkids_cell):
     """See Issue #31, Notebook equivalent:
     %%jarvis
     with function_context_with_grandkids
@@ -215,26 +190,10 @@ def test_function_context_with_grandkids(mocker):
     show context F1
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_context_with_grandkids"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F1a is a function\n"
-                    "F1a1 is a function\n"
-                    "F1 is composed of F1a\n"
-                    "F1a is composed of F1a1\n"
-                    "a is a data\n"
-                    "F1a produces a\n"
-                    "b is a data\n"
-                    "F1a consumes b\n"
-                    "c is a data\n"
-                    "F1a1 produces c\n"
-                    "d is a data\n"
-                    "F1a1 consumes d\n"
-                    "\n"
-                    "show context F1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{function_grandkids_cell}\n"
+                         f"show context F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
@@ -249,10 +208,7 @@ def test_function_context_with_grandkids(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_with_interfaces(mocker):
@@ -284,34 +240,31 @@ def test_fun_elem_context_with_interfaces(mocker):
     show context Fun_elem_1
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_with_interfaces"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F2 is a function\n"
-                    "A is a data\n"
-                    "B is a data\n"
-                    "C is a data\n"
-                    "F1 produces A\n"
-                    "F2 consumes A\n"
-                    "F2 produces B\n"
-                    "F1 consumes B\n"
-                    "F1 produces C\n"
-                    "Fun_elem_1 is a functional element\n"
-                    "Fun_elem_2 is a functional element\n"
-                    "Fun_inter_1 is a functional interface\n"
-                    "Fun_inter_2 is a functional interface\n"
-                    "Fun_elem_1 allocates F1\n"
-                    "Fun_elem_2 allocates F2\n"
-                    "Fun_inter_1 allocates A\n"
-                    "Fun_inter_2 allocates C\n"
-                    "Fun_elem_1 exposes Fun_inter_1\n"
-                    "Fun_elem_1 exposes Fun_inter_2\n"
-                    "Fun_elem_2 exposes Fun_inter_1\n"
-                    "\n"
-                    "show context Fun_elem_1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "F2 is a function\n"
+                         "A is a data\n"
+                         "B is a data\n"
+                         "C is a data\n"
+                         "F1 produces A\n"
+                         "F2 consumes A\n"
+                         "F2 produces B\n"
+                         "F1 consumes B\n"
+                         "F1 produces C\n"
+                         "Fun_elem_1 is a functional element\n"
+                         "Fun_elem_2 is a functional element\n"
+                         "Fun_inter_1 is a functional interface\n"
+                         "Fun_inter_2 is a functional interface\n"
+                         "Fun_elem_1 allocates F1\n"
+                         "Fun_elem_2 allocates F2\n"
+                         "Fun_inter_1 allocates A\n"
+                         "Fun_inter_2 allocates C\n"
+                         "Fun_elem_1 exposes Fun_inter_1\n"
+                         "Fun_elem_1 exposes Fun_inter_2\n"
+                         "Fun_elem_2 exposes Fun_inter_1\n"
+                         "\n"
+                         "show context Fun_elem_1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
@@ -329,10 +282,7 @@ def test_fun_elem_context_with_interfaces(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_interface_with_no_flow(mocker):
@@ -350,18 +300,15 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
     show context Fun_elem_1
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_with_no_flow"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "E is a functional element\n"
-                    "E1 is a functional element\n"
-                    "I_E_E1 is a functional interface\n"
-                    "E exposes I_E_E1\n"
-                    "E1 exposes I_E_E1\n"
-                    "\n"
-                    "show context E1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "E is a functional element\n"
+                         "E1 is a functional element\n"
+                         "I_E_E1 is a functional interface\n"
+                         "E exposes I_E_E1\n"
+                         "E1 exposes I_E_E1\n"
+                         "\n"
+                         "show context E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
@@ -374,10 +321,7 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_interface_not_exposed(mocker):
@@ -410,35 +354,32 @@ def test_fun_elem_context_interface_not_exposed(mocker):
     show context E2
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_not_exposed"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F is a function\n"
-                    "F1 is a function\n"
-                    "F2 is a function\n"
-                    "a is a data\n"
-                    "F produces a\n"
-                    "F1 consumes a\n"
-                    "F2 consumes a\n"
-                    "b is a data\n"
-                    "F produces b\n"
-                    "F2 consumes b\n"
-                    "\n"
-                    "E is a functional element\n"
-                    "E allocates F\n"
-                    "E1 is a functional element\n"
-                    "E1 allocates F1\n"
-                    "E2 is a functional element\n"
-                    "E2 allocates F2\n"
-                    "\n"
-                    "I_E_E1 is a functional interface\n"
-                    "I_E_E1 allocates a\n"
-                    "E exposes I_E_E1\n"
-                    "E1 exposes I_E_E1\n"
-                    "\n"
-                    "show context E2\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F is a function\n"
+                         "F1 is a function\n"
+                         "F2 is a function\n"
+                         "a is a data\n"
+                         "F produces a\n"
+                         "F1 consumes a\n"
+                         "F2 consumes a\n"
+                         "b is a data\n"
+                         "F produces b\n"
+                         "F2 consumes b\n"
+                         "\n"
+                         "E is a functional element\n"
+                         "E allocates F\n"
+                         "E1 is a functional element\n"
+                         "E1 allocates F1\n"
+                         "E2 is a functional element\n"
+                         "E2 allocates F2\n"
+                         "\n"
+                         "I_E_E1 is a functional interface\n"
+                         "I_E_E1 allocates a\n"
+                         "E exposes I_E_E1\n"
+                         "E1 exposes I_E_E1\n"
+                         "\n"
+                         "show context E2\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
@@ -454,10 +395,7 @@ def test_fun_elem_context_interface_not_exposed(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 # Add childs to external fun_elem or create new test
@@ -487,31 +425,28 @@ def test_fun_elem_context_interface_with_child(mocker):
     show context E
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_with_child"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F is a function\n"
-                    "F1 is a function\n"
-                    "a is a data\n"
-                    "F produces a\n"
-                    "F1 consumes a\n"
-                    "E is a functional element\n"
-                    "E1 is a functional element\n"
-                    "E allocates F\n"
-                    "E1 allocates F1\n"
-                    "I_E_E1 is a functional interface\n"
-                    "E exposes I_E_E1\n"
-                    "E1 exposes I_E_E1\n"
-                    "I_E_E1 allocates a\n"
-                    "\n"
-                    "E11 is a functional element\n"
-                    "E11 composes E\n"
-                    "E11 allocates F\n"
-                    "E11 exposes I_E_E1\n"
-                    "\n"
-                    "show context E\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F is a function\n"
+                         "F1 is a function\n"
+                         "a is a data\n"
+                         "F produces a\n"
+                         "F1 consumes a\n"
+                         "E is a functional element\n"
+                         "E1 is a functional element\n"
+                         "E allocates F\n"
+                         "E1 allocates F1\n"
+                         "I_E_E1 is a functional interface\n"
+                         "E exposes I_E_E1\n"
+                         "E1 exposes I_E_E1\n"
+                         "I_E_E1 allocates a\n"
+                         "\n"
+                         "E11 is a functional element\n"
+                         "E11 composes E\n"
+                         "E11 allocates F\n"
+                         "E11 exposes I_E_E1\n"
+                         "\n"
+                         "show context E\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
@@ -526,7 +461,4 @@ def test_fun_elem_context_interface_with_child(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)

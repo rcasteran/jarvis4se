@@ -1,15 +1,13 @@
 """Module to tests decomposition diagrams"""
-import os
 import io
-from pathlib import Path
-from IPython import get_ipython
 
-
-import jarvis
+from conftest import get_jarvis4se, remove_xml_file
 import plantuml_adapter
 
+jarvis4se = get_jarvis4se()
 
-def test_function_with_childs_decomposition(mocker):
+
+def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
     """See Issue #5, Notebook equivalent:
     %%jarvis
     with function_with_childs_decomposition
@@ -46,42 +44,10 @@ def test_function_with_childs_decomposition(mocker):
     show decomposition F1
      """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_with_childs_decomposition"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F1a is a function\n"
-                    "F1b is a function\n"
-                    "F1c is a function\n"
-                    "F1d is a function\n"
-                    "F1e is a function\n"
-                    "F2 is a function\n"
-                    "F3 is a function\n"
-                    "\n"
-                    "F1 is composed of F1a\n"
-                    "F1 is composed of F1b\n"
-                    "F1 is composed of F1c\n"
-                    "F1 is composed of F1d\n"
-                    "F1 is composed of F1e\n"
-                    "\n"
-                    "a is a data\n"
-                    "F1 produces a\n"
-                    "F2 consumes a\n"
-                    "\n"
-                    "F1a produces a\n"
-                    "F1b consumes a\n"
-                    "\n"
-                    "b is a data\n"
-                    "F1c produces b\n"
-                    "F1d consumes b\n"
-                    "\n"
-                    "c is a data\n"
-                    "F3 produces c\n"
-                    "F1e consumes c\n"
-                    "\n"
-                    "show decomposition F1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{function_with_childs_cell}\n"
+                         "show decomposition F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
@@ -102,10 +68,7 @@ def test_function_with_childs_decomposition(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
@@ -155,51 +118,48 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
      """
     monkeypatch.setattr('sys.stdin', io.StringIO('y'))  # Say yes for adding F3 alloacted to E1
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_flow"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F1a is a function\n"
-                    "F1b is a function\n"
-                    "F1c is a function\n"
-                    "F1 is composed of F1a\n"
-                    "F1 is composed of F1b\n"
-                    "F1 is composed of F1c\n"
-                    "\n"
-                    "F1c1 is a function\n"
-                    "F1c is composed of F1c1\n"
-                    "\n"
-                    "F2 is a function\n"
-                    "F2a is a function\n"
-                    "F2 is composed of F2a\n"
-                    "\n"
-                    "F3 is a function\n"
-                    "F3a is a function\n"
-                    "F3 is composed of F3a\n"
-                    "\n"
-                    "E1 is a functional element\n"
-                    "E1a is a functional element\n"
-                    "E1b is a functional element\n"
-                    "E1c is a functional element\n"
-                    "E1 is composed of E1a\n"
-                    "E1 is composed of E1b\n"
-                    "E1 is composed of E1c\n"
-                    "E1c1 is a functional element\n"
-                    "E1c2 is a functional element\n"
-                    "E1c is composed of E1c1\n"
-                    "E1c is composed of E1c2\n"
-                    "\n"
-                    "E1 allocates F1\n"
-                    "E1 allocates F2\n"
-                    "E1a allocates F1a\n"
-                    "E1a allocates F3a\n"
-                    "E1b allocates F1b\n"
-                    "E1c allocates F1c\n"
-                    "E1c1 allocates F1c1\n"
-                    "\n"
-                    "show decomposition E1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "F1a is a function\n"
+                         "F1b is a function\n"
+                         "F1c is a function\n"
+                         "F1 is composed of F1a\n"
+                         "F1 is composed of F1b\n"
+                         "F1 is composed of F1c\n"
+                         "\n"
+                         "F1c1 is a function\n"
+                         "F1c is composed of F1c1\n"
+                         "\n"
+                         "F2 is a function\n"
+                         "F2a is a function\n"
+                         "F2 is composed of F2a\n"
+                         "\n"
+                         "F3 is a function\n"
+                         "F3a is a function\n"
+                         "F3 is composed of F3a\n"
+                         "\n"
+                         "E1 is a functional element\n"
+                         "E1a is a functional element\n"
+                         "E1b is a functional element\n"
+                         "E1c is a functional element\n"
+                         "E1 is composed of E1a\n"
+                         "E1 is composed of E1b\n"
+                         "E1 is composed of E1c\n"
+                         "E1c1 is a functional element\n"
+                         "E1c2 is a functional element\n"
+                         "E1c is composed of E1c1\n"
+                         "E1c is composed of E1c2\n"
+                         "\n"
+                         "E1 allocates F1\n"
+                         "E1 allocates F2\n"
+                         "E1a allocates F1a\n"
+                         "E1a allocates F3a\n"
+                         "E1b allocates F1b\n"
+                         "E1c allocates F1c\n"
+                         "E1c1 allocates F1c1\n"
+                         "\n"
+                         "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
@@ -224,10 +184,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 11*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_decompo_with_no_childs(mocker):
@@ -243,18 +200,15 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     show decomposition E1
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_childs"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F2 is a function\n"
-                    "F1 is composed of F2\n"
-                    "E1 is a functional element\n"
-                    "E1 allocates F1\n"
-                    "\n"
-                    "show decomposition E1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "F2 is a function\n"
+                         "F1 is composed of F2\n"
+                         "E1 is a functional element\n"
+                         "E1 allocates F1\n"
+                         "\n"
+                         "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
@@ -264,10 +218,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
 
 
 def test_fun_elem_decompo_with_interface(mocker):
@@ -329,64 +280,61 @@ def test_fun_elem_decompo_with_interface(mocker):
     show decomposition E1
      """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_interface"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "F1 is a function\n"
-                    "F1b is a function\n"
-                    "F1c is a function\n"
-                    "F1 is composed of F1b\n"
-                    "F1 is composed of F1c\n"
-                    "\n"
-                    "F1c1 is a function\n"
-                    "F1c is composed of F1c1\n"
-                    "\n"
-                    "F_ext is a function\n"
-                    "\n"
-                    "E1 is a functional element\n"
-                    "E1b is a functional element\n"
-                    "E1c is a functional element\n"
-                    "Ext is a functional element\n"
-                    "E1 is composed of E1b\n"
-                    "E1 is composed of E1c\n"
-                    "E1c1 is a functional element\n"
-                    "E1c is composed of E1c1\n"
-                    "\n"
-                    "E1 allocates F1\n"
-                    "E1b allocates F1b\n"
-                    "E1c allocates F1c\n"
-                    "E1c1 allocates F1c1\n"
-                    "Ext allocates F_ext\n"
-                    "\n"
-                    "A is a data\n"
-                    "A_2 is a data\n"
-                    "B is a data\n"
-                    "C is a data\n"
-                    "\n"
-                    "Fun_inter_A is a functional interface\n"
-                    "Fun_inter_A allocates A\n"
-                    "Fun_inter_A allocates A_2\n"
-                    "Fun_inter_B is a functional interface\n"
-                    "Fun_inter_B allocates B\n"
-                    "\n"
-                    "F1c1 produces A\n"
-                    "F1c1 produces A_2\n"
-                    "F1b consumes A\n"
-                    "F1b consumes A_2\n"
-                    "\n"
-                    "F_ext produces B\n"
-                    "F1c1 consumes B\n"
-                    "\n"
-                    "F1b produces C\n"
-                    "F_ext consumes C\n"
-                    "\n"
-                    "E1c exposes Fun_inter_A\n"
-                    "E1c1 exposes Fun_inter_A\n"
-                    "E1b exposes Fun_inter_A\n"
-                    "\n"
-                    "show decomposition E1\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "F1 is a function\n"
+                         "F1b is a function\n"
+                         "F1c is a function\n"
+                         "F1 is composed of F1b\n"
+                         "F1 is composed of F1c\n"
+                         "\n"
+                         "F1c1 is a function\n"
+                         "F1c is composed of F1c1\n"
+                         "\n"
+                         "F_ext is a function\n"
+                         "\n"
+                         "E1 is a functional element\n"
+                         "E1b is a functional element\n"
+                         "E1c is a functional element\n"
+                         "Ext is a functional element\n"
+                         "E1 is composed of E1b\n"
+                         "E1 is composed of E1c\n"
+                         "E1c1 is a functional element\n"
+                         "E1c is composed of E1c1\n"
+                         "\n"
+                         "E1 allocates F1\n"
+                         "E1b allocates F1b\n"
+                         "E1c allocates F1c\n"
+                         "E1c1 allocates F1c1\n"
+                         "Ext allocates F_ext\n"
+                         "\n"
+                         "A is a data\n"
+                         "A_2 is a data\n"
+                         "B is a data\n"
+                         "C is a data\n"
+                         "\n"
+                         "Fun_inter_A is a functional interface\n"
+                         "Fun_inter_A allocates A\n"
+                         "Fun_inter_A allocates A_2\n"
+                         "Fun_inter_B is a functional interface\n"
+                         "Fun_inter_B allocates B\n"
+                         "\n"
+                         "F1c1 produces A\n"
+                         "F1c1 produces A_2\n"
+                         "F1b consumes A\n"
+                         "F1b consumes A_2\n"
+                         "\n"
+                         "F_ext produces B\n"
+                         "F1c1 consumes B\n"
+                         "\n"
+                         "F1b produces C\n"
+                         "F_ext consumes C\n"
+                         "\n"
+                         "E1c exposes Fun_inter_A\n"
+                         "E1c1 exposes Fun_inter_A\n"
+                         "E1b exposes Fun_inter_A\n"
+                         "\n"
+                         "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
@@ -410,7 +358,4 @@ def test_fun_elem_decompo_with_interface(mocker):
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)

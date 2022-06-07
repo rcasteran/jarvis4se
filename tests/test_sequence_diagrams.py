@@ -1,11 +1,8 @@
 """Module to test sequece diagrams"""
-import os
-from pathlib import Path
-from IPython import get_ipython
-
-
-import jarvis
+from conftest import get_jarvis4se, remove_xml_file
 import plantuml_adapter
+
+jarvis4se = get_jarvis4se()
 
 
 def test_fun_inter_simple_sequence(mocker):
@@ -39,36 +36,33 @@ def test_fun_inter_simple_sequence(mocker):
     show sequence Fun_inter
      """
     spy = mocker.spy(plantuml_adapter, "get_sequence_diagram")
-    ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
-    my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_inter_simple_sequence"
-    my_magic.jarvis("", f"with {file_name}\n"
-                    "Fun_inter is a functional interface\n"
-                    "Fun_elem_1 is a functional element\n"
-                    "Fun_elem_2 is a functional element\n"
-                    "A is a data\n"
-                    "B is a data\n"
-                    "C is a data\n"
-                    "F1 is a function\n"
-                    "F2 is a function\n"
-                    "F1 produces A\n"
-                    "F1 produces C\n"
-                    "F2 consumes C\n"
-                    "F2 produces B\n"
-                    "F1 consumes B\n"
-                    "F2 consumes A\n"
-                    "C implies B\n"
-                    "B implies A\n"
-                    "Fun_elem_1 allocates F1\n"
-                    "Fun_elem_2 allocates F2\n"
-                    "Fun_elem_1 exposes Fun_inter\n"
-                    "Fun_elem_2 exposes Fun_inter\n"
-                    "Fun_inter allocates A\n"
-                    "Fun_inter allocates B\n"
-                    "Fun_inter allocates C\n"
-                    "\n"
-                    "show sequence Fun_inter\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "Fun_inter is a functional interface\n"
+                         "Fun_elem_1 is a functional element\n"
+                         "Fun_elem_2 is a functional element\n"
+                         "A is a data\n"
+                         "B is a data\n"
+                         "C is a data\n"
+                         "F1 is a function\n"
+                         "F2 is a function\n"
+                         "F1 produces A\n"
+                         "F1 produces C\n"
+                         "F2 consumes C\n"
+                         "F2 produces B\n"
+                         "F1 consumes B\n"
+                         "F2 consumes A\n"
+                         "C implies B\n"
+                         "B implies A\n"
+                         "Fun_elem_1 allocates F1\n"
+                         "Fun_elem_2 allocates F2\n"
+                         "Fun_elem_1 exposes Fun_inter\n"
+                         "Fun_elem_2 exposes Fun_inter\n"
+                         "Fun_inter allocates A\n"
+                         "Fun_inter allocates B\n"
+                         "Fun_inter allocates C\n"
+                         "\n"
+                         "show sequence Fun_inter\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_sequence_diagram()
@@ -86,7 +80,4 @@ def test_fun_inter_simple_sequence(mocker):
     assert all(i in result for i in expected)
     assert len(result) == len(''.join(expected))
 
-    fname = os.path.join("./", file_name + ".xml")
-    path = Path(fname)
-    if path:
-        os.remove(path)
+    remove_xml_file(file_name)
