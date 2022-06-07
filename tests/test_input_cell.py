@@ -1,6 +1,8 @@
+"""Modules containing tests to check jarvis ouput i.e. jupyter notebook output messages"""
 import os
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 
 import jarvis
 
@@ -17,7 +19,7 @@ def test_attribute_declaration_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "attribute_declaration_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "B is an attribute. C is an attribute\n")
 
@@ -60,13 +62,13 @@ def test_described_attribute_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "described_attribute_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "Fun elem is a functional element\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "B is an attribute. C is an attribute\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "The A of F1 is 4,2\n"
                     "The C of F1 is pink\n"
                     "The B of Fun elem is 8,5.\n"
@@ -90,7 +92,7 @@ def test_described_attribute_input(capsys):
 
 
 def test_set_object_type_alias_input(capsys):
-    # TODO: Needs to be extend to test with source/destination
+    # Can be extend to test with source/destination
     """ In order to check Issue #21 causing bad regex match between type, alias and
     described attribute. Notebook equivalent:
     %%jarvis
@@ -104,7 +106,7 @@ def test_set_object_type_alias_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "set_object_type_alias_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function. The type of F1 is high level function\n"
                     "The alias of F1 is f1\n")
 
@@ -146,14 +148,14 @@ def test_consider_object_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "consider_object_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F2 with a long name is a function. The alias of F2 with a long name is F2.\n"
                     "F3 is a function\n"
                     "F4 is a function\n"
                     "a is a data\n"
                     "Fun_elem is a functional element\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "under test_chain\n"
                     "consider F1. consider toto. consider a, Fun_elem\n"
                     "consider tata.\n"
@@ -199,7 +201,7 @@ def test_functional_interface_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "functional_interface_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Color is an attribute\n"
                     "A is a data\n"
                     "Fun_inter is a functional interface.\n"
@@ -259,7 +261,7 @@ def test_fun_elem_exposes_interface_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_exposes_interface_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Fun_inter is a functional interface\n"
                     "Fun_elem is a functional element\n"
                     "Fun_elem_2 is a functional element\n"
@@ -321,10 +323,10 @@ def test_extends_object_input(capsys):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "extends_object_input"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Safety interface extends functional interface\n"
                     "The alias of Safety interface is sf\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "sf_a extends sf\n"
                     "sf_a_b extends sf_a\n"
                     "final one extends sf_a_b\n"

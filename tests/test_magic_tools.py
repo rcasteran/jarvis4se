@@ -1,3 +1,4 @@
+"""Test module for tools pkg i.e. MagicTools"""
 from IPython import get_ipython
 
 import jarvis

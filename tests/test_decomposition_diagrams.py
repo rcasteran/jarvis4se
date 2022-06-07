@@ -1,8 +1,9 @@
+"""Module to tests decomposition diagrams"""
 import os
 import io
-
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 
 import jarvis
 import plantuml_adapter
@@ -49,7 +50,7 @@ def test_function_with_childs_decomposition(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_with_childs_decomposition"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1a is a function\n"
                     "F1b is a function\n"
@@ -158,7 +159,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_flow"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1a is a function\n"
                     "F1b is a function\n"
@@ -246,7 +247,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_no_childs"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F2 is a function\n"
                     "F1 is composed of F2\n"
@@ -332,7 +333,7 @@ def test_fun_elem_decompo_with_interface(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_decompo_with_interface"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1b is a function\n"
                     "F1c is a function\n"

@@ -1,7 +1,8 @@
+"""Module to test sequece diagrams"""
 import os
-
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 
 import jarvis
 import plantuml_adapter
@@ -42,7 +43,7 @@ def test_fun_inter_simple_sequence(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_inter_simple_sequence"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Fun_inter is a functional interface\n"
                     "Fun_elem_1 is a functional element\n"
                     "Fun_elem_2 is a functional element\n"

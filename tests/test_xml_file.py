@@ -1,6 +1,8 @@
+"""Module that contains tests to check that xml file has been written"""
 import os
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 from xml_adapter import XmlParser3SE
 import jarvis
 
@@ -15,11 +17,11 @@ def test_generate_xml_file_template():
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "generate_xml_file_template"
-    my_magic.jarvis("", "with %s\n" % file_name)
+    my_magic.jarvis("", f"with {file_name}\n")
     fname = os.path.join("./", file_name + ".xml")
     path = Path(fname)
-    with path as f:
-        s = f.read_text(encoding="utf-8")
+    with path as file:
+        read_xml = file.read_text(encoding="utf-8")
         base_xml = "<?xml version='1.0' encoding='UTF-8'?>\n" \
                    "<systemAnalysis>\n" \
                    "  <funcArch>\n" \
@@ -40,7 +42,7 @@ def test_generate_xml_file_template():
                    "    <typeList/>\n" \
                    "  </viewPoint>\n" \
                    "</systemAnalysis>\n"
-        assert base_xml in s
+        assert base_xml in read_xml
     if path:
         os.remove(Path(fname))
 
@@ -57,7 +59,7 @@ def test_simple_function_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "simple_function_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n")
 
     function_list = xml_parser.parse_xml(file_name + ".xml")['xml_function_list']
@@ -96,13 +98,13 @@ def test_described_attribute_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "described_attribute_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "Fun elem is a functional element\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "B is an attribute. C is an attribute\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "The A of F1 is 4,2\n"
                     "The C of F1 is pink\n"
                     "The B of Fun elem is 8,5.\n"
@@ -151,7 +153,7 @@ def test_set_attribute_type_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "set_attribute_type_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "B is an attribute.\n"
                     "The type of A is attribute type A.\n"
@@ -198,14 +200,14 @@ def test_set_allocated_item_to_chain_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "set_allocated_item_to_chain_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F2 with a long name is a function. The alias of F2 with a long name is F2.\n"
                     "F3 is a function\n"
                     "F4 is a function\n"
                     "a is a data\n"
                     "Fun_elem is a functional element\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "under test_chain\n"
                     "consider F1. consider toto. consider a, Fun_elem\n"
                     "consider tata.\n"
@@ -266,7 +268,7 @@ def test_function_with_grandkids_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "function_with_grandkids_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1a is a function\n"
                     "F1a1 is a function\n"
@@ -355,7 +357,7 @@ def test_function_childs_cons_prod_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "function_childs_cons_prod_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1a is a function\n"
                     "F1b is a function\n"
@@ -449,7 +451,7 @@ def test_functional_interface_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "functional_interface_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Color is an attribute\n"
                     "A is a data\n"
                     "F1 is a function\n"
@@ -521,7 +523,7 @@ def test_fun_elem_exposes_interface_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "fun_elem_exposes_interface_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Fun_inter is a functional interface\n"
                     "Fun_elem is a functional element\n"
                     "Fun_elem_2 is a functional element\n"
@@ -594,10 +596,10 @@ def test_type_within_xml():
     my_magic = jarvis.MagicJarvis(ip, parser)
     xml_parser = XmlParser3SE()
     file_name = "type_within_xml"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "Safety interface extends functional interface\n"
                     "The alias of Safety interface is sf\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "sf_a extends sf\n"
                     "sf_a_b extends sf_a\n"
                     "final one extends sf_a_b\n"

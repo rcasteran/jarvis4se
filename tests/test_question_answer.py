@@ -1,7 +1,8 @@
+"""Test module with tests associated to question_answer.py"""
 import os
-
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 
 import jarvis
 from jarvis import question_answer
@@ -41,7 +42,7 @@ def test_list_data_functional_interface(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "list_data_functional_interface"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F2 is a function\n"
                     "F3 is a function\n"

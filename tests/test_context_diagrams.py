@@ -1,6 +1,8 @@
+"""Module that contains tests for context diagrams"""
 import os
-from IPython import get_ipython
 from pathlib import Path
+from IPython import get_ipython
+
 
 import jarvis
 import plantuml_adapter
@@ -19,7 +21,7 @@ def test_simple_function_context(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "simple_function_context"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
@@ -59,15 +61,15 @@ def test_simple_function_context_in_out(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "simple_function_in_out"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "a is a data\n"
                     "b is a data\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 produces b\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 consumes a\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
@@ -109,15 +111,15 @@ def test_function_context_with_attribute(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "test_function_with_attribute"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "C is an attribute\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "The A of F1 is 4,2\n"
                     "The C of F1 is pink\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
@@ -157,19 +159,19 @@ def test_fun_elem_context_with_attribute(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_with_attribute"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "Fun elem is a functional element\n"
                     "F1 is allocated to Fun elem")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "A is an attribute\n"
                     "B is an attribute. C is an attribute\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "The A of F1 is 4,2\n"
                     "The C of F1 is pink\n"
                     "The B of Fun elem is 8,5.\n"
                     "The A of Fun elem is 100\n")
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "show context Fun elem\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
@@ -217,7 +219,7 @@ def test_function_context_with_grandkids(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "function_context_with_grandkids"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F1a is a function\n"
                     "F1a1 is a function\n"
@@ -286,7 +288,7 @@ def test_fun_elem_context_with_interfaces(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_with_interfaces"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F1 is a function\n"
                     "F2 is a function\n"
                     "A is a data\n"
@@ -352,7 +354,7 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_with_no_flow"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "E is a functional element\n"
                     "E1 is a functional element\n"
                     "I_E_E1 is a functional interface\n"
@@ -412,7 +414,7 @@ def test_fun_elem_context_interface_not_exposed(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_not_exposed"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F is a function\n"
                     "F1 is a function\n"
                     "F2 is a function\n"
@@ -458,7 +460,7 @@ def test_fun_elem_context_interface_not_exposed(mocker):
         os.remove(path)
 
 
-# TODO: Add childs to external fun_elem or create new test
+# Add childs to external fun_elem or create new test
 def test_fun_elem_context_interface_with_child(mocker):
     """ See issue #44, Notebook equivalent:
     %%jarvis
@@ -489,7 +491,7 @@ def test_fun_elem_context_interface_with_child(mocker):
     parser = jarvis.command_parser.CmdParser()
     my_magic = jarvis.MagicJarvis(ip, parser)
     file_name = "fun_elem_context_interface_with_child"
-    my_magic.jarvis("", "with %s\n" % file_name +
+    my_magic.jarvis("", f"with {file_name}\n"
                     "F is a function\n"
                     "F1 is a function\n"
                     "a is a data\n"
