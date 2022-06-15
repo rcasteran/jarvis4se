@@ -9,6 +9,52 @@ from enum import Enum
 from . import util
 
 
+class BaseType(Enum):
+    """BaseType class"""
+    DATA = 0
+    FUNCTION = 1
+    FUNCTIONAL_ELEMENT = 2
+    FUNCTIONAL_INTERFACE = 3
+    PHYSICAL_ELEMENT = 4
+    PHYSICAL_INTERFACE = 5
+
+    def __str__(self):
+        """Get the str representation from Enum"""
+        type_str = ''
+        if self == self.DATA:
+            type_str = 'Data'
+        elif self == self.FUNCTION:
+            type_str = 'Function'
+        elif self == self.FUNCTIONAL_ELEMENT:
+            type_str = 'Functional element'
+        elif self == self.FUNCTIONAL_INTERFACE:
+            type_str = 'Functional interface'
+        elif self == self.PHYSICAL_ELEMENT:
+            type_str = 'Physical element'
+        elif self == self.PHYSICAL_INTERFACE:
+            type_str = 'Physical interface'
+        return type_str
+
+    @classmethod
+    def get_enum(cls, obj_type):
+        """Get the Enum representation from string"""
+        enum_type = None
+        if obj_type == 'Data':
+            enum_type = cls.DATA
+        elif obj_type == 'Function':
+            enum_type = cls.FUNCTION
+        elif obj_type == 'Functional element':
+            enum_type = cls.FUNCTIONAL_ELEMENT
+        elif obj_type == 'Functional interface':
+            enum_type = cls.FUNCTIONAL_INTERFACE
+        elif obj_type == 'Physical element':
+            enum_type = cls.PHYSICAL_ELEMENT
+        elif obj_type == 'Physical interface':
+            enum_type = cls.PHYSICAL_INTERFACE
+
+        return enum_type
+
+
 class FunctionType(Enum):
     """Function type: Compatible with ArKItect and XMI"""
     UNKNOWN = 0
@@ -85,7 +131,7 @@ class FunctionType(Enum):
 
 class Function:
     """Function class: Compatible with ArKItect and XMI"""
-    def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionType.UNKNOWN, p_parent=None,
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTION, p_parent=None,
                  p_ark_obj=None, p_role=None, p_operand=None, p_derived=''):
         """Init Object"""
         self.id = p_id
@@ -550,7 +596,7 @@ class DataType(Enum):
 
 class Data:
     """Data class"""
-    def __init__(self, p_id='', p_name='', p_type=DataType.UNKNOWN):
+    def __init__(self, p_id='', p_name='', p_type=BaseType.DATA):
         """Init Object"""
         self.id = p_id
         self.name = p_name
@@ -750,7 +796,7 @@ class FunctionalElementType(Enum):
 
 class FunctionalElement:
     """FunctionalElement class"""
-    def __init__(self, p_id='', p_name='', p_alias='', p_type=FunctionalElementType.UNKNOWN,
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_ELEMENT,
                  p_parent=None, p_derived=''):
         """Init Object"""
         self.id = p_id
@@ -914,7 +960,8 @@ class Attribute:
 
 class FunctionalInterface:
     """Functional Interface class"""
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_INTERFACE,
+                 p_derived=''):
         """Init Object"""
         self.id = p_id
         self.name = p_name
@@ -950,8 +997,8 @@ class FunctionalInterface:
 
 class PhysicalElement:
     """Physical Element class"""
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_parent=None,
-                 p_derived=''):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_ELEMENT,
+                 p_parent=None, p_derived=''):
         """Init Object"""
         self.id = p_id
         self.name = p_name
@@ -1002,7 +1049,8 @@ class PhysicalElement:
 
 class PhysicalInterface:
     """PhysicalInterface class"""
-    def __init__(self, p_id='', p_name='', p_alias='', p_type='unknown', p_derived=''):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_INTERFACE,
+                 p_derived=''):
         """Init Object"""
         self.id = p_id
         self.name = p_name
@@ -1060,49 +1108,3 @@ class Type:
     def set_base(self, p_base):
         """Set base"""
         self.base = p_base
-
-
-class BaseType(Enum):
-    """BaseType class"""
-    DATA = 0
-    FUNCTION = 1
-    FUNCTIONAL_ELEMENT = 2
-    FUNCTIONAL_INTERFACE = 3
-    PHYSICAL_ELEMENT = 4
-    PHYSICAL_INTERFACE = 5
-
-    def __str__(self):
-        """Get the str representation from Enum"""
-        type_str = ''
-        if self == self.DATA:
-            type_str = 'Data'
-        elif self == self.FUNCTION:
-            type_str = 'Function'
-        elif self == self.FUNCTIONAL_ELEMENT:
-            type_str = 'Functional element'
-        elif self == self.FUNCTIONAL_INTERFACE:
-            type_str = 'Functional interface'
-        elif self == self.PHYSICAL_ELEMENT:
-            type_str = 'Physical element'
-        elif self == self.PHYSICAL_INTERFACE:
-            type_str = 'Physical interface'
-        return type_str
-
-    @classmethod
-    def get_enum(cls, obj_type):
-        """Get the Enum representation from string"""
-        enum_type = None
-        if obj_type == 'Data':
-            enum_type = cls.DATA
-        elif obj_type == 'Function':
-            enum_type = cls.FUNCTION
-        elif obj_type == 'Functional element':
-            enum_type = cls.FUNCTIONAL_ELEMENT
-        elif obj_type == 'Functional interface':
-            enum_type = cls.FUNCTIONAL_INTERFACE
-        elif obj_type == 'Physical element':
-            enum_type = cls.PHYSICAL_ELEMENT
-        elif obj_type == 'Physical interface':
-            enum_type = cls.PHYSICAL_INTERFACE
-
-        return enum_type

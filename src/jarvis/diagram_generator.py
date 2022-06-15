@@ -7,7 +7,7 @@ import re
 
 import plantuml_adapter
 from .viewpoint_orchestrator import filter_allocated_item_from_chain
-from .question_answer import check_parentality, get_object_name, check_get_object, switch_data, \
+from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
 
 
@@ -52,7 +52,7 @@ def switch_show_filter(**kwargs):
 def case_function_diagram(**kwargs):
     """Case for 'show function <functional_element>'"""
     filename = None
-    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+    xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         filename = show_fun_elem_function(kwargs['diagram_object_str'],
                                           kwargs['xml_fun_elem_list'],
@@ -70,9 +70,9 @@ def case_function_diagram(**kwargs):
 def case_context_diagram(**kwargs):
     """Case for 'show context <functional_element>/<function>'"""
     filename = None
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
-    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+    xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
+    xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
+    xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
 
     if kwargs['diagram_object_str'] in xml_function_name_list:
         filename = show_function_context(kwargs['diagram_object_str'], kwargs['xml_function_list'],
@@ -104,8 +104,8 @@ def case_context_diagram(**kwargs):
 def case_decomposition_diagram(**kwargs):
     """Case for 'show decomposition <functional_element>/<function>'"""
     filename = None
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+    xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
+    xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
 
     if ' at level ' in kwargs['diagram_object_str']:
         splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
@@ -235,8 +235,8 @@ def get_object_list_from_chain(obj_str, xml_obj_list, xml_chain_list):
 def case_chain_diagram(**kwargs):
     """Case for 'show chain <states>/<functions>'"""
     filename = None
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
+    xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
+    xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(" ", ""))
     if len(object_list_str) > 0:
         result_function = all(t in xml_function_name_list for t in object_list_str)
@@ -288,10 +288,10 @@ def case_sequence_diagram(**kwargs):
     object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
         if len(object_list_str) == 1 and \
-                any(s == object_list_str[0] for s in get_object_name(kwargs['xml_fun_inter_list'])):
+                any(s == object_list_str[0] for s in get_objects_names(kwargs['xml_fun_inter_list'])):
             filename = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
-            if all(i in get_object_name(kwargs['xml_function_list']) for i in object_list_str):
+            if all(i in get_objects_names(kwargs['xml_function_list']) for i in object_list_str):
                 xml_data_list = filter_allocated_item_from_chain(
                     kwargs['xml_data_list'], kwargs['xml_chain_list'])
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
@@ -308,7 +308,7 @@ def case_sequence_diagram(**kwargs):
                                                    xml_prod,
                                                    xml_data_list)
 
-            elif all(i in get_object_name(kwargs['xml_fun_elem_list']) for i in object_list_str):
+            elif all(i in get_objects_names(kwargs['xml_fun_elem_list']) for i in object_list_str):
                 xml_data_list = filter_allocated_item_from_chain(
                     kwargs['xml_data_list'], kwargs['xml_chain_list'])
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
@@ -333,7 +333,7 @@ def case_sequence_diagram(**kwargs):
 def case_state_diagram(**kwargs):
     """Case for 'show state <functional_element>'"""
     filename = None
-    xml_fun_elem_name_list = get_object_name(kwargs['xml_fun_elem_list'])
+    xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         filename = show_fun_elem_state_machine(kwargs['diagram_object_str'],
                                                kwargs['xml_state_list'],
@@ -348,7 +348,7 @@ def case_state_diagram(**kwargs):
 def case_state_sequence_diagram(**kwargs):
     """Case for 'show state sequence <state>'"""
     filename = None
-    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
+    xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     if kwargs['diagram_object_str'] in xml_state_name_list:
         filename = show_state_allocated_function(kwargs['diagram_object_str'],
                                                  kwargs['xml_state_list'],

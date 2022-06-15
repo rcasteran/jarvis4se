@@ -20,7 +20,7 @@ def test_simple_function_context(mocker):
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = 'object "F1" as f1 <<unknown>>\n'
+    expected = 'object "F1" as f1 <<Function>>\n'
     assert expected in result
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
@@ -62,7 +62,7 @@ def test_simple_function_context_in_out(mocker):
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = 'object "F1" as f1 <<unknown>>\n' \
+    expected = 'object "F1" as f1 <<Function>>\n' \
                'circle f1_i\n' \
                'circle f1_o\n' \
                'f1_i --> f1 : a\n' \
@@ -107,7 +107,7 @@ def test_function_context_with_attribute(mocker):
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = ['object "F1" as f1 <<unknown>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
+    expected = ['object "F1" as f1 <<Function>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
@@ -153,8 +153,8 @@ def test_fun_elem_context_with_attribute(mocker):
                          "show context Fun elem\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = ['component "Fun elem" as fun_elem <<unknown>>{\n',
-                'object "F1" as f1 <<unknown>> {\n',
+    expected = ['component "Fun elem" as fun_elem <<Functional element>>{\n',
+                'object "F1" as f1 <<Function>> {\n',
                 'A = 4,2\n',
                 'C = pink\n',
                 '}\n}\n',
@@ -197,7 +197,7 @@ def test_function_context_with_grandkids(mocker, function_grandkids_cell):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = ['object "F1" as f1 <<unknown>>\n',
+    expected = ['object "F1" as f1 <<Function>>\n',
                 'circle f1_i\n',
                 'circle f1_o\n',
                 'f1_i --> f1 : ',
@@ -268,11 +268,11 @@ def test_fun_elem_context_with_interfaces(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
-    expected = ['component "Fun_elem_2" as fun_elem_2 <<unknown>>{\n',
-                'object "F2" as f2 <<unknown>>\n',
+    expected = ['component "Fun_elem_2" as fun_elem_2 <<Functional element>>{\n',
+                'object "F2" as f2 <<Function>>\n',
                 '}\n',
-                'component "Fun_elem_1" as fun_elem_1 <<unknown>>{\n',
-                'object "F1" as f1 <<unknown>>\n',
+                'component "Fun_elem_1" as fun_elem_1 <<Functional element>>{\n',
+                'object "F1" as f1 <<Function>>\n',
                 '}\n',
                 'circle f1_o\n',
                 'f1 --> f1_o  : C\n'
@@ -312,9 +312,9 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
-    expected = ['component "E" as e <<unknown>>{\n',
+    expected = ['component "E" as e <<Functional element>>{\n',
                 '}\n',
-                'component "E1" as e1 <<unknown>>{\n',
+                'component "E1" as e1 <<Functional element>>{\n',
                 '}\n',
                 'e1', ' -- ', 'e ', ': i_e_e1\n']
 
@@ -383,11 +383,11 @@ def test_fun_elem_context_interface_not_exposed(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
-    expected = ['component "E" as e <<unknown>>{\n',
-                'object "F" as f <<unknown>>\n',
+    expected = ['component "E" as e <<Functional element>>{\n',
+                'object "F" as f <<Function>>\n',
                 '}\n',
-                'component "E2" as e2 <<unknown>>{\n',
-                'object "F2" as f2 <<unknown>>\n',
+                'component "E2" as e2 <<Functional element>>{\n',
+                'object "F2" as f2 <<Function>>\n',
                 '}\n',
                 'f #--> f2 : ',
                 'a', '\\n', 'b', '\n']
@@ -450,11 +450,11 @@ def test_fun_elem_context_interface_with_child(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
-    expected = ['component "E" as e <<unknown>>{\n',
-                'object "F" as f <<unknown>>\n',
+    expected = ['component "E" as e <<Functional element>>{\n',
+                'object "F" as f <<Function>>\n',
                 '}\n',
-                'component "E1" as e1 <<unknown>>{\n',
-                'object "F1" as f1 <<unknown>>\n',
+                'component "E1" as e1 <<Functional element>>{\n',
+                'object "F1" as f1 <<Function>>\n',
                 '}\n',
                 'e1', ' -- ', 'e ', ': i_e_e1\n']
 

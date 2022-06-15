@@ -76,10 +76,9 @@ def get_functions(root):
     xml_function_list = root.iter('function')
     for xml_function in xml_function_list:
         # Instantiate functions and add them to a list
-        function = datamodel.Function(p_id=xml_function.get('id'),
-                                      p_name=xml_function.get('name'),
-                                      p_type=xml_function.get('type'),
+        function = datamodel.Function(p_id=xml_function.get('id'), p_name=xml_function.get('name'),
                                       p_alias=xml_function.get('alias'),
+                                      p_type=xml_function.get('type'),
                                       p_derived=xml_function.get('derived'))
         function.set_operand()
 

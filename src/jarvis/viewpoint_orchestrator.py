@@ -7,7 +7,7 @@ import re
 
 import datamodel
 from . import shared_orchestrator
-from .question_answer import get_object_name, check_get_object
+from .question_answer import get_objects_names, check_get_object
 
 
 def add_chain(chain_name_str, xml_chain_list, output_xml):
@@ -26,7 +26,7 @@ def add_chain(chain_name_str, xml_chain_list, output_xml):
         """
     chain_list = []
     # Create a list with all chain names already in the xml
-    xml_chain_name_list = get_object_name(xml_chain_list)
+    xml_chain_name_list = get_objects_names(xml_chain_list)
     # Loop on the list and create set for functions
     if chain_name_str not in xml_chain_name_list:
         # Instantiate chain class and chain
@@ -101,9 +101,9 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
     """
     allocated_item_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_data_name_list = get_object_name(xml_data_list)
+    xml_fun_elem_name_list = get_objects_names(xml_fun_elem_list)
+    xml_function_name_list = get_objects_names(xml_function_list)
+    xml_data_name_list = get_objects_names(xml_data_list)
 
     consider_str_list = split_chain_from_string(consider_str_list)
 
@@ -167,7 +167,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
     """
     new_attribute_list = []
     # Create attribute names list already in xml
-    xml_attribute_name_list = get_object_name(xml_attribute_list)
+    xml_attribute_name_list = get_objects_names(xml_attribute_list)
     # Filter attribute_list, keeping only the the ones not already in the xml
     for attribute_name in attribute_str_list:
         if attribute_name not in xml_attribute_name_list:
@@ -213,10 +213,10 @@ def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml
     """
     new_described_attribute_list = []
     # Create objects names/aliases list
-    xml_attribute_name_list = get_object_name(xml_attribute_list)
-    xml_function_name_list = get_object_name(xml_function_list)
-    xml_fun_elem_name_list = get_object_name(xml_fun_elem_list)
-    xml_fun_inter_name_list = get_object_name(xml_fun_inter_list)
+    xml_attribute_name_list = get_objects_names(xml_attribute_list)
+    xml_function_name_list = get_objects_names(xml_function_list)
+    xml_fun_elem_name_list = get_objects_names(xml_fun_elem_list)
+    xml_fun_inter_name_list = get_objects_names(xml_fun_inter_list)
     whole_list = xml_function_name_list + xml_fun_elem_name_list + xml_fun_inter_name_list
 
     # Loop to filter attributes and create a new list
@@ -312,7 +312,7 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
     new_type_list = []
     # Capitalyze the reference type for datamodel matching
     for elem in extends_str_list:
-        if any(t == elem[0] for t in get_object_name(xml_type_list)):
+        if any(t == elem[0] for t in get_objects_names(xml_type_list)):
             # print(f"{elem[0]} already exists")
             continue
         type_to_extend = check_get_type_to_extend(elem[1], xml_type_list)
@@ -352,7 +352,7 @@ def check_get_type_to_extend(type_str, xml_type_list):
         check = datamodel.BaseType
         return check
 
-    if any(a == type_str for a in get_object_name(xml_type_list)):
+    if any(a == type_str for a in get_objects_names(xml_type_list)):
         check = check_get_object(type_str, **{'xml_type_list': xml_type_list})
         return check
 

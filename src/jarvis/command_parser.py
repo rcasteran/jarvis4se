@@ -7,7 +7,6 @@ from IPython.display import display, HTML, Markdown
 from . import viewpoint_orchestrator
 from . import functional_orchestrator
 from . import shared_orchestrator
-from .physical_orchestrator import add_phy_elem_by_name, add_phy_inter_by_name
 from .question_answer import get_object_list, get_pandas_table, find_question
 from .diagram_generator import filter_show_command
 
@@ -17,25 +16,16 @@ class CmdParser:
         self.commands = [
             (r"(under.*)", self.matched_under),
 
-            (r"(?<= |\n)(.*?) is a function\b(?=.|\n)", matched_function),
+            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
 
-            (r"(?<= |\n)(.*?) is a data(?=.\s|\n|.\n)", matched_data),
+            (r"(?<= |\n)(.*?) is a ([^state|transition][^\.\n]*)",
+             matched_specific_obj),
 
             (r"(?<= |\n)(.*?) is a state(?=.|\n)", matched_state),
 
             (r"(?<= |\n)(.*?) is a transition(?=.|\n)", matched_transition),
 
-            (r"(?<= |\n)(.*?) is a functional element(?=.|\n)", matched_functional_element),
-
-            (r"(?<= |\n)(.*?) is a functional interface(?=.|\n)", matched_functional_interface),
-
-            (r"(?<= |\n)(.*?) is a physical element(?=.|\n)", matched_physical_element),
-
-            (r"(?<= |\n)(.*?) is a physical interface(?=.|\n)", matched_physical_interface),
-
             (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)", matched_attribute),
-
-            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
 
             (r"(?<= |\n)(.*?) inherits from ([^\.\n]*)", matched_inherits),
 
@@ -135,18 +125,17 @@ class CmdParser:
         return 0
 
 
-def matched_function(function_name_str_list, **kwargs):
-    """Get function's declaration (does not match if "function" is not at the end)"""
-    out = functional_orchestrator.add_function_by_name(function_name_str_list,
-                                                       kwargs['xml_function_list'],
-                                                       kwargs['output_xml'])
+def matched_extend(type_str_list, **kwargs):
+    """Get extend declaration"""
+    out = viewpoint_orchestrator.check_set_extends(type_str_list,
+                                                   kwargs['xml_type_list'],
+                                                   kwargs['output_xml'])
     return out
 
 
-def matched_data(data_str_list, **kwargs):
-    """Get data declaration"""
-    out = functional_orchestrator.add_data(data_str_list, kwargs['xml_data_list'],
-                                           kwargs['output_xml'])
+def matched_specific_obj(obj_type_str, **kwargs):
+    """Get "is a" declaration"""
+    out = shared_orchestrator.check_add_specific_obj_by_type(obj_type_str, **kwargs)
     return out
 
 
@@ -166,51 +155,11 @@ def matched_transition(transition_name_str_list, **kwargs):
     return out
 
 
-def matched_functional_element(functional_elem_name_str_list, **kwargs):
-    """Get Functional element's declaration"""
-    out = functional_orchestrator.add_fun_elem_by_name(functional_elem_name_str_list,
-                                                       kwargs['xml_fun_elem_list'],
-                                                       kwargs['output_xml'])
-    return out
-
-
-def matched_functional_interface(functional_inter_name_str_list, **kwargs):
-    """Get Functional interface's declaration"""
-    out = functional_orchestrator.add_fun_inter_by_name(functional_inter_name_str_list,
-                                                        kwargs['xml_fun_inter_list'],
-                                                        kwargs['output_xml'])
-    return out
-
-
-def matched_physical_element(physical_elem_name_str_list, **kwargs):
-    """Get Physical element's declaration"""
-    out = add_phy_elem_by_name(physical_elem_name_str_list,
-                               kwargs['xml_phy_elem_list'],
-                               kwargs['output_xml'])
-    return out
-
-
-def matched_physical_interface(physical_inter_name_str_list, **kwargs):
-    """Get Physical interface's declaration"""
-    out = add_phy_inter_by_name(physical_inter_name_str_list,
-                                kwargs['xml_phy_inter_list'],
-                                kwargs['output_xml'])
-    return out
-
-
 def matched_attribute(attribute_name_str, **kwargs):
     """Get "attribute" declaration"""
     out = viewpoint_orchestrator.add_attribute(attribute_name_str,
                                                kwargs['xml_attribute_list'],
                                                kwargs['output_xml'])
-    return out
-
-
-def matched_extend(type_str_list, **kwargs):
-    """Get extend declaration"""
-    out = viewpoint_orchestrator.check_set_extends(type_str_list,
-                                                   kwargs['xml_type_list'],
-                                                   kwargs['output_xml'])
     return out
 
 

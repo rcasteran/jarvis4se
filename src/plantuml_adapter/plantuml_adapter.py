@@ -4,7 +4,7 @@
 # Modules
 import datamodel
 from jarvis.shared_orchestrator import check_type_recursively
-from jarvis.question_answer import get_object_name, check_get_object
+from jarvis.question_answer import get_objects_names, check_get_object
 from .util import ObjDiagram, StateDiagram, SequenceDiagram
 
 
@@ -187,10 +187,10 @@ def check_function_type(function, xml_type_list):
     Safety function, High level safety function, unknown]"""
     specific_obj_type_list = datamodel.FunctionType.get_parent_function_type_list()
     check = False
-    if any(a == function.type for a in specific_obj_type_list):
+    if any(a == str(function.type) for a in specific_obj_type_list):
         check = True
         return check
-    if any(a == function.type for a in get_object_name(xml_type_list)):
+    if any(a == function.type for a in get_objects_names(xml_type_list)):
         obj_type = check_get_object(function.type, **{'xml_type_list': xml_type_list})
         check = check_type_recursively(obj_type, [str(i).upper() for i in specific_obj_type_list])
         return check

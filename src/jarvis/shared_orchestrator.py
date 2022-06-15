@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 """Module containing methods shared between objects/orchestrator"""
 import re
+import uuid
 
 import datamodel
-from .question_answer import get_object_type, check_get_object, get_allocation_object, \
-    check_not_family, get_object_name
-
+from .question_answer import (get_object_type, check_get_object, get_allocation_object,
+                              check_not_family, get_objects_names)
+from .functional_orchestrator import (create_function_obj, create_data_obj, create_fun_elem_obj,
+                                      create_fun_inter_obj)
+from .physical_orchestrator import (create_phy_elem_obj, create_phy_inter_obj)
 
 def cut_string_list(string_tuple_list):
     """From set of input command strings e.g for composition with input list as
@@ -563,7 +566,7 @@ def check_new_type(object_to_set, type_name, xml_type_list):
             if type_name.capitalize() != str(object_to_set.type):
                 check = True
                 object_to_set.set_type(type_name.capitalize())
-        elif any(t == type_name for t in get_object_name(xml_type_list)):
+        elif any(t == type_name for t in get_objects_names(xml_type_list)):
             obj_type = check_get_object(type_name, **{'xml_type_list': xml_type_list})
             check = check_type_recursively(obj_type, specific_obj_type_list)
             if not check:
@@ -1082,7 +1085,7 @@ def get_allocated_child(elem, xml_fun_elem_list):
 def check_add_inheritance(inherit_str_list, **kwargs):
     """
     Check if each string in allocation_str_list are corresponding to an actual object's name/alias,
-    set_derive, create lists of objets, write in xml
+    set_derive, create lists of objets.
     Send lists to add_derived() to write them within xml and then returns update from it.
 
         Parameters:
@@ -1288,3 +1291,84 @@ def add_derived(object_list, output_xml):
             print(f"{obj.name} inherited from {obj.derived.name}")
         return 1
     return 0
+
+
+def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
+    """
+    Check if each string in obj_type_str_list are corresponding to an actual object's name/alias,
+    set_derive, create object_lists with list per obj. Send lists to add_obj_to_xml()
+    write them within xml and then returns update from it.
+
+        Parameters:
+            obj_type_str_list ([str]) : Lists of string from jarvis cell
+            kwargs (dict) : whole xml lists + xml's file object
+
+        Returns:
+            update ([0/1]) : 1 if update, else 0
+    """
+    object_lists = [[] for _ in range(6)]
+    for elem in obj_type_str_list:
+        spec_obj_type = None
+        if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
+            base_type = next((i for i in [str(i) for i in datamodel.BaseType]
+                              if i == elem[1].capitalize()))
+        else:
+            spec_obj_type = check_get_object(elem[1],
+                                             **{'xml_type_list': kwargs['xml_type_list']})
+            base_type = get_base_type_recursively(spec_obj_type)
+        if not base_type:
+            print(f"No valid base type found for {elem[1]}")
+            continue
+        base_type = datamodel.BaseType.get_enum(str(base_type)).value
+        switch_obj_list = {
+            0: create_data_obj,
+            1: create_function_obj,
+            2: create_fun_elem_obj,
+            3: create_fun_inter_obj,
+            4: create_phy_elem_obj,
+            5: create_phy_inter_obj,
+        }
+        call = switch_obj_list.get(base_type)
+        new_obj = call(elem[0], spec_obj_type, **kwargs)
+        if not isinstance(new_obj, int):
+            object_lists[base_type].append(new_obj)
+        # print(sepc_obj_type.name, sepc_obj_type.base)
+    if any(object_lists):
+        return add_obj_to_xml(object_lists, kwargs['output_xml'])
+    return 0
+
+
+def get_base_type_recursively(obj_type):
+    """Checks type: if it's a BaseType or its base else recursively return """
+    if isinstance(obj_type, datamodel.BaseType):
+        return obj_type
+    elif obj_type.name in [str(i) for i in datamodel.BaseType]:
+        return obj_type.name
+    elif obj_type.base in [str(i) for i in datamodel.BaseType]:
+        return obj_type.base
+    return get_base_type_recursively(obj_type.base)
+
+
+def get_unique_id():
+    """Generate and set unique identifier of length 10 integers"""
+    identifier = uuid.uuid4()
+    return str(identifier.int)[:10]
+
+
+def add_obj_to_xml(object_lists, output_xml):
+    """Send lists object to respective methods of GenerateXML, returns 1 if at least one obj has
+    been written"""
+    switch_write_obj = {
+        0: output_xml.write_data,
+        1: output_xml.write_function,
+        2: output_xml.write_functional_element,
+        3: output_xml.write_functional_interface,
+        4: output_xml.write_physical_element,
+        5: output_xml.write_physical_interface,
+    }
+    check = 0
+    for idx, sub in enumerate(object_lists):
+        if sub:
+            switch_write_obj.get(idx)(sub)
+            check = 1
+    return check

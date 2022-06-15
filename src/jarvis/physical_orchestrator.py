@@ -1,96 +1,72 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Libraries
-import uuid
 import re
 
 import datamodel
-from .question_answer import check_get_object
+from .question_answer import get_objects_names
+from . import shared_orchestrator
 
 
-def add_phy_elem_by_name(physical_elem_name_str_list, xml_phy_elem_list, output_xml):
+def create_phy_elem_obj(phy_elem_str, specific_obj_type, **kwargs):
     """
-    Check if each string in physical_elem_name_str_list is not already corresponding to an actual
-    object's name/alias, create new PhysicalElement() object, instantiate it, write it
-    within XML and then returns update_list.
+    Check if string phy_elem_str is not already corresponding to an actual object's name/alias,
+    create new PhysicalElement() object, instantiate it, add it to xml_phy_elem_list.
 
         Parameters:
-            physical_elem_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_phy_elem_list ([PhysicalElement]) : PhysicalElement list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            phy_elem_str (str) : Lists of string from jarvis cell
+            specific_obj_type ([Function]) : specific type or None
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
-            1 if update, else 0
+            update (0/fun_elem) : fun_elem if update, else 0
     """
-    phy_elem_list = set()
-
-    for phy_elem_name in physical_elem_name_str_list:
-        if check_get_object(phy_elem_name, **{'xml_phy_elem_list': xml_phy_elem_list}) is None:
-
-            phy_elem = datamodel.PhysicalElement()
-            phy_elem.set_name(str(phy_elem_name))
-            alias_str = re.search(r"(.*)\s[-]\s", phy_elem_name, re.MULTILINE)
-            if alias_str:
-                phy_elem.set_alias(alias_str.group(1))
-            # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            phy_elem.set_id(str(identifier.int)[:10])
-
-            xml_phy_elem_list.add(phy_elem)
-            phy_elem_list.add(phy_elem)
-        else:
-            # print(fun_elem_name + " already exists (not added)")
-            pass
-
-    if not phy_elem_list:
+    if any(n == phy_elem_str for n in get_objects_names(kwargs['xml_phy_elem_list'])):
         return 0
+    if not specific_obj_type:
+        phy_elem = datamodel.PhysicalElement(p_name=phy_elem_str)
+    else:
+        phy_elem = datamodel.PhysicalElement(p_name=phy_elem_str, p_type=specific_obj_type.name)
 
-    output_xml.write_physical_element(phy_elem_list)
-    for phy_elem in phy_elem_list:
-        print(phy_elem.name + " is a physical element")
-    return 1
+    alias_str = re.search(r"(.*)\s[-]\s", phy_elem_str, re.MULTILINE)
+    if alias_str:
+        phy_elem.set_alias(alias_str.group(1))
+    phy_elem.set_id(shared_orchestrator.get_unique_id())
+
+    kwargs['xml_phy_elem_list'].add(phy_elem)
+    print(f"{phy_elem.name} is a {phy_elem.type}")
+    if phy_elem:
+        return phy_elem
+    return 0
 
 
-def add_phy_inter_by_name(physical_inter_name_str_list, xml_phy_inter_list, output_xml):
+def create_phy_inter_obj(phy_inter_str, specific_obj_type, **kwargs):
     """
-    Check if each string in physical_inter_name_str_list is not already corresponding to an actual
-    object's name/alias, create new PhysicalInterface() object, instantiate it, write it
-    within XML and then returns update_list.
+    Check if string phy_inter_str is not already corresponding to an actual object's name/alias,
+    create new PhysicalElement() object, instantiate it, add it to xml_phy_inter_list.
 
         Parameters:
-            physical_inter_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_phy_inter_list ([PhysicalInterface]) : PhysicalInterface list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            phy_inter_str (str) : Lists of string from jarvis cell
+            specific_obj_type ([Function]) : specific type or None
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
-            1 if update, else 0
+            update (0/fun_elem) : fun_elem if update, else 0
     """
-
-    physical_interface_list = set()
-
-    for phy_inter_name in physical_inter_name_str_list:
-        if check_get_object(phy_inter_name, **{'xml_phy_inter_list': xml_phy_inter_list}) is None:
-
-            phy_inter = datamodel.PhysicalInterface()
-            phy_inter.set_name(str(phy_inter_name))
-            alias_str = re.search(r"(.*)\s[-]\s", phy_inter_name, re.MULTILINE)
-            if alias_str:
-                phy_inter.set_alias(alias_str.group(1))
-            # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            phy_inter.set_id(str(identifier.int)[:10])
-
-            xml_phy_inter_list.add(phy_inter)
-            physical_interface_list.add(phy_inter)
-        else:
-            # print(fun_elem_name + " already exists (not added)")
-            pass
-
-    if not physical_interface_list:
+    if any(n == phy_inter_str for n in get_objects_names(kwargs['xml_phy_inter_list'])):
         return 0
+    if not specific_obj_type:
+        phy_inter = datamodel.PhysicalInterface(p_name=phy_inter_str)
+    else:
+        phy_inter = datamodel.PhysicalInterface(p_name=phy_inter_str, p_type=specific_obj_type.name)
 
-    output_xml.write_physical_interface(physical_interface_list)
-    for phy_inter in physical_interface_list:
-        print(phy_inter.name + " is a physical interface")
+    alias_str = re.search(r"(.*)\s[-]\s", phy_inter_str, re.MULTILINE)
+    if alias_str:
+        phy_inter.set_alias(alias_str.group(1))
+    phy_inter.set_id(shared_orchestrator.get_unique_id())
 
-    return 1
+    kwargs['xml_phy_inter_list'].add(phy_inter)
+    print(f"{phy_inter.name} is a {phy_inter.type}")
+    if phy_inter:
+        return phy_inter
+    return 0

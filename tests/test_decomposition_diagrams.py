@@ -51,20 +51,20 @@ def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
-    expected = ['object "F3" as f3 <<unknown>>\n',
-                'component "F1" as f1 <<unknown>>{\n',
-                'object "F1c" as f1c <<unknown>>\n',
-                'object "F1d" as f1d <<unknown>>\n',
-                'object "F1e" as f1e <<unknown>>\n',
-                'object "F1a" as f1a <<unknown>>\n',
-                'object "F1b" as f1b <<unknown>>\n',
+    expected = ['object "F3" as f3 <<Function>>\n',
+                'component "F1" as f1 <<Function>>{\n',
+                'object "F1c" as f1c <<Function>>\n',
+                'object "F1d" as f1d <<Function>>\n',
+                'object "F1e" as f1e <<Function>>\n',
+                'object "F1a" as f1a <<Function>>\n',
+                'object "F1b" as f1b <<Function>>\n',
                 '}\n',
-                'object "F2" as f2 <<unknown>>\n',
+                'object "F2" as f2 <<Function>>\n',
                 'f1a #--> f2 : a\n',
                 'f1c #--> f1d : b\n',
                 'f1a #--> f1b : a\n',
                 'f3 #--> f1e : c\n']
-
+    print(result)
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
@@ -163,20 +163,20 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
-    expected = ['component "E1" as e1 <<unknown>>{\n',
-                'object "F2" as f2 <<unknown>>\n',
-                'component "E1b" as e1b <<unknown>>{\n',
-                'object "F1b" as f1b <<unknown>>\n',
+    expected = ['component "E1" as e1 <<Functional element>>{\n',
+                'object "F2" as f2 <<Function>>\n',
+                'component "E1b" as e1b <<Functional element>>{\n',
+                'object "F1b" as f1b <<Function>>\n',
                 '}\n',
-                'component "E1a" as e1a <<unknown>>{\n',
-                'object "F1a" as f1a <<unknown>>\n',
-                'object "F3a" as f3a <<unknown>>\n',
+                'component "E1a" as e1a <<Functional element>>{\n',
+                'object "F1a" as f1a <<Function>>\n',
+                'object "F3a" as f3a <<Function>>\n',
                 '}\n',
-                'component "E1c" as e1c <<unknown>>{\n',
-                'component "E1c1" as e1c1 <<unknown>>{\n',
-                'object "F1c1" as f1c1 <<unknown>>\n',
+                'component "E1c" as e1c <<Functional element>>{\n',
+                'component "E1c1" as e1c1 <<Functional element>>{\n',
+                'object "F1c1" as f1c1 <<Function>>\n',
                 '}\n',
-                'component "E1c2" as e1c2 <<unknown>>{\n',
+                'component "E1c2" as e1c2 <<Functional element>>{\n',
                 '}\n',
                 '}\n',
                 '}\n']
@@ -212,7 +212,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
-    expected = ['component "E1" as e1 <<unknown>>{\n',
+    expected = ['component "E1" as e1 <<Functional element>>{\n',
                 '}\n']
 
     assert all(i in result for i in expected)
@@ -338,18 +338,18 @@ def test_fun_elem_decompo_with_interface(mocker):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
-    expected = ['component "E1" as e1 <<unknown>>{\n',
-                'component "E1c" as e1c <<unknown>>{\n',
-                'component "E1c1" as e1c1 <<unknown>>{\n',
-                'object "F1c1" as f1c1 <<unknown>>\n',
+    expected = ['component "E1" as e1 <<Functional element>>{\n',
+                'component "E1c" as e1c <<Functional element>>{\n',
+                'component "E1c1" as e1c1 <<Functional element>>{\n',
+                'object "F1c1" as f1c1 <<Function>>\n',
                 '}\n',
                 '}\n',
-                'component "E1b" as e1b <<unknown>>{\n',
-                'object "F1b" as f1b <<unknown>>\n',
+                'component "E1b" as e1b <<Functional element>>{\n',
+                'object "F1b" as f1b <<Function>>\n',
                 '}\n',
                 '}\n',
-                'component "Ext" as ext <<unknown>>{\n',
-                'object "F_ext" as f_ext <<unknown>>\n',
+                'component "Ext" as ext <<Functional element>>{\n',
+                'object "F_ext" as f_ext <<Function>>\n',
                 '}\n',
                 'f_ext #--> f1c1 : B\n',
                 'f1b #--> f_ext : C\n',

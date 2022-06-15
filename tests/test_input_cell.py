@@ -85,7 +85,7 @@ def test_set_object_type_alias_input(capsys):
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
-                "F1 is a function\n",
+                "F1 is a Function\n",
                 "The alias for F1 is f1\n",
                 "The type of F1 is High level function\n",
                 f"{file_name}.xml updated\n"]
@@ -156,20 +156,18 @@ def test_functional_interface_input(capsys):
                          "Color is an attribute\n"
                          "A is a data\n"
                          "Fun_inter is a functional interface.\n"
-                         "The type of Fun_inter is functional interface\n"
                          "The alias of Fun_inter is FI\n"
                          "The Color of Fun_inter is pink\n"
                          "Fun_inter allocates A.\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
-                "A is a data\n",
-                "Fun_inter is a functional interface\n",
+                "A is a Data\n",
+                "Fun_inter is a Functional interface\n",
                 "Color is an attribute\n",
                 "The alias for Fun_inter is FI\n",
                 "Data A has no producer(s) nor consumer(s) allocated to functional "
                 "elements exposing Fun_inter, A not allocated to Fun_inter\n",
-                "The type of Fun_inter is Functional interface\n",
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]
 
@@ -250,7 +248,7 @@ def test_extends_object_input(capsys, extends_cell):
                 "The alias for Safety interface is sf\n",
                 f"{file_name}.xml updated\n"
                 f"{file_name}.xml parsed\n",
-                "Fun_inter is a functional interface\n",
+                "Fun_inter is a Functional interface\n",
                 "sf_a is a type extending Safety interface\n",
                 "sf_a_b is a type extending sf_a\n",
                 "final one is a type extending sf_a_b\n",

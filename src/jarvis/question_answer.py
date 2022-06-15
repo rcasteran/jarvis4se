@@ -48,8 +48,8 @@ def matched_allocated(object_str, **kwargs):
     """From object_str, get object then check if allocated and returns allocation's list"""
     object_info = ""
     object_str = object_str[0]
-    xml_function_name_list = get_object_name(kwargs['xml_function_list'])
-    xml_state_name_list = get_object_name(kwargs['xml_state_list'])
+    xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
+    xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
     if not any(s == object_str for s in whole_objects_name_list):
         print(f"{object_str} is not a function nor a state")
@@ -73,7 +73,7 @@ def get_objects_name_lists(xml_str_lists, **kwargs):
     whole_objects_name_list = [[] for _ in range(11)]
     for i in range(11):
         if kwargs.get(xml_str_lists[i], False):
-            whole_objects_name_list[i] = get_object_name(kwargs[xml_str_lists[i]])
+            whole_objects_name_list[i] = get_objects_names(kwargs[xml_str_lists[i]])
 
     return whole_objects_name_list
 
@@ -124,7 +124,7 @@ def match_object(object_str, result, xml_str_lists=None, **kwargs):
                 except AttributeError:
                     # To avoid error when there is no alias for the object
                     pass
-    return
+    return None
 
 
 def get_object_info(wanted_object, **kwargs):
@@ -686,7 +686,7 @@ def get_objects_from_id_list(id_list, object_list):
     return output_list
 
 
-def get_object_name(xml_object_list):
+def get_objects_names(xml_object_list):
     """
     Method that returns a list with all object aliases/names from object's list
 
