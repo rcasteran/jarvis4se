@@ -224,23 +224,24 @@ def test_fun_elem_exposes_interface_input(capsys, fun_elem_exposing_cell):
     remove_xml_file(file_name)
 
 
-def test_extends_object_input(capsys, extends_cell):
+def test_extends_and_set_type_object_input(capsys, extends_and_set_type_cell):
     """ Issue #56 Notebook equivalent:
     %%jarvis
-    with extends_object_input
+    with extends_and_set_type_object_input
     Safety interface extends functional interface
     The alias of Safety interface is sf
     ========================================
     %%jarvis
+    with extends_and_set_type_object_input
     sf_a extends sf
     sf_a_b extends sf_a
     final one extends sf_a_b
     Fun_inter is a functional interface
     The type of Fun_inter is final one
     """
-    file_name = "extends_object_input"
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[0]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[1]}")
+    file_name = "extends_and_set_type_object_input"
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[0]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[1]}")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -253,6 +254,31 @@ def test_extends_object_input(capsys, extends_cell):
                 "sf_a_b is a type extending sf_a\n",
                 "final one is a type extending sf_a_b\n",
                 "The type of Fun_inter is final one\n",
+                f"{file_name}.xml updated\n"]
+
+    assert all(i in captured.out for i in expected)
+
+    remove_xml_file(file_name)
+
+
+def test_extends_and_create_object_input(capsys, extends_and_create_object_cell):
+    """ Issue #62 Notebook equivalent:
+    %%jarvis
+    with extends_and_create_object_input
+    "High level function" extends function
+    "High high level function" extends "High level function"
+    "High high high level function" extends "High high level function"
+    3High is a "High high high level function"
+    """
+    file_name = "extends_and_create_object_input"
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_create_object_cell}")
+
+    captured = capsys.readouterr()
+    expected = [f"Creating {file_name}.xml !\n",
+                "High level function is a type extending Function\n",
+                "High high level function is a type extending High level function\n",
+                "High high high level function is a type extending High high level function\n"
+                "3High is a High high high level function\n",
                 f"{file_name}.xml updated\n"]
 
     assert all(i in captured.out for i in expected)

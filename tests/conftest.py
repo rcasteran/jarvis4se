@@ -81,7 +81,7 @@ def attribute_cell():
 
 
 @pytest.fixture
-def extends_cell():
+def extends_and_set_type_cell():
     """Returns string see usage"""
     first_part = "\n".join(["Safety interface extends functional interface",
                             "The alias of Safety interface is sf", ""])
@@ -89,6 +89,15 @@ def extends_cell():
                             "final one extends sf_a_b", "Fun_inter is a functional interface",
                              "The type of Fun_inter is final one", ""])
     return first_part, second_part
+
+
+@pytest.fixture
+def extends_and_create_object_cell():
+    """Returns string see usage"""
+    return "\n".join(['"High level function" extends function',
+                      '"High high level function" extends "High level function"',
+                      '"High high high level function" extends "High high level function"',
+                      '3High is a "High high high level function"', ""])
 
 
 def remove_xml_file(file_name):

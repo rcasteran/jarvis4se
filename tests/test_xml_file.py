@@ -422,7 +422,7 @@ def test_fun_elem_exposes_interface_within_xml(fun_elem_exposing_cell):
     remove_xml_file(file_name)
 
 
-def test_type_within_xml(extends_cell):
+def test_type_within_xml(extends_and_set_type_cell):
     """ Issue #56 Notebook equivalent:
     %%jarvis
     with type_within_xml
@@ -437,8 +437,8 @@ def test_type_within_xml(extends_cell):
     The type of Fun_inter is final one
     """
     file_name = "type_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[0]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_cell[1]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[0]}")
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[1]}")
 
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
 
@@ -460,5 +460,40 @@ def test_type_within_xml(extends_cell):
 
     assert expected_type == captured_type
     assert obj_dict['xml_fun_inter_list'].pop().type == "final one"
+
+    remove_xml_file(file_name)
+
+
+def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_cell):
+    """ Issue #62 Notebook equivalent:
+    %%jarvis
+    with extends_and_create_object_input
+    "High level function" extends function
+    "High high level function" extends "High level function"
+    "High high high level function" extends "High high level function"
+    3High is a "High high high level function"
+    """
+    file_name = "extends_and_create_object_within_xml"
+    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_create_object_cell}")
+
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+
+    assert len([x for x in obj_dict.values() if x]) == 2
+    assert len(obj_dict['xml_type_list']) == 3
+    assert len(obj_dict['xml_function_list']) == 1
+
+    expected_type = {('High level function', 'Function'),
+                     ('High high level function', 'High level function'),
+                     ('High high high level function', 'High high level function')}
+    captured_type = set()
+    for type_elem in obj_dict['xml_type_list']:
+        if isinstance(type_elem.base, str):
+            base_type = type_elem.base
+        else:
+            base_type = type_elem.base.name
+        captured_type.add((type_elem.name, base_type))
+
+    assert expected_type == captured_type
+    assert obj_dict['xml_function_list'].pop().type == "High high high level function"
 
     remove_xml_file(file_name)
