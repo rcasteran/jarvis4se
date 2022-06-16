@@ -115,9 +115,9 @@ class CmdParser:
         out = []
         for chain, rest in zip(chain_name_str[::2], chain_name_str[1::2]):
             chain = chain.replace("under ", "")
-            out.append(viewpoint_orchestrator.add_chain(chain,
-                                                        kwargs['xml_chain_list'],
-                                                        kwargs['output_xml']))
+            out.append(viewpoint_orchestrator.add_view(chain,
+                                                       kwargs['xml_view_list'],
+                                                       kwargs['output_xml']))
             self.lookup_table(rest, **kwargs)
         if 1 in out:
             return 1
@@ -181,7 +181,7 @@ def matched_consider(consider_str_list, **kwargs):
                                                     kwargs['xml_function_list'],
                                                     kwargs['xml_fun_elem_list'],
                                                     kwargs['xml_data_list'],
-                                                    kwargs['xml_chain_list'],
+                                                    kwargs['xml_view_list'],
                                                     kwargs['output_xml'])
     return out
 
@@ -255,7 +255,7 @@ def matched_implies(data_predecessor_str_set, **kwargs):
     """Get predecessor declaration"""
     out = functional_orchestrator.check_add_predecessor(data_predecessor_str_set,
                                                         kwargs['xml_data_list'],
-                                                        kwargs['xml_chain_list'],
+                                                        kwargs['xml_view_list'],
                                                         kwargs['output_xml'])
     return out
 

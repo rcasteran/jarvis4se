@@ -6,7 +6,7 @@ them to plantuml_adapter.py"""
 import re
 
 import plantuml_adapter
-from .viewpoint_orchestrator import filter_allocated_item_from_chain
+from .viewpoint_orchestrator import filter_allocated_item_from_view
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
 
@@ -124,12 +124,12 @@ def case_decomposition_diagram(**kwargs):
 
     if diagram_object_str in xml_function_name_list:
 
-        function_list = get_object_list_from_chain(diagram_object_str,
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_chain_list'])
-        consumer_list, producer_list = get_cons_prod_from_chain_data(
+        function_list = get_object_list_from_view(diagram_object_str,
+                                                  kwargs['xml_function_list'],
+                                                  kwargs['xml_view_list'])
+        consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
             kwargs['xml_data_list'],
-            kwargs['xml_chain_list'],
+            kwargs['xml_view_list'],
             kwargs['xml_consumer_function_list'],
             kwargs['xml_producer_function_list'],
             function_list)
@@ -143,15 +143,15 @@ def case_decomposition_diagram(**kwargs):
                                                diagram_level=diagram_level)
 
     elif diagram_object_str in xml_fun_elem_name_list:
-        function_list = get_object_list_from_chain(diagram_object_str,
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_chain_list'])
-        fun_elem_list = get_object_list_from_chain(diagram_object_str,
-                                                   kwargs['xml_fun_elem_list'],
-                                                   kwargs['xml_chain_list'])
-        consumer_list, producer_list = get_cons_prod_from_chain_data(
+        function_list = get_object_list_from_view(diagram_object_str,
+                                                  kwargs['xml_function_list'],
+                                                  kwargs['xml_view_list'])
+        fun_elem_list = get_object_list_from_view(diagram_object_str,
+                                                  kwargs['xml_fun_elem_list'],
+                                                  kwargs['xml_view_list'])
+        consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
             kwargs['xml_data_list'],
-            kwargs['xml_chain_list'],
+            kwargs['xml_view_list'],
             kwargs['xml_consumer_function_list'],
             kwargs['xml_producer_function_list'],
             function_list)
@@ -173,12 +173,12 @@ def case_decomposition_diagram(**kwargs):
     return filename
 
 
-def get_cons_prod_from_chain_data(xml_data_list, xml_chain_list, xml_consumer_function_list,
-                                  xml_producer_function_list, function_list):
-    """If a chain is activated, returns filtered consumer/producer lists"""
+def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_consumer_function_list,
+                                           xml_producer_function_list, function_list):
+    """If a view is activated, returns filtered consumer/producer lists"""
     new_consumer_list = []
     new_producer_list = []
-    new_data_list = filter_allocated_item_from_chain(xml_data_list, xml_chain_list)
+    new_data_list = filter_allocated_item_from_view(xml_data_list, xml_view_list)
 
     if len(new_data_list) == len(xml_data_list):
         for prod in xml_producer_function_list:
@@ -203,9 +203,9 @@ def get_cons_prod_from_chain_data(xml_data_list, xml_chain_list, xml_consumer_fu
     return new_consumer_list, new_producer_list
 
 
-def get_object_list_from_chain(obj_str, xml_obj_list, xml_chain_list):
-    """Returns current object's list by checking chain"""
-    output_list = filter_allocated_item_from_chain(xml_obj_list, xml_chain_list)
+def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
+    """Returns current object's list by checking view"""
+    output_list = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
 
     if len(xml_obj_list) == len(output_list):
         return xml_obj_list
@@ -253,12 +253,12 @@ def case_chain_diagram(**kwargs):
 
         elif result_function or result_state:
             if result_function:
-                function_list = get_object_list_from_chain(object_list_str,
-                                                           kwargs['xml_function_list'],
-                                                           kwargs['xml_chain_list'])
-                consumer_list, producer_list = get_cons_prod_from_chain_data(
+                function_list = get_object_list_from_view(object_list_str,
+                                                          kwargs['xml_function_list'],
+                                                          kwargs['xml_view_list'])
+                consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
                     kwargs['xml_data_list'],
-                    kwargs['xml_chain_list'],
+                    kwargs['xml_view_list'],
                     kwargs['xml_consumer_function_list'],
                     kwargs['xml_producer_function_list'],
                     function_list)
@@ -268,11 +268,11 @@ def case_chain_diagram(**kwargs):
                                                 producer_list,
                                                 kwargs['xml_type_list'])
             elif result_state:
-                state_list = get_object_list_from_chain(object_list_str,
-                                                        kwargs['xml_state_list'],
-                                                        kwargs['xml_chain_list'])
-                transition_list = filter_allocated_item_from_chain(kwargs['xml_transition_list'],
-                                                                   kwargs['xml_chain_list'])
+                state_list = get_object_list_from_view(object_list_str,
+                                                       kwargs['xml_state_list'],
+                                                       kwargs['xml_view_list'])
+                transition_list = filter_allocated_item_from_view(kwargs['xml_transition_list'],
+                                                                  kwargs['xml_view_list'])
                 filename = show_states_chain(object_list_str, state_list,
                                              transition_list)
         else:
@@ -292,8 +292,8 @@ def case_sequence_diagram(**kwargs):
             filename = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
             if all(i in get_objects_names(kwargs['xml_function_list']) for i in object_list_str):
-                xml_data_list = filter_allocated_item_from_chain(
-                    kwargs['xml_data_list'], kwargs['xml_chain_list'])
+                xml_data_list = filter_allocated_item_from_view(
+                    kwargs['xml_data_list'], kwargs['xml_view_list'])
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
                     xml_cons = [i for i in kwargs['xml_consumer_function_list']
                                 if any(a == i[0] for a in [d.name for d in xml_data_list])]
@@ -309,8 +309,8 @@ def case_sequence_diagram(**kwargs):
                                                    xml_data_list)
 
             elif all(i in get_objects_names(kwargs['xml_fun_elem_list']) for i in object_list_str):
-                xml_data_list = filter_allocated_item_from_chain(
-                    kwargs['xml_data_list'], kwargs['xml_chain_list'])
+                xml_data_list = filter_allocated_item_from_view(
+                    kwargs['xml_data_list'], kwargs['xml_view_list'])
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
                     kwargs['xml_consumer_function_list'] = \
                         [i for i in kwargs['xml_consumer_function_list']

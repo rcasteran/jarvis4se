@@ -81,7 +81,7 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
         Parameters:
             data_predecessor_str_set ([str]) : Lists of string from jarvis cell
             xml_data_list ([Data]) : Data list from xml parsing
-            xml_chain_list ([Chain]) : Chain list from xml parsing
+            xml_chain_list ([View]) : View list from xml parsing
             output_xml (GenerateXML object) : XML's file object
 
         Returns:

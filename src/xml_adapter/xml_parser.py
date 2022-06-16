@@ -21,7 +21,7 @@ class XmlParser3SE:
                          'xml_state_list': set(),
                          'xml_transition_list': set(),
                          'xml_fun_elem_list': set(),
-                         'xml_chain_list': set(),
+                         'xml_view_list': set(),
                          'xml_attribute_list': set(),
                          'xml_fun_inter_list': set(),
                          'xml_phy_elem_list': set(),
@@ -48,7 +48,7 @@ class XmlParser3SE:
                          'xml_state_list': get_state(self.root),
                          'xml_transition_list': get_transition(self.root),
                          'xml_fun_elem_list': get_functional_element(self.root),
-                         'xml_chain_list': get_chains(self.root),
+                         'xml_view_list': get_views(self.root),
                          'xml_attribute_list': get_attributes(self.root),
                          'xml_fun_inter_list': get_functional_interface(self.root),
                          'xml_phy_elem_list': get_physical_element(self.root),
@@ -267,23 +267,23 @@ def get_functional_element(root):
     return functional_element_list
 
 
-def get_chains(root):
-    """Get Chain objects"""
-    chain_list = set()
-    xml_chain_list = root.iter('chain')
-    for xml_chain in xml_chain_list:
-        # Instantiate chain and add them to a list
-        chain = datamodel.Chain(p_id=xml_chain.get('id'),
-                                p_name=xml_chain.get('name'),
-                                p_type=xml_chain.get('type'))
-        # Looking for allocated items and add them to the chain
-        xml_allocated_item_list = xml_chain.iter('allocatedItem')
+def get_views(root):
+    """Get View objects"""
+    view_list = set()
+    xml_view_list = root.iter('view')
+    for xml_view in xml_view_list:
+        # Instantiate view and add them to a list
+        view = datamodel.View(p_id=xml_view.get('id'),
+                               p_name=xml_view.get('name'),
+                               p_type=xml_view.get('type'))
+        # Looking for allocated items and add them to the view
+        xml_allocated_item_list = xml_view.iter('allocatedItem')
         for xml_allo_item in xml_allocated_item_list:
-            chain.add_allocated_item(xml_allo_item.get("id"))
+            view.add_allocated_item(xml_allo_item.get("id"))
 
-        chain_list.add(chain)
+        view_list.add(view)
 
-    return chain_list
+    return view_list
 
 
 def get_attributes(root):

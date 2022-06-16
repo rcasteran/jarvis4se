@@ -10,68 +10,68 @@ from . import shared_orchestrator
 from .question_answer import get_objects_names, check_get_object
 
 
-def add_chain(chain_name_str, xml_chain_list, output_xml):
+def add_view(view_name_str, xml_view_list, output_xml):
     """
-        Check if each string in chain_name_str is not already corresponding to an actual
-        object's name, create new Chain() object, instantiate it, write it within XML and
+        Check if each string in view_name_str is not already corresponding to an actual
+        object's name, create new View() object, instantiate it, write it within XML and
         then returns update_list.
 
             Parameters:
-                chain_name_str ([str]) : Lists of string from jarvis cell
-                xml_chain_list ([Function]) : chain list from xml parsing
+                view_name_str ([str]) : Lists of string from jarvis cell
+                xml_view_list ([Function]) : view list from xml parsing
                 output_xml (GenerateXML object) : XML's file object
 
             Returns:
                 1 if update, else 0
         """
-    chain_list = []
-    # Create a list with all chain names already in the xml
-    xml_chain_name_list = get_objects_names(xml_chain_list)
+    view_list = []
+    # Create a list with all view names already in the xml
+    xml_view_name_list = get_objects_names(xml_view_list)
     # Loop on the list and create set for functions
-    if chain_name_str not in xml_chain_name_list:
-        # Instantiate chain class and chain
-        chain = datamodel.Chain()
-        # Set chain's name
-        chain.set_name(str(chain_name_str))
-        # Set chain's type
-        chain.set_type(datamodel.ChainType.UNKNOWN)
+    if view_name_str not in xml_view_name_list:
+        # Instantiate view class
+        view = datamodel.View()
+        # Set view's name
+        view.set_name(str(view_name_str))
+        # Set view's type
+        view.set_type(datamodel.ViewType.UNKNOWN)
         # Generate and set unique identifier of length 10 integers
         identifier = uuid.uuid4()
-        chain.set_id(str(identifier.int)[:10])
-        # Add chain to new set() and existing et() from xml
-        xml_chain_list.add(chain)
-        chain_list.append(chain)
-        activate_chain(chain.name, xml_chain_list)
-    elif chain_name_str in xml_chain_name_list:
-        # print(chain_name + " already exists (not added)")
-        activate_chain(chain_name_str, xml_chain_list)
+        view.set_id(str(identifier.int)[:10])
+        # Add view to new set() and existing et() from xml
+        xml_view_list.add(view)
+        view_list.append(view)
+        activate_view(view.name, xml_view_list)
+    elif view_name_str in xml_view_name_list:
+        # print(view_name + " already exists (not added)")
+        activate_view(view_name_str, xml_view_list)
 
-    if not chain_list:
+    if not view_list:
         return 0
 
-    output_xml.write_chain(chain_list)
-    for chain in chain_list:
-        print(chain.name + " is a chain")
+    output_xml.write_view(view_list)
+    for view in view_list:
+        print(view.name + " is a View")
     return 1
 
 
-def activate_chain(chain_name, xml_chain_list):
-    """Activates Chain from chain's name str"""
-    for chain in xml_chain_list:
-        if chain_name == chain.name:
-            chain.set_activation(True)
+def activate_view(view_name, xml_view_list):
+    """Activates View from view's name str"""
+    for view in xml_view_list:
+        if view_name == view.name:
+            view.set_activation(True)
         else:
-            chain.set_activation(False)
+            view.set_activation(False)
 
 
-def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
-    """For a type of item from xml, check if a Chain is activated and if the item is in its
+def filter_allocated_item_from_view(xml_item_list, xml_view_list):
+    """For a type of item from xml, check if a View is activated and if the item is in its
     allocated item's list"""
-    if not any(j.activated for j in xml_chain_list):
+    if not any(j.activated for j in xml_view_list):
         return xml_item_list
 
     filtered_items_list = []
-    for j in xml_chain_list:
+    for j in xml_view_list:
         if j.activated:
             for item in xml_item_list:
                 if item.id in j.allocated_item_list:
@@ -84,16 +84,16 @@ def filter_allocated_item_from_chain(xml_item_list, xml_chain_list):
 
 
 def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, xml_data_list,
-                       xml_chain_list, output_xml):
+                       xml_view_list, output_xml):
     """
     Check and get all "consider xxx" strings. If corresponds to an actual object not yet added to
-    the current chain => add it to Chain object and as allocatedItem within xml
+    the current view => add it to View object and as allocatedItem within xml
     Args:
         consider_str_list ([strings]): list of strings (separated by comma is possible)
         xml_function_list ([Function]) : Function list from xml parsing
         xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
         xml_data_list ([Data]) : Data list from xml parsing
-        xml_chain_list ([Chain]) : Chain list from xml parsing
+        xml_view_list ([View]) : View list from xml parsing
         output_xml (GenerateXML object) : XML's file object
 
     Returns:
@@ -119,17 +119,17 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
 
             if result_function:
                 allocated_fun = shared_orchestrator.check_add_allocated_item(
-                    consider_str, xml_function_list, xml_chain_list)
+                    consider_str, xml_function_list, xml_view_list)
                 if allocated_fun:
                     allocated_item_list.append(allocated_fun)
             elif result_fun_elem:
                 allocated_fun_elem = shared_orchestrator.check_add_allocated_item(
-                    consider_str, xml_fun_elem_list, xml_chain_list)
+                    consider_str, xml_fun_elem_list, xml_view_list)
                 if allocated_fun_elem:
                     allocated_item_list.append(allocated_fun_elem)
             elif result_data:
                 allocated_data = shared_orchestrator.check_add_allocated_item(
-                    consider_str, xml_data_list, xml_chain_list)
+                    consider_str, xml_data_list, xml_view_list)
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 

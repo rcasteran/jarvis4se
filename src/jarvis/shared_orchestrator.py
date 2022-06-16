@@ -121,38 +121,38 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
     return 0
 
 
-def check_add_allocated_item(item, xml_item_list, xml_chain_list):
+def check_add_allocated_item(item, xml_item_list, xml_view_list):
     """
-    Checks if a chain is already activated, if yes check if item isn't already
-    allocated and returns corresponding [Chain, Object].
+    Checks if a view is already activated, if yes check if item isn't already
+    allocated and returns corresponding [View, Object].
     Args:
         item (string): Object's name/alias from user's input
         xml_item_list ([Object]): List of xml's item (same type as item)
-        xml_chain_list ([Chain]) : Chain list from xml parsing
+        xml_view_list ([View]) : View list from xml parsing
 
     Returns:
-        [Chain, Object]
+        [View, Object]
     """
-    if not any(s.activated for s in xml_chain_list):
+    if not any(s.activated for s in xml_view_list):
         return None
 
-    activated_chain = None
-    for chain in xml_chain_list:
-        if chain.activated:
-            activated_chain = chain
+    activated_view = None
+    for view in xml_view_list:
+        if view.activated:
+            activated_view = view
             break
-    if activated_chain:
+    if activated_view:
         for i in xml_item_list:
             if item == i.name:
-                if i.id not in activated_chain.allocated_item_list:
-                    activated_chain.add_allocated_item(i.id)
-                    return [activated_chain, i]
+                if i.id not in activated_view.allocated_item_list:
+                    activated_view.add_allocated_item(i.id)
+                    return [activated_view, i]
             # To avoid errors for i.alias when i is Data (no such attriute)
             try:
                 if item == i.alias:
-                    if i.id not in activated_chain.allocated_item_list:
-                        activated_chain.add_allocated_item(i.id)
-                        return [activated_chain, i]
+                    if i.id not in activated_view.allocated_item_list:
+                        activated_view.add_allocated_item(i.id)
+                        return [activated_view, i]
             except AttributeError:
                 pass
 
@@ -238,12 +238,12 @@ def check_object_not_allocated(object_to_check, allocated_to_object_list):
             if not any(object_to_check.id in obj.allocated_function_list for obj
                        in converted_list):
                 check = True
-        if isinstance(converted_list[0], datamodel.Chain):
+        if isinstance(converted_list[0], datamodel.View):
             if not any(object_to_check.id in obj.allocated_item_list for obj
                        in converted_list):
                 check = True
     if isinstance(object_to_check, datamodel.Data):
-        if isinstance(converted_list[0], datamodel.Chain):
+        if isinstance(converted_list[0], datamodel.View):
             if not any(object_to_check.id in obj.allocated_item_list for obj
                        in converted_list):
                 check = True
@@ -310,7 +310,7 @@ def check_function(object_to_del, **kwargs):
     if not check_list[4]:
         print(f"{object_to_del.name} has attribute(s) set")
 
-    check_list[5] = check_object_not_allocated(object_to_del, kwargs['xml_chain_list'])
+    check_list[5] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
     if not check_list[5]:
         print(f"{object_to_del.name} has chain relationship(s)")
 
@@ -330,7 +330,7 @@ def check_data(object_to_del, **kwargs):
     if not check_list[0]:
         print(f"{object_to_del.name} has production/consumption relationship(s)")
 
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_chain_list'])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
     if not check_list[1]:
         print(f"{object_to_del.name} has chain relationship(s)")
 
@@ -410,7 +410,7 @@ def check_fun_elem(object_to_del, **kwargs):
 
 
 def check_chain(object_to_del, **kwargs):
-    """Checks for Chain's object"""
+    """Checks for View's object"""
     check = False
     check_list = [False] * 1
 
@@ -420,7 +420,7 @@ def check_chain(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_chain_list'].remove(object_to_del)
+        kwargs['xml_view_list'].remove(object_to_del)
 
     return check
 
@@ -530,7 +530,7 @@ def check_set_object_type(type_str_list, **kwargs):
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
     [objects] ordered lists for:
     [[Function],[Data],[State],[Transition],[FunctionalElement],[Attribute],
-    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface],[Chain]]
+    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface],[View]]
     Send lists to set_object_type() to write them within xml and then returns update from it.
 
         Parameters:
@@ -600,7 +600,7 @@ def check_type_recursively(obj_type, specific_obj_type_list):
 
 def get_specific_obj_type_and_idx(object_to_set):
     """Get __str__ list from FunctionType, DataType, StateType, TransitionType,
-    FunctionalElementType, ChainType and index for output_list (depends on the type)"""
+    FunctionalElementType, ViewType and index for output_list (depends on the type)"""
     specific_obj_type_list = []
     list_idx = None
     if isinstance(object_to_set, datamodel.Function):
@@ -618,8 +618,8 @@ def get_specific_obj_type_and_idx(object_to_set):
     elif isinstance(object_to_set, datamodel.FunctionalElement):
         specific_obj_type_list = [str(i).upper() for i in datamodel.FunctionalElementType]
         list_idx = 4
-    elif isinstance(object_to_set, datamodel.Chain):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.ChainType]
+    elif isinstance(object_to_set, datamodel.View):
+        specific_obj_type_list = [str(i).upper() for i in datamodel.ViewType]
         list_idx = 5
     elif isinstance(object_to_set, datamodel.Attribute):
         list_idx = 6
@@ -764,7 +764,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
         2: [],  # [FunctionalInterface, Data]
         3: [],  # [PhysicalElement, FunctionalElement]
         4: [],  # [PhysicalInterface, FunctionalInterface]
-        # 5: [],  [Chain, Object] in other modules or [Fun_elem_Parent, Function/State] in
+        # 5: [],  [View, Object] in other modules or [Fun_elem_Parent, Function/State] in
         # check_parent_allocation() it's just a key with no recursivety
     }
     for elem in allocation_str_list:
@@ -985,7 +985,7 @@ def add_allocation(allocation_dict, output_xml):
                     print(f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                           f"{elem[0].__class__.__name__} {elem[0].name}")
                     # Check the dict length, if this method is called from viewpoint_orchestrator
-                    # or functional_orchestrator for Chain => Only key[0] and no recursion wanted
+                    # or functional_orchestrator for View => Only key[0] and no recursion wanted
                     if k in (0, 1):
                         recursive_allocation(elem, output_xml)
         return 1
@@ -1220,9 +1220,9 @@ def allocation_inheritance(elem, **kwargs):
 
 
 def viewpoint_inheritance(elem, **kwargs):
-    """Chain and Attribute inheritance"""
-    kwargs['xml_chain_list'] = \
-        [chain.add_allocated_item(elem.id) for chain in kwargs['xml_chain_list']
+    """View and Attribute inheritance"""
+    kwargs['xml_view_list'] = \
+        [chain.add_allocated_item(elem.id) for chain in kwargs['xml_view_list']
          if any(a == elem.derived.id for a in chain.allocated_item_list)]
 
     for attribute in kwargs['xml_attribute_list']:

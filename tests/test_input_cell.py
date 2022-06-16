@@ -97,7 +97,7 @@ def test_set_object_type_alias_input(capsys):
 
 
 def test_consider_object_input(capsys, allocation_item_cell):
-    """ Relative to Issue #9 to add new allocated item to a chain(i.e. filter). Notebook equivalent:
+    """ Relative to Issue #9 to add new allocated item to a view(i.e. filter). Notebook equivalent:
     %%jarvis
     with consider_object_input
     F1 is a function
@@ -120,17 +120,17 @@ def test_consider_object_input(capsys, allocation_item_cell):
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
-                "test_chain is a chain\n",
+                "test_view is a View\n",
                 "Object toto does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
                 "Object tata does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
-                "Function F1 is allocated to Chain test_chain\n",
-                "Data a is allocated to Chain test_chain\n",
-                "FunctionalElement Fun_elem is allocated to Chain test_chain\n",
-                "Function F2 with a long name is allocated to Chain test_chain\n",
-                "Function F3 is allocated to Chain test_chain\n",
-                "Function F4 is allocated to Chain test_chain\n",
+                "Function F1 is allocated to View test_view\n",
+                "Data a is allocated to View test_view\n",
+                "FunctionalElement Fun_elem is allocated to View test_view\n",
+                "Function F2 with a long name is allocated to View test_view\n",
+                "Function F3 is allocated to View test_view\n",
+                "Function F4 is allocated to View test_view\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]

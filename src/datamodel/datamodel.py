@@ -851,8 +851,8 @@ class FunctionalElement:
         self.derived = p_derived
 
 
-class ChainType(Enum):
-    """Chain type"""
+class ViewType(Enum):
+    """View type"""
     UNKNOWN = 0
     FUNCTION = 1
     STATE = 2
@@ -862,43 +862,43 @@ class ChainType(Enum):
 
     def __str__(self):
         """Get the str representation from Enum"""
-        chain_type = 'unknown'
+        view_type = 'unknown'
 
         if self == self.FUNCTION:
-            chain_type = 'Function'
+            view_type = 'Function'
         elif self == self.STATE:
-            chain_type = 'State'
+            view_type = 'State'
         elif self == self.TRANSITION:
-            chain_type = 'Transition'
+            view_type = 'Transition'
         elif self == self.FUNCTIONAL_ELEMENT:
-            chain_type = 'Functional element'
+            view_type = 'Functional element'
         elif self == self.DATA:
-            chain_type = 'Data'
+            view_type = 'Data'
 
-        return chain_type
+        return view_type
 
     @classmethod
-    def get_name(cls, chain_type):
+    def get_name(cls, view_type):
         """Get the Enum representation from string"""
         name = cls.UNKNOWN
 
-        if chain_type == 'Function':
+        if view_type == 'Function':
             name = cls.FUNCTION
-        elif chain_type == 'State':
+        elif view_type == 'State':
             name = cls.STATE
-        elif chain_type == 'Transition':
+        elif view_type == 'Transition':
             name = cls.TRANSITION
-        elif chain_type == 'Functional element':
+        elif view_type == 'Functional element':
             name = cls.FUNCTIONAL_ELEMENT
-        elif chain_type == 'Data':
+        elif view_type == 'Data':
             name = cls.DATA
 
         return name
 
 
-class Chain:
-    """Chain class"""
-    def __init__(self, p_id='', p_name='', p_type=ChainType.UNKNOWN):
+class View:
+    """View class"""
+    def __init__(self, p_id='', p_name='', p_type=ViewType.UNKNOWN):
         """Init Object"""
         self.id = p_id
         self.name = p_name

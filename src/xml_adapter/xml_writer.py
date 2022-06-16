@@ -22,7 +22,7 @@ class GenerateXML:
         for tag in phy_arch_tags:
             etree.SubElement(phy_arch, tag)
         viewpoint = etree.SubElement(self.root, "viewPoint")
-        viewpoint_tags = ['chainList', 'attributeList', 'typeList']
+        viewpoint_tags = ['viewList', 'attributeList', 'typeList']
         for tag in viewpoint_tags:
             etree.SubElement(viewpoint, tag)
         self.tree = etree.ElementTree(self.root)
@@ -261,19 +261,19 @@ class GenerateXML:
                                                                   {'id': inter.id})
         self.write()
 
-    def write_chain(self, chain_list):
-        """Method to write chains from chain's list"""
+    def write_view(self, view_list):
+        """Method to write views from view's list"""
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            if root.find('.//chainList') is None:
-                etree.SubElement(root, 'chainList')
-            for chain_list_tag in root.findall(".//chainList"):
-                for chain in chain_list:
-                    chain_tag = etree.SubElement(chain_list_tag, "chain",
-                                                 {'id': chain.id, 'name': chain.name,
-                                                  'type': str(chain.type)})
-                    _allocated_item_list_tag = etree.SubElement(chain_tag, "allocatedItemList")
+            if root.find('.//viewList') is None:
+                etree.SubElement(root, 'viewList')
+            for view_list_tag in root.findall(".//viewList"):
+                for view in view_list:
+                    view_tag = etree.SubElement(view_list_tag, "view",
+                                                 {'id': view.id, 'name': view.name,
+                                                  'type': str(view.type)})
+                    _allocated_item_list_tag = etree.SubElement(view_tag, "allocatedItemList")
         self.write()
 
     def write_attribute(self, attribute_list):
@@ -451,7 +451,7 @@ class GenerateXML:
                 for obj_tag in root.findall(".//" + elem_tag):
                     for obj, obj_to_alloc in objects_list:
                         if obj_tag.get('id') == obj.id:
-                            if elem_tag == "chain":
+                            if elem_tag == "view":
                                 alloc_tag = get_allocation_tag(obj)
                             else:
                                 alloc_tag = get_allocation_tag(obj_to_alloc)
@@ -511,8 +511,8 @@ def get_object_tag(wanted_object):
         elem_tag = "state"
     elif isinstance(wanted_object, datamodel.Data):
         elem_tag = "data"
-    elif isinstance(wanted_object, datamodel.Chain):
-        elem_tag = "chain"
+    elif isinstance(wanted_object, datamodel.View):
+        elem_tag = "view"
     elif isinstance(wanted_object, datamodel.Type):
         elem_tag = "type"
     return elem_tag
@@ -531,6 +531,6 @@ def get_allocation_tag(wanted_object):
         elem_tag = "allocatedState"
     elif isinstance(wanted_object, datamodel.Data):
         elem_tag = "allocatedData"
-    elif isinstance(wanted_object, datamodel.Chain):
+    elif isinstance(wanted_object, datamodel.View):
         elem_tag = "allocatedItem"
     return elem_tag

@@ -11,8 +11,8 @@ from .datamodel import Transition
 from .datamodel import TransitionType
 from .datamodel import FunctionalElement
 from .datamodel import FunctionalElementType
-from .datamodel import Chain
-from .datamodel import ChainType
+from .datamodel import View
+from .datamodel import ViewType
 from .datamodel import Attribute
 from .datamodel import FunctionalInterface
 from .datamodel import PhysicalElement

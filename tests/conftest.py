@@ -55,7 +55,7 @@ def allocation_item_cell():
                             "long name is F2",
                             "F3 is a function", "F4 is a function", "a is a data",
                             "Fun_elem is a functional element", ""])
-    second_part = "\n".join(["under test_chain", "consider F1. consider toto. consider a, Fun_elem",
+    second_part = "\n".join(["under test_view", "consider F1. consider toto. consider a, Fun_elem",
                              "consider tata.", "consider F1, F2, F3, F4", ""])
     return first_part, second_part
 

@@ -91,7 +91,7 @@ def check_get_object(object_str, **kwargs):
     """
     xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
                      'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                     'xml_phy_inter_list', 'xml_attribute_list', 'xml_chain_list', 'xml_type_list']
+                     'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
     whole_objects_name_list = get_objects_name_lists(xml_str_lists, **kwargs)
     if not any(object_str in s for s in whole_objects_name_list):
         return None
@@ -112,7 +112,7 @@ def match_object(object_str, result, xml_str_lists=None, **kwargs):
         xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list',
                          'xml_fun_elem_list', 'xml_transition_list', 'xml_fun_inter_list',
                          'xml_phy_elem_list', 'xml_phy_inter_list', 'xml_attribute_list',
-                         'xml_chain_list', 'xml_type_list']
+                         'xml_view_list', 'xml_type_list']
     for i in range(11):
         if result[i]:
             for obj in kwargs[xml_str_lists[i]]:
@@ -751,7 +751,7 @@ def get_object_type(object_to_check):
     """From an object, returns its type as string"""
     obj_type_list = [(datamodel.State, 'state'), (datamodel.Function, 'function'),
                      (datamodel.Data, 'data'), (datamodel.FunctionalElement, 'Functional element'),
-                     (datamodel.Chain, 'Chain'), (datamodel.Transition, 'Transition'),
+                     (datamodel.View, 'View'), (datamodel.Transition, 'Transition'),
                      (datamodel.Attribute, 'Attribute'),
                      (datamodel.FunctionalInterface, 'Functional interface'),
                      (datamodel.PhysicalElement, 'Physical element'),

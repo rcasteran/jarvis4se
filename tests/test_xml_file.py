@@ -35,7 +35,7 @@ def test_generate_xml_file_template():
                    "    <physicalInterfaceList/>\n" \
                    "  </phyArch>\n" \
                    "  <viewPoint>\n" \
-                   "    <chainList/>\n" \
+                   "    <viewList/>\n" \
                    "    <attributeList/>\n" \
                    "    <typeList/>\n" \
                    "  </viewPoint>\n" \
@@ -141,11 +141,11 @@ def test_set_attribute_type_within_xml():
     remove_xml_file(file_name)
 
 
-def test_set_allocated_item_to_chain_within_xml(allocation_item_cell):
-    """Relative to Issue #9 to add new allocated item to a chain(i.e. filter) by verifying than
+def test_set_allocated_item_to_view_within_xml(allocation_item_cell):
+    """Relative to Issue #9 to add new allocated item to a view(i.e. filter) by verifying than
     it's written within xml. Notebook equivalent:
     %%jarvis
-    with set_allocated_item_to_chain_within_xml
+    with set_allocated_item_to_view_within_xml
     F1 is a function
     F2 with a long name is a function. The alias of F2 with a long name is F2.
     F3 is a function
@@ -154,13 +154,13 @@ def test_set_allocated_item_to_chain_within_xml(allocation_item_cell):
     Fun_elem is a functional element
     ========================================
     %%jarvis
-    with set_allocated_item_to_chain_within_xml
+    with set_allocated_item_to_view_within_xml
     under toto
     consider F1. consider toto. consider a, Fun_elem
     consider tata.
     consider F1, F2, F3, F4
     """
-    file_name = "set_allocated_item_to_chain_within_xml"
+    file_name = "set_allocated_item_to_view_within_xml"
     jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[0]}")
     jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[1]}")
 
@@ -170,8 +170,9 @@ def test_set_allocated_item_to_chain_within_xml(allocation_item_cell):
     # xml_adapter.parse_xml() returns mainly set(), so the order can change
     # thus we have to compare it with a set also
     result = set()
-    assert len(obj_dict['xml_chain_list']) == 1
-    for item in next(iter(obj_dict['xml_chain_list'])).allocated_item_list:
+    assert len(obj_dict['xml_view_list']) == 1
+    assert "test_view" in {i.name for i in obj_dict['xml_view_list']}
+    for item in next(iter(obj_dict['xml_view_list'])).allocated_item_list:
         for fun in obj_dict['xml_function_list']:
             if item == fun.id:
                 result.add(fun.name)
