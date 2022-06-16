@@ -11,6 +11,7 @@ from .functional_orchestrator import (create_function_obj, create_data_obj, crea
                                       create_fun_inter_obj)
 from .physical_orchestrator import (create_phy_elem_obj, create_phy_inter_obj)
 
+
 def cut_string_list(string_tuple_list):
     """From set of input command strings e.g for composition with input list as
     {(Function_name, Function_name_A), (Function_name, [Function_name_B, Function_name_C])} : this
@@ -391,8 +392,8 @@ def check_fun_elem(object_to_del, **kwargs):
     if not check_list[0]:
         print(f"{object_to_del.name} has composition relationship(s)")
 
-    check_list[1] = not object_to_del.allocated_function_list \
-                    and not object_to_del.allocated_state_list
+    check_list[1] = (not object_to_del.allocated_function_list and
+                     not object_to_del.allocated_state_list)
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
     if not check_list[1] or not check_list[2]:
         print(f"{object_to_del.name} has allocation relationship(s)")
