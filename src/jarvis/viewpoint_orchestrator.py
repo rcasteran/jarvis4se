@@ -64,25 +64,6 @@ def activate_view(view_name, xml_view_list):
             view.set_activation(False)
 
 
-def filter_allocated_item_from_view(xml_item_list, xml_view_list):
-    """For a type of item from xml, check if a View is activated and if the item is in its
-    allocated item's list"""
-    if not any(j.activated for j in xml_view_list):
-        return xml_item_list
-
-    filtered_items_list = []
-    for j in xml_view_list:
-        if j.activated:
-            for item in xml_item_list:
-                if item.id in j.allocated_item_list:
-                    filtered_items_list.append(item)
-
-    if filtered_items_list:
-        return filtered_items_list
-
-    return xml_item_list
-
-
 def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, xml_data_list,
                        xml_view_list, output_xml):
     """

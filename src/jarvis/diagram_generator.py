@@ -6,7 +6,6 @@ them to plantuml_adapter.py"""
 import re
 
 import plantuml_adapter
-from .viewpoint_orchestrator import filter_allocated_item_from_view
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
 
@@ -122,11 +121,17 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    if diagram_object_str in xml_function_name_list:
+    # Check view if activated and filter allocated item,
+    # if not activated then no item filtered
+    # if not any item under view return string
+    function_list = get_object_list_from_view(diagram_object_str,
+                                              kwargs['xml_function_list'],
+                                              kwargs['xml_view_list'])
+    if isinstance(function_list, str):
+        print(function_list)
+        return None
 
-        function_list = get_object_list_from_view(diagram_object_str,
-                                                  kwargs['xml_function_list'],
-                                                  kwargs['xml_view_list'])
+    if diagram_object_str in xml_function_name_list:
         consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
             kwargs['xml_data_list'],
             kwargs['xml_view_list'],
@@ -143,9 +148,6 @@ def case_decomposition_diagram(**kwargs):
                                                diagram_level=diagram_level)
 
     elif diagram_object_str in xml_fun_elem_name_list:
-        function_list = get_object_list_from_view(diagram_object_str,
-                                                  kwargs['xml_function_list'],
-                                                  kwargs['xml_view_list'])
         fun_elem_list = get_object_list_from_view(diagram_object_str,
                                                   kwargs['xml_fun_elem_list'],
                                                   kwargs['xml_view_list'])
@@ -206,6 +208,8 @@ def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_con
 def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
     """Returns current object's list by checking view"""
     output_list = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
+    if isinstance(output_list, str):
+        return output_list
 
     if len(xml_obj_list) == len(output_list):
         return xml_obj_list
@@ -253,9 +257,15 @@ def case_chain_diagram(**kwargs):
 
         elif result_function or result_state:
             if result_function:
+                # Check view if activated and filter allocated item,
+                # if not activated then no item filtered
+                # if not any item under view return string
                 function_list = get_object_list_from_view(object_list_str,
                                                           kwargs['xml_function_list'],
                                                           kwargs['xml_view_list'])
+                if isinstance(function_list, str):
+                    print(function_list)
+                    return None
                 consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
                     kwargs['xml_data_list'],
                     kwargs['xml_view_list'],
@@ -268,9 +278,13 @@ def case_chain_diagram(**kwargs):
                                                 producer_list,
                                                 kwargs['xml_type_list'])
             elif result_state:
+                # See above after "if result_function"
                 state_list = get_object_list_from_view(object_list_str,
                                                        kwargs['xml_state_list'],
                                                        kwargs['xml_view_list'])
+                if isinstance(state_list, str):
+                    print(state_list)
+                    return None
                 transition_list = filter_allocated_item_from_view(kwargs['xml_transition_list'],
                                                                   kwargs['xml_view_list'])
                 filename = show_states_chain(object_list_str, state_list,
@@ -291,9 +305,16 @@ def case_sequence_diagram(**kwargs):
                 any(s == object_list_str[0] for s in get_objects_names(kwargs['xml_fun_inter_list'])):
             filename = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
+            # Check view if activated and filter allocated item,
+            # if not activated then no item filtered
+            # if not any item under view return string
+            xml_data_list = filter_allocated_item_from_view(kwargs['xml_data_list'],
+                                                            kwargs['xml_view_list'])
+            if isinstance(xml_data_list, str):
+                print(xml_data_list)
+                return None
             if all(i in get_objects_names(kwargs['xml_function_list']) for i in object_list_str):
-                xml_data_list = filter_allocated_item_from_view(
-                    kwargs['xml_data_list'], kwargs['xml_view_list'])
+
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
                     xml_cons = [i for i in kwargs['xml_consumer_function_list']
                                 if any(a == i[0] for a in [d.name for d in xml_data_list])]
@@ -309,8 +330,6 @@ def case_sequence_diagram(**kwargs):
                                                    xml_data_list)
 
             elif all(i in get_objects_names(kwargs['xml_fun_elem_list']) for i in object_list_str):
-                xml_data_list = filter_allocated_item_from_view(
-                    kwargs['xml_data_list'], kwargs['xml_view_list'])
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
                     kwargs['xml_consumer_function_list'] = \
                         [i for i in kwargs['xml_consumer_function_list']
@@ -1183,3 +1202,24 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
 
     else:
         print(f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")
+
+
+def filter_allocated_item_from_view(xml_item_list, xml_view_list):
+    """For a type of item from xml, check if a View is activated and if the item is in its
+    allocated item's list"""
+    if not any(j.activated for j in xml_view_list):
+        return xml_item_list
+
+    filtered_items_list = []
+    activated_view = ''
+    for view in xml_view_list:
+        if view.activated:
+            activated_view = view.name
+            for item in xml_item_list:
+                if item.id in view.allocated_item_list:
+                    filtered_items_list.append(item)
+
+    if filtered_items_list:
+        return filtered_items_list
+
+    return f"View {activated_view} does not contain any elements"
