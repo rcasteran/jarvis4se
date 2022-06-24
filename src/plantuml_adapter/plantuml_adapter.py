@@ -177,9 +177,7 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     string_obj.create_output_flow(output_flow_list)
     string_obj.create_data_flow(data_flow_list)
 
-    diagram_url = string_obj.generator.get_diagram_path_or_url(string_obj.string)
-
-    return string_obj.string, diagram_url
+    return string_obj.string
 
 
 def check_function_type(function, xml_type_list):
@@ -201,7 +199,7 @@ def check_function_type(function, xml_type_list):
 def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
                                  data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
                                  fun_elem_inter_list):
-    """Returns plantuml_text, diagram_url for fun_elem_context"""
+    """Returns plantuml_text for fun_elem_context"""
     string_obj = ObjDiagram()
     if fun_inter_list:
 
@@ -249,9 +247,7 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     if fun_elem_inter_list:
         string_obj.create_interface(fun_elem_inter_list)
 
-    diagram_url = string_obj.generator.get_diagram_path_or_url(string_obj.string)
-
-    return string_obj.string, diagram_url
+    return string_obj.string
 
 
 def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list, fun_elem_list):
@@ -415,7 +411,7 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
             data_list ([Data]) : Data list from xml
             fun_inter_list ([Functional Interface]) : Functional interface list from xml
         Returns:
-            diagram_url (url_str) : Url can be local(big diagram) or visible via plantuml server
+            string (str) : plantuml string
     """
     string_obj = ObjDiagram()
     interface_list = None
@@ -453,25 +449,7 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     if interface_list:
         string_obj.create_interface(interface_list)
 
-    diagram_url = string_obj.generator.get_diagram_path_or_url(string_obj.string)
-
-    return diagram_url, string_obj.string
-
-
-def get_url_from_string(diagram_str, from_diagram_cell=False):
-    """
-    Return diagram url from its string.
-        Parameters:
-            diagram_str (string) : Plantuml diagram string
-            from_diagram_cell (bool): If comming from %%diagram no skin param and user has to
-            specify tags @startuml @enduml
-        Returns:
-            diagram_url (string) : Url can be local(big diagram) or hosted by plantuml server
-    """
-    string_obj = ObjDiagram()
-    string_obj.string = diagram_str
-    diagram_url = string_obj.generator.get_diagram_path_or_url(string_obj.string, from_diagram_cell)
-    return diagram_url
+    return string_obj.string
 
 
 def get_sequence_diagram(function_list, consumer_function_list, producer_function_list,
@@ -494,11 +472,7 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
 
     seq_obj_string.create_sequence_message(ordered_message_list)
 
-    if str_out:
-        return seq_obj_string.string, ''
-
-    diagram_url = seq_obj_string.generator.get_diagram_path_or_url(seq_obj_string.string)
-    return seq_obj_string.string, diagram_url
+    return seq_obj_string.string
 
 
 def get_predecessor_list(data):
@@ -806,9 +780,7 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
             state_obj_string.create_transition([p])
             objects_conditions_list.remove(p)
 
-    diagram_url = state_obj_string.generator.get_diagram_path_or_url(state_obj_string.string)
-
-    return state_obj_string.string, diagram_url
+    return state_obj_string.string
 
 
 def get_objects_conditions_list(xml_state_list, xml_transition_list):

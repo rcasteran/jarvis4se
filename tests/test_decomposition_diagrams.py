@@ -50,7 +50,7 @@ def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
                          "show decomposition F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = ['object "F3" as f3 <<Function>>\n',
                 'component "F1" as f1 <<Function>>{\n',
                 'object "F1c" as f1c <<Function>>\n',
@@ -162,7 +162,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
                          "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
+    result = spy.spy_return
     expected = ['component "E1" as e1 <<Functional element>>{\n',
                 'object "F2" as f2 <<Function>>\n',
                 'component "E1b" as e1b <<Functional element>>{\n',
@@ -211,7 +211,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
                          "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
+    result = spy.spy_return
     expected = ['component "E1" as e1 <<Functional element>>{\n',
                 '}\n']
 
@@ -337,7 +337,7 @@ def test_fun_elem_decompo_with_interface(mocker):
                          "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[1]  # Second element returned by get_fun_elem_decomposition()
+    result = spy.spy_return
     expected = ['component "E1" as e1 <<Functional element>>{\n',
                 'component "E1c" as e1c <<Functional element>>{\n',
                 'component "E1c1" as e1c1 <<Functional element>>{\n',

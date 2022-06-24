@@ -5,7 +5,6 @@ jarvi4se"""
 # Libraries
 import re
 import os
-import shutil
 import getpass
 from datetime import datetime
 from io import StringIO
@@ -92,20 +91,3 @@ def greet_user():
     elif 16 <= hour < 19:
         print(f"Good Evening {user_name}")
     print("I am Jarvis. How may I assist you?")
-
-
-def clean_diagram_folder():
-    """Clean/erase all files within Diagram's folder"""
-    folder = './Diagrams'
-    if not os.path.exists(folder):
-        os.mkdir(folder)
-    else:
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.remove(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as err:
-                print(f"Failed to delete {file_path}. Reason: {err}")

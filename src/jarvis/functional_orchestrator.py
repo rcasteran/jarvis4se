@@ -72,7 +72,7 @@ def create_data_obj(data_str, specific_obj_type, **kwargs):
     return 0
 
 
-def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_list, output_xml):
+def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list, output_xml):
     """
     Check if each string in data_predecessor_str_set is corresponding to an actual Data object,
     create new [Data, predecessor] objects lists for object's type : Data.
@@ -81,7 +81,7 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
         Parameters:
             data_predecessor_str_set ([str]) : Lists of string from jarvis cell
             xml_data_list ([Data]) : Data list from xml parsing
-            xml_chain_list ([View]) : View list from xml parsing
+            xml_view_list ([View]) : View list from xml parsing
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
@@ -96,7 +96,6 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
     # Create data names list already in xml
     xml_data_name_list = get_objects_names(xml_data_list)
 
-    is_elem_found = False
     for elem in data_predecessor_str_list:
         is_elem_found = True
         if elem[0] not in xml_data_name_list:
@@ -110,29 +109,28 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_chain_lis
                 is_elem_found = False
                 print(f"{elem[1]} does not exist")
 
-    if is_elem_found:
-        for d, p in data_predecessor_str_list:
+        if is_elem_found:
             predecessor = None
             selected_data = None
             existing_predecessor_id_list = []
             for data in xml_data_list:
-                if d == data.name:
+                if elem[0] == data.name:
                     selected_data = data
                     for existing_predecessor in data.predecessor_list:
                         existing_predecessor_id_list.append(existing_predecessor.id)
             for da in xml_data_list:
-                if p == da.name and da.id not in existing_predecessor_id_list:
+                if elem[1] == da.name and da.id not in existing_predecessor_id_list:
                     predecessor = da
             if predecessor is not None and selected_data is not None:
                 data_predecessor_list.append([selected_data, predecessor])
-            allocation_chain_1 = shared_orchestrator.check_add_allocated_item(d,
+            allocation_chain_1 = shared_orchestrator.check_add_allocated_item(elem[0],
                                                                               xml_data_list,
-                                                                              xml_chain_list)
+                                                                              xml_view_list)
             if allocation_chain_1:
                 allocated_item_list.append(allocation_chain_1)
-            allocation_chain_2 = shared_orchestrator.check_add_allocated_item(p,
+            allocation_chain_2 = shared_orchestrator.check_add_allocated_item(elem[1],
                                                                               xml_data_list,
-                                                                              xml_chain_list)
+                                                                              xml_view_list)
             if allocation_chain_2:
                 allocated_item_list.append(allocation_chain_2)
 

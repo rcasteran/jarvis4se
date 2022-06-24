@@ -2,10 +2,10 @@
 from IPython import get_ipython
 
 import jarvis
-import tools
 
 ip = get_ipython()
-my_magic = jarvis.MagicTools(ip)
+generator = jarvis.PlantUmlGen()
+my_magic = jarvis.MagicTools(ip, generator)
 
 
 def test_retrieve_pkg_version(capsys):
@@ -39,7 +39,7 @@ def test_diagram_cell(capsys, mocker):
     WAIT -down-> JunctionAnd
     @enduml
     """
-    spy = mocker.spy(tools, "get_url_from_string")
+    spy = mocker.spy(generator, "get_diagram_url")
     my_magic.diagram('', "@startuml\n"
                          "!define Junction_Or circle #black\n"
                          "!define Junction_And circle #whitesmoke\n"

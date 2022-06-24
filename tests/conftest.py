@@ -10,7 +10,8 @@ import jarvis
 def get_jarvis4se():
     """Start an ipython session, init parser and jarvis4se(MagicJarvis), returns jarvi4se"""
     ip = get_ipython()
-    parser = jarvis.command_parser.CmdParser()
+    generator = jarvis.PlantUmlGen()
+    parser = jarvis.command_parser.CmdParser(generator)
     my_magic = jarvis.MagicJarvis(ip, parser)
     return my_magic
 

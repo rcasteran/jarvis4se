@@ -19,7 +19,7 @@ def test_simple_function_context(mocker):
                          "F1 is a function\n"
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = 'object "F1" as f1 <<Function>>\n'
     assert expected in result
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
@@ -61,7 +61,7 @@ def test_simple_function_context_in_out(mocker):
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = 'object "F1" as f1 <<Function>>\n' \
                'circle f1_i\n' \
                'circle f1_o\n' \
@@ -106,7 +106,7 @@ def test_function_context_with_attribute(mocker):
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "show context F1\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = ['object "F1" as f1 <<Function>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
 
     assert all(i in result for i in expected)
@@ -152,7 +152,7 @@ def test_fun_elem_context_with_attribute(mocker):
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "show context Fun elem\n")
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = ['component "Fun elem" as fun_elem <<Functional element>>{\n',
                 'object "F1" as f1 <<Function>> {\n',
                 'A = 4,2\n',
@@ -196,7 +196,7 @@ def test_function_context_with_grandkids(mocker, function_grandkids_cell):
                          f"show context F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_function_diagrams()
+    result = spy.spy_return
     expected = ['object "F1" as f1 <<Function>>\n',
                 'circle f1_i\n',
                 'circle f1_o\n',
@@ -267,7 +267,7 @@ def test_fun_elem_context_with_interfaces(mocker):
                          "show context Fun_elem_1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+    result = spy.spy_return
     expected = ['component "Fun_elem_2" as fun_elem_2 <<Functional element>>{\n',
                 'object "F2" as f2 <<Function>>\n',
                 '}\n',
@@ -311,7 +311,7 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
                          "show context E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+    result = spy.spy_return
     expected = ['component "E" as e <<Functional element>>{\n',
                 '}\n',
                 'component "E1" as e1 <<Functional element>>{\n',
@@ -382,7 +382,7 @@ def test_fun_elem_context_interface_not_exposed(mocker):
                          "show context E2\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+    result = spy.spy_return
     expected = ['component "E" as e <<Functional element>>{\n',
                 'object "F" as f <<Function>>\n',
                 '}\n',
@@ -449,7 +449,7 @@ def test_fun_elem_context_interface_with_child(mocker):
                          "show context E\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from get_fun_elem_context_diagram()
+    result = spy.spy_return
     expected = ['component "E" as e <<Functional element>>{\n',
                 'object "F" as f <<Function>>\n',
                 '}\n',

@@ -12,7 +12,7 @@ from .diagram_generator import filter_show_command
 
 
 class CmdParser:
-    def __init__(self):
+    def __init__(self, generator):
         self.commands = [
             (r"(under.*)", self.matched_under),
 
@@ -61,7 +61,7 @@ class CmdParser:
 
             (r"The (source|destination) of (.*?) is ([^\.\n]*)", matched_src_dest),
 
-            (r"(?<= |\n)show (.*?)\n", matched_show),
+            (r"(?<= |\n)show (.*?)\n", self.matched_show),
 
             (r"\s([A-Za-z\s].*\?)", matched_question_mark),
 
@@ -74,6 +74,8 @@ class CmdParser:
         self.reverse = (r"([^\. \.\n]*) composes ([^\.\n]*)", r"([^\. \.\n]*) consumes ([^\.\n]*)",
                         r"([^\. \.\n]*) produces ([^\.\n]*)",
                         r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)")
+
+        self.generator = generator
 
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
@@ -123,6 +125,16 @@ class CmdParser:
             return 1
 
         return 0
+
+    def matched_show(self, diagram_name_str, **kwargs):
+        """Get "show" declaration"""
+        out = filter_show_command(diagram_name_str, **kwargs)
+        if out:
+            url = self.generator.get_diagram_url(out)
+            hyper = get_hyperlink(url)
+            display(HTML(hyper))
+            print("Overview :")
+            display(Markdown(f'![figure]({url})'))
 
 
 def matched_extend(type_str_list, **kwargs):
@@ -275,16 +287,6 @@ def matched_src_dest(src_dest_str, **kwargs):
                                                      kwargs['xml_state_list'],
                                                      kwargs['output_xml'])
     return out
-
-
-def matched_show(diagram_name_str, **kwargs):
-    """Get "show" declaration"""
-    out = filter_show_command(diagram_name_str, **kwargs)
-    if out:
-        hyper = get_hyperlink(out)
-        display(HTML(hyper))
-        print("Overview :")
-        display(Markdown(f'![figure]({out})'))
 
 
 def get_hyperlink(path):

@@ -375,7 +375,7 @@ def case_state_sequence_diagram(**kwargs):
                                                  kwargs['xml_consumer_function_list'],
                                                  kwargs['xml_producer_function_list'],
                                                  kwargs['xml_data_list'])
-
+        return filename
     else:
         print(f"Jarvis does not know the State {kwargs['diagram_object_str']}")
 
@@ -440,11 +440,11 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                 xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
                                 xml_data_list, xml_fun_inter_list, diagram_level=None):
     """Creates lists with desired objects for <functional_element> decomposition, send them to
-    plantuml_adapter.py then returns url_diagram"""
-    url_diagram = None
+    plantuml_adapter.py then returns plantuml_text"""
+    plantuml_text = None
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
-        return url_diagram
+        return plantuml_text
     main_fun_elem.parent = None
 
     if diagram_level:
@@ -470,16 +470,16 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
         external_function_list, xml_fun_elem_list = set(), set()
         new_consumer_list, new_producer_list = [], []
 
-    url_diagram, _ = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
-                                                                 allocated_function_list,
-                                                                 new_consumer_list,
-                                                                 new_producer_list,
-                                                                 external_function_list,
-                                                                 xml_attribute_list,
-                                                                 xml_data_list,
-                                                                 xml_fun_inter_list)
-    print("Decomposition Diagram for " + fun_elem_str + " generated")
-    return url_diagram
+    plantuml_text = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
+                                                                allocated_function_list,
+                                                                new_consumer_list,
+                                                                new_producer_list,
+                                                                external_function_list,
+                                                                xml_attribute_list,
+                                                                xml_data_list,
+                                                                xml_fun_inter_list)
+    print(f"Decomposition Diagram for {fun_elem_str} generated")
+    return plantuml_text
 
 
 def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, xml_fun_elem_list):
@@ -555,7 +555,7 @@ def get_ext_cons_prod(producer_list, consumer_list, xml_producer_function_list,
 def show_state_allocated_function(state_str, state_list, function_list, xml_consumer_function_list,
                                   xml_producer_function_list, xml_data_list):
     """Creates lists with desired objects for <state> function's allocation, send them to
-    plantuml_adapter.py then returns url_diagram"""
+    plantuml_adapter.py then returns plantuml_text"""
     allocated_function_id_list = set()
     state_name = ''
     for state in state_list:
@@ -575,25 +575,24 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
                                           xml_consumer_function_list, xml_producer_function_list,
                                           xml_data_list, True)
 
-    diagram_str = f'box "{state_name}"\n' + diagram_str + "end box\n"
-    url_diagram = plantuml_adapter.get_url_from_string(diagram_str)
-    print("Function Sequence Diagram for " + state_str + " generated")
-    return url_diagram
+    diagram_str = f'box "{state_name}"\n{diagram_str}end box\n'
+    print(f"Function Sequence Diagram for {state_str} generated")
+    return diagram_str
 
 
 def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
                            xml_consumer_function_list, xml_producer_function_list, xml_type_list):
     """Creates lists with desired objects for <functional_element> function's allocation,
-    send them to plantuml_adapter.py then returns url_diagram"""
-    url_diagram = None
+    send them to plantuml_adapter.py then returns plantuml_text"""
+    plantuml_text = None
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
-        return url_diagram
+        return plantuml_text
 
     if not main_fun_elem.allocated_function_list:
         print(f"No function allocated to {main_fun_elem.name} (no display)")
-        return url_diagram
+        return plantuml_text
 
     main_fun_elem.parent = None
     main_fun_elem.child_list.clear()
@@ -601,7 +600,7 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
                          if f.id in main_fun_elem.allocated_function_list and f.parent is None}
     if not new_function_list:
         print(f"No parent function allocated to {main_fun_elem.name} (no display)")
-        return url_diagram
+        return plantuml_text
 
     new_consumer_list = get_cons_or_prod_paired(new_function_list,
                                                 xml_consumer_function_list,
@@ -611,13 +610,13 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
                                                 xml_producer_function_list,
                                                 xml_consumer_function_list)
 
-    _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                            new_consumer_list,
-                                                            new_producer_list,
-                                                            {}, None, xml_type_list)
+    plantuml_text = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                           new_consumer_list,
+                                                           new_producer_list,
+                                                           {}, None, xml_type_list)
 
-    print("Function Diagram for " + fun_elem_str + " generated")
-    return url_diagram
+    print(f"Function Diagram for {fun_elem_str} generated")
+    return plantuml_text
 
 
 def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list):
@@ -640,7 +639,7 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                           xml_consumer_function_list, xml_producer_function_list,
                           xml_attribute_list, xml_fun_inter_list, xml_data_list):
     """Creates lists with desired objects for <functional_element> context, send them to
-    plantuml_adapter.py then returns url_diagram"""
+    plantuml_adapter.py then returns plantuml_text"""
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
@@ -670,16 +669,16 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
         if any(a == elem for a in main_fun_elem.child_list):
             fun_elem_list.remove(elem)
 
-    _, url_diagram = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
-                                                                   cons,
-                                                                   prod,
-                                                                   xml_data_list,
-                                                                   xml_attribute_list,
-                                                                   fun_elem_list,
-                                                                   interface_list,
-                                                                   fun_elem_inter_list)
-    print("Context Diagram for " + fun_elem_str + " generated")
-    return url_diagram
+    plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
+                                                                  cons,
+                                                                  prod,
+                                                                  xml_data_list,
+                                                                  xml_attribute_list,
+                                                                  fun_elem_list,
+                                                                  interface_list,
+                                                                  fun_elem_inter_list)
+    print(f"Context Diagram for {fun_elem_str} generated")
+    return plantuml_text
 
 
 def get_allocated_function_context_lists(allocated_function_list,
@@ -750,7 +749,7 @@ def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
 def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_list,
                                 xml_fun_elem_list):
     """Creates lists with desired objects for <functional_element> state, send them to
-    plantuml_adapter.py then returns url_diagram"""
+    plantuml_adapter.py then returns plantuml_text"""
     new_fun_elem_list = set()
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
@@ -766,11 +765,11 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
 
     new_transition_list = get_transitions(new_state_list, xml_transition_list)
 
-    _, url_diagram = plantuml_adapter.get_state_machine_diagram(new_state_list,
-                                                                new_transition_list,
-                                                                xml_fun_elem_list)
-    print("State Machine Diagram for " + fun_elem_str + " generated")
-    return url_diagram
+    plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
+                                                               new_transition_list,
+                                                               xml_fun_elem_list)
+    print(f"State Machine Diagram for {fun_elem_str} generated")
+    return plantuml_text
 
 
 def get_transitions(state_list, xml_transition_list):
@@ -788,7 +787,7 @@ def get_transitions(state_list, xml_transition_list):
 
 def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
     """Creates lists with desired objects for <states> chain, send them to plantuml_adapter.py
-    then returns url_diagram"""
+    then returns plantuml_text"""
     new_state_list = set()
     for state_str in state_list_str:
         for state in xml_state_list:
@@ -799,20 +798,20 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
 
     new_transition_list = get_transitions(new_state_list, xml_transition_list)
 
-    _, url_diagram = plantuml_adapter.get_state_machine_diagram(new_state_list,
-                                                                new_transition_list)
+    plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
+                                                               new_transition_list)
     spaced_state_list = ", ".join(state_list_str)
     if len(state_list_str) == 1:
-        print("Context Diagram " + str(spaced_state_list) + " generated")
+        print(f"Context Diagram {str(spaced_state_list)} generated")
     else:
-        print("Chain Diagram " + str(spaced_state_list) + " generated")
-    return url_diagram
+        print(f"Chain Diagram {str(spaced_state_list)} generated")
+    return plantuml_text
 
 
 def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_function_list,
                             xml_producer_function_list, xml_data_list, str_out=False):
     """Creates lists with desired objects for <functions> sequence, send them to plantuml_adapter.py
-    then returns url_diagram"""
+    then returns plantuml_text"""
     new_function_list = set()
 
     for i in function_list_str:
@@ -839,17 +838,15 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
             if pred not in new_data_list:
                 new_data.predecessor_list.remove(pred)
 
-    plant_uml_text, url_diagram = plantuml_adapter.get_sequence_diagram(new_function_list,
-                                                                        new_consumer_list,
-                                                                        new_producer_list,
-                                                                        {},
-                                                                        new_data_list, str_out)
-    if str_out:
-        out = plant_uml_text
-    else:
-        out = url_diagram
+    plantuml_text = plantuml_adapter.get_sequence_diagram(new_function_list,
+                                                          new_consumer_list,
+                                                          new_producer_list,
+                                                          {},
+                                                          new_data_list, str_out)
+    if not str_out:
         print("Sequence Diagram " + str(", ".join(function_list_str)) + " generated")
-    return out
+
+    return plantuml_text
 
 
 def show_functions_chain(function_list_str, xml_function_list, xml_consumer_function_list,
@@ -881,15 +878,15 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
                                 [xml_producer_flow, fun] not in xml_consumer_function_list:
                             new_producer_list.append([xml_producer_flow, fun])
 
-    _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                            new_consumer_list,
-                                                            new_producer_list,
-                                                            new_parent_dict,
-                                                            None,
-                                                            xml_type_list)
-    spaced_function_list = ", ".join(function_list_str)
-    print("Chain Diagram " + str(spaced_function_list) + " generated")
-    return url_diagram
+    plantuml_text = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                           new_consumer_list,
+                                                           new_producer_list,
+                                                           new_parent_dict,
+                                                           None,
+                                                           xml_type_list)
+
+    print(f'Chain Diagram {str(", ".join(function_list_str))} generated')
+    return plantuml_text
 
 
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
@@ -937,16 +934,16 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                 if j not in new_function_list:
                     function.child_list.remove(j)
 
-    _, url_diagram = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                            new_consumer_list,
-                                                            new_producer_list,
-                                                            new_parent_dict,
-                                                            None,
-                                                            xml_type_list,
-                                                            xml_attribute_list=xml_attribute_list)
+    plantuml_text = plantuml_adapter.get_function_diagrams(new_function_list,
+                                                           new_consumer_list,
+                                                           new_producer_list,
+                                                           new_parent_dict,
+                                                           None,
+                                                           xml_type_list,
+                                                           xml_attribute_list=xml_attribute_list)
 
-    print("Decomposition Diagram " + diagram_function_str + " generated")
-    return url_diagram
+    print(f"Decomposition Diagram {diagram_function_str} generated")
+    return plantuml_text
 
 
 def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, xml_flow_list,
@@ -1088,7 +1085,7 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
     if list_out:
         out = new_function_list, new_consumer_list, new_producer_list
     else:
-        plant_uml_text, url_diagram = plantuml_adapter.get_function_diagrams(
+        plantuml_text = plantuml_adapter.get_function_diagrams(
             new_function_list,
             new_consumer_list,
             new_producer_list,
@@ -1097,8 +1094,8 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
             xml_type_list,
             xml_attribute_list=xml_attribute_list)
 
-        out = url_diagram
-        print("Context Diagram " + diagram_function_str + " generated")
+        out = plantuml_text
+        print(f"Context Diagram {diagram_function_str} generated")
     return out
 
 
@@ -1111,7 +1108,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
         **kwargs: whole lists
 
     Returns:
-        url_diagram : url diagram from plantuml default server or local path
+        plantuml_text (str) : plantuml text
     """
     new_consumer_list = []
     new_producer_list = []
@@ -1135,14 +1132,14 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
                 new_fun_elem_list.add(fun_elem_prod)
 
     if new_consumer_list and new_producer_list:
-        url_diagram = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
-                                                            new_consumer_list,
-                                                            new_producer_list,
-                                                            {},
-                                                            kwargs['xml_data_list'])
+        plantuml_text = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
+                                                              new_consumer_list,
+                                                              new_producer_list,
+                                                              {},
+                                                              kwargs['xml_data_list'])
 
-        if url_diagram[1]:
-            return url_diagram[1]
+        return plantuml_text
+
     else:
         print(f"No data found for {fun_inter.name}")
 
@@ -1156,7 +1153,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
         **kwargs: whole lists
 
     Returns:
-        url_diagram : url diagram from plantuml default server or local path
+        plantuml_text (str) : plantuml_text
     """
     new_consumer_list = []
     new_producer_list = []
@@ -1191,14 +1188,13 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
                         new_producer_list.append([elem['Data'], fun_elem_prod])
 
     if new_consumer_list and new_producer_list:
-        url_diagram = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
-                                                            new_consumer_list,
-                                                            new_producer_list,
-                                                            {},
-                                                            kwargs['xml_data_list'])
+        plantuml_text = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
+                                                              new_consumer_list,
+                                                              new_producer_list,
+                                                              {},
+                                                              kwargs['xml_data_list'])
 
-        if url_diagram[1]:
-            return url_diagram[1]
+        return plantuml_text
 
     else:
         print(f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")

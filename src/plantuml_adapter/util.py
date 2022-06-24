@@ -3,32 +3,94 @@
 """Module to write plantuml text and write plantuml text within file"""
 # Libraries
 import os
+import re
 import inspect
 import pathlib
-import uuid
 import subprocess
-
+from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 from plantuml import PlantUML
 
 
-class PlantUmlGen:
-    """Class to generate PLantuml string/.txt and .svg/url diagram"""
-    # Open(or create) output file in root folder
+class PlantUmlPicoServer:
+    """Class that looks for .jar file in root, check version and handle local PlantUML PicoWeb
+    Server (https://plantuml.com/en/picoweb)"""
     def __init__(self):
-        """Init server, uuid and path"""
-        # Quickest by HTTP request to plantuml server (only for small diagrams)
-        self.server = PlantUML(url='http://www.plantuml.com/plantuml/svg/',
+        """If . jar, get it, check if picoweb is running, if not start new process else default url
+        to online plantuml server"""
+        jar_file = self.get_jar()
+        if not jar_file:
+            self.url = 'http://www.plantuml.com/plantuml/svg/'
+        else:
+            self.plantuml_jar_path = str(pathlib.Path(f'./{jar_file}'))
+            self.version_cmd = ['java', '-jar', self.plantuml_jar_path, '-version']
+            pico_cmd = ['java', '-DPLANTUML_LIMIT_SIZE=20000', '-jar', self.plantuml_jar_path,
+                        '-picoweb']
+
+            self.check_version()
+            # Default localhost pico server
+            self.url = "http://127.0.0.1:8080/plantuml/svg/"
+            # Check if pico is running
+            check_pico = False
+            try:
+                with urlopen(f"{self.url}", timeout=1):
+                    pass
+            except HTTPError:
+                pass
+            except URLError:
+                pass
+            except TimeoutError:
+                pass
+            else:
+                check_pico = True
+            if not check_pico:
+                self.process = subprocess.Popen(pico_cmd)
+
+    @classmethod
+    def get_jar(cls):
+        """Get .jar file(s) in root and return first one if 'plantuml' in filename"""
+        end_message = ", large diagrams will not be displayed.\n" \
+                      "See: " \
+                      "https://github.com/rcasteran/jarvis4se/blob/main/docs/installation.md"
+        list_dir = os.listdir('.')
+        if not any('.jar' in f for f in list_dir):
+            print(f"WARNING:\nNot any .jar found for plantuml in root{end_message}")
+            return None
+        jar_list = [f.string for f in [re.search("plantuml.*jar", i) for i in list_dir] if f]
+        if not jar_list:
+            print(f"WARNING:\nNot any .jar found with 'plantuml' in its name{end_message}")
+            return None
+        # Return first filename with plantuml in it
+        return jar_list.pop(0)
+
+    def check_version(self):
+        """Get .jar version and check with latest release"""
+        jar_version = subprocess.run(
+            self.version_cmd, capture_output=True, encoding="utf-8").stdout[17:25]
+        github_url = "https://github.com/plantuml/plantuml/releases/latest"
+        with urlopen(f"{github_url}") as rep:
+            release_ver = str(rep.geturl())[-8:]
+
+        if int(release_ver[0]) > int(jar_version[0]) or \
+                int(release_ver[2:6]) > int(jar_version[2:6]) or \
+                int(release_ver[7:len(release_ver)]) > int(jar_version[7:len(jar_version)]):
+            print(f"WARNING:\nPlantUml .jar is not up-to-date, see latest release {github_url}")
+
+
+class PlantUmlGen(PlantUmlPicoServer):
+    """Class to encode PLantuml text and get server url as .svg"""
+    def __init__(self):
+        """Init pico server from PlantUMLPicoServer if .jar found or default online plantuml,
+        send it to Plantuml for encoding and HTTP handling"""
+        super().__init__()
+        # PlantUML has encoding and handling errors
+        self.server = PlantUML(url=self.url,
                                basic_auth={},
                                form_auth={}, http_opts={}, request_opts={})
-        # Generate and set unique identifier of length 10 integers
-        identi = uuid.uuid4()
-        self.identi = str(identi.int)[:10]
-        self.current_file_path = str(pathlib.Path('./Diagrams/Diagram' + self.identi + '.txt'))
-        self.plantuml_jar_path = str(pathlib.Path('./plantuml.jar'))
 
-    def get_diagram_path_or_url(self, string, from_diagram_cell=False):
-        """Generate unique .svg from string using  plantuml default server or plantuml.jar client,
-        depending on the diagram's size (limit around 15000 char.)
+    def get_diagram_url(self, string, from_diagram_cell=False):
+        """
+        Generate .svg from string using  plantuml default server or plantuml.jar picoweb
         """
         if not from_diagram_cell:
             full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
@@ -36,31 +98,18 @@ class PlantUmlGen:
         else:
             full_string = string
 
-        if len(string) < 15000:
-            out = self.server.get_url(full_string)
-        else:
-            with open(self.current_file_path, 'w+', encoding="utf8") as my_file:
-                my_file.write(full_string)
-                my_file.close()
-            subprocess.check_output(
-                ['java', '-DPLANTUML_LIMIT_SIZE=20000', '-jar', self.plantuml_jar_path,
-                 f'{self.current_file_path}', '-tsvg'])
-            out = str(self.current_file_path).replace(".txt", ".svg")
-            if not os.path.isfile(out):
-                print("Diagram not generated")
-                return None
+        if len(string) > 15000 and not self.plantuml_jar_path:
+            print(f"Diagram is too large to be display with Plantuml Online Server, "
+                  f"please consider download https://plantuml.com/fr/download .jar")
+            return None
 
-            if os.path.isfile(out):
-                os.remove(self.current_file_path)
-
-        return out
+        return self.server.get_url(full_string)
 
 
 class StateDiagram:
     """Class for plantuml State diagram"""
     def __init__(self):
-        """Init string and PLantumlGen()"""
-        self.generator = PlantUmlGen()
+        """Init string"""
         self.string = inspect.cleandoc("""skinparam useBetaStyle true
                                             hide empty description
                                             <style>
@@ -123,9 +172,8 @@ class StateDiagram:
 class SequenceDiagram:
     """Class for plantuml sequence diagram"""
     def __init__(self):
-        """Init string and PLantumlGen()"""
-        self.generator = PlantUmlGen()
-        # Allow plantuml option to put duration between 2 messages
+        """Init string"""
+        # Allow plantuml option to put duration between 2 messages (not used yet)
         self.string = "!pragma teoz true\n"
 
     def append_string(self, *string_list):
@@ -166,8 +214,7 @@ class SequenceDiagram:
 class ObjDiagram:
     """Class for plantuml object/component diagram"""
     def __init__(self):
-        """Init string and PLantumlGen()"""
-        self.generator = PlantUmlGen()
+        """Init string"""
         self.string = ""
 
     def append_string(self, *string_list):

@@ -65,7 +65,7 @@ def test_fun_inter_simple_sequence(mocker):
                          "show sequence Fun_inter\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
-    result = spy.spy_return[0]  # First element from returned values by get_sequence_diagram()
+    result = spy.spy_return
     expected = ['!pragma teoz true\n',
                 'participant fun_elem_1 <<Functional element>>\n',
                 'participant fun_elem_2 <<Functional element>>\n',
