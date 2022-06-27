@@ -16,7 +16,7 @@ class CmdParser:
         self.commands = [
             (r"(under.*)", self.matched_under),
 
-            (r"(?<= |\n)(.*?) extends ([^\.\n]*)", matched_extend),
+            (r"(?<= |\n)(.*?) extends ([^.|\n]*)", matched_extend),
 
             (r"(?<= |\n)(.*?) is a ([^state|transition][^\.\n]*)",
              matched_specific_obj),
@@ -27,53 +27,54 @@ class CmdParser:
 
             (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)", matched_attribute),
 
-            (r"(?<= |\n)(.*?) inherits from ([^\.\n]*)", matched_inherits),
+            (r"(?<= |\n)(.*?) inherits from ([^.|\n]*)", matched_inherits),
 
-            (r"The alias of (.*?) is ([^\.\n]*)", matched_alias),
+            (r"The alias of (.*?) is ([^.|\n]*)", matched_alias),
 
-            (r"(?<= |\n)consider ([^\.\n]*)", matched_consider),
+            (r"(?<= |\n)consider ([^.|\n]*)", matched_consider),
 
-            (r"([^\. \.\n]*) is composed of ([^\.\n]*)", matched_composition),
+            (r"([^\. \.\n]*) is composed of ([^.|\n]*)", matched_composition),
 
-            (r"([^\. \.\n]*) composes ([^\.\n]*)", matched_composition),
+            (r"([^. |.|\n].*) composes ([^.|\n]*)", matched_composition),
 
-            (r"([^\. \.\n]*) consumes ([^\.\n]*)", matched_consumer),
+            (r"([^. |.|\n].*) consumes ([^.|\n]*)", matched_consumer),
 
-            (r"([^\. \.\n]*) is an input of ([^\.\n]*)", matched_consumer),
+            (r"([^. |.|\n].*) is an input of ([^.|\n]*)", matched_consumer),
 
-            (r"([^\. \.\n]*) produces ([^\.\n]*)", matched_producer),
+            (r"([^. |.|\n].*) produces ([^.|\n]*)", matched_producer),
 
-            (r"([^\. \.\n]*) is an output of ([^\.\n]*)", matched_producer),
+            (r"([^. |.|\n].*) is an output of ([^.|\n]*)", matched_producer),
 
-            (r"(?<= |\n)(.*?) exposes ([^\.\n]*)", matched_exposes),
+            (r"(?<= |\n)(.*?) exposes ([^.|\n]*)", matched_exposes),
 
-            (r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)", matched_allocation),
+            (r"(?<= |\n)(.*?) is allocated to ([^.|\n]*)", matched_allocation),
 
-            (r"(?<= |\n)(.*?) allocates ([^\.\n]*)", matched_allocation),
+            (r"(?<= |\n)(.*?) allocates ([^.|\n]*)", matched_allocation),
 
-            (r"(?<= |\n)delete ([^\.\n]*)", matched_delete),
+            (r"(?<= |\n)delete ([^.|\n]*)", matched_delete),
 
-            (r"The type of (.*?) is ([^\.\n]*)", matched_type),
+            (r"The type of (.*?) is ([^.|\n]*)", matched_type),
 
-            (r"([^\. \.\n]*) implies ([^\.\n]*)", matched_implies),
+            (r"([^. |.|\n].*) implies ([^.|\n]*)", matched_implies),
 
-            (r"Condition for (.*?) is:([^\.\n]*)", matched_condition),
+            (r"Condition for (.*?) is:([^.|\n]*)", matched_condition),
 
-            (r"The (source|destination) of (.*?) is ([^\.\n]*)", matched_src_dest),
+            (r"The (source|destination) of (.*?) is ([^.|\n]*)", matched_src_dest),
 
             (r"(?<= |\n)show (.*?)\n", self.matched_show),
 
             (r"\s([A-Za-z\s].*\?)", matched_question_mark),
 
-            (r"list (input|output|child|data|function|transition|interface) ([^\.\n]*)",
+            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)",
              matched_list),
 
-            (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^\.\n]*)",
+            (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^.|\n]*)",
              matched_described_attribute),
         ]
-        self.reverse = (r"([^\. \.\n]*) composes ([^\.\n]*)", r"([^\. \.\n]*) consumes ([^\.\n]*)",
-                        r"([^\. \.\n]*) produces ([^\.\n]*)",
-                        r"(?<= |\n)(.*?) is allocated to ([^\.\n]*)")
+        self.reverse = (r"([^. |.|\n].*) composes ([^.|\n]*)",
+                        r"([^. |.|\n].*) consumes ([^.|\n]*)",
+                        r"([^. |.|\n].*) produces ([^.|\n]*)",
+                        r"(?<= |\n)(.*?) is allocated to ([^.|\n]*)")
 
         self.generator = generator
 
