@@ -33,13 +33,11 @@ class PlantUmlPicoServer:
             # Check if pico is running
             check_pico = False
             try:
-                with urlopen(f"{self.url}", timeout=1):
+                with urlopen(f"{self.url}"):
                     pass
             except HTTPError:
                 pass
             except URLError:
-                pass
-            except TimeoutError:
                 pass
             else:
                 check_pico = True
