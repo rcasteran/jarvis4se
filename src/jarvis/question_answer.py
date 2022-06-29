@@ -196,7 +196,7 @@ def get_child_name_list(parent_object, object_list):
     for child in object_list:
         if child in parent_object.child_list:
             child_list.add((child.name, "Child"))
-    return child_list
+    return list(child_list)
 
 
 def get_allocated_object_name_list(wanted_object, object_list):
@@ -310,7 +310,10 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
 
 def switch_in(wanted_object, _, **kwargs):
     """Case 'list input Function/Functional ELement' """
-    input_list = get_input(wanted_object, **kwargs)
+    input_list = get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', **kwargs)
+    if wanted_object.derived:
+        input_list.append(*get_input_or_output_fun_and_fun_elem(wanted_object.derived,
+                                                                direction='input', **kwargs))
     if input_list:
         input_dict = {'title': f"Input list for {wanted_object.name}:",
                       'data': input_list,
@@ -320,7 +323,10 @@ def switch_in(wanted_object, _, **kwargs):
 
 def switch_out(wanted_object, _, **kwargs):
     """Case 'list output Function/Functional ELement' """
-    output_list = get_output(wanted_object, **kwargs)
+    output_list = get_input_or_output_fun_and_fun_elem(wanted_object, direction='output', **kwargs)
+    if wanted_object.derived:
+        output_list.append(*get_input_or_output_fun_and_fun_elem(wanted_object.derived,
+                                                                 direction='output', **kwargs))
     if output_list:
         output_dict = {'title': f"Output list for {wanted_object.name}:",
                        'data': output_list,
@@ -332,27 +338,47 @@ def switch_child(wanted_object, object_type, **kwargs):
     """Case 'list child Function/State/Functional ELement' """
     child_list = None
     if object_type == "function":
-        child_list = list(get_child_name_list(wanted_object,
-                                              kwargs['xml_function_list']))
+        child_list = get_child_name_list(wanted_object, kwargs['xml_function_list'])
+        if wanted_object.derived:
+            child_list += [e for e in get_child_name_list(wanted_object.derived,
+                                                          kwargs['xml_function_list'])]
     elif object_type == "state":
-        child_list = list(get_child_name_list(wanted_object,
-                                              kwargs['xml_state_list']))
+        child_list = get_child_name_list(wanted_object, kwargs['xml_state_list'])
+
     elif object_type == "Functional element":
-        child_list = list(get_child_name_list(wanted_object,
-                                              kwargs['xml_fun_elem_list']))
-        for allocated_fun in wanted_object.allocated_function_list:
-            for fun in kwargs['xml_function_list']:
-                if fun.id == allocated_fun:
-                    child_list.append((fun.name, "Function allocation"))
-        for allocated_state in wanted_object.allocated_state_list:
-            for state in kwargs['xml_state_list']:
-                if state.id == allocated_state:
-                    child_list.append((state.name, "State allocation"))
+        child_list = get_child_name_list(wanted_object, kwargs['xml_fun_elem_list'])
+
+        child_list.extend(get_fun_elem_function_state_allocation(wanted_object,
+                                                                 kwargs['xml_function_list'],
+                                                                 kwargs['xml_state_list']))
+        if wanted_object.derived:
+            child_list += [e for e in get_child_name_list(wanted_object.derived,
+                                                          kwargs['xml_fun_elem_list'])]
+            child_list += [e for e in get_fun_elem_function_state_allocation(
+                wanted_object.derived, kwargs['xml_function_list'], kwargs['xml_state_list'])]
+
     if child_list:
         child_dict = {'title': f"Child list for {wanted_object.name}:",
                       'data': list(tuple(sorted(child_list))),
                       'columns': ["Object's name", "Relationship's type"]}
         return child_dict
+
+
+def get_fun_elem_function_state_allocation(wanted_object, xml_function_list, xml_state_list):
+    """Returns a list for allocations with:
+    [(function.name, "Function allocation"), (state.name, "State allocation"), ...]
+    """
+    allocation_list = []
+    for allocated_fun in wanted_object.allocated_function_list:
+        for fun in xml_function_list:
+            if fun.id == allocated_fun:
+                allocation_list.append((fun.name, "Function allocation"))
+    for allocated_state in wanted_object.allocated_state_list:
+        for state in xml_state_list:
+            if state.id == allocated_state:
+                allocation_list.append((state.name, "State allocation"))
+
+    return allocation_list
 
 
 def switch_state_function(wanted_object, _, **kwargs):
@@ -401,9 +427,15 @@ def switch_state_transition(wanted_object, _, **kwargs):
 
 def switch_fun_elem_interface(wanted_object, _, **kwargs):
     """Case for 'list interface Functional element'"""
-    fun_inter_list = get_objects_from_id_list([i for i in wanted_object.exposed_interface_list],
-                                              kwargs['xml_fun_inter_list'])
+    id_list = wanted_object.exposed_interface_list
     main_fun_elem_child_list, _ = get_children(wanted_object)
+    if wanted_object.derived:
+        id_list = id_list.union(wanted_object.derived.exposed_interface_list)
+        main_fun_elem_child_list.union(get_children(wanted_object.derived)[0])
+
+    fun_inter_list = get_objects_from_id_list(id_list,
+                                              kwargs['xml_fun_inter_list'])
+
     if not fun_inter_list:
         return f"Not any exposed interface for {wanted_object.name}"
 
@@ -440,13 +472,28 @@ def switch_data(wanted_object, _, **kwargs):
     """Case for 'list data Functional Interface' """
     data_list = []
     fun_elem_exposing = get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
+    if wanted_object.derived:
+        derived_fun_elem_exposing = get_allocation_object(wanted_object.derived,
+                                                          kwargs['xml_fun_elem_list'])
+        if derived_fun_elem_exposing and fun_elem_exposing:
+            fun_elem_exposing = fun_elem_exposing.union(derived_fun_elem_exposing)
+
     if not fun_elem_exposing:
         return f"Not any functional element exosing {wanted_object.name}"
-    last_fun_elem_exposing = [check_latest(j, fun_elem_exposing) for j in fun_elem_exposing]
+    last_fun_elem_exposing = [check_latest(j, fun_elem_exposing) for j in fun_elem_exposing
+                              if check_latest(j, fun_elem_exposing)]
+
     for allocated_id in wanted_object.allocated_data_list:
         for data in kwargs['xml_data_list']:
             if allocated_id == data.id:
                 data_list.append(get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
+
+    if wanted_object.derived:
+        for allocated_id in wanted_object.derived.allocated_data_list:
+            for data in kwargs['xml_data_list']:
+                if allocated_id == data.id:
+                    data_list.append(
+                        get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
 
     if data_list:
         data_dict = {'title': f"Data list for {wanted_object.name}:",
@@ -547,76 +594,47 @@ def get_object_list(object_str, **kwargs):
     return answer_list
 
 
-# TODO: Merge get_output and get_input()
-def get_input(wanted_object, unmerged=False, **kwargs):
+def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmerged=False,
+                                         **kwargs):
     """
-    Gets inputs for object (Function or Functional Element): i.e. what is consumed by wanted object.
+    Gets inputs/outputs for object (Function or Functional Element):
+    i.e. what is consumed/produces by wanted object or object allocated functions.
     Args:
         wanted_object: current object
+        direction (str: default=input): i.e. input or output asked
         unmerged (bool: default=false): used by functional elements
         **kwargs: all xml lists
 
     Returns:
-        Input's list
+        input or output list
     """
     object_type = get_object_type(wanted_object)
     if object_type == "Functional element":
-        input_list = []
+        in_or_out_list = []
         allocated_fun_list = set()
         for fun in wanted_object.allocated_function_list:
             for xml_fun in kwargs['xml_function_list']:
                 if fun == xml_fun.id:
                     allocated_fun_list.add(xml_fun)
         for func in allocated_fun_list:
-            current_fun_list = get_input(func, True, **kwargs)
+            current_fun_list = get_input_or_output_fun_and_fun_elem(func, direction, True, **kwargs)
             for sub in current_fun_list:
                 if sub and sub[1] not in [f.name for f in allocated_fun_list]:
-                    input_list.append(sub)
-        return merge_list_per_cons_prod(input_list)
+                    in_or_out_list.append(sub)
+        return merge_list_per_cons_prod(in_or_out_list)
     else:
-        input_list = get_in_out_function(wanted_object,
-                                         kwargs['xml_consumer_function_list'],
-                                         kwargs['xml_producer_function_list'])
-        if unmerged:
-            return input_list
+        if direction == 'output':
+            in_or_out_list = get_in_out_function(wanted_object,
+                                                 kwargs['xml_producer_function_list'],
+                                                 kwargs['xml_consumer_function_list'])
         else:
-            return merge_list_per_cons_prod(input_list)
-
-
-def get_output(wanted_object, unmerged=False, **kwargs):
-    """
-    Gets outputs for object (Function or Functional Element): i.e. what is produced by wanted
-    object.
-    Args:
-        wanted_object: current object
-        unmerged (bool: default=false): used by functional elements
-        **kwargs: all xml lists
-
-    Returns:
-        Output's list
-    """
-    object_type = get_object_type(wanted_object)
-    if object_type == "Functional element":
-        output_list = []
-        allocated_fun_list = set()
-        for fun in wanted_object.allocated_function_list:
-            for xml_fun in kwargs['xml_function_list']:
-                if fun == xml_fun.id:
-                    allocated_fun_list.add(xml_fun)
-        for func in allocated_fun_list:
-            current_fun_list = get_output(func, True, **kwargs)
-            for sub in current_fun_list:
-                if sub and sub[1] not in [f.name for f in allocated_fun_list]:
-                    output_list.append(sub)
-        return merge_list_per_cons_prod(output_list)
-    else:
-        output_list = get_in_out_function(wanted_object,
-                                          kwargs['xml_producer_function_list'],
-                                          kwargs['xml_consumer_function_list'])
+            in_or_out_list = get_in_out_function(wanted_object,
+                                                 kwargs['xml_consumer_function_list'],
+                                                 kwargs['xml_producer_function_list'])
         if unmerged:
-            return output_list
+            return in_or_out_list
         else:
-            return merge_list_per_cons_prod(output_list)
+            return merge_list_per_cons_prod(in_or_out_list)
 
 
 def merge_list_per_cons_prod(input_list):

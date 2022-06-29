@@ -6,9 +6,6 @@ from lxml import etree
 
 # Modules
 import datamodel
-from jarvis.shared_orchestrator import (function_inheritance, fun_elem_inheritance,
-                                        fun_inter_inheritance, phy_elem_inheritance,
-                                        phy_inter_inheritance)
 
 
 class XmlParser3SE:
@@ -58,7 +55,7 @@ class XmlParser3SE:
         self.xml_dict['xml_data_list'], self.xml_dict['xml_producer_function_list'], self.xml_dict[
             'xml_consumer_function_list'] = get_data(self.root, self.xml_dict['xml_function_list'])
 
-        return generate_inheritance(**self.xml_dict)
+        return self.xml_dict
 
 
 def check_xml(root):
@@ -428,24 +425,3 @@ def get_type_list(root):
                 break
 
     return type_list
-
-
-def generate_inheritance(**xml_dict):
-    """For all abjects that are derived/inherited update xml_lists accordingly"""
-    inheritance_list = [xml_dict['xml_function_list'], xml_dict['xml_fun_elem_list'],
-                        xml_dict['xml_fun_inter_list'], xml_dict['xml_phy_elem_list'],
-                        xml_dict['xml_phy_inter_list']]
-    switch_inheritance = {
-        0: function_inheritance,
-        1: fun_elem_inheritance,
-        2: fun_inter_inheritance,
-        3: phy_elem_inheritance,
-        4: phy_inter_inheritance,
-    }
-    for idx, j in enumerate(inheritance_list):
-        call = switch_inheritance.get(idx, "")
-        for elem in inheritance_list[idx]:
-            if elem.derived:
-                call(elem, **xml_dict)
-
-    return xml_dict

@@ -1128,7 +1128,7 @@ def check_add_inheritance(inherit_str_list, **kwargs):
         if elem_0.derived == elem_1:
             continue
 
-        check_obj = check_inheritance(elem_0, elem_1, **kwargs)
+        check_obj = check_inheritance(elem_0, elem_1)
         if not check_obj:
             continue
         new_list.append(elem_0)
@@ -1146,21 +1146,19 @@ def print_wrong_object_inheritance(*obj):
         user_message = f"{obj[0]} and {obj[1]}"
     else:
         user_message = f"{obj[0]}"
-    user_message += " not found, available objects for inheritance are:\n"\
-                    "- Function\n"\
-                    "- Functional element\n"\
-                    "- Functional interface\n"\
-                    "- Physical element\n"\
-                    "- Physical element\n"
-    print(user_message)
+    print(f"{user_message} not found, available objects for inheritance are:\n"
+          "- Function\n"
+          "- Functional element\n"
+          "- Functional interface\n"
+          "- Physical element\n"
+          "- Physical element\n")
 
 
-def check_inheritance(elem_0, elem_1, **kwargs):
+def check_inheritance(elem_0, elem_1):
     """Returns check if pair are compatible and object list have been updated"""
     inheritance_type_list = [datamodel.Function, datamodel.FunctionalElement,
                              datamodel.FunctionalInterface, datamodel.PhysicalElement,
                              datamodel.PhysicalInterface]
-    check = False
 
     type_found = None
     for idx, inheritance_type in enumerate(inheritance_type_list):
@@ -1170,108 +1168,8 @@ def check_inheritance(elem_0, elem_1, **kwargs):
     if type_found is None:
         print(f"{elem_0.__class__.__name__} and {elem_1.__class__.__name__} "
               f"are not of the same type")
-        return check
+        return False
     elem_0.set_derived(elem_1)
-    switch_inheritance = {
-        0: function_inheritance,
-        1: fun_elem_inheritance,
-        2: fun_inter_inheritance,
-        3: phy_elem_inheritance,
-        4: phy_inter_inheritance,
-    }
-    inheritance = switch_inheritance.get(type_found, "")
-    check = inheritance(elem_0, **kwargs)
-    return check
-
-
-def function_inheritance(elem, **kwargs):
-    """Inheritance to propagate for functions"""
-    # TODO: Waiting for parent confirmation
-    elem.child_list.update([elem.add_child(c) for c in elem.derived.child_list if c])
-
-    new_cons = [[a[0], elem] for a in kwargs['xml_consumer_function_list']
-                if a[1] == elem.derived
-                if not any(e == [a[0], elem] for e in kwargs['xml_consumer_function_list'])]
-    kwargs['xml_consumer_function_list'].extend(new_cons)
-
-    new_prod = [[a[0], elem] for a in kwargs['xml_producer_function_list']
-                if a[1] == elem.derived
-                if not any(e == [a[0], elem] for e in kwargs['xml_producer_function_list'])]
-    kwargs['xml_producer_function_list'].extend(new_prod)
-
-    allocation_inheritance(elem, **kwargs)
-    viewpoint_inheritance(elem, **kwargs)
-    return True
-
-
-def allocation_inheritance(elem, **kwargs):
-    """Allocation inheritance for objects in inheritance_type_list"""
-    if isinstance(elem, datamodel.Function):
-        kwargs['xml_fun_elem_list'] = \
-            [fun_elem.add_allocated_function(elem.id) for fun_elem in kwargs['xml_fun_elem_list']
-             if any(a == elem.derived.id for a in fun_elem.allocated_function_list)]
-        kwargs['xml_state_list'] = \
-            [state.add_allocated_function(elem.id) for state in kwargs['xml_state_list']
-             if any(a == elem.derived.id for a in state.allocated_function_list)]
-    elif isinstance(elem, datamodel.FunctionalElement):
-        kwargs['xml_phy_elem_list'] = \
-            [fun_elem.add_allocated_fun_elem(elem.id) for fun_elem in kwargs['xml_phy_elem_list']
-             if any(a == elem.derived.id for a in fun_elem.allocated_fun_elem_list)]
-
-
-def viewpoint_inheritance(elem, **kwargs):
-    """View and Attribute inheritance"""
-    kwargs['xml_view_list'] = \
-        [chain.add_allocated_item(elem.id) for chain in kwargs['xml_view_list']
-         if any(a == elem.derived.id for a in chain.allocated_item_list)]
-
-    for attribute in kwargs['xml_attribute_list']:
-        for obj_id, value in attribute.described_item_list.copy():
-            if obj_id == elem.derived.id:
-                attribute.add_described_item((elem.id, value))
-
-
-def fun_elem_inheritance(elem, **kwargs):
-    """Inheritance to propagate for fun elem"""
-    # TODO: Waiting for parent confirmation
-    elem.child_list.update([elem.add_child(c) for c in elem.derived.child_list if c])
-    elem.allocated_state_list.update(
-        [elem.add_allocated_state(c) for c in elem.derived.allocated_state_list if c])
-    elem.allocated_function_list.update(
-        [elem.add_allocated_function(c) for c in elem.derived.allocated_function_list if c])
-    elem.exposed_interface_list.update(
-        [elem.add_exposed_interface(c) for c in elem.derived.exposed_interface_list if c])
-    allocation_inheritance(elem, **kwargs)
-    viewpoint_inheritance(elem, **kwargs)
-    return True
-
-
-def fun_inter_inheritance(elem, **kwargs):
-    """Inheritance to propagate for fun inter"""
-    elem.allocated_data_list.update(
-        [elem.add_allocated_data(c) for c in elem.derived.allocated_data_list if c])
-
-    viewpoint_inheritance(elem, **kwargs)
-    return True
-
-
-def phy_elem_inheritance(elem, **kwargs):
-    """Inheritance to propagate for phy elem"""
-    # TODO: Waiting for parent confirmation
-    elem.child_list.update([elem.add_child(c) for c in elem.derived.child_list if c])
-    elem.allocated_fun_elem_list.update(
-        [elem.add_allocated_fun_elem(c) for c in elem.derived.allocated_fun_elem_list if c])
-    elem.exposed_interface_list.update(
-        [elem.add_exposed_interface(c) for c in elem.derived.exposed_interface_list if c])
-    viewpoint_inheritance(elem, **kwargs)
-    return True
-
-
-def phy_inter_inheritance(elem, **kwargs):
-    """Inheritance to propagate for phy inter"""
-    elem.allocated_fun_inter_list.update(
-        [elem.add_allocated_fun_inter(c) for c in elem.derived.allocated_fun_inter_list if c])
-    viewpoint_inheritance(elem, **kwargs)
     return True
 
 
