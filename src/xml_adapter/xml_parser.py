@@ -271,8 +271,8 @@ def get_views(root):
     for xml_view in xml_view_list:
         # Instantiate view and add them to a list
         view = datamodel.View(p_id=xml_view.get('id'),
-                               p_name=xml_view.get('name'),
-                               p_type=xml_view.get('type'))
+                              p_name=xml_view.get('name'),
+                              p_type=xml_view.get('type'))
         # Looking for allocated items and add them to the view
         xml_allocated_item_list = xml_view.iter('allocatedItem')
         for xml_allo_item in xml_allocated_item_list:
