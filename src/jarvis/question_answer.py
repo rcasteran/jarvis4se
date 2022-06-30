@@ -431,7 +431,8 @@ def switch_fun_elem_interface(wanted_object, _, **kwargs):
     main_fun_elem_child_list, _ = get_children(wanted_object)
     if wanted_object.derived:
         id_list = id_list.union(wanted_object.derived.exposed_interface_list)
-        main_fun_elem_child_list.union(get_children(wanted_object.derived)[0])
+        main_fun_elem_child_list = main_fun_elem_child_list.union(
+            get_children(wanted_object.derived)[0])
 
     fun_inter_list = get_objects_from_id_list(id_list,
                                               kwargs['xml_fun_inter_list'])

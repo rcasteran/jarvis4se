@@ -12,7 +12,7 @@ from .question_answer import check_parentality, get_objects_names, check_get_obj
 
 def filter_show_command(diagram_name_str, **kwargs):
     """Entry point for all diagrams (i.e. 'show' command) from command_parser.py"""
-    filename = None
+    plantuml_string = None
     wanted_diagram_str = diagram_name_str.group(1)
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
     specific_diagram_str = re.search(regex, wanted_diagram_str, re.MULTILINE)
@@ -24,13 +24,13 @@ def filter_show_command(diagram_name_str, **kwargs):
             diagram_type_str = specific_diagram_str.group(1) + ' sequence'
             diagram_object_str = specific_diagram_str.group(2).replace("sequence ", "")
 
-        filename = switch_show_filter(diagram_type_str=diagram_type_str,
-                                      diagram_object_str=diagram_object_str,
-                                      **kwargs)
+        plantuml_string = switch_show_filter(diagram_type_str=diagram_type_str,
+                                             diagram_object_str=diagram_object_str,
+                                             **kwargs)
     else:
         print(f"Jarvis does not understand the command {wanted_diagram_str}")
 
-    return filename
+    return plantuml_string
 
 
 def switch_show_filter(**kwargs):
@@ -50,59 +50,63 @@ def switch_show_filter(**kwargs):
 
 def case_function_diagram(**kwargs):
     """Case for 'show function <functional_element>'"""
-    filename = None
+    plantuml_string = None
     xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        filename = show_fun_elem_function(kwargs['diagram_object_str'],
-                                          kwargs['xml_fun_elem_list'],
-                                          kwargs['xml_function_list'],
-                                          kwargs['xml_consumer_function_list'],
-                                          kwargs['xml_producer_function_list'],
-                                          kwargs['xml_type_list'])
+        plantuml_string = show_fun_elem_function(kwargs['diagram_object_str'],
+                                                 kwargs['xml_fun_elem_list'],
+                                                 kwargs['xml_function_list'],
+                                                 kwargs['xml_consumer_function_list'],
+                                                 kwargs['xml_producer_function_list'],
+                                                 kwargs['xml_type_list'])
 
     else:
         print(f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
 
-    return filename
+    return plantuml_string
 
 
 def case_context_diagram(**kwargs):
     """Case for 'show context <functional_element>/<function>'"""
-    filename = None
+    plantuml_string = None
     xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
     xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
 
     if kwargs['diagram_object_str'] in xml_function_name_list:
-        filename = show_function_context(kwargs['diagram_object_str'], kwargs['xml_function_list'],
-                                         kwargs['xml_consumer_function_list'],
-                                         kwargs['xml_producer_function_list'],
-                                         kwargs['xml_data_list'], kwargs['xml_attribute_list'],
-                                         kwargs['xml_type_list'])
+        plantuml_string = show_function_context(kwargs['diagram_object_str'],
+                                                kwargs['xml_function_list'],
+                                                kwargs['xml_consumer_function_list'],
+                                                kwargs['xml_producer_function_list'],
+                                                kwargs['xml_data_list'],
+                                                kwargs['xml_attribute_list'],
+                                                kwargs['xml_type_list'])
 
     elif kwargs['diagram_object_str'] in xml_state_name_list:
-        filename = show_states_chain([kwargs['diagram_object_str']], kwargs['xml_state_list'],
-                                     kwargs['xml_transition_list'])
+        plantuml_string = show_states_chain([kwargs['diagram_object_str']],
+                                            kwargs['xml_state_list'],
+                                            kwargs['xml_transition_list'])
 
     elif kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        filename = show_fun_elem_context(kwargs['diagram_object_str'], kwargs['xml_fun_elem_list'],
-                                         kwargs['xml_function_list'],
-                                         kwargs['xml_consumer_function_list'],
-                                         kwargs['xml_producer_function_list'],
-                                         kwargs['xml_attribute_list'],
-                                         kwargs['xml_fun_inter_list'],
-                                         kwargs['xml_data_list'])
+        plantuml_string = show_fun_elem_context(kwargs['diagram_object_str'],
+                                                kwargs['xml_fun_elem_list'],
+                                                kwargs['xml_function_list'],
+                                                kwargs['xml_consumer_function_list'],
+                                                kwargs['xml_producer_function_list'],
+                                                kwargs['xml_attribute_list'],
+                                                kwargs['xml_fun_inter_list'],
+                                                kwargs['xml_data_list'])
     else:
         print(f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
               f"{kwargs['diagram_object_str']} is not a valid "
               f"Function/State/Functional Element name/alias")
 
-    return filename
+    return plantuml_string
 
 
 def case_decomposition_diagram(**kwargs):
     """Case for 'show decomposition <functional_element>/<function>'"""
-    filename = None
+    plantuml_string = None
     xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
     xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
 
@@ -113,17 +117,17 @@ def case_decomposition_diagram(**kwargs):
             diagram_level = int(splitted_str[1])
             if diagram_level == 0:
                 print("Invalid level, please choose a valid level >= 1")
-                return filename
+                return plantuml_string
         except ValueError:
             print("Invalid level, please choose a valid level >= 1")
-            return filename
+            return plantuml_string
     else:
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
     # Check view if activated and filter allocated item,
     # if not activated then no item filtered
-    # if not any item under view return string
+    # if not any item under view return string for user's message
     function_list = get_object_list_from_view(diagram_object_str,
                                               kwargs['xml_function_list'],
                                               kwargs['xml_view_list'])
@@ -139,13 +143,13 @@ def case_decomposition_diagram(**kwargs):
             kwargs['xml_producer_function_list'],
             function_list)
 
-        filename = show_function_decomposition(diagram_object_str,
-                                               function_list,
-                                               consumer_list,
-                                               producer_list,
-                                               kwargs['xml_attribute_list'],
-                                               kwargs['xml_type_list'],
-                                               diagram_level=diagram_level)
+        plantuml_string = show_function_decomposition(diagram_object_str,
+                                                      function_list,
+                                                      consumer_list,
+                                                      producer_list,
+                                                      kwargs['xml_attribute_list'],
+                                                      kwargs['xml_type_list'],
+                                                      diagram_level=diagram_level)
 
     elif diagram_object_str in xml_fun_elem_name_list:
         fun_elem_list = get_object_list_from_view(diagram_object_str,
@@ -158,21 +162,21 @@ def case_decomposition_diagram(**kwargs):
             kwargs['xml_producer_function_list'],
             function_list)
 
-        filename = show_fun_elem_decomposition(diagram_object_str,
-                                               function_list,
-                                               consumer_list,
-                                               producer_list,
-                                               fun_elem_list,
-                                               kwargs['xml_attribute_list'],
-                                               kwargs['xml_data_list'],
-                                               kwargs['xml_fun_inter_list'],
-                                               diagram_level)
+        plantuml_string = show_fun_elem_decomposition(diagram_object_str,
+                                                      function_list,
+                                                      consumer_list,
+                                                      producer_list,
+                                                      fun_elem_list,
+                                                      kwargs['xml_attribute_list'],
+                                                      kwargs['xml_data_list'],
+                                                      kwargs['xml_fun_inter_list'],
+                                                      diagram_level)
 
     else:
         print(f"Jarvis does not know the object {diagram_object_str}"
               f"(i.e. it is not a function, nor a functional element)")
 
-    return filename
+    return plantuml_string
 
 
 def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_consumer_function_list,
@@ -238,7 +242,7 @@ def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
 
 def case_chain_diagram(**kwargs):
     """Case for 'show chain <states>/<functions>'"""
-    filename = None
+    plantuml_string = None
     xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
     xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(" ", ""))
@@ -272,11 +276,11 @@ def case_chain_diagram(**kwargs):
                     kwargs['xml_consumer_function_list'],
                     kwargs['xml_producer_function_list'],
                     function_list)
-                filename = show_functions_chain(object_list_str,
-                                                function_list,
-                                                consumer_list,
-                                                producer_list,
-                                                kwargs['xml_type_list'])
+                plantuml_string = show_functions_chain(object_list_str,
+                                                       function_list,
+                                                       consumer_list,
+                                                       producer_list,
+                                                       kwargs['xml_type_list'])
             elif result_state:
                 # See above after "if result_function"
                 state_list = get_object_list_from_view(object_list_str,
@@ -287,23 +291,22 @@ def case_chain_diagram(**kwargs):
                     return None
                 transition_list = filter_allocated_item_from_view(kwargs['xml_transition_list'],
                                                                   kwargs['xml_view_list'])
-                filename = show_states_chain(object_list_str, state_list,
-                                             transition_list)
+                plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
         else:
             print(f"{kwargs['diagram_object_str']} is not a valid chain")
 
-    return filename
+    return plantuml_string
 
 
 def case_sequence_diagram(**kwargs):
     """Case for 'show sequence <functional_elements>/<functions>/<functional_interface>'"""
-    filename = None
+    plantuml_string = None
     object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(", ", ","))
     object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
         if len(object_list_str) == 1 and \
                 any(s == object_list_str[0] for s in get_objects_names(kwargs['xml_fun_inter_list'])):
-            filename = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
+            plantuml_string = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
             # Check view if activated and filter allocated item,
             # if not activated then no item filtered
@@ -323,11 +326,11 @@ def case_sequence_diagram(**kwargs):
                 else:
                     xml_cons = kwargs['xml_consumer_function_list']
                     xml_prod = kwargs['xml_producer_function_list']
-                filename = show_functions_sequence(object_list_str,
-                                                   kwargs['xml_function_list'],
-                                                   xml_cons,
-                                                   xml_prod,
-                                                   xml_data_list)
+                plantuml_string = show_functions_sequence(object_list_str,
+                                                          kwargs['xml_function_list'],
+                                                          xml_cons,
+                                                          xml_prod,
+                                                          xml_data_list)
 
             elif all(i in get_objects_names(kwargs['xml_fun_elem_list']) for i in object_list_str):
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
@@ -338,7 +341,7 @@ def case_sequence_diagram(**kwargs):
                         [i for i in kwargs['xml_producer_function_list']
                          if any(a == i[0] for a in [d.name for d in xml_data_list])]
                 kwargs['xml_data_list'] = xml_data_list
-                filename = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
+                plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
 
             else:
                 print(f"{kwargs['diagram_object_str']} is not a valid sequence, availabe sequences "
@@ -346,40 +349,40 @@ def case_sequence_diagram(**kwargs):
                       f"- show sequence Function_A, Function_B, ...\n"
                       f"- show sequence Functional_element_A, Functional_element_B, ...\n"
                       f"- show sequence Functional_interface\n")
-    return filename
+    return plantuml_string
 
 
 def case_state_diagram(**kwargs):
     """Case for 'show state <functional_element>'"""
-    filename = None
+    plantuml_string = None
     xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        filename = show_fun_elem_state_machine(kwargs['diagram_object_str'],
-                                               kwargs['xml_state_list'],
-                                               kwargs['xml_transition_list'],
-                                               kwargs['xml_fun_elem_list'])
+        plantuml_string = show_fun_elem_state_machine(kwargs['diagram_object_str'],
+                                                      kwargs['xml_state_list'],
+                                                      kwargs['xml_transition_list'],
+                                                      kwargs['xml_fun_elem_list'])
     else:
         print(f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
 
-    return filename
+    return plantuml_string
 
 
 def case_state_sequence_diagram(**kwargs):
     """Case for 'show state sequence <state>'"""
-    filename = None
+    plantuml_string = None
     xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     if kwargs['diagram_object_str'] in xml_state_name_list:
-        filename = show_state_allocated_function(kwargs['diagram_object_str'],
-                                                 kwargs['xml_state_list'],
-                                                 kwargs['xml_function_list'],
-                                                 kwargs['xml_consumer_function_list'],
-                                                 kwargs['xml_producer_function_list'],
-                                                 kwargs['xml_data_list'])
-        return filename
+        plantuml_string = show_state_allocated_function(kwargs['diagram_object_str'],
+                                                        kwargs['xml_state_list'],
+                                                        kwargs['xml_function_list'],
+                                                        kwargs['xml_consumer_function_list'],
+                                                        kwargs['xml_producer_function_list'],
+                                                        kwargs['xml_data_list'])
+        return plantuml_string
     else:
         print(f"Jarvis does not know the State {kwargs['diagram_object_str']}")
 
-    return filename
+    return plantuml_string
 
 
 def case_no_diagram(**kwargs):
@@ -889,10 +892,11 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
     return plantuml_text
 
 
+# TODO: Clean-up once inerithage has been validated (Create method for Function and others objects?)
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_attribute_list, xml_type_list,
                                 diagram_level=None):
-
+    """Create necessary lists then returns plantuml text for decomposition of function"""
     main_fun = check_get_object(diagram_function_str, **{'xml_function_list': xml_function_list})
     if not main_fun:
         return
@@ -900,6 +904,10 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
     if diagram_level:
         full_fun_list, _ = get_children(main_fun)
         main_function_list, main_parent_dict = get_children(main_fun, level=diagram_level)
+        derived = check_derived_and_add_childs(main_fun, level=diagram_level)
+        if derived:
+            main_function_list = main_function_list.union(derived[0])
+            main_parent_dict.update(derived[1])
 
         for k in full_fun_list.symmetric_difference(main_function_list):
             for cons in xml_consumer_function_list.copy():
@@ -911,6 +919,10 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                     xml_producer_function_list.remove(prod)
     else:
         main_function_list, main_parent_dict = get_children(main_fun)
+        derived = check_derived_and_add_childs(main_fun)
+        if derived:
+            main_function_list = main_function_list.union(derived[0])
+            main_parent_dict.update(derived[1])
 
     main_consumer_list = check_get_child_flows(main_function_list, xml_consumer_function_list)
     main_producer_list = check_get_child_flows(main_function_list, xml_producer_function_list)
@@ -942,12 +954,46 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                            xml_type_list,
                                                            xml_attribute_list=xml_attribute_list)
 
+    check_and_reset_derived_child_list(main_fun, derived[2])
+
     print(f"Decomposition Diagram {diagram_function_str} generated")
     return plantuml_text
 
 
+def check_derived_and_add_childs(main_fun, level=None):
+    """Check if object is derived, if yes:
+    - add derived object childs to object and set derived object parent to main_fun,
+    - returns derived_parent_dict of derived objects id, derived_child_set of derived objects and
+    derived_child_id_list"""
+    derived_child_set = set()
+    derived_parent_dict = {}
+    derived_child_id_list = set()
+    if main_fun.derived:
+        [main_fun.add_child(c) for c in main_fun.derived.child_list
+         if c.parent == main_fun.derived]
+        [c.set_parent(main_fun) for c in main_fun.derived.child_list
+         if c.parent == main_fun.derived]
+        for child in main_fun.derived.child_list:
+            derived_parent_dict[str(child.id)] = str(main_fun.id)
+        derived_child_set = get_children(main_fun.derived, level=level)[0]
+        derived_child_id_list = {c.id for c in main_fun.derived.child_list}
+        main_fun.derived.child_list.clear()
+        derived_child_set.remove(main_fun.derived)
+
+    return derived_child_set, derived_parent_dict, derived_child_id_list
+
+
+def check_and_reset_derived_child_list(main_fun, derived_child_name):
+    """Check if there is first level derived child name list, if yes """
+    if derived_child_name:
+        child_pop = [c for c in main_fun.child_list if c.id in [f for f in derived_child_name]]
+        [main_fun.derived.add_child(c) for c in child_pop]
+        [c.set_parent(main_fun.derived) for c in child_pop]
+
+
 def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, xml_flow_list,
                                  level):
+    """Returns external functions list, flow lists and parent dict"""
     ext_flow_fun_list = set()
     ext_flow_list = []
     ext_flow_parent_dict = {}
@@ -1022,6 +1068,7 @@ def check_get_child_flows(function_list, xml_flow_list, new_flow_list=None):
 def show_function_context(diagram_function_str, xml_function_list, xml_consumer_function_list,
                           xml_producer_function_list, xml_data_list, xml_attribute_list,
                           xml_type_list, list_out=False):
+    """Create necessary lists then returns plantuml text for context of function"""
     new_function_list = set()
     new_parent_dict = {}
     new_producer_list = []
