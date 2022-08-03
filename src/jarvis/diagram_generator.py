@@ -8,6 +8,8 @@ import re
 import plantuml_adapter
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
+from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
+    attribute_inheritance, reset_attribute_inheritance, view_inheritance, reset_view_inheritance
 
 
 def filter_show_command(diagram_name_str, **kwargs):
@@ -107,8 +109,6 @@ def case_context_diagram(**kwargs):
 def case_decomposition_diagram(**kwargs):
     """Case for 'show decomposition <functional_element>/<function>'"""
     plantuml_string = None
-    xml_function_name_list = get_objects_names(kwargs['xml_function_list'])
-    xml_fun_elem_name_list = get_objects_names(kwargs['xml_fun_elem_list'])
 
     if ' at level ' in kwargs['diagram_object_str']:
         splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
@@ -125,6 +125,8 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
+    v_inheritance = view_inheritance(kwargs['xml_view_list'], kwargs['xml_function_list'])
+
     # Check view if activated and filter allocated item,
     # if not activated then no item filtered
     # if not any item under view return string for user's message
@@ -135,7 +137,7 @@ def case_decomposition_diagram(**kwargs):
         print(function_list)
         return None
 
-    if diagram_object_str in xml_function_name_list:
+    if diagram_object_str in get_objects_names(kwargs['xml_function_list']):
         consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
             kwargs['xml_data_list'],
             kwargs['xml_view_list'],
@@ -151,7 +153,7 @@ def case_decomposition_diagram(**kwargs):
                                                       kwargs['xml_type_list'],
                                                       diagram_level=diagram_level)
 
-    elif diagram_object_str in xml_fun_elem_name_list:
+    elif diagram_object_str in get_objects_names(kwargs['xml_fun_elem_list']):
         fun_elem_list = get_object_list_from_view(diagram_object_str,
                                                   kwargs['xml_fun_elem_list'],
                                                   kwargs['xml_view_list'])
@@ -175,6 +177,8 @@ def case_decomposition_diagram(**kwargs):
     else:
         print(f"Jarvis does not know the object {diagram_object_str}"
               f"(i.e. it is not a function, nor a functional element)")
+
+    reset_view_inheritance(kwargs['xml_view_list'], v_inheritance)
 
     return plantuml_string
 
@@ -892,7 +896,8 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
     return plantuml_text
 
 
-# TODO: Clean-up once inerithage has been validated (Create method for Function and others objects?)
+# TODO: Clean-up once inheritance has been validated (Create method for Function and others
+#  objects?)
 def show_function_decomposition(diagram_function_str, xml_function_list, xml_consumer_function_list,
                                 xml_producer_function_list, xml_attribute_list, xml_type_list,
                                 diagram_level=None):
@@ -901,13 +906,17 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
     if not main_fun:
         return
     main_parent = main_fun.parent
+
+    c_inheritance = childs_inheritance(xml_function_list, level=diagram_level)
+    a_inheritance = attribute_inheritance(xml_attribute_list, xml_function_list)
+
     if diagram_level:
         full_fun_list, _ = get_children(main_fun)
         main_function_list, main_parent_dict = get_children(main_fun, level=diagram_level)
-        derived = check_derived_and_add_childs(main_fun, level=diagram_level)
-        if derived:
-            main_function_list = main_function_list.union(derived[0])
-            main_parent_dict.update(derived[1])
+        # derived = childs_inheritance(main_fun, level=diagram_level)
+        # if derived:
+        #     main_function_list = main_function_list.union(derived[0])
+        #     main_parent_dict.update(derived[1])
 
         for k in full_fun_list.symmetric_difference(main_function_list):
             for cons in xml_consumer_function_list.copy():
@@ -919,10 +928,10 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                     xml_producer_function_list.remove(prod)
     else:
         main_function_list, main_parent_dict = get_children(main_fun)
-        derived = check_derived_and_add_childs(main_fun)
-        if derived:
-            main_function_list = main_function_list.union(derived[0])
-            main_parent_dict.update(derived[1])
+        # derived = childs_inheritance(main_fun)
+        # if derived:
+        #     main_function_list = main_function_list.union(derived[0])
+        #     main_parent_dict.update(derived[1])
 
     main_consumer_list = check_get_child_flows(main_function_list, xml_consumer_function_list)
     main_producer_list = check_get_child_flows(main_function_list, xml_producer_function_list)
@@ -954,41 +963,11 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                            xml_type_list,
                                                            xml_attribute_list=xml_attribute_list)
 
-    check_and_reset_derived_child_list(main_fun, derived[2])
+    reset_childs_inheritance(xml_function_list, derived_child_id=c_inheritance[2])
+    reset_attribute_inheritance(xml_attribute_list, a_inheritance)
 
     print(f"Decomposition Diagram {diagram_function_str} generated")
     return plantuml_text
-
-
-def check_derived_and_add_childs(main_fun, level=None):
-    """Check if object is derived, if yes:
-    - add derived object childs to object and set derived object parent to main_fun,
-    - returns derived_parent_dict of derived objects id, derived_child_set of derived objects and
-    derived_child_id_list"""
-    derived_child_set = set()
-    derived_parent_dict = {}
-    derived_child_id_list = set()
-    if main_fun.derived:
-        [main_fun.add_child(c) for c in main_fun.derived.child_list
-         if c.parent == main_fun.derived]
-        [c.set_parent(main_fun) for c in main_fun.derived.child_list
-         if c.parent == main_fun.derived]
-        for child in main_fun.derived.child_list:
-            derived_parent_dict[str(child.id)] = str(main_fun.id)
-        derived_child_set = get_children(main_fun.derived, level=level)[0]
-        derived_child_id_list = {c.id for c in main_fun.derived.child_list}
-        main_fun.derived.child_list.clear()
-        derived_child_set.remove(main_fun.derived)
-
-    return derived_child_set, derived_parent_dict, derived_child_id_list
-
-
-def check_and_reset_derived_child_list(main_fun, derived_child_name):
-    """Check if there is first level derived child name list, if yes """
-    if derived_child_name:
-        child_pop = [c for c in main_fun.child_list if c.id in [f for f in derived_child_name]]
-        [main_fun.derived.add_child(c) for c in child_pop]
-        [c.set_parent(main_fun.derived) for c in child_pop]
 
 
 def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, xml_flow_list,
@@ -1074,6 +1053,10 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
     new_producer_list = []
     new_consumer_list = []
     main = None
+
+    c_inheritance = childs_inheritance(xml_function_list)
+    a_inheritance = attribute_inheritance(xml_attribute_list, xml_function_list)
+
     for fun in xml_function_list:
         if diagram_function_str in (fun.name, fun.alias):
             new_function_list.add(fun)
@@ -1143,6 +1126,10 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
 
         out = plantuml_text
         print(f"Context Diagram {diagram_function_str} generated")
+
+    reset_childs_inheritance(xml_function_list, derived_child_id=c_inheritance[2])
+    reset_attribute_inheritance(xml_attribute_list, a_inheritance)
+
     return out
 
 

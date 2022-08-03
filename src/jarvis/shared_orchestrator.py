@@ -6,7 +6,7 @@ import uuid
 
 import datamodel
 from .question_answer import (get_object_type, check_get_object, get_allocation_object,
-                              check_not_family, get_objects_names)
+                              check_not_family, get_objects_names, get_children)
 from .functional_orchestrator import (create_function_obj, create_data_obj, create_fun_elem_obj,
                                       create_fun_inter_obj)
 from .physical_orchestrator import (create_phy_elem_obj, create_phy_inter_obj)
@@ -1271,3 +1271,97 @@ def add_obj_to_xml(object_lists, output_xml):
             switch_write_obj.get(idx)(sub)
             check = 1
     return check
+
+
+# Inheritance start here - Should be moved/refactored after validation
+def childs_inheritance(xml_obj_set, level=None):
+    """Check if object from xml_obj_set is derived, if yes:
+    - call derived_childs()
+    - returns derived_parent_dict of derived objects id, derived_child_set of derived objects and
+    derived_child_id_list
+    Parameter:
+    - obj: set() of objects
+    - level: diagram level"""
+    derived_child_set = set()
+    derived_parent_dict = {}
+    derived_child_id_list = set()
+
+    for elem in xml_obj_set:
+        if elem.derived:
+            partial_child_set, partial_par_dict, partial_child_id_set = derived_childs(elem,
+                                                                                       level)
+            derived_child_set = derived_child_set.union(partial_child_set)
+            derived_parent_dict.update(partial_par_dict)
+            derived_child_id_list = derived_child_id_list.union(partial_child_id_set)
+
+    return derived_child_set, derived_parent_dict, derived_child_id_list
+
+
+def derived_childs(obj, level):
+    """Add derived object childs to object and set derived parent to object"""
+    derived_parent_dict = {}
+
+    [obj.add_child(c) for c in obj.derived.child_list
+     if c.parent == obj.derived]
+    [c.set_parent(obj) for c in obj.derived.child_list
+     if c.parent == obj.derived]
+    for child in obj.derived.child_list:
+        derived_parent_dict[str(child.id)] = str(obj.id)
+    derived_child_set = get_children(obj.derived, level=level)[0]
+    derived_child_id_list = {c.id for c in obj.derived.child_list}
+    obj.derived.child_list.clear()
+    derived_child_set.remove(obj.derived)
+
+    return derived_child_set, derived_parent_dict, derived_child_id_list
+
+
+def reset_childs_inheritance(xml_obj_set, derived_child_id=None):
+    """Check if there is first level derived child id list, if yes reset original child/parent
+    relationships"""
+    if derived_child_id:
+        for elem in xml_obj_set:
+            if elem.derived:
+                child_pop = [c for c in elem.child_list if c.id in [f for f in derived_child_id]]
+                [elem.derived.add_child(c) for c in child_pop]
+                [c.set_parent(elem.derived) for c in child_pop]
+
+
+def attribute_inheritance(xml_attribute_set, xml_object_list):
+    """Attribute inheritance"""
+    modified_attrib_set = set()
+    for attribute in xml_attribute_set:
+        for obj_id, value in attribute.described_item_list.copy():
+            for der_obj in {o for o in xml_object_list if o.derived}:
+                if obj_id == der_obj.derived.id:
+                    attribute.add_described_item((der_obj.id, value))
+                    modified_attrib_set.add((attribute.id, der_obj.id, value))
+
+    return modified_attrib_set
+
+
+def reset_attribute_inheritance(xml_attribute_set, to_be_reset_id_set):
+    """Reset attributes"""
+    for attribute in xml_attribute_set:
+        [attribute.described_item_list.remove((e[1], e[2])) for e in to_be_reset_id_set
+         if e[0] == attribute.id]
+
+
+def view_inheritance(xml_view_set, xml_obj_set):
+    """View inheritance"""
+    temp_view_set = set()
+    for view in xml_view_set:
+        for item_id in view.allocated_item_list.copy():
+            for obj in {i for i in xml_obj_set if i.derived}:
+                if item_id == obj.derived.id:
+                    temp_view_set.add((view.id, obj.id))
+                    view.add_allocated_item(obj.id)
+
+    return temp_view_set
+
+
+def reset_view_inheritance(xml_view_set, to_be_removed_id):
+    """Reset views"""
+    for view in xml_view_set:
+        for ids in to_be_removed_id:
+            if view.id == ids[0]:
+                view.allocated_item_list.remove(ids[1])
