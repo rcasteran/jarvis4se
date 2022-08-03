@@ -9,7 +9,7 @@ import datamodel
 
 
 class XmlParser3SE:
-
+    """Class for xml parsing"""
     def __init__(self):
         self.xml_dict = {'xml_function_list': set(),
                          'xml_consumer_function_list': [],
