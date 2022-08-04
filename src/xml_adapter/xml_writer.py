@@ -390,15 +390,16 @@ class GenerateXML:
 
     def write_derived(self, derived_list):
         """Method to write derived by list [Object]"""
-        elem_tag = get_object_tag(derived_list[0])
-        if elem_tag in derived_obj_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for elem in derived_list:
-                    for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
-                                                      elem.id + "']"):
-                        fun_inter_tag.set('derived', str(elem.derived.id))
+        for obj in derived_list:
+            elem_tag = get_object_tag(obj)
+            if elem_tag in derived_obj_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+                    for elem in derived_list:
+                        for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
+                                                          elem.id + "']"):
+                            fun_inter_tag.set('derived', str(elem.derived.id))
             self.write()
 
     def write_object_type(self, object_list):
