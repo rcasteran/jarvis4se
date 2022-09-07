@@ -1274,7 +1274,7 @@ def add_obj_to_xml(object_lists, output_xml):
 
 
 # Inheritance start here - Should be moved/refactored after validation
-def childs_inheritance(xml_obj_set, level=None):
+def childs_inheritance(*xml_obj_set, level=None):
     """Check if object from xml_obj_set is derived, if yes:
     - call derived_childs()
     - returns derived_parent_dict of derived objects id, derived_child_set of derived objects and
@@ -1286,13 +1286,14 @@ def childs_inheritance(xml_obj_set, level=None):
     derived_parent_dict = {}
     derived_child_id_list = set()
 
-    for elem in xml_obj_set:
-        if elem.derived:
-            partial_child_set, partial_par_dict, partial_child_id_set = derived_childs(elem,
-                                                                                       level)
-            derived_child_set = derived_child_set.union(partial_child_set)
-            derived_parent_dict.update(partial_par_dict)
-            derived_child_id_list = derived_child_id_list.union(partial_child_id_set)
+    for xml_set in xml_obj_set:
+        for elem in xml_set:
+            if elem.derived:
+                partial_child_set, partial_par_dict, partial_child_id_set = derived_childs(elem,
+                                                                                           level)
+                derived_child_set = derived_child_set.union(partial_child_set)
+                derived_parent_dict.update(partial_par_dict)
+                derived_child_id_list = derived_child_id_list.union(partial_child_id_set)
 
     return derived_child_set, derived_parent_dict, derived_child_id_list
 
@@ -1315,23 +1316,30 @@ def derived_childs(obj, level):
     return derived_child_set, derived_parent_dict, derived_child_id_list
 
 
-def reset_childs_inheritance(xml_obj_set, derived_child_id=None):
+def reset_childs_inheritance(*xml_obj_set, derived_child_id=None):
     """Check if there is first level derived child id list, if yes reset original child/parent
     relationships"""
     if derived_child_id:
-        for elem in xml_obj_set:
-            if elem.derived:
-                child_pop = [c for c in elem.child_list if c.id in [f for f in derived_child_id]]
-                [elem.derived.add_child(c) for c in child_pop]
-                [c.set_parent(elem.derived) for c in child_pop]
+        for xml_set in xml_obj_set:
+            for elem in xml_set:
+                if elem.derived:
+                    child_pop = [c for c in elem.child_list
+                                 if c.id in [f for f in derived_child_id]]
+                    [elem.derived.add_child(c) for c in child_pop]
+                    [c.set_parent(elem.derived) for c in child_pop]
 
 
-def attribute_inheritance(xml_attribute_set, xml_object_list):
+def attribute_inheritance(xml_attribute_set, *xml_object_set):
     """Attribute inheritance"""
     modified_attrib_set = set()
+    derived_elem = set()
+
+    for xml_set in xml_object_set:
+        [derived_elem.add(e) for e in xml_set if e.derived]
+
     for attribute in xml_attribute_set:
         for obj_id, value in attribute.described_item_list.copy():
-            for der_obj in {o for o in xml_object_list if o.derived}:
+            for der_obj in derived_elem:
                 if obj_id == der_obj.derived.id:
                     attribute.add_described_item((der_obj.id, value))
                     modified_attrib_set.add((attribute.id, der_obj.id, value))
@@ -1346,12 +1354,17 @@ def reset_attribute_inheritance(xml_attribute_set, to_be_reset_id_set):
          if e[0] == attribute.id]
 
 
-def view_inheritance(xml_view_set, xml_obj_set):
+def view_inheritance(xml_view_set, *xml_obj_set):
     """View inheritance"""
     temp_view_set = set()
+    derived_elem_set = set()
+
+    for xml_set in xml_obj_set:
+        [derived_elem_set.add(e) for e in xml_set if e.derived]
+
     for view in xml_view_set:
         for item_id in view.allocated_item_list.copy():
-            for obj in {i for i in xml_obj_set if i.derived}:
+            for obj in derived_elem_set:
                 if item_id == obj.derived.id:
                     temp_view_set.add((view.id, obj.id))
                     view.add_allocated_item(obj.id)
@@ -1365,3 +1378,25 @@ def reset_view_inheritance(xml_view_set, to_be_removed_id):
         for ids in to_be_removed_id:
             if view.id == ids[0]:
                 view.allocated_item_list.remove(ids[1])
+
+
+def allocation_inheritance(xml_obj_set, xml_allocated_obj_set):
+    """Allocation Inheritance"""
+    alloc_to_reset = []
+    for elem in xml_obj_set:
+        if elem.derived:
+            if isinstance(elem, datamodel.FunctionalElement):
+                pair = [elem, {i for i in elem.derived.allocated_function_list
+                                  if i not in elem.allocated_function_list}]
+                elem.allocated_function_list = elem.allocated_function_list.union(
+                    elem.derived.allocated_function_list)
+                alloc_to_reset.append(pair)
+
+    return alloc_to_reset
+
+
+def reset_alloc_inheritance(pairs_to_reset):
+    """Reset Allocation Inheritance"""
+    for pair in pairs_to_reset:
+        if isinstance(pair[0], datamodel.FunctionalElement):
+            [pair[0].allocated_function_list.remove(fun_id) for fun_id in pair[1]]

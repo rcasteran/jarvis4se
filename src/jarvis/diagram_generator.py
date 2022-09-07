@@ -9,7 +9,8 @@ import plantuml_adapter
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
 from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
-    attribute_inheritance, reset_attribute_inheritance, view_inheritance, reset_view_inheritance
+    attribute_inheritance, reset_attribute_inheritance, view_inheritance, reset_view_inheritance, \
+    allocation_inheritance, reset_alloc_inheritance
 
 
 def filter_show_command(diagram_name_str, **kwargs):
@@ -125,7 +126,9 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    v_inheritance = view_inheritance(kwargs['xml_view_list'], kwargs['xml_function_list'])
+    v_inheritance = view_inheritance(kwargs['xml_view_list'],
+                                     kwargs['xml_function_list'],
+                                     kwargs['xml_fun_elem_list'])
 
     # Check view if activated and filter allocated item,
     # if not activated then no item filtered
@@ -454,6 +457,15 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
         return plantuml_text
     main_fun_elem.parent = None
 
+    c_inheritance = childs_inheritance(xml_function_list, xml_fun_elem_list, level=diagram_level)
+    attrib_inheritance = attribute_inheritance(xml_attribute_list,
+                                               xml_function_list,
+                                               xml_fun_elem_list,
+                                               xml_fun_inter_list)
+    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
+    alloc_inheritance = allocation_inheritance(xml_fun_elem_list, xml_function_list)
+    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
+
     if diagram_level:
         xml_function_list, xml_fun_elem_list = filter_fun_elem_with_level(main_fun_elem,
                                                                           diagram_level,
@@ -485,6 +497,12 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                                                 xml_attribute_list,
                                                                 xml_data_list,
                                                                 xml_fun_inter_list)
+
+    reset_childs_inheritance(xml_function_list, xml_fun_elem_list, derived_child_id=c_inheritance[2])
+    reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)
+    #reset_alloc_inheritance(alloc_inheritance)
+    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
+
     print(f"Decomposition Diagram for {fun_elem_str} generated")
     return plantuml_text
 
