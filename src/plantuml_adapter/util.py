@@ -64,15 +64,18 @@ class PlantUmlPicoServer:
     def check_version(self):
         """Get .jar version and check with latest release"""
         jar_version = subprocess.run(
-            self.version_cmd, capture_output=True, encoding="utf-8").stdout[17:25]
+            self.version_cmd, capture_output=True, encoding="utf-8").stdout[17:26].strip()
         github_url = "https://github.com/plantuml/plantuml/releases/latest"
-        with urlopen(f"{github_url}") as rep:
-            release_ver = str(rep.geturl())[-8:]
+        try:
+            with urlopen(f"{github_url}") as rep:
+                release_ver = str(rep.geturl())[51:]
 
-        if int(release_ver[0]) > int(jar_version[0]) or \
-                int(release_ver[2:6]) > int(jar_version[2:6]) or \
-                int(release_ver[7:len(release_ver)]) > int(jar_version[7:len(jar_version)]):
-            print(f"WARNING:\nPlantUml .jar is not up-to-date, see latest release {github_url}")
+            if int(release_ver[0]) > int(jar_version[0]) or \
+                    int(release_ver[2:6]) > int(jar_version[2:6]) or \
+                    int(release_ver[7:len(release_ver)]) > int(jar_version[7:len(jar_version)]):
+                print(f"WARNING:\nPlantUml .jar is not up-to-date, see latest release {github_url}")
+        except:
+            print("Not able to check plantuml .jar version.")
 
 
 class PlantUmlGen(PlantUmlPicoServer):
