@@ -462,9 +462,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                                xml_function_list,
                                                xml_fun_elem_list,
                                                xml_fun_inter_list)
-    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
+
     alloc_inheritance = allocation_inheritance(xml_fun_elem_list, xml_function_list)
-    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
 
     if diagram_level:
         xml_function_list, xml_fun_elem_list = filter_fun_elem_with_level(main_fun_elem,
@@ -500,8 +499,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
 
     reset_childs_inheritance(xml_function_list, xml_fun_elem_list, derived_child_id=c_inheritance[2])
     reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)
-    #reset_alloc_inheritance(alloc_inheritance)
-    print([[elem.name, elem.allocated_function_list] for elem in xml_fun_elem_list])
+    reset_alloc_inheritance(alloc_inheritance)
 
     print(f"Decomposition Diagram for {fun_elem_str} generated")
     return plantuml_text
