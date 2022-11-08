@@ -1267,5 +1267,7 @@ def filter_allocated_item_from_view(xml_item_list, xml_view_list):
 
     if filtered_items_list:
         return filtered_items_list
+    if view.allocated_item_list and not filtered_items_list:
+        return xml_item_list
 
     return f"View {activated_view} does not contain any elements"
