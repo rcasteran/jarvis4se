@@ -1214,6 +1214,9 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         else:
             spec_obj_type = check_get_object(elem[1],
                                              **{'xml_type_list': kwargs['xml_type_list']})
+            if not spec_obj_type:
+                print(f"No valid type found for {elem[1]}")
+                continue
             base_type = get_base_type_recursively(spec_obj_type)
         if not base_type:
             print(f"No valid base type found for {elem[1]}")

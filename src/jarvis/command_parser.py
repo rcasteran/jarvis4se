@@ -18,7 +18,7 @@ class CmdParser:
 
             (r"(?<= |\n)(.*?) extends ([^.|\n]*)", matched_extend),
 
-            (r"(?<= |\n)(.*?) is a ([^state|transition][^\.\n]*)",
+            (r"(?<= |\n)(.*?) is a (?!state|transition)([^.|\n]*)",
              matched_specific_obj),
 
             (r"(?<= |\n)(.*?) is a state(?=.|\n)", matched_state),
