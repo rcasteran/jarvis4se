@@ -463,7 +463,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                                xml_fun_elem_list,
                                                xml_fun_inter_list)
 
-    alloc_inheritance = allocation_inheritance(xml_fun_elem_list, xml_function_list)
+    func_alloc_inheritance = allocation_inheritance(xml_fun_elem_list, xml_function_list)
+    fun_inter_alloc_inheritance = allocation_inheritance(xml_fun_inter_list, xml_data_list)
 
     if diagram_level:
         xml_function_list, xml_fun_elem_list = filter_fun_elem_with_level(main_fun_elem,
@@ -499,7 +500,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
 
     reset_childs_inheritance(xml_function_list, xml_fun_elem_list, derived_child_id=c_inheritance[2])
     reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)
-    reset_alloc_inheritance(alloc_inheritance)
+    reset_alloc_inheritance(func_alloc_inheritance)
+    reset_alloc_inheritance(fun_inter_alloc_inheritance)
 
     print(f"Decomposition Diagram for {fun_elem_str} generated")
     return plantuml_text
@@ -668,6 +670,14 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     if not main_fun_elem:
         return None
 
+    c_inheritance = childs_inheritance(xml_function_list, xml_fun_elem_list, level=None)
+    attrib_inheritance = attribute_inheritance(xml_attribute_list,
+                                               xml_function_list,
+                                               xml_fun_elem_list,
+                                               xml_fun_inter_list)
+    func_alloc_inheritance = allocation_inheritance(xml_fun_elem_list, xml_function_list)
+    fun_inter_alloc_inheritance = allocation_inheritance(xml_fun_inter_list, xml_data_list)
+
     # Get allocated function to main_fun_elem
     allocated_function_list = {f for f in xml_function_list
                                if f.id in main_fun_elem.allocated_function_list}
@@ -700,6 +710,12 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
                                                                   fun_elem_list,
                                                                   interface_list,
                                                                   fun_elem_inter_list)
+    
+    reset_childs_inheritance(xml_function_list, xml_fun_elem_list, derived_child_id=c_inheritance[2])
+    reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)                            
+    reset_alloc_inheritance(func_alloc_inheritance)
+    reset_alloc_inheritance(fun_inter_alloc_inheritance)
+
     print(f"Context Diagram for {fun_elem_str} generated")
     return plantuml_text
 

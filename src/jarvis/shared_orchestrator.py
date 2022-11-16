@@ -1394,6 +1394,12 @@ def allocation_inheritance(xml_obj_set, xml_allocated_obj_set):
                 elem.allocated_function_list = elem.allocated_function_list.union(
                     elem.derived.allocated_function_list)
                 alloc_to_reset.append(pair)
+            if isinstance(elem, datamodel.FunctionalInterface):
+                pair = [elem, {i for i in elem.derived.allocated_data_list
+                                  if i not in elem.allocated_data_list}]
+                elem.allocated_data_list = elem.allocated_data_list.union(
+                    elem.derived.allocated_data_list)
+                alloc_to_reset.append(pair)
 
     return alloc_to_reset
 
@@ -1403,3 +1409,5 @@ def reset_alloc_inheritance(pairs_to_reset):
     for pair in pairs_to_reset:
         if isinstance(pair[0], datamodel.FunctionalElement):
             [pair[0].allocated_function_list.remove(fun_id) for fun_id in pair[1]]
+        if isinstance(pair[0], datamodel.FunctionalInterface):
+            [pair[0].allocated_data_list.remove(data_id) for data_id in pair[1]]
