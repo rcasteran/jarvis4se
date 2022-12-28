@@ -3,7 +3,7 @@
 """Module with methods relative to Functional section"""
 # Libraries
 import re
-import uuid
+
 # Modules
 import datamodel
 from . import shared_orchestrator
@@ -23,6 +23,7 @@ def create_function_obj(function_str, specific_obj_type, **kwargs):
         Returns:
             update (0/function) : function if update, else 0
     """
+    function = 0
     if any(n == function_str for n in get_objects_names(kwargs['xml_function_list'])):
         return 0
     if not specific_obj_type:
@@ -30,7 +31,7 @@ def create_function_obj(function_str, specific_obj_type, **kwargs):
         function = datamodel.Function(p_name=function_str)
     else:
         # Instantiate Function
-        function = datamodel.Function(p_name=function_str, p_type=specific_obj_type.name)
+        function = datamodel.Function(p_name=function_str, p_type=specific_obj_type)
 
     alias_str = re.search(r"(.*)\s[-]\s", function_str, re.MULTILINE)
     if alias_str:
@@ -38,10 +39,14 @@ def create_function_obj(function_str, specific_obj_type, **kwargs):
     function.set_id(shared_orchestrator.get_unique_id())
     # Add function to a set()
     kwargs['xml_function_list'].add(function)
-    print(f"{function.name} is a {function.type}")
-    if function:
-        return function
-    return 0
+    if isinstance(function.type, datamodel.BaseType):
+        type_name = str(function.type).capitalize().replace("_", " ")
+    else:
+        type_name = function.type.name
+    print(f"{function.name} is a {type_name}")
+    
+    return function
+
 
 
 def create_data_obj(data_str, specific_obj_type, **kwargs):
@@ -490,11 +495,8 @@ def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
             alias_str = re.search(r"(.*)\s[-]\s", state_name, re.MULTILINE)
             if alias_str:
                 state.set_alias(alias_str.group(1))
-            # Set state's type
-            state.set_type(str(datamodel.StateType.UNKNOWN))
             # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            state.set_id(str(identifier.int)[:10])
+            state.set_id(shared_orchestrator.get_unique_id())
             # Add state to a set()
             xml_state_list.add(state)
             state_list.append(state)
@@ -537,10 +539,8 @@ def add_transition_by_name(transition_name_str_list, xml_transition_list, output
             alias_str = re.search(r"(.*)\s[-]\s", transition_name, re.MULTILINE)
             if alias_str:
                 transition.set_alias(alias_str.group(1))
-            # Set state's type
-            transition.set_type(str(datamodel.StateType.UNKNOWN))
             # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
+            identifier = shared_orchestrator.get_unique_id()
             transition.set_id(str(identifier.int)[:10])
             # Add state to a set()
             xml_transition_list.add(transition)
@@ -656,9 +656,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                     if elem[1] == transition.name or elem[1] == transition.alias:
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
-                                if state.type == datamodel.StateType.EXIT:
-                                    print(f"{elem[2]} is typed as EXIT state, "
-                                          f"it cannot be put as source's transition (not added)")
+                                if not isinstance(state.type, datamodel.BaseType):
+                                    if 'EXIT' in state.type.name: 
+                                        print(f"{elem[2]} is typed as EXIT state, "
+                                            f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
@@ -668,9 +669,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                     if elem[1] == transition.name or elem[1] == transition.alias:
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
-                                if state.type == datamodel.StateType.ENTRY:
-                                    print(f"{elem[2]} is typed as ENTRY state, it cannot be "
-                                          f"put as destination's transition (not added)")
+                                if not isinstance(state.type, datamodel.BaseType):
+                                    if 'EXIT' in state.type.name:
+                                        print(f"{elem[2]} is typed as ENTRY state, it cannot be "
+                                            f"put as destination's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])

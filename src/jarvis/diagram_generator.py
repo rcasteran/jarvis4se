@@ -399,7 +399,7 @@ def case_no_diagram(**kwargs):
 
 def check_level_0_allocated_child(fun_elem, function):
     """Returns True if the function can be "shown" by the functional element (i.e. no function
-    children allocated to fun_elem children => TODO: Clean 2 above methods"""
+    children allocated to fun_elem children => TODO: Clean 2 below methods"""
     check = False
     if fun_elem.child_list == set():
         check = True

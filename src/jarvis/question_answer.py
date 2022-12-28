@@ -168,8 +168,6 @@ def get_function_info(wanted_object, object_info, **kwargs):
         object_info['Input Role'] = str(wanted_object.input_role)
     if wanted_object.operand is not None:
         object_info['Operand'] = str(wanted_object.operand)
-    if any(wanted_object.port_list):
-        object_info['Port List'] = str(wanted_object.port_list)
 
     object_info['Consumption List'] = \
         get_consumes_produces_info(wanted_object, kwargs['xml_consumer_function_list'])

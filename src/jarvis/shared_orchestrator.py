@@ -190,18 +190,18 @@ def check_and_delete_object(delete_str_list, **kwargs):
 
 def check_relationship_before_delete(object_to_del, **kwargs):
     """Switch to trigger differents methods depend object's type"""
-    _, idx = get_specific_obj_type_and_idx(object_to_del)
+    _, idx = get_basetype_and_idx(object_to_del)
     switch_check = {
-        0: check_function,
-        1: check_data,
-        2: check_state,
-        3: check_transition,
-        4: check_fun_elem,
-        5: check_chain,
-        6: check_attribute,
-        7: check_fun_inter,
-        8: check_phy_elem,
-        9: check_phy_inter,
+        0: check_data,
+        1: check_function,
+        2: check_fun_elem,
+        3: check_fun_inter,
+        4: check_phy_elem,
+        5: check_phy_inter,
+        6: check_state,
+        7: check_transition,
+        8: check_attribute,
+        9: check_chain,
     }
     check_obj = switch_check.get(idx, "Object can not be deleted")
     check = check_obj(object_to_del, **kwargs)
@@ -509,7 +509,7 @@ def delete_objects(object_lists, output_xml):
     updates has been made
 
         Parameters:
-            object_lists : see order in get_specific_obj_type_and_idx()
+            object_lists : see order in get_basetype_and_idx()
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
@@ -528,9 +528,9 @@ def delete_objects(object_lists, output_xml):
 def check_set_object_type(type_str_list, **kwargs):
     """
     Check if each string in type_str_list are corresponding to an actual object's name/alias, create
-    [objects] ordered lists for:
-    [[Function],[Data],[State],[Transition],[FunctionalElement],[Attribute],
-    [FuncitonalInterface],[PhysicalElement],[PhysicalInterface],[View]]
+    [objects] ordered lists(as BaseType(Enum)) for:
+    [[Data], [Function],[FunctionalElement], [FuncitonalInterface],[PhysicalElement],
+    [PhysicalInterface], [State],[Transition],[Attribute],[View]]
     Send lists to set_object_type() to write them within xml and then returns update from it.
 
         Parameters:
@@ -549,9 +549,9 @@ def check_set_object_type(type_str_list, **kwargs):
             continue
         if object_to_set.type == type_name:
             continue
-        check, list_idx = check_new_type(object_to_set, type_name, kwargs['xml_type_list'])
+        check, basetype_idx = check_new_type(object_to_set, type_name, kwargs['xml_type_list'])
         if check:
-            object_type_lists[list_idx].append(object_to_set)
+            object_type_lists[basetype_idx].append(object_to_set)
 
     update = set_object_type(object_type_lists, kwargs['output_xml'])
 
@@ -561,79 +561,56 @@ def check_set_object_type(type_str_list, **kwargs):
 def check_new_type(object_to_set, type_name, xml_type_list):
     """Check if type in specity object's type list and if changed"""
     check = False
-    specific_obj_type_list, list_idx = get_specific_obj_type_and_idx(object_to_set)
-    if list_idx in (0, 1, 2, 3, 4, 5, 7, 8, 9):
-        if any(t == type_name.upper() for t in specific_obj_type_list):
-            if type_name.capitalize() != str(object_to_set.type):
-                check = True
-                object_to_set.set_type(type_name.capitalize())
+    basetype_idx = None
+    obj_base_type = get_basetype_and_idx(object_to_set)
+    # print(specific_obj_type_list, list_idx)
+    if obj_base_type and type_name != object_to_set.type:
+        if type_name.capitalize().replace("_", " ") in [str(i) for i in datamodel.BaseType]:
+            basetype_idx = obj_base_type.value
+            check = True
+            object_to_set.set_type(obj_base_type)
         elif any(t == type_name for t in get_objects_names(xml_type_list)):
             obj_type = check_get_object(type_name, **{'xml_type_list': xml_type_list})
-            check = check_type_recursively(obj_type, specific_obj_type_list)
+            check = check_type_recursively(obj_type)
             if not check:
                 print(f"{obj_type.name} is not base type: "
-                      f"{specific_obj_type_list[0].capitalize()}")
+                    f"{str(obj_base_type)}")
             else:
-                object_to_set.set_type(obj_type.name)
+                basetype_idx = obj_base_type.value
+                object_to_set.set_type(obj_type)
         else:
             print(
                 f"The type {type_name} does not exist, available types are "
-                f": {', '.join(specific_obj_type_list)}.")
-
-    elif list_idx == 6:
-        check = True
-        object_to_set.set_type(type_name)
-
-    return check, list_idx
+                f": {', '.join([str(i) for i in datamodel.BaseType])}.")
+        
 
 
-def check_type_recursively(obj_type, specific_obj_type_list):
+    return check, basetype_idx
+
+
+def check_type_recursively(obj_type):
     """Checks type.base recursively if it within specific_obj_type_list"""
     check = False
-    if isinstance(obj_type.base, str) and obj_type.base.upper() in specific_obj_type_list:
+    if isinstance(obj_type.base, (datamodel.BaseType, str)):
         check = True
         return check
     elif isinstance(obj_type.base, datamodel.Type):
-        return check_type_recursively(obj_type.base, specific_obj_type_list)
+        return check_type_recursively(obj_type.base)
     return check
 
 
-def get_specific_obj_type_and_idx(object_to_set):
-    """Get __str__ list from FunctionType, DataType, StateType, TransitionType,
-    FunctionalElementType, ViewType and index for output_list (depends on the type)"""
-    specific_obj_type_list = []
-    list_idx = None
-    if isinstance(object_to_set, datamodel.Function):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.FunctionType]
-        list_idx = 0
-    elif isinstance(object_to_set, datamodel.Data):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.DataType]
-        list_idx = 1
-    elif isinstance(object_to_set, datamodel.State):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.StateType]
-        list_idx = 2
-    elif isinstance(object_to_set, datamodel.Transition):  # TBC
-        specific_obj_type_list = [str(i).upper() for i in datamodel.TransitionType]
-        list_idx = 3
-    elif isinstance(object_to_set, datamodel.FunctionalElement):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.FunctionalElementType]
-        list_idx = 4
-    elif isinstance(object_to_set, datamodel.View):
-        specific_obj_type_list = [str(i).upper() for i in datamodel.ViewType]
-        list_idx = 5
-    elif isinstance(object_to_set, datamodel.Attribute):
-        list_idx = 6
-    elif isinstance(object_to_set, datamodel.FunctionalInterface):
-        specific_obj_type_list = [str(datamodel.BaseType.FUNCTIONAL_INTERFACE).upper()]
-        list_idx = 7
-    elif isinstance(object_to_set, datamodel.PhysicalElement):
-        specific_obj_type_list = [str(datamodel.BaseType.PHYSICAL_ELEMENT).upper()]
-        list_idx = 8
-    elif isinstance(object_to_set, datamodel.PhysicalInterface):
-        specific_obj_type_list = [str(datamodel.BaseType.PHYSICAL_INTERFACE).upper()]
-        list_idx = 9
+def get_basetype_and_idx(object_to_set):
+    """Return BaseType according to object's type"""
+    # Tuple order is same as datamodel.BaseType(Enum)
+    class_obj_tuple = (datamodel.Data, datamodel.Function, datamodel.FunctionalElement,
+    datamodel.FunctionalInterface, datamodel.PhysicalElement, datamodel.PhysicalInterface,
+    datamodel.State, datamodel.Transition, datamodel.Attribute, datamodel.View)
 
-    return specific_obj_type_list, list_idx
+    for idx, i in enumerate(class_obj_tuple):
+        if isinstance(object_to_set, i):
+            return datamodel.BaseType(idx)
+
+    return None
 
 
 def set_object_type(object_lists, output_xml):
@@ -642,7 +619,7 @@ def set_object_type(object_lists, output_xml):
     updates has been made
 
         Parameters:
-            object_lists : see order in get_specific_obj_type_and_idx()
+            object_lists : see order in get_basetype_and_idx()
             output_xml (GenerateXML object) : XML's file object
 
         Returns:
@@ -653,7 +630,11 @@ def set_object_type(object_lists, output_xml):
             if object_lists[i]:
                 output_xml.write_object_type(object_lists[i])
                 for object_type in object_lists[i]:
-                    print(f"The type of {object_type.name} is {object_type.type}")
+                    if isinstance(object_type.type, datamodel.BaseType):
+                        type_name = str(object_type.type).capitalize().replace("_", " ")
+                    else:
+                        type_name = object_type.type.name
+                    print(f"The type of {object_type.name} is {type_name}")
         return 1
     return 0
 
@@ -1221,7 +1202,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         if not base_type:
             print(f"No valid base type found for {elem[1]}")
             continue
-        base_type = datamodel.BaseType.get_enum(str(base_type)).value
+        base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
         switch_obj_list = {
             0: create_data_obj,
             1: create_function_obj,
@@ -1230,10 +1211,10 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
             4: create_phy_elem_obj,
             5: create_phy_inter_obj,
         }
-        call = switch_obj_list.get(base_type)
+        call = switch_obj_list.get(base_type_idx)
         new_obj = call(elem[0], spec_obj_type, **kwargs)
         if not isinstance(new_obj, int):
-            object_lists[base_type].append(new_obj)
+            object_lists[base_type_idx].append(new_obj)
         # print(sepc_obj_type.name, sepc_obj_type.base)
     if any(object_lists):
         return add_obj_to_xml(object_lists, kwargs['output_xml'])
@@ -1244,8 +1225,6 @@ def get_base_type_recursively(obj_type):
     """Checks type: if it's a BaseType or its base else recursively return """
     if isinstance(obj_type, datamodel.BaseType):
         return obj_type
-    elif obj_type.name in [str(i) for i in datamodel.BaseType]:
-        return obj_type.name
     elif obj_type.base in [str(i) for i in datamodel.BaseType]:
         return obj_type.base
     return get_base_type_recursively(obj_type.base)
