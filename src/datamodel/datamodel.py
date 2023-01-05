@@ -84,41 +84,41 @@ class BaseType(Enum):
 class Function:
     """ @anchor Function
     Basic type representing a function
-
+    
     A function is a transformation of incoming data to outgoing data, by means of some mechanisms,
     and subject to certain controls.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTION, p_parent=None,
                  p_role=None, p_operand=None, p_derived=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         function type\n
         Could be @ref BaseType .FUNCTION or a @ref Type based on @ref BaseType .FUNCTION
-
+        
         @var parent
         parent identifier
-
+        
         @var child_list
         child list
-
+        
         @var input_role
         role of the function for a given data
-
+        
         @var derived
         identifier of the function from which it is derived
-		
-		@var operand
-		operand of the function
+        
+        @var operand
+        operand of the function
         """
 
         self.id = p_id
@@ -213,23 +213,23 @@ class Function:
 class Data:
     """ @anchor Data
     Basic type representing a data
-
+    
     A data is an output produced by a function and consumed by another function.
     It can be functional (information) or physical (flow of energy, particles...)
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_type=BaseType.DATA):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var type
         data type\n
         Could be @ref BaseType .DATA or a @ref Type based on @ref BaseType .DATA
-
+        
         @var predecessor_list
         data predecessor list
         """
@@ -274,31 +274,31 @@ class Data:
 class State:
     """ @anchor State
     Basic type representing a state
-
+    
     A state is an operational situation of the system characterized by its active functions.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.STATE, p_parent=None):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         state type\n
         Could be @ref BaseType .STATE or a @ref Type based on @ref BaseType .STATE
-
+        
         @var parent
         parent identifier
-
+        
         @var child_list
         child list
-
+        
         @var allocated_function_list
         allocated function list
         """
@@ -370,7 +370,7 @@ class State:
 class Transition:
     """ @anchor Transition
     Basic type representing a transition
-
+    
     A transition is a change from one initial state to a final state or the same one, whose evaluation depends on the
     data produced by the active functions in the initial state.
     """
@@ -379,23 +379,23 @@ class Transition:
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         transition type\n
         Could be @ref BaseType .TRANSITION or a @ref Type based on @ref BaseType .TRANSITION
-
+        
         @var source
         initial state
-
+        
         @var destination
         final state
-
+        
         @var condition_list
         condition list
         """
@@ -467,42 +467,42 @@ class Transition:
 class FunctionalElement:
     """ @anchor FunctionalElement
     Basic type representing a functional element
-
+    
     A functional element is a part of a system element responsible for carrying out some functions devolved to
     the system, by interacting with its other functional elements and/or functional enabling systems.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_ELEMENT,
                  p_parent=None, p_derived=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         functional element type\n
         Could be @ref BaseType .FUNCTIONAL_ELEMENT or a @ref Type based on @ref BaseType .FUNCTIONAL_ELEMENT
-
+        
         @var parent
         parent identifier
-
+        
         @var child_list
         child list
-
+        
         @var allocated_state_list
         allocated state list
-
+        
         @var allocated_function_list
         allocated function list
-
+        
         @var exposed_interface_list
         exposed interface list
-
+        
         @var derived
         identifier of the functional element from which it is derived
         """
@@ -601,22 +601,22 @@ class View:
     """@anchor View
     View class
     """
-	
+    
     def __init__(self, uid='', name='', v_type=BaseType.VIEW):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var type
         attribute type\n
         Could be @ref BaseType .STATE or a @ref Type based on @ref BaseType .VIEW
-
+        
         @var activated
         Indicates if the view is activated (TRUE) or not (FALSE)
-
+        
         @var allocated_item_list
         allocated item list
         """
@@ -671,22 +671,22 @@ class Attribute:
     """@anchor Attribute
     Attribute class
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.ATTRIBUTE):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         attribute type\n
         Could be @ref BaseType .STATE or a @ref Type based on @ref BaseType .ATTRIBUTE
-
+        
         @var described_item_list
         described item list
         """
@@ -740,30 +740,30 @@ class Attribute:
 class FunctionalInterface:
     """ @anchor FunctionalInterface
     Basic type representing a functional interface
-
+    
     A functional interface is a boundary across which two functional elements and/or enabling functional elements
     meet and exchange data.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_INTERFACE,
                  p_derived=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         functional interface type\n
         Could be @ref BaseType .FUNCTIONAL_ELEMENT or a @ref Type based on @ref BaseType .FUNCTIONAL_ELEMENT
-
+        
         @var allocated_data_list
         allocated data list
-
+        
         @var derived
         identifier of the functional interface from which it is derived
         """
@@ -825,38 +825,38 @@ class FunctionalInterface:
 class PhysicalElement:
     """ @anchor PhysicalElement
     Basic type representing a physical element
-
+    
     A physical element is a physical part of a system that satisfies specified requirements.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_ELEMENT,
                  p_parent=None, p_derived=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         Physical element type\n
         Could be @ref BaseType .PHYSICAL_ELEMENT or a @ref Type based on @ref BaseType .PHYSICAL_ELEMENT
-
+        
         @var parent
         parent identifier
-
+        
         @var allocated_fun_elem_list
         allocated functional element list
-
+        
         @var exposed_interface_list
         exposed interface list
-
+        
         @var child_list
         child list
-
+        
         @var derived
         identifier of the functional element from which it is derived
         """
@@ -945,30 +945,30 @@ class PhysicalElement:
 class PhysicalInterface:
     """ @anchor PhysicalInterface
     Basic type representing a physical interface
-
+    
     A physical interface is a boundary across which two physical elements and/or enabling physical elements meet and
     exchange data.
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_INTERFACE,
                  p_derived=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var type
         Physical interface type
         Could be @ref BaseType .PHYSICAL_ELEMENT or a @ref Type based on @ref BaseType .PHYSICAL_ELEMENT
-
+        
         @var allocated_fun_inter_list
         allocated functional interface list
-
+        
         @var derived
         identifier of the physical interface from which it is derived
         """
@@ -1031,18 +1031,18 @@ class Type:
     """@anchor Type
     Type class
     """
-	
+    
     def __init__(self, p_id='', p_name='', p_alias='', p_base=''):
         """
         @var id
         unique identifier
-
+        
         @var name
         unique name
-
+        
         @var alias
         unique alias
-
+        
         @var base
         Type base\n
         Must be @ref BaseType value

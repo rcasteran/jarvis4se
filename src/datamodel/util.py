@@ -35,15 +35,15 @@ class EndPoint:
     """ @anchor EndPoint
     Basic type for diagram object defined as a set of points
     """
-	
+    
     def __init__(self, p_name=''):
         """
-		@var name
+        @var name
         unique name
-		
-		@var point_list
-        point list		
-		"""
+        
+        @var point_list
+        point list
+        """
         self.name = p_name
         self.point_list = set()
 
@@ -56,9 +56,10 @@ class EndPoint:
         self.name = p_name
 
     def add_point(self, p_point):
-	    """Add point to point_list
+        """Add point to point_list
         @param[in] self this class instance
         @param[in] p_point point
         @return None
         """
         self.point_list.add(p_point)
+
