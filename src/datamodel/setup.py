@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module datamodel for 3SE"""
 from setuptools import setup
 
 
 setup(name='datamodel',
       version='0.1',
-      description='MTC datamodel',
+      description='3SE datamodel',
       url='',
       author='',
       author_email='',

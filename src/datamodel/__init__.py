@@ -1,3 +1,15 @@
+""" @package datamodel
+Module for 3SE datamodel
+
+Defines the following basic types that are manipulated by systems engineers:
+- For functional analysis: @ref Function, @ref Data, @ref FunctionalElement and @ref FunctionalInterface
+- For state analysis: @ref State and @ref Transition
+- For physical analysis: @ref PhysicalElement and @ref PhysicalInterface
+- For type declaration: @ref BaseType and @ref Type
+- For attribute declaration: @ref Attribute
+- For view declaration: @ref View
+"""
+
 from .datamodel import Function
 from .datamodel import Data
 from .datamodel import State
