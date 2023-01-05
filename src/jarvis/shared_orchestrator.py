@@ -1199,22 +1199,23 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                 print(f"No valid type found for {elem[1]}")
                 continue
             base_type = get_base_type_recursively(spec_obj_type)
-        if not base_type:
-            print(f"No valid base type found for {elem[1]}")
-            continue
-        base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
-        switch_obj_list = {
-            0: create_data_obj,
-            1: create_function_obj,
-            2: create_fun_elem_obj,
-            3: create_fun_inter_obj,
-            4: create_phy_elem_obj,
-            5: create_phy_inter_obj,
-        }
-        call = switch_obj_list.get(base_type_idx)
-        new_obj = call(elem[0], spec_obj_type, **kwargs)
-        if not isinstance(new_obj, int):
-            object_lists[base_type_idx].append(new_obj)
+            if not base_type:
+                print(f"No valid base type found for {elem[1]}")
+                continue
+
+            base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
+            switch_obj_list = {
+                0: create_data_obj,
+                1: create_function_obj,
+                2: create_fun_elem_obj,
+                3: create_fun_inter_obj,
+                4: create_phy_elem_obj,
+                5: create_phy_inter_obj,
+            }
+            call = switch_obj_list.get(base_type_idx)
+            new_obj = call(elem[0], spec_obj_type, **kwargs)
+            if not isinstance(new_obj, int):
+                object_lists[base_type_idx].append(new_obj)
         # print(sepc_obj_type.name, sepc_obj_type.base)
     if any(object_lists):
         return add_obj_to_xml(object_lists, kwargs['output_xml'])
