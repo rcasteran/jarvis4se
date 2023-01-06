@@ -77,7 +77,7 @@ class BaseType(Enum):
             enum_type = cls.ATTRIBUTE
         elif obj_type == 'View':
             enum_type = cls.VIEW
-			
+        
         return enum_type
 
 
