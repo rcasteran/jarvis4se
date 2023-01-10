@@ -8,7 +8,7 @@ import datamodel
 from .question_answer import (get_object_type, check_get_object, get_allocation_object,
                               check_not_family, get_objects_names, get_children)
 from .functional_orchestrator import (create_function_obj, create_data_obj, create_fun_elem_obj,
-                                      create_fun_inter_obj)
+                                      create_fun_inter_obj, create_state_obj)
 from .physical_orchestrator import (create_phy_elem_obj, create_phy_inter_obj)
 
 
@@ -670,7 +670,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
 
     return update
 
-
+# TODO: Clean this with new datamodel
 def check_new_alias(object_to_set, alias_str):
     """Check that alias is new and object has en alias attribute, then returns corresponding
     object's type index"""
@@ -1186,7 +1186,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    object_lists = [[] for _ in range(6)]
+    object_lists = [[] for _ in range(7)]
     for elem in obj_type_str_list:
         spec_obj_type = None
         if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
@@ -1199,23 +1199,23 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                 print(f"No valid type found for {elem[1]}")
                 continue
             base_type = get_base_type_recursively(spec_obj_type)
-            if not base_type:
-                print(f"No valid base type found for {elem[1]}")
-                continue
-
-            base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
-            switch_obj_list = {
-                0: create_data_obj,
-                1: create_function_obj,
-                2: create_fun_elem_obj,
-                3: create_fun_inter_obj,
-                4: create_phy_elem_obj,
-                5: create_phy_inter_obj,
-            }
-            call = switch_obj_list.get(base_type_idx)
-            new_obj = call(elem[0], spec_obj_type, **kwargs)
-            if not isinstance(new_obj, int):
-                object_lists[base_type_idx].append(new_obj)
+        if not base_type or base_type is None:
+            print(f"No valid base type found for {elem[1]}")
+            continue
+        base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
+        switch_obj_list = {
+            0: create_data_obj,
+            1: create_function_obj,
+            2: create_fun_elem_obj,
+            3: create_fun_inter_obj,
+            4: create_phy_elem_obj,
+            5: create_phy_inter_obj,
+            6: create_state_obj,
+        }
+        call = switch_obj_list.get(base_type_idx)
+        new_obj = call(elem[0], spec_obj_type, **kwargs)
+        if not isinstance(new_obj, int):
+            object_lists[base_type_idx].append(new_obj)
         # print(sepc_obj_type.name, sepc_obj_type.base)
     if any(object_lists):
         return add_obj_to_xml(object_lists, kwargs['output_xml'])
@@ -1247,6 +1247,7 @@ def add_obj_to_xml(object_lists, output_xml):
         3: output_xml.write_functional_interface,
         4: output_xml.write_physical_element,
         5: output_xml.write_physical_interface,
+        6: output_xml.write_state,
     }
     check = 0
     for idx, sub in enumerate(object_lists):

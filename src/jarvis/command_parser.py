@@ -18,10 +18,8 @@ class CmdParser:
 
             (r"(?<= |\n)(.*?) extends ([^.|\n]*)", matched_extend),
 
-            (r"(?<= |\n)(.*?) is a (?!state|transition)([^.|\n]*)",
+            (r"(?<= |\n)(.*?) is a (?!transition)([^.|\n]*)",
              matched_specific_obj),
-
-            (r"(?<= |\n)(.*?) is a state(?=.|\n)", matched_state),
 
             (r"(?<= |\n)(.*?) is a transition(?=.|\n)", matched_transition),
 
@@ -149,14 +147,6 @@ def matched_extend(type_str_list, **kwargs):
 def matched_specific_obj(obj_type_str, **kwargs):
     """Get "is a" declaration"""
     out = shared_orchestrator.check_add_specific_obj_by_type(obj_type_str, **kwargs)
-    return out
-
-
-def matched_state(state_name_str_list, **kwargs):
-    """Get state's declaration"""
-    out = functional_orchestrator.add_state_by_name(state_name_str_list,
-                                                    kwargs['xml_state_list'],
-                                                    kwargs['output_xml'])
     return out
 
 

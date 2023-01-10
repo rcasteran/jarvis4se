@@ -468,48 +468,49 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
     return 1
 
 
-def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
+def create_state_obj(state_str, specific_obj_type, **kwargs):
     """
-    Check if each string in state_name_str_list is not already corresponding to an actual object's
-    name/alias, create new State() object, instantiate it, write it within XML and then returns
-    update_list.
+    Check if string state_str is not already corresponding to an actual object's name/alias,
+    create new State() object, instantiate it, add it to xml_state_list.
 
         Parameters:
-            state_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_state_list ([State]) : State list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            state_str (str) : string from jarvis cell
+            specific_obj_type ([Function]) : specific type (Type() or BaseType(Enum))
+            kwargs (dict) : whole xml lists + xml's file object
 
         Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
+            update (0/state) : state if update, else 0
     """
-    state_list = []
-    # Create a list with all state names/aliases already in the xml
-    xml_state_name = get_objects_names(xml_state_list)
-    # Loop on the list and create set for states
-    for state_name in state_name_str_list:
-        if state_name not in xml_state_name:
-            # Instantiate State class and state
-            state = datamodel.State()
-            # Set state's name
-            state.set_name(str(state_name))
-            alias_str = re.search(r"(.*)\s[-]\s", state_name, re.MULTILINE)
-            if alias_str:
-                state.set_alias(alias_str.group(1))
-            # Generate and set unique identifier of length 10 integers
-            state.set_id(shared_orchestrator.get_unique_id())
-            # Add state to a set()
-            xml_state_list.add(state)
-            state_list.append(state)
-        else:
-            # print(state_name + " already exists (not added)")
-            pass
-    if not state_list:
-        return 0
+    state = 0
+    if any(n == state_str for n in get_objects_names(kwargs['xml_state_list'])):
+        existing_state = check_get_object(state_str, kwargs['xml_state_list'])
+        print("{:s} is already declared as {:s}".format(state_str, str(existing_state.type)))
+        return state
 
-    output_xml.write_state(state_list)
-    for state in state_list:
-        print(state.name + " is a state")
-    return 1
+    if not specific_obj_type:
+        state = datamodel.State(
+            p_name=state_str, 
+            p_id=shared_orchestrator.get_unique_id()
+            )
+    else:
+        state = datamodel.State(
+            p_name=state_str, 
+            p_type=specific_obj_type,
+            p_id=shared_orchestrator.get_unique_id()
+            )
+
+    alias_str = re.search(r"(.*)\s[-]\s", state_str, re.MULTILINE)
+    if alias_str:
+        state.set_alias(alias_str.group(1))
+
+    kwargs['xml_state_list'].add(state)
+    if isinstance(state.type, datamodel.BaseType):
+        type_name = str(state.type).capitalize().replace("_", " ")
+    else:
+        type_name = state.type.name
+    print(f"{state.name} is a {type_name}")
+    
+    return state
 
 
 def add_transition_by_name(transition_name_str_list, xml_transition_list, output_xml):
