@@ -8,9 +8,9 @@ import datamodel
 
 
 questions = [
-    (r"What is ([^\.\n]*) ", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
+    (r"What is (.*)", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
 
-    (r"Is (.*) allocated ", lambda matched_str, **kwargs: matched_allocated(matched_str, **kwargs)),
+    (r"Is (.*) allocated", lambda matched_str, **kwargs: matched_allocated(matched_str, **kwargs)),
 ]
 
 
