@@ -27,7 +27,7 @@ class CmdParser:
 
             (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", matched_inherits),
 
-            (r"The alias of (.*) is ([^.|\n]*)", matched_alias),
+            (r"The alias of (.*?) is ([^.|\n]*)", matched_alias),
 
             (r"consider ([^.|\n]*)", matched_consider),
 
@@ -51,22 +51,22 @@ class CmdParser:
 
             (r"delete ([^.|\n]*)", matched_delete),
 
-            (r"The type of (.*) is ([^.|\n]*)", matched_type),
+            (r"The type of (.*?) is ([^.|\n]*)", matched_type),
 
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", matched_implies),
 
-            (r"Condition for (.*) is:([^.|\n]*)", matched_condition),
+            (r"Condition for (.*?) is:([^.|\n]*)", matched_condition),
 
-            (r"The (source|destination) of (.*) is ([^.|\n]*)", matched_src_dest),
+            (r"The (source|destination) of (.*?) is ([^.|\n]*)", matched_src_dest),
 
             (r"show ([^.|\n]*)", self.matched_show),
 
-            (r"(.*)\?", matched_question_mark),
+            (r"(.*?)\?", matched_question_mark),
 
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)",
              matched_list),
 
-            (r"The ((?!type|alias|source|destination).*) of (.*) is ([^.|\n]*)",
+            (r"The ((?!type|alias|source|destination).*) of (.*?) is ([^.|\n]*)",
              matched_described_attribute),
         ]
         self.reverse = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
