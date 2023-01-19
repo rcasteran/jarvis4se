@@ -6,11 +6,7 @@ import uuid
 
 import datamodel
 from .question_answer import (get_object_type, check_get_object, get_allocation_object,
-                              check_not_family, get_objects_names, get_children)
-from .functional_orchestrator import (create_function_obj, create_data_obj, create_fun_elem_obj,
-                                      create_fun_inter_obj, create_state_obj)
-from .physical_orchestrator import (create_phy_elem_obj, create_phy_inter_obj)
-
+                              check_not_family, get_objects_names, get_children, get_objects_name_lists)
 
 def cut_string_list(string_tuple_list):
     """From set of input command strings e.g for composition with input list as
@@ -1172,6 +1168,58 @@ def add_derived(object_list, output_xml):
         return 1
     return 0
 
+class CreateObjInstance:
+    def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
+        self.specific_obj_type = specific_obj_type
+        self.base_type = base_type
+        self.new_obj = self.create_obj(obj_str)
+        self.create_alias(obj_str)
+        self.add_obj_to_xml_set(**kwargs)
+
+    def create_obj(self, obj_str):
+        self.base_type_idx = datamodel.BaseType.get_enum(
+            str(self.base_type)).value
+        switch_obj_list = {
+            0: datamodel.Data,
+            1: datamodel.Function,
+            2: datamodel.FunctionalElement,
+            3: datamodel.FunctionalInterface,
+            4: datamodel.PhysicalElement,
+            5: datamodel.PhysicalInterface,
+            6: datamodel.State,
+            7: datamodel.Transition,
+        }
+        call = switch_obj_list.get(self.base_type_idx)
+        if self.specific_obj_type is None:
+            return call(p_name=obj_str, p_id=get_unique_id())
+        return call(p_name=obj_str, p_id=get_unique_id(), p_type=self.specific_obj_type)
+
+    def create_alias(self, obj_str):
+        alias_str = re.search(r"(.*)\s[-]\s", obj_str, re.MULTILINE)
+        if alias_str:
+            self.new_obj.set_alias(alias_str.group(1))
+
+    def add_obj_to_xml_set(self, **kwargs):
+        switch_obj_list = {
+            0: kwargs['xml_data_list'].add,
+            1: kwargs['xml_function_list'].add,
+            2: kwargs['xml_fun_elem_list'].add,
+            3: kwargs['xml_fun_inter_list'].add,
+            4: kwargs['xml_phy_elem_list'].add,
+            5: kwargs['xml_phy_inter_list'].add,
+            6: kwargs['xml_state_list'].add,
+            7: kwargs['xml_transition_list'].add,
+        }
+        call = switch_obj_list.get(self.base_type_idx)
+        return call(self.new_obj)
+
+    def return_obj(self):
+        return self.new_obj, self.base_type_idx
+
+
+xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
+                    'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
+                    'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
 
 def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     """
@@ -1186,9 +1234,10 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    object_lists = [[] for _ in range(7)]
+    object_lists = [[] for _ in range(8)]
     for elem in obj_type_str_list:
         spec_obj_type = None
+        base_type = None
         if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
             base_type = next((i for i in [str(i) for i in datamodel.BaseType]
                               if i == elem[1].capitalize()))
@@ -1199,24 +1248,31 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                 print(f"No valid type found for {elem[1]}")
                 continue
             base_type = get_base_type_recursively(spec_obj_type)
-        if not base_type or base_type is None:
+        if base_type is None:
             print(f"No valid base type found for {elem[1]}")
             continue
-        base_type_idx = datamodel.BaseType.get_enum(str(base_type)).value
-        switch_obj_list = {
-            0: create_data_obj,
-            1: create_function_obj,
-            2: create_fun_elem_obj,
-            3: create_fun_inter_obj,
-            4: create_phy_elem_obj,
-            5: create_phy_inter_obj,
-            6: create_state_obj,
-        }
-        call = switch_obj_list.get(base_type_idx)
-        new_obj = call(elem[0], spec_obj_type, **kwargs)
-        if not isinstance(new_obj, int):
-            object_lists[base_type_idx].append(new_obj)
-        # print(sepc_obj_type.name, sepc_obj_type.base)
+
+        xml_names_list = get_objects_name_lists(
+            **{key:value for (key,value) in kwargs.items()
+            if key in xml_str_lists}
+            )
+        flat_names_list = [item for sublist in xml_names_list for item in sublist]
+        if any(n == elem[0] for n in flat_names_list):
+            # Maybe we can warn object
+            continue
+        new_obj, base_type_idx = CreateObjInstance(
+            elem[0],
+            base_type,
+            spec_obj_type,
+            **kwargs
+        ).return_obj()
+        if isinstance(new_obj.type, datamodel.BaseType):
+            type_name = str(new_obj.type)
+        else:
+            type_name = new_obj.type.name
+        print(f"{new_obj.name} is a {type_name}")
+        object_lists[base_type_idx].append(new_obj)
+
     if any(object_lists):
         return add_obj_to_xml(object_lists, kwargs['output_xml'])
     return 0
@@ -1248,6 +1304,7 @@ def add_obj_to_xml(object_lists, output_xml):
         4: output_xml.write_physical_element,
         5: output_xml.write_physical_interface,
         6: output_xml.write_state,
+        7: output_xml.write_transition,
     }
     check = 0
     for idx, sub in enumerate(object_lists):

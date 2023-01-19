@@ -141,12 +141,17 @@ class StateDiagram:
             state_alias = state.alias
         else:
             state_alias = state.name.lower().replace(" ", "_").replace("-", "")
+
         if isinstance(state.type, datamodel.BaseType):
             state_type_str = str(state.type).capitalize().replace("_", " ")
+        elif 'EXIT' in state.type.name:
+            state_type_str = 'EXIT'
+        elif 'ENTRY' in state.type.name:
+            state_type_str = 'ENTRY'
         else:
             state_type_str = state.type.name
         self.append_string("'id: ", state.id, '\nstate "', state.name, '"', ' as ', state_alias,
-                           ' <<', satte_type_str, '>>', open_bracket_str, '\n')
+                           ' <<', state_type_str, '>>', open_bracket_str, '\n')
 
     def create_transition(self, transition_list):
         """Create transition"""

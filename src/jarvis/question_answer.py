@@ -67,8 +67,11 @@ def matched_allocated(object_str, **kwargs):
 
     return
 
+xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
+                    'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
+                    'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
 
-def get_objects_name_lists(xml_str_lists, **kwargs):
+def get_objects_name_lists(**kwargs):
     """Returns lists of objects with their names depending on kwargs"""
     whole_objects_name_list = [[] for _ in range(11)]
     for i in range(11):
@@ -89,10 +92,7 @@ def check_get_object(object_str, **kwargs):
     Returns:
         wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
     """
-    xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
-                     'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                     'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
-    whole_objects_name_list = get_objects_name_lists(xml_str_lists, **kwargs)
+    whole_objects_name_list = get_objects_name_lists(**kwargs)
     if not any(object_str in s for s in whole_objects_name_list):
         return None
     else:
