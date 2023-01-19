@@ -14,84 +14,63 @@ from .diagram_generator import filter_show_command
 class CmdParser:
     def __init__(self, generator):
         self.commands = [
-            (r"(under.*)", self.matched_under),
+            (r"under ([^.|\n]*)", self.matched_under),
 
-            (r"(?<= |\n)(.*?) extends ([^.|\n]*)", 
-            matched_extend),
+            (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", matched_extend),
 
-            (r"(?<= |\n)(.*?) is a ([^.|\n]*)",
+            (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)",
              matched_specific_obj),
 
-            (r"(?<= |\n)(.*?) is an attribute\b(?=.|\n)", 
-            matched_attribute),
+            (r"([^. |\n][^.|\n]*) is an attribute", matched_attribute),
 
-            (r"(?<= |\n)(.*?) inherits from ([^.|\n]*)", 
-            matched_inherits),
+            (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", matched_inherits),
 
-            (r"The alias of (.*?) is ([^.|\n]*)", 
-            matched_alias),
+            (r"The alias of (.*?) is ([^.|\n]*)", matched_alias),
 
-            (r"(?<= |\n)consider ([^.|\n]*)", 
-            matched_consider),
+            (r"consider ([^.|\n]*)", matched_consider),
 
-            (r"([^\. \.\n]*) is composed of ([^.|\n]*)", 
-            matched_composition),
+            (r"([^. |\n][^.|\n]*) is composed of ([^.|\n]*)", matched_composition),
 
-            (r"([^. |.|\n].*) composes ([^.|\n]*)", 
-            matched_composition),
+            (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)", matched_composition),
 
-            (r"([^. |.|\n].*) consumes ([^.|\n]*)", 
-            matched_consumer),
+            (r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)", matched_consumer),
 
-            (r"([^. |.|\n].*) is an input of ([^.|\n]*)", 
-            matched_consumer),
+            (r"([^. |\n][^.|\n]*) is an input of ([^.|\n]*)", matched_consumer),
 
-            (r"([^. |.|\n].*) produces ([^.|\n]*)", 
-            matched_producer),
+            (r"([^. |\n][^.|\n]*) produces ([^.|\n]*)", matched_producer),
 
-            (r"([^. |.|\n].*) is an output of ([^.|\n]*)", 
-            matched_producer),
+            (r"([^. |\n][^.|\n]*) is an output of ([^.|\n]*)", matched_producer),
 
-            (r"(?<= |\n)(.*?) exposes ([^.|\n]*)", 
-            matched_exposes),
+            (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", matched_exposes),
 
-            (r"(?<= |\n)(.*?) is allocated to ([^.|\n]*)", 
-            matched_allocation),
+            (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", matched_allocation),
 
-            (r"(?<= |\n)(.*?) allocates ([^.|\n]*)", 
-            matched_allocation),
+            (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", matched_allocation),
 
-            (r"(?<= |\n)delete ([^.|\n]*)", 
-            matched_delete),
+            (r"delete ([^.|\n]*)", matched_delete),
 
-            (r"The type of (.*?) is ([^.|\n]*)", 
-            matched_type),
+            (r"The type of (.*?) is ([^.|\n]*)", matched_type),
 
-            (r"([^. |.|\n].*) implies ([^.|\n]*)", 
-            matched_implies),
+            (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", matched_implies),
 
-            (r"Condition for (.*?) is:([^.|\n]*)", 
-            matched_condition),
+            (r"Condition for (.*?) is:([^.|\n]*)", matched_condition),
 
-            (r"The (source|destination) of (.*?) is ([^.|\n]*)", 
-            matched_src_dest),
+            (r"The (source|destination) of (.*?) is ([^.|\n]*)", matched_src_dest),
 
-            (r"(?<= |\n)show (.*?)\n", 
-            self.matched_show),
+            (r"show ([^.|\n]*)", self.matched_show),
 
-            (r"\s([A-Za-z\s].*\?)", 
-            matched_question_mark),
+            (r"(.*?)\?", matched_question_mark),
 
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)",
              matched_list),
 
-            (r"The ([^type|alias|source|destination].*?) of (.*?) is ([^.|\n]*)",
+            (r"The ((?!type|alias|source|destination).*) of (.*?) is ([^.|\n]*)",
              matched_described_attribute),
         ]
-        self.reverse = (r"([^. |.|\n].*) composes ([^.|\n]*)",
-                        r"([^. |.|\n].*) consumes ([^.|\n]*)",
-                        r"([^. |.|\n].*) produces ([^.|\n]*)",
-                        r"(?<= |\n)(.*?) is allocated to ([^.|\n]*)")
+        self.reverse = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) produces ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)")
 
         self.generator = generator
 
@@ -102,17 +81,16 @@ class CmdParser:
             result_chain = None
             result = None
             update = None
-            if regex == r"(under.*)":
+            if regex == r"under ([^.|\n]*)":
                 result_chain = re.split(regex, string)
                 del result_chain[0]
             # Only one diagram per cell can be output
-            elif regex == r"(?<= |\n)show (.*?)\n":
+            elif regex == r"show ([^.|\n]*)":
                 result = re.search(regex, string, re.MULTILINE)
             else:
                 # Transform to avoid duplicated function's declaration within cells input
                 result = []
-                [result.append(x) for x in re.findall(regex, string, re.MULTILINE)
-                 if x not in result]
+                [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
 
             if result and not result_chain:
                 # self.reverse : ("composes", "consumes", "produces", "is allocated to")

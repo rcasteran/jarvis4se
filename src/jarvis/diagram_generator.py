@@ -16,7 +16,7 @@ from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
 def filter_show_command(diagram_name_str, **kwargs):
     """Entry point for all diagrams (i.e. 'show' command) from command_parser.py"""
     plantuml_string = None
-    wanted_diagram_str = diagram_name_str.group(1)
+    wanted_diagram_str = diagram_name_str[0].strip()
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
     specific_diagram_str = re.search(regex, wanted_diagram_str, re.MULTILINE)
     if specific_diagram_str:
