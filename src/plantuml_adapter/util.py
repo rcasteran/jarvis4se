@@ -21,6 +21,7 @@ class PlantUmlPicoServer:
     def __init__(self):
         """If . jar, get it, check if picoweb is running, if not start new process else default url
         to online plantuml server"""
+        self.plantuml_jar_path = None
         jar_file = self.get_jar()
         if not jar_file:
             self.url = 'http://www.plantuml.com/plantuml/svg/'
@@ -102,7 +103,7 @@ class PlantUmlGen(PlantUmlPicoServer):
         else:
             full_string = string
 
-        if len(string) > 15000 and not self.plantuml_jar_path:
+        if len(string) > 15000 and self.plantuml_jar_path is None:
             print(f"Diagram is too large to be display with Plantuml Online Server, "
                   f"please consider download https://plantuml.com/fr/download .jar")
             return None

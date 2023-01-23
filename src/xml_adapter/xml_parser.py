@@ -56,7 +56,7 @@ class XmlParser3SE:
             'xml_consumer_function_list'] = get_data(self.root, self.xml_dict['xml_function_list'])
 
         get_type_obj_from_str(self.xml_dict)
-        # print([(i, i.name, i.type) for i in self.xml_dict['xml_function_list']])
+
         return self.xml_dict
 
 
@@ -443,7 +443,6 @@ def get_type_obj_from_str(xml_dict):
             for obj in xml_list:
                 try:
                     obj.type = datamodel.BaseType[obj.type.upper().replace(" ", "_")]
-                    break
                 except KeyError:
                     for type_obj in xml_dict['xml_type_list']:
                         if obj.type == type_obj.id:
