@@ -627,7 +627,7 @@ def set_object_type(object_lists, output_xml):
                 output_xml.write_object_type(object_lists[i])
                 for object_type in object_lists[i]:
                     if isinstance(object_type.type, datamodel.BaseType):
-                        type_name = str(object_type.type).capitalize().replace("_", " ")
+                        type_name = str(object_type.type)
                     else:
                         type_name = object_type.type.name
                     print(f"The type of {object_type.name} is {type_name}")
@@ -666,35 +666,29 @@ def check_set_object_alias(alias_str_list, **kwargs):
 
     return update
 
-# TODO: Clean this with new datamodel
 def check_new_alias(object_to_set, alias_str):
     """Check that alias is new and object has en alias attribute, then returns corresponding
     object's type index"""
-    list_idx = None
-    if object_to_set.alias != alias_str:
-        object_to_set.set_alias(alias_str)
-        if isinstance(object_to_set, datamodel.Function):
-            list_idx = 0
-        elif isinstance(object_to_set, datamodel.State):
-            list_idx = 1
-        elif isinstance(object_to_set, datamodel.Transition):
-            list_idx = 2
-        elif isinstance(object_to_set, datamodel.FunctionalElement):
-            list_idx = 3
-        elif isinstance(object_to_set, datamodel.Attribute):
-            list_idx = 4
-        elif isinstance(object_to_set, datamodel.FunctionalInterface):
-            list_idx = 5
-        elif isinstance(object_to_set, datamodel.PhysicalElement):
-            list_idx = 6
-        elif isinstance(object_to_set, datamodel.PhysicalInterface):
-            list_idx = 7
-        elif isinstance(object_to_set, datamodel.Type):
-            list_idx = 8
-        else:
-            print(f"{object_to_set.name} does not have alias attribute")
+    check = None
+    try:
+        if object_to_set.alias == alias_str:
+            return check
+    except AttributeError:
+        print(f"{object_to_set.name} object does not have alias attribute")
+        return check
 
-    return list_idx
+    if isinstance(object_to_set, datamodel.Type):
+        object_to_set.set_alias(alias_str)
+        return 0
+    base_type = get_base_type_recursively(object_to_set.type)
+    # Data() and View() do not have aliases attributes
+    if base_type.value not in (0, 9):
+        object_to_set.set_alias(alias_str)
+        return base_type.value
+
+    return check
+
+
 
 
 def set_object_alias(object_lists, output_xml):
@@ -1173,7 +1167,9 @@ class CreateObjInstance:
         self.specific_obj_type = specific_obj_type
         self.base_type = base_type
         self.new_obj = self.create_obj(obj_str)
-        self.create_alias(obj_str)
+        # Data() and View() do not have aliases
+        if not isinstance(self.new_obj, (datamodel.Data, datamodel.View)):
+            self.create_alias(obj_str)
         self.add_obj_to_xml_set(**kwargs)
 
     def create_obj(self, obj_str):
@@ -1258,7 +1254,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
             )
         flat_names_list = [item for sublist in xml_names_list for item in sublist]
         if any(n == elem[0] for n in flat_names_list):
-            # Maybe we can warn object
+            # Maybe we can warn user
             continue
         new_obj, base_type_idx = CreateObjInstance(
             elem[0],
