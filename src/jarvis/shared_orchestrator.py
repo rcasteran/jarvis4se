@@ -666,6 +666,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
 
     return update
 
+
 def check_new_alias(object_to_set, alias_str):
     """Check that alias is new and object has en alias attribute, then returns corresponding
     object's type index"""
@@ -676,19 +677,18 @@ def check_new_alias(object_to_set, alias_str):
     except AttributeError:
         print(f"{object_to_set.name} object does not have alias attribute")
         return check
-
     if isinstance(object_to_set, datamodel.Type):
         object_to_set.set_alias(alias_str)
         return 0
+
     base_type = get_base_type_recursively(object_to_set.type)
-    # Data() and View() do not have aliases attributes
-    if base_type.value not in (0, 9):
-        object_to_set.set_alias(alias_str)
-        return base_type.value
+    if isinstance(base_type, datamodel.BaseType):
+        # Data() and View() do not have aliases attributes
+        if base_type.value not in (0,9):
+            object_to_set.set_alias(alias_str)
+            return base_type.value
 
     return check
-
-
 
 
 def set_object_alias(object_lists, output_xml):

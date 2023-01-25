@@ -161,83 +161,52 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
     return 1
 
 
-def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml_function_list,
-                               xml_fun_elem_list, xml_fun_inter_list, output_xml):
+def check_add_object_attribute(described_attribute_list, **xml_dict_sets):
     """
     Check if each string in described_attribute_list are corresponding to an actual object and
-    attribute, create new [Attribute, (Object, value)] objects list for object's type : Function
-    and Functional Element.
+    attribute, create new [Attribute, (Object, value)] objects list.
     Send lists to add_object_attribute() to write them within xml and then returns update_list
     from it.
 
         Parameters:
             described_attribute_list ([str]) : Lists of string from jarvis cell
             xml_attribute_list ([Attribute]) : Attribute's list from xml
-            xml_function_list ([Function]) : Function list from xml parsing
-            xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
-            xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
 
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
     new_described_attribute_list = []
-    # Create objects names/aliases list
-    xml_attribute_name_list = get_objects_names(xml_attribute_list)
-    xml_function_name_list = get_objects_names(xml_function_list)
-    xml_fun_elem_name_list = get_objects_names(xml_fun_elem_list)
-    xml_fun_inter_name_list = get_objects_names(xml_fun_inter_list)
-    whole_list = xml_function_name_list + xml_fun_elem_name_list + xml_fun_inter_name_list
-
-    # Loop to filter attributes and create a new list
     for elem in described_attribute_list:
-        is_elem_found = True
-        if not any(item == elem[1] for item in whole_list) and \
-                not any(item == elem[0] for item in xml_attribute_name_list):
-            is_elem_found = False
-            print(f"{elem[1]} and {elem[0]} do not exist")
-        elif not any(item == elem[1] for item in whole_list) or \
-                not any(item == elem[0] for item in xml_attribute_name_list):
-            is_elem_found = False
-            if any(item == elem[1] for item in whole_list) and \
-                    not any(item == elem[0] for item in xml_attribute_name_list):
-                print(f"{elem[0]} does not exist")
-            elif any(item == elem[0] for item in xml_attribute_name_list) and not \
-                    any(item == elem[1] for item in whole_list):
-                print(f"{elem[1]} does not exist")
+        obj_to_set = check_get_object(
+            elem[1], 
+            **{'xml_function_list': xml_dict_sets['xml_function_list'],
+            'xml_fun_elem_list': xml_dict_sets['xml_fun_elem_list'],
+            'xml_fun_inter_list': xml_dict_sets['xml_fun_inter_list'],
+            'xml_phy_elem_list': xml_dict_sets['xml_phy_elem_list'],
+            'xml_phy_inter_list': xml_dict_sets['xml_phy_inter_list'],
+            })
+        attribute_wanted = check_get_object(
+            elem[0], 
+            **{'xml_attribute_list': xml_dict_sets['xml_attribute_list'],
+            })
+        if obj_to_set is None and attribute_wanted is None:
+            print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
+            "- Function\n"
+            "- Functional element\n"
+            "- Functional interface\n"
+            "- Physical element\n"
+            "- Physical interface\n")
+            continue
+        if None in (obj_to_set, attribute_wanted):
+            print("{} does not exist".format(
+                [elem[i] for i in range(2) 
+                if [attribute_wanted, obj_to_set][i] is None]
+                .pop()
+                ))
+            continue
+        new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
 
-        if is_elem_found:
-            current_attrib = None
-            for attribute in xml_attribute_list:
-                if elem[0] == attribute.name or elem[0] == attribute.alias:
-                    current_attrib = attribute
-            # Loop to filter attribute and create a new list
-            result_function = any(item == elem[1] for item in xml_function_name_list)
-            result_fun_elem = any(item == elem[1]for item in xml_fun_elem_name_list)
-            result_fun_inter = any(item == elem[1]for item in xml_fun_inter_name_list)
-
-            if result_function and current_attrib:
-                for function in xml_function_list:
-                    if elem[1] == function.name or elem[1] == function.alias:
-                        if (function.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (function, str(elem[2]))])
-
-            if result_fun_elem and current_attrib:
-                for fun_elem in xml_fun_elem_list:
-                    if elem[1] == fun_elem.name or elem[1] == fun_elem.alias:
-                        if (fun_elem.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (fun_elem, str(elem[2]))])
-
-            if result_fun_inter and current_attrib:
-                for fun_inter in xml_fun_inter_list:
-                    if elem[1] == fun_inter.name or elem[1] == fun_inter.alias:
-                        if (fun_inter.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (fun_inter, str(elem[2]))])
-
-    update = add_object_attribute(new_described_attribute_list, output_xml)
+    update = add_object_attribute(new_described_attribute_list, xml_dict_sets['output_xml'])
 
     return update
 
