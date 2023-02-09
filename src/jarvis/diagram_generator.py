@@ -954,10 +954,14 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
             for cons in xml_consumer_function_list.copy():
                 if k in cons:
                     xml_consumer_function_list.remove(cons)
+                    if [cons[0], k.parent] in xml_consumer_function_list:
+                        xml_consumer_function_list.remove([cons[0], k.parent])
 
             for prod in xml_producer_function_list.copy():
                 if k in prod:
                     xml_producer_function_list.remove(prod)
+                    if [prod[0], k.parent] in xml_producer_function_list:
+                        xml_producer_function_list.remove([prod[0], k.parent])
     else:
         main_function_list, main_parent_dict = get_children(main_fun)
         # derived = childs_inheritance(main_fun)
