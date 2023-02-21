@@ -43,10 +43,14 @@ class GenerateXML:
             for function_list_tag in root.findall(".//functionList"):
                 # Loop on function's list
                 for function in function_list:
+                    if isinstance(function.type, datamodel.BaseType):
+                        type_str = str(function.type)
+                    else:
+                        type_str = function.type.id
                     function_tag = etree.SubElement(function_list_tag, "function",
                                                     {'id': function.id,
                                                      'name': function.name,
-                                                     'type': str(function.type),
+                                                     'type': type_str,
                                                      'alias': function.alias,
                                                      'derived': function.derived})
 
@@ -63,13 +67,17 @@ class GenerateXML:
                 etree.SubElement(root, 'dataList')
             for data_list_tag in root.findall('.//dataList'):
                 for data in data_list:
+                    if isinstance(data.type, datamodel.BaseType):
+                        type_str = str(data.type)
+                    else:
+                        type_str = data.type.id
                     existing_data_tag = data_list_tag.find('.//dataList/data')
                     if existing_data_tag is not None:
                         tag = existing_data_tag
                     else:
                         tag = data_list_tag
                     data_tag = etree.SubElement(tag, "data", {'name': data.name,
-                                                              'type': str(data.type),
+                                                              'type': type_str,
                                                               'id': data.id})
 
                     _consumer_list_tag = etree.SubElement(data_tag, "consumerList")
@@ -150,9 +158,13 @@ class GenerateXML:
                 etree.SubElement(root, 'stateList')
             for state_list_tag in root.findall(".//stateList"):
                 for state in state_list:
+                    if isinstance(state.type, datamodel.BaseType):
+                        type_str = str(state.type)
+                    else:
+                        type_str = state.type.id
                     state_tag = etree.SubElement(state_list_tag, "state",
                                                  {'id': state.id, 'name': state.name,
-                                                  'type': str(state.type), 'alias': state.alias})
+                                                  'type': type_str, 'alias': state.alias})
 
                     _state_part_list_tag = etree.SubElement(state_tag, "statePartList")
                     _allocated_function_list_tag = etree.SubElement(state_tag,
@@ -168,10 +180,14 @@ class GenerateXML:
                 etree.SubElement(root, 'transitionList')
             for transition_list_tag in root.findall(".//transitionList"):
                 for transition in transition_list:
+                    if isinstance(transition.type, datamodel.BaseType):
+                        type_str = str(transition.type)
+                    else:
+                        type_str = transition.type.id
                     transition_tag = etree.SubElement(transition_list_tag, "transition",
                                                       {'id': transition.id,
                                                        'name': transition.name,
-                                                       'type': str(transition.type),
+                                                       'type': type_str,
                                                        'alias': transition.alias,
                                                        'source': str(transition.source),
                                                        'destination': str(transition.destination)})
@@ -220,13 +236,16 @@ class GenerateXML:
                 etree.SubElement(root, 'functionalElementList')
             for functional_element_list_tag in root.findall(".//functionalElementList"):
                 for functional_element in functional_element_list:
+                    if isinstance(functional_element.type, datamodel.BaseType):
+                        type_str = str(functional_element.type)
+                    else:
+                        type_str = functional_element.type.id
                     functional_element_tag = etree.SubElement(
                         functional_element_list_tag, "functionalElement",
                         {
                             'id': functional_element.id,
                             'name': functional_element.name,
-                            'type': str(
-                                functional_element.type),
+                            'type': type_str,
                             'alias': functional_element.alias,
                             'derived': functional_element.derived}
                     )
@@ -270,9 +289,13 @@ class GenerateXML:
                 etree.SubElement(root, 'viewList')
             for view_list_tag in root.findall(".//viewList"):
                 for view in view_list:
+                    if isinstance(view.type, datamodel.BaseType):
+                        type_str = str(view.type)
+                    else:
+                        type_str = view.type.id
                     view_tag = etree.SubElement(view_list_tag, "view",
                                                  {'id': view.id, 'name': view.name,
-                                                  'type': str(view.type)})
+                                                  'type': type_str})
                     _allocated_item_list_tag = etree.SubElement(view_tag, "allocatedItemList")
         self.write()
 
@@ -285,9 +308,13 @@ class GenerateXML:
                 etree.SubElement(root, 'attributeList')
             for attribute_list_tag in root.findall(".//attributeList"):
                 for attribute in attribute_list:
+                    if isinstance(attribute.type, datamodel.BaseType):
+                        type_str = str(attribute.type)
+                    else:
+                        type_str = attribute.type.id
                     attribute_tag = etree.SubElement(attribute_list_tag, "attribute",
                                                      {'id': attribute.id, 'name': attribute.name,
-                                                      'type': str(attribute.type),
+                                                      'type': type_str,
                                                       'alias': attribute.alias})
 
                     _described_item_list_tag = etree.SubElement(attribute_tag, "describedItemList")
@@ -317,11 +344,15 @@ class GenerateXML:
                 etree.SubElement(root, 'functionalInterfaceList')
             for fun_interface_list_tag in root.findall(".//functionalInterfaceList"):
                 for fun_interface in functional_interface_list:
+                    if isinstance(fun_interface.type, datamodel.BaseType):
+                        type_str = str(fun_interface.type)
+                    else:
+                        type_str = fun_interface.type.id
                     fun_interface_tag = etree.SubElement(fun_interface_list_tag,
                                                          "functionalInterface",
                                                          {'id': fun_interface.id,
                                                           'name': fun_interface.name,
-                                                          'type': str(fun_interface.type),
+                                                          'type': type_str,
                                                           'alias': fun_interface.alias,
                                                           'derived': fun_interface.derived})
                     _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
@@ -337,13 +368,16 @@ class GenerateXML:
                 etree.SubElement(root, 'physicalElementList')
             for physical_element_list_tag in root.findall(".//physicalElementList"):
                 for physical_element in physical_element_list:
+                    if isinstance(physical_element.type, datamodel.BaseType):
+                        type_str = str(physical_element.type)
+                    else:
+                        type_str = physical_element.type.id
                     physical_element_tag = etree.SubElement(
                         physical_element_list_tag, "physicalElement",
                         {
                             'id': physical_element.id,
                             'name': physical_element.name,
-                            'type': str(
-                                physical_element.type),
+                            'type': type_str,
                             'alias': physical_element.alias,
                             'derived': physical_element.derived}
                     )
@@ -365,6 +399,10 @@ class GenerateXML:
                 etree.SubElement(root, 'physicalInterfaceList')
             for phy_interface_list_tag in root.findall(".//physicalInterfaceList"):
                 for phy_interface in physical_interface_list:
+                    if isinstance(phy_interface.type, datamodel.BaseType):
+                        type_str = str(phy_interface.type)
+                    else:
+                        type_str = phy_interface.type.id
                     phy_interface_tag = etree.SubElement(phy_interface_list_tag,
                                                          "physicalInterface",
                                                          {'id': phy_interface.id,
@@ -411,7 +449,11 @@ class GenerateXML:
                 root = self.tree.parse(file, parser)
                 for obj in object_list:
                     for object_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
-                        object_tag.set('type', obj.type)
+                        if isinstance(obj.type, datamodel.BaseType):
+                            type_name = str(obj.type)
+                        else:
+                            type_name = obj.type.id
+                        object_tag.set('type', type_name)
             self.write()
 
     def write_object_child(self, object_child_list):
@@ -471,13 +513,13 @@ class GenerateXML:
             for type_list_tag in root.findall(".//typeList"):
                 for type_elem in type_list:
                     if isinstance(type_elem.base, datamodel.Type):
-                        base_type = type_elem.base.name
+                        base_type = type_elem.base.id
                     else:
-                        base_type = type_elem.base
+                        base_type = str(type_elem.base)
                     elem_tag = etree.SubElement(type_list_tag, "type",
                                                 {'id': type_elem.id, 'name': type_elem.name,
                                                  'alias': type_elem.alias,
-                                                 'base': str(base_type)})
+                                                 'base': base_type})
 
                     # _described_item_list_tag = etree.SubElement(elem_tag, "describedItemList")
 

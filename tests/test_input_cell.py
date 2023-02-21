@@ -73,21 +73,22 @@ def test_set_object_type_alias_input(capsys):
     described attribute. Notebook equivalent:
     %%jarvis
     with set_object_type_alias_input
-    F1 is a function. The type of F1 is high level function
-    The alias of F1 is f1
+    F1 is a function.
+    high level function extends function. The alias of F1 is f1. The type of f1 is high level function
     ========================================
 
     """
     file_name = "set_object_type_alias_input"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 is a function. The type of F1 is high level function\n"
-                         "The alias of F1 is f1\n")
+                         "F1 is a function.\n"
+                         "high level function extends function. The alias of F1 is f1. The type of f1 is high level function\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
+                "high level function is a type extending Function\n"
                 "F1 is a Function\n",
                 "The alias for F1 is f1\n",
-                "The type of F1 is High level function\n",
+                "The type of F1 is high level function\n",
                 f"{file_name}.xml updated\n"]
 
     assert all(i in captured.out for i in expected)

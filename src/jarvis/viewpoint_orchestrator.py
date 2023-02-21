@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Module with methods relative to Viewpoint section"""
 # Libraries
-import uuid
 import re
 
 import datamodel
@@ -30,14 +29,7 @@ def add_view(view_name_str, xml_view_list, output_xml):
     # Loop on the list and create set for functions
     if view_name_str not in xml_view_name_list:
         # Instantiate view class
-        view = datamodel.View()
-        # Set view's name
-        view.set_name(str(view_name_str))
-        # Set view's type
-        view.set_type(datamodel.ViewType.UNKNOWN)
-        # Generate and set unique identifier of length 10 integers
-        identifier = uuid.uuid4()
-        view.set_id(str(identifier.int)[:10])
+        view = datamodel.View(name=view_name_str, uid=shared_orchestrator.get_unique_id())
         # Add view to new set() and existing et() from xml
         xml_view_list.add(view)
         view_list.append(view)
@@ -155,10 +147,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
             new_attribute = datamodel.Attribute()
             new_attribute.set_name(str(attribute_name))
             # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            new_attribute.set_id(str(identifier.int)[:10])
-            # Not needed, by default unknown
-            # new_data.set_type(datamodel.DataType.UNKNOWN)
+            new_attribute.set_id(shared_orchestrator.get_unique_id())
             # alias is 'none' by default
             new_attribute_list.append(new_attribute)
 
@@ -303,12 +292,10 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
         new_type = datamodel.Type()
         new_type.set_name(elem[0])
         # Generate and set unique identifier of length 10 integers
-        identifier = uuid.uuid4()
-        new_type.set_id(str(identifier.int)[:10])
-        if isinstance(type_to_extend, datamodel.Type):
-            new_type.set_base(type_to_extend)
-        else:
-            new_type.set_base(type_to_extend.get_enum(elem[1].capitalize()))
+        new_type.set_id(shared_orchestrator.get_unique_id())
+        
+        new_type.set_base(type_to_extend)
+
         new_type_list.append(new_type)
         xml_type_list.add(new_type)
 
@@ -329,9 +316,9 @@ def check_get_type_to_extend(type_str, xml_type_list):
     """Checks if type_str is within BaseType or xml_type_list, then return Basetype or
     type object"""
     check = None
-    if any(a == type_str.capitalize() for a in [str(i) for i in datamodel.BaseType]):
-        check = datamodel.BaseType
-        return check
+    formated_type_str = type_str.upper().replace(" ", "_")
+    if any(a == formated_type_str for a in [i.name for i in datamodel.BaseType]):
+        return datamodel.BaseType[formated_type_str]
 
     if any(a == type_str for a in get_objects_names(xml_type_list)):
         check = check_get_object(type_str, **{'xml_type_list': xml_type_list})

@@ -55,6 +55,8 @@ class XmlParser3SE:
         self.xml_dict['xml_data_list'], self.xml_dict['xml_producer_function_list'], self.xml_dict[
             'xml_consumer_function_list'] = get_data(self.root, self.xml_dict['xml_function_list'])
 
+        get_type_obj_from_str(self.xml_dict)
+
         return self.xml_dict
 
 
@@ -270,9 +272,9 @@ def get_views(root):
     xml_view_list = root.iter('view')
     for xml_view in xml_view_list:
         # Instantiate view and add them to a list
-        view = datamodel.View(p_id=xml_view.get('id'),
-                              p_name=xml_view.get('name'),
-                              p_type=xml_view.get('type'))
+        view = datamodel.View(uid=xml_view.get('id'),
+                              name=xml_view.get('name'),
+                              v_type=xml_view.get('type'))
         # Looking for allocated items and add them to the view
         xml_allocated_item_list = xml_view.iter('allocatedItem')
         for xml_allo_item in xml_allocated_item_list:
@@ -420,8 +422,30 @@ def get_type_list(root):
 
     for obj_type in type_list:
         for base in type_list:
-            if obj_type.base == base.name:
+            if obj_type.base == base.id:
                 obj_type.base = base
                 break
+            if isinstance(obj_type.base, str):
+                try:
+                    obj_type.base = datamodel.BaseType[obj_type.base]
+                    break
+                except KeyError:
+                    pass
 
     return type_list
+
+
+def get_type_obj_from_str(xml_dict):
+    """Return xml lists with obj.type= ObjType/BaseType"""
+    unwanted_xml_list = ('xml_type_list', 'xml_consumer_function_list', 'xml_producer_function_list')
+    for key, xml_list in xml_dict.items():
+        if key not in unwanted_xml_list:
+            for obj in xml_list:
+                try:
+                    obj.type = datamodel.BaseType[obj.type.upper().replace(" ", "_")]
+                except KeyError:
+                    for type_obj in xml_dict['xml_type_list']:
+                        if obj.type == type_obj.id:
+                            obj.type = type_obj
+                            break
+

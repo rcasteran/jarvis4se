@@ -16,7 +16,7 @@ from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
 def filter_show_command(diagram_name_str, **kwargs):
     """Entry point for all diagrams (i.e. 'show' command) from command_parser.py"""
     plantuml_string = None
-    wanted_diagram_str = diagram_name_str.group(1)
+    wanted_diagram_str = diagram_name_str[0].strip()
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
     specific_diagram_str = re.search(regex, wanted_diagram_str, re.MULTILINE)
     if specific_diagram_str:
@@ -399,7 +399,7 @@ def case_no_diagram(**kwargs):
 
 def check_level_0_allocated_child(fun_elem, function):
     """Returns True if the function can be "shown" by the functional element (i.e. no function
-    children allocated to fun_elem children => TODO: Clean 2 above methods"""
+    children allocated to fun_elem children => TODO: Clean 2 below methods"""
     check = False
     if fun_elem.child_list == set():
         check = True

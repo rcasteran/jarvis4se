@@ -8,9 +8,9 @@ import datamodel
 
 
 questions = [
-    (r"What is ([^\.\n]*) ", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
+    (r"What is (.*)", lambda matched_str, **kwargs: matched_what(matched_str, **kwargs)),
 
-    (r"Is (.*) allocated ", lambda matched_str, **kwargs: matched_allocated(matched_str, **kwargs)),
+    (r"Is (.*) allocated", lambda matched_str, **kwargs: matched_allocated(matched_str, **kwargs)),
 ]
 
 
@@ -67,8 +67,11 @@ def matched_allocated(object_str, **kwargs):
 
     return
 
+xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
+                    'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
+                    'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
 
-def get_objects_name_lists(xml_str_lists, **kwargs):
+def get_objects_name_lists(**kwargs):
     """Returns lists of objects with their names depending on kwargs"""
     whole_objects_name_list = [[] for _ in range(11)]
     for i in range(11):
@@ -89,10 +92,7 @@ def check_get_object(object_str, **kwargs):
     Returns:
         wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
     """
-    xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
-                     'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                     'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
-    whole_objects_name_list = get_objects_name_lists(xml_str_lists, **kwargs)
+    whole_objects_name_list = get_objects_name_lists(**kwargs)
     if not any(object_str in s for s in whole_objects_name_list):
         return None
     else:
@@ -168,8 +168,6 @@ def get_function_info(wanted_object, object_info, **kwargs):
         object_info['Input Role'] = str(wanted_object.input_role)
     if wanted_object.operand is not None:
         object_info['Operand'] = str(wanted_object.operand)
-    if any(wanted_object.port_list):
-        object_info['Port List'] = str(wanted_object.port_list)
 
     object_info['Consumption List'] = \
         get_consumes_produces_info(wanted_object, kwargs['xml_consumer_function_list'])
