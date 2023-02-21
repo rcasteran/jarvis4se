@@ -4,6 +4,7 @@ from pathlib import Path
 
 from conftest import get_jarvis4se, remove_xml_file
 from xml_adapter import XmlParser3SE
+from datamodel import BaseType
 
 jarvis4se = get_jarvis4se()
 xml_parser = XmlParser3SE()
@@ -116,6 +117,8 @@ def test_set_attribute_type_within_xml():
      with set_attribute_type_within_xml
      A is an attribute
      B is an attribute.
+     attribute type A extends attribute
+     attribute type B extends attribute
      The type of A is attribute type A.
      The type of B is attribute type B
 
@@ -124,6 +127,8 @@ def test_set_attribute_type_within_xml():
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "A is an attribute\n"
                          "B is an attribute.\n"
+                         "attribute type A extends attribute\n"
+                         "attribute type B extends attribute\n"
                          "The type of A is attribute type A.\n"
                          "The type of B is attribute type B\n")
 
@@ -134,7 +139,7 @@ def test_set_attribute_type_within_xml():
     result = set()
     assert len(attribute_list) == 2
     for attribute in attribute_list:
-        result.add((attribute.name, attribute.type))
+        result.add((attribute.name, attribute.type.name))
 
     assert expected == result
 
@@ -361,7 +366,7 @@ def test_functional_interface_within_xml():
     assert data.name == 'A'
     assert fun_inter.name == 'Fun_inter'
     assert fun_inter.alias == 'FI'
-    assert fun_inter.type == 'Functional interface'
+    assert fun_inter.type == BaseType['FUNCTIONAL_INTERFACE']
     assert attribute.name == 'Color'
     described_item = attribute.described_item_list.pop()
     assert described_item[0] == fun_inter.id and described_item[1] == 'pink'
@@ -453,14 +458,14 @@ def test_type_within_xml(extends_and_set_type_cell):
     for type_elem in obj_dict['xml_type_list']:
         if type_elem.name == 'Safety interface':
             assert type_elem.alias == 'sf'
-        if isinstance(type_elem.base, str):
-            base_type = type_elem.base
+        if isinstance(type_elem.base, BaseType):
+            base_type = str(type_elem.base)
         else:
             base_type = type_elem.base.name
         captured_type.add((type_elem.name, base_type))
 
     assert expected_type == captured_type
-    assert obj_dict['xml_fun_inter_list'].pop().type == "final one"
+    assert obj_dict['xml_fun_inter_list'].pop().type.name == "final one"
 
     remove_xml_file(file_name)
 
@@ -468,7 +473,7 @@ def test_type_within_xml(extends_and_set_type_cell):
 def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_cell):
     """ Issue #62 Notebook equivalent:
     %%jarvis
-    with extends_and_create_object_input
+    with extends_and_create_object_within_xml
     "High level function" extends function
     "High high level function" extends "High level function"
     "High high high level function" extends "High high level function"
@@ -476,9 +481,9 @@ def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_
     """
     file_name = "extends_and_create_object_within_xml"
     jarvis4se.jarvis("", f"with {file_name}\n{extends_and_create_object_cell}")
-
+    
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
-
+    
     assert len([x for x in obj_dict.values() if x]) == 2
     assert len(obj_dict['xml_type_list']) == 3
     assert len(obj_dict['xml_function_list']) == 1
@@ -488,13 +493,14 @@ def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_
                      ('High high high level function', 'High high level function')}
     captured_type = set()
     for type_elem in obj_dict['xml_type_list']:
-        if isinstance(type_elem.base, str):
-            base_type = type_elem.base
+        print(type_elem, type_elem.base)
+        if isinstance(type_elem.base, BaseType):
+            base_type = str(type_elem.base)
         else:
             base_type = type_elem.base.name
         captured_type.add((type_elem.name, base_type))
 
     assert expected_type == captured_type
-    assert obj_dict['xml_function_list'].pop().type == "High high high level function"
+    assert obj_dict['xml_function_list'].pop().type.name == "High high high level function"
 
     remove_xml_file(file_name)

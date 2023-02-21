@@ -3,73 +3,11 @@
 """Module with methods relative to Functional section"""
 # Libraries
 import re
-import uuid
+
 # Modules
 import datamodel
 from . import shared_orchestrator
 from .question_answer import get_objects_names, get_children, check_get_object, check_parentality
-
-
-def create_function_obj(function_str, specific_obj_type, **kwargs):
-    """
-    Check if string function_str is not already corresponding to an actual object's name/alias,
-    create new Function() object, instantiate it, add it to xml_function_list.
-
-        Parameters:
-            function_str (str) : Lists of string from jarvis cell
-            specific_obj_type ([Function]) : specific type or None
-            kwargs (dict) : whole xml lists + xml's file object
-
-        Returns:
-            update (0/function) : function if update, else 0
-    """
-    if any(n == function_str for n in get_objects_names(kwargs['xml_function_list'])):
-        return 0
-    if not specific_obj_type:
-        # Instantiate Function class and function
-        function = datamodel.Function(p_name=function_str)
-    else:
-        # Instantiate Function
-        function = datamodel.Function(p_name=function_str, p_type=specific_obj_type.name)
-
-    alias_str = re.search(r"(.*)\s[-]\s", function_str, re.MULTILINE)
-    if alias_str:
-        function.set_alias(alias_str.group(1))
-    function.set_id(shared_orchestrator.get_unique_id())
-    # Add function to a set()
-    kwargs['xml_function_list'].add(function)
-    print(f"{function.name} is a {function.type}")
-    if function:
-        return function
-    return 0
-
-
-def create_data_obj(data_str, specific_obj_type, **kwargs):
-    """
-    Check if string data_str is not already corresponding to an actual object's name/alias,
-    create new Data() object, instantiate it, add it to xml_data_list.
-
-        Parameters:
-            data_str (str) : Lists of string from jarvis cell
-            specific_obj_type ([Function]) : specific type or None
-            kwargs (dict) : whole xml lists + xml's file object
-
-        Returns:
-            update (0/data) : data if update, else 0
-    """
-    if any(n == data_str for n in get_objects_names(kwargs['xml_data_list'])):
-        return 0
-    if not specific_obj_type:
-        data = datamodel.Data(p_name=data_str)
-    else:
-        data = datamodel.Data(p_name=data_str, p_type=specific_obj_type.name)
-
-    data.set_id(shared_orchestrator.get_unique_id())
-    kwargs['xml_data_list'].add(data)
-    print(f"{data.name} is a {data.type}")
-    if data:
-        return data
-    return 0
 
 
 def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list, output_xml):
@@ -463,98 +401,6 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
     return 1
 
 
-def add_state_by_name(state_name_str_list, xml_state_list, output_xml):
-    """
-    Check if each string in state_name_str_list is not already corresponding to an actual object's
-    name/alias, create new State() object, instantiate it, write it within XML and then returns
-    update_list.
-
-        Parameters:
-            state_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_state_list ([State]) : State list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
-
-        Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
-    """
-    state_list = []
-    # Create a list with all state names/aliases already in the xml
-    xml_state_name = get_objects_names(xml_state_list)
-    # Loop on the list and create set for states
-    for state_name in state_name_str_list:
-        if state_name not in xml_state_name:
-            # Instantiate State class and state
-            state = datamodel.State()
-            # Set state's name
-            state.set_name(str(state_name))
-            alias_str = re.search(r"(.*)\s[-]\s", state_name, re.MULTILINE)
-            if alias_str:
-                state.set_alias(alias_str.group(1))
-            # Set state's type
-            state.set_type(str(datamodel.StateType.UNKNOWN))
-            # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            state.set_id(str(identifier.int)[:10])
-            # Add state to a set()
-            xml_state_list.add(state)
-            state_list.append(state)
-        else:
-            # print(state_name + " already exists (not added)")
-            pass
-    if not state_list:
-        return 0
-
-    output_xml.write_state(state_list)
-    for state in state_list:
-        print(state.name + " is a state")
-    return 1
-
-
-def add_transition_by_name(transition_name_str_list, xml_transition_list, output_xml):
-    """
-    Check if each string in transition_name_str_list is not already corresponding to an actual
-    object's name/alias, create new Transition() object, instantiate it, write it within XML and
-    then returns update_list.
-
-        Parameters:
-            transition_name_str_list ([str]) : Lists of string from jarvis cell
-            xml_transition_list ([State]) : Transition list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
-
-        Returns:
-            update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
-    """
-    transition_list = []
-    # Create a list with all transition's name already in the xml
-    xml_transition_name_list = get_objects_names(xml_transition_list)
-    # Loop on the list and create set for transitions
-    for transition_name in transition_name_str_list:
-        if transition_name not in xml_transition_name_list:
-            # Instantiate Transition
-            transition = datamodel.Transition()
-            # Set state's name
-            transition.set_name(str(transition_name))
-            alias_str = re.search(r"(.*)\s[-]\s", transition_name, re.MULTILINE)
-            if alias_str:
-                transition.set_alias(alias_str.group(1))
-            # Set state's type
-            transition.set_type(str(datamodel.StateType.UNKNOWN))
-            # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            transition.set_id(str(identifier.int)[:10])
-            # Add state to a set()
-            xml_transition_list.add(transition)
-            transition_list.append(transition)
-
-    if not transition_list:
-        return 0
-
-    output_xml.write_transition(transition_list)
-    for transition in transition_list:
-        print(transition.name + " is a transition")
-    return 1
-
-
 # TODO: Check condition_str on data and (add LogicalType, ArithmeticType in datamodel.py)
 def check_add_transition_condition(trans_condition_str_list, xml_transition_list, output_xml):
     """
@@ -656,9 +502,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                     if elem[1] == transition.name or elem[1] == transition.alias:
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
-                                if state.type == datamodel.StateType.EXIT:
-                                    print(f"{elem[2]} is typed as EXIT state, "
-                                          f"it cannot be put as source's transition (not added)")
+                                if not isinstance(state.type, datamodel.BaseType):
+                                    if 'EXIT' in state.type.name: 
+                                        print(f"{elem[2]} is typed as EXIT state, "
+                                            f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
@@ -668,9 +515,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                     if elem[1] == transition.name or elem[1] == transition.alias:
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
-                                if state.type == datamodel.StateType.ENTRY:
-                                    print(f"{elem[2]} is typed as ENTRY state, it cannot be "
-                                          f"put as destination's transition (not added)")
+                                if not isinstance(state.type, datamodel.BaseType):
+                                    if 'ENTRY' in state.type.name:
+                                        print(f"{elem[2]} is typed as ENTRY state, it cannot be "
+                                            f"put as destination's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])
@@ -712,71 +560,6 @@ def add_src_dest(src_dest_lists, output_xml):
                 print(f"{destination[1].name} destination for {destination[0].name}")
         return 1
 
-    return 0
-
-
-def create_fun_elem_obj(fun_elem_str, specific_obj_type, **kwargs):
-    """
-    Check if string fun_elem_str is not already corresponding to an actual object's name/alias,
-    create new FunctionalElement() object, instantiate it, add it to xml_fun_elem_list.
-
-        Parameters:
-            fun_elem_str (str) : Lists of string from jarvis cell
-            specific_obj_type ([Function]) : specific type or None
-            kwargs (dict) : whole xml lists + xml's file object
-
-        Returns:
-            update (0/fun_elem) : fun_elem if update, else 0
-    """
-    if any(n == fun_elem_str for n in get_objects_names(kwargs['xml_fun_elem_list'])):
-        return 0
-    if not specific_obj_type:
-        fun_elem = datamodel.FunctionalElement(p_name=fun_elem_str)
-    else:
-        fun_elem = datamodel.FunctionalElement(p_name=fun_elem_str, p_type=specific_obj_type.name)
-
-    alias_str = re.search(r"(.*)\s[-]\s", fun_elem_str, re.MULTILINE)
-    if alias_str:
-        fun_elem.set_alias(alias_str.group(1))
-    fun_elem.set_id(shared_orchestrator.get_unique_id())
-    # Add function to a set()
-    kwargs['xml_fun_elem_list'].add(fun_elem)
-    print(f"{fun_elem.name} is a {fun_elem.type}")
-    if fun_elem:
-        return fun_elem
-    return 0
-
-
-def create_fun_inter_obj(fun_inter_str, specific_obj_type, **kwargs):
-    """
-    Check if string fun_inter_str is not already corresponding to an actual object's name/alias,
-    create new FunctionalInterface() object, instantiate it, add it to xml_fun_inter_list.
-
-        Parameters:
-            fun_inter_str (str) : Lists of string from jarvis cell
-            specific_obj_type ([Function]) : specific type or None
-            kwargs (dict) : whole xml lists + xml's file object
-
-        Returns:
-            update (0/fun_elem) : fun_elem if update, else 0
-    """
-    if any(n == fun_inter_str for n in get_objects_names(kwargs['xml_fun_inter_list'])):
-        return 0
-    if not specific_obj_type:
-        fun_inter = datamodel.FunctionalInterface(p_name=fun_inter_str)
-    else:
-        fun_inter = datamodel.FunctionalInterface(p_name=fun_inter_str,
-                                                  p_type=specific_obj_type.name)
-
-    alias_str = re.search(r"(.*)\s[-]\s", fun_inter_str, re.MULTILINE)
-    if alias_str:
-        fun_inter.set_alias(alias_str.group(1))
-    fun_inter.set_id(shared_orchestrator.get_unique_id())
-    # Add function to a set()
-    kwargs['xml_fun_inter_list'].add(fun_inter)
-    print(f"{fun_inter.name} is a {fun_inter.type}")
-    if fun_inter:
-        return fun_inter
     return 0
 
 

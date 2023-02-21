@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Module with methods relative to Viewpoint section"""
 # Libraries
-import uuid
 import re
 
 import datamodel
@@ -30,14 +29,7 @@ def add_view(view_name_str, xml_view_list, output_xml):
     # Loop on the list and create set for functions
     if view_name_str not in xml_view_name_list:
         # Instantiate view class
-        view = datamodel.View()
-        # Set view's name
-        view.set_name(str(view_name_str))
-        # Set view's type
-        view.set_type(datamodel.ViewType.UNKNOWN)
-        # Generate and set unique identifier of length 10 integers
-        identifier = uuid.uuid4()
-        view.set_id(str(identifier.int)[:10])
+        view = datamodel.View(name=view_name_str, uid=shared_orchestrator.get_unique_id())
         # Add view to new set() and existing et() from xml
         xml_view_list.add(view)
         view_list.append(view)
@@ -155,10 +147,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
             new_attribute = datamodel.Attribute()
             new_attribute.set_name(str(attribute_name))
             # Generate and set unique identifier of length 10 integers
-            identifier = uuid.uuid4()
-            new_attribute.set_id(str(identifier.int)[:10])
-            # Not needed, by default unknown
-            # new_data.set_type(datamodel.DataType.UNKNOWN)
+            new_attribute.set_id(shared_orchestrator.get_unique_id())
             # alias is 'none' by default
             new_attribute_list.append(new_attribute)
 
@@ -172,83 +161,52 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
     return 1
 
 
-def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml_function_list,
-                               xml_fun_elem_list, xml_fun_inter_list, output_xml):
+def check_add_object_attribute(described_attribute_list, **xml_dict_sets):
     """
     Check if each string in described_attribute_list are corresponding to an actual object and
-    attribute, create new [Attribute, (Object, value)] objects list for object's type : Function
-    and Functional Element.
+    attribute, create new [Attribute, (Object, value)] objects list.
     Send lists to add_object_attribute() to write them within xml and then returns update_list
     from it.
 
         Parameters:
             described_attribute_list ([str]) : Lists of string from jarvis cell
             xml_attribute_list ([Attribute]) : Attribute's list from xml
-            xml_function_list ([Function]) : Function list from xml parsing
-            xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
-            xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
 
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
     new_described_attribute_list = []
-    # Create objects names/aliases list
-    xml_attribute_name_list = get_objects_names(xml_attribute_list)
-    xml_function_name_list = get_objects_names(xml_function_list)
-    xml_fun_elem_name_list = get_objects_names(xml_fun_elem_list)
-    xml_fun_inter_name_list = get_objects_names(xml_fun_inter_list)
-    whole_list = xml_function_name_list + xml_fun_elem_name_list + xml_fun_inter_name_list
-
-    # Loop to filter attributes and create a new list
     for elem in described_attribute_list:
-        is_elem_found = True
-        if not any(item == elem[1] for item in whole_list) and \
-                not any(item == elem[0] for item in xml_attribute_name_list):
-            is_elem_found = False
-            print(f"{elem[1]} and {elem[0]} do not exist")
-        elif not any(item == elem[1] for item in whole_list) or \
-                not any(item == elem[0] for item in xml_attribute_name_list):
-            is_elem_found = False
-            if any(item == elem[1] for item in whole_list) and \
-                    not any(item == elem[0] for item in xml_attribute_name_list):
-                print(f"{elem[0]} does not exist")
-            elif any(item == elem[0] for item in xml_attribute_name_list) and not \
-                    any(item == elem[1] for item in whole_list):
-                print(f"{elem[1]} does not exist")
+        obj_to_set = check_get_object(
+            elem[1], 
+            **{'xml_function_list': xml_dict_sets['xml_function_list'],
+            'xml_fun_elem_list': xml_dict_sets['xml_fun_elem_list'],
+            'xml_fun_inter_list': xml_dict_sets['xml_fun_inter_list'],
+            'xml_phy_elem_list': xml_dict_sets['xml_phy_elem_list'],
+            'xml_phy_inter_list': xml_dict_sets['xml_phy_inter_list'],
+            })
+        attribute_wanted = check_get_object(
+            elem[0], 
+            **{'xml_attribute_list': xml_dict_sets['xml_attribute_list'],
+            })
+        if obj_to_set is None and attribute_wanted is None:
+            print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
+            "- Function\n"
+            "- Functional element\n"
+            "- Functional interface\n"
+            "- Physical element\n"
+            "- Physical interface\n")
+            continue
+        if None in (obj_to_set, attribute_wanted):
+            print("{} does not exist".format(
+                [elem[i] for i in range(2) 
+                if [attribute_wanted, obj_to_set][i] is None]
+                .pop()
+                ))
+            continue
+        new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
 
-        if is_elem_found:
-            current_attrib = None
-            for attribute in xml_attribute_list:
-                if elem[0] == attribute.name or elem[0] == attribute.alias:
-                    current_attrib = attribute
-            # Loop to filter attribute and create a new list
-            result_function = any(item == elem[1] for item in xml_function_name_list)
-            result_fun_elem = any(item == elem[1]for item in xml_fun_elem_name_list)
-            result_fun_inter = any(item == elem[1]for item in xml_fun_inter_name_list)
-
-            if result_function and current_attrib:
-                for function in xml_function_list:
-                    if elem[1] == function.name or elem[1] == function.alias:
-                        if (function.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (function, str(elem[2]))])
-
-            if result_fun_elem and current_attrib:
-                for fun_elem in xml_fun_elem_list:
-                    if elem[1] == fun_elem.name or elem[1] == fun_elem.alias:
-                        if (fun_elem.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (fun_elem, str(elem[2]))])
-
-            if result_fun_inter and current_attrib:
-                for fun_inter in xml_fun_inter_list:
-                    if elem[1] == fun_inter.name or elem[1] == fun_inter.alias:
-                        if (fun_inter.id, elem[2]) not in current_attrib.described_item_list:
-                            new_described_attribute_list.append(
-                                [current_attrib, (fun_inter, str(elem[2]))])
-
-    update = add_object_attribute(new_described_attribute_list, output_xml)
+    update = add_object_attribute(new_described_attribute_list, xml_dict_sets['output_xml'])
 
     return update
 
@@ -303,12 +261,10 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
         new_type = datamodel.Type()
         new_type.set_name(elem[0])
         # Generate and set unique identifier of length 10 integers
-        identifier = uuid.uuid4()
-        new_type.set_id(str(identifier.int)[:10])
-        if isinstance(type_to_extend, datamodel.Type):
-            new_type.set_base(type_to_extend)
-        else:
-            new_type.set_base(type_to_extend.get_enum(elem[1].capitalize()))
+        new_type.set_id(shared_orchestrator.get_unique_id())
+        
+        new_type.set_base(type_to_extend)
+
         new_type_list.append(new_type)
         xml_type_list.add(new_type)
 
@@ -329,9 +285,9 @@ def check_get_type_to_extend(type_str, xml_type_list):
     """Checks if type_str is within BaseType or xml_type_list, then return Basetype or
     type object"""
     check = None
-    if any(a == type_str.capitalize() for a in [str(i) for i in datamodel.BaseType]):
-        check = datamodel.BaseType
-        return check
+    formated_type_str = type_str.upper().replace(" ", "_")
+    if any(a == formated_type_str for a in [i.name for i in datamodel.BaseType]):
+        return datamodel.BaseType[formated_type_str]
 
     if any(a == type_str for a in get_objects_names(xml_type_list)):
         check = check_get_object(type_str, **{'xml_type_list': xml_type_list})

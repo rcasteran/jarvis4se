@@ -7,6 +7,9 @@ import re
 import inspect
 import pathlib
 import subprocess
+
+import datamodel
+
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 from plantuml import PlantUML
@@ -18,6 +21,7 @@ class PlantUmlPicoServer:
     def __init__(self):
         """If . jar, get it, check if picoweb is running, if not start new process else default url
         to online plantuml server"""
+        self.plantuml_jar_path = None
         jar_file = self.get_jar()
         if not jar_file:
             self.url = 'http://www.plantuml.com/plantuml/svg/'
@@ -99,7 +103,7 @@ class PlantUmlGen(PlantUmlPicoServer):
         else:
             full_string = string
 
-        if len(string) > 15000 and not self.plantuml_jar_path:
+        if len(string) > 15000 and self.plantuml_jar_path is None:
             print(f"Diagram is too large to be display with Plantuml Online Server, "
                   f"please consider download https://plantuml.com/fr/download .jar")
             return None
@@ -138,8 +142,17 @@ class StateDiagram:
             state_alias = state.alias
         else:
             state_alias = state.name.lower().replace(" ", "_").replace("-", "")
+
+        if isinstance(state.type, datamodel.BaseType):
+            state_type_str = str(state.type).capitalize().replace("_", " ")
+        elif 'EXIT' in state.type.name:
+            state_type_str = 'EXIT'
+        elif 'ENTRY' in state.type.name:
+            state_type_str = 'ENTRY'
+        else:
+            state_type_str = state.type.name
         self.append_string("'id: ", state.id, '\nstate "', state.name, '"', ' as ', state_alias,
-                           ' <<', str(state.type), '>>', open_bracket_str, '\n')
+                           ' <<', state_type_str, '>>', open_bracket_str, '\n')
 
     def create_transition(self, transition_list):
         """Create transition"""
@@ -209,7 +222,11 @@ class SequenceDiagram:
         """Create participant"""
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
-        self.append_string("participant ", function_name, ' <<', str(function.type), '>>', "\n")
+        if isinstance(function.type, datamodel.BaseType):
+            function_type_str = str(function.type).capitalize().replace("_", " ")
+        else:
+            function_type_str = function.type.name
+        self.append_string("participant ", function_name, ' <<', function_type_str, '>>', "\n")
 
 
 class ObjDiagram:
@@ -227,9 +244,13 @@ class ObjDiagram:
         # If the string is not formatted like this, plantuml raises error
         operand_str = ''
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
+        if isinstance(function.type, datamodel.BaseType):
+            function_type_str = str(function.type).capitalize().replace("_", " ")
+        else:
+            function_type_str = function.type.name
         self.append_string(
             "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_name,
-            ' <<', str(function.type), '>>')
+            ' <<', function_type_str, '>>')
 
         if function.operand:
             operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'
@@ -263,8 +284,12 @@ class ObjDiagram:
         """Create component"""
         # If the string is not formatted like this, plantuml raises error
         component_name = component.name.lower().replace(" ", "_").replace("-", "")
+        if isinstance(component.type, datamodel.BaseType):
+            component_type_str = str(component.type).capitalize().replace("_", " ")
+        else:
+            component_type_str = component.type.name
         self.append_string("'id: ", component.id, '\ncomponent "', component.name, '" ', 'as ',
-                           component_name, ' <<', str(component.type), '>>{\n')
+                           component_name, ' <<', component_type_str, '>>{\n')
 
     def create_output_flow(self, output_flow_list):
         """Create output flow"""

@@ -100,6 +100,24 @@ def extends_and_create_object_cell():
                       '"High high high level function" extends "High high level function"',
                       '3High is a "High high high level function"', ""])
 
+@pytest.fixture
+def state_exit_entry_chain_output_diagram():
+    """Returns string see usage"""
+    return ('skinparam useBetaStyle true\n',
+            'hide empty description\n',
+            '<style>\n',
+            '     .Entry{\n',
+            '        FontColor white\n',
+            '        BackgroundColor black\n',
+            '     }\n',
+            '     .Exit{\n',
+            '        FontColor white\n',
+            '        BackgroundColor black\n',
+            '     }\n',
+            '</style>\n',
+            'state "S1" as s1 <<EXIT>>\n',
+            'state "S2" as s2 <<ENTRY>>\n')
+
 
 def remove_xml_file(file_name):
     """Remove xml file"""

@@ -24,8 +24,8 @@ class MagicTools(Magics):
         """Magic line %retrieve_pkg_version that get dependecies versions, for users to share when
         they create issues"""
         pkg = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas']
-        pkg_ver = "\n".join(['=='.join(tups) for tups in list(zip(pkg, list(map(version, pkg))))])
-        print(pkg_ver, f"\npython=={py_ver[:6]}")
+        pkg_ver =  "\n".join(['=='.join(tups) for tups in zip(pkg, map(version, pkg))]) 
+        print(pkg_ver, "\npython=={}".format(py_ver[:6]))
 
     @cell_magic
     def diagram(self, _, cell):
