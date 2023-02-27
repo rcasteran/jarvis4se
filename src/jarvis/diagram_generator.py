@@ -1227,16 +1227,19 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     """
     new_consumer_list = []
     new_producer_list = []
-    global_interface_list = set()
+    global_interface_set = set()
     new_fun_elem_list = [check_get_object(i, **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
                          for i in fun_elem_str]
     kwargs['xml_fun_elem_list'] = new_fun_elem_list
     for fun_elem in new_fun_elem_list:
+        interface_dict = switch_fun_elem_interface(fun_elem, None, **kwargs)[1:]
+        if isinstance(interface_dict, str):
+            continue
+        global_interface_set.update(interface_dict)
         fun_elem.child_list.clear()
         fun_elem.parent = None
-        global_interface_list.update(switch_fun_elem_interface(fun_elem, None, **kwargs)[1:])
 
-    for item in global_interface_list:
+    for item in global_interface_set:
         if any(n == item[1] for n in [f.name for f in new_fun_elem_list]):
             interface = check_get_object(
                 item[0], **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})

@@ -436,7 +436,7 @@ def switch_fun_elem_interface(wanted_object, _, **kwargs):
                                               kwargs['xml_fun_inter_list'])
 
     if not fun_inter_list:
-        return f"Not any exposed interface for {wanted_object.name}"
+        return "Not any exposed interface for {!s}".format(wanted_object.name)
 
     exposing_fun_elem = set()
     for interface in fun_inter_list:
