@@ -1,3 +1,7 @@
+"""@defgroup datamodel
+Module for 3SE datamodel
+"""
+
 # Libraries
 from enum import Enum
 
@@ -6,7 +10,8 @@ from . import util
 
 
 class BaseType(Enum):
-    """ @anchor BaseType
+    """@ingroup datamodel
+    @anchor BaseType
     Basic types enumeration
     """
     DATA = 0
@@ -82,7 +87,8 @@ class BaseType(Enum):
 
 
 class Function:
-    """ @anchor Function
+    """@ingroup datamodel
+    @anchor Function
     Basic type representing a function
     
     A function is a transformation of incoming data to outgoing data, by means of some mechanisms,
@@ -211,7 +217,8 @@ class Function:
 
 
 class Data:
-    """ @anchor Data
+    """@ingroup datamodel
+    @anchor Data
     Basic type representing a data
     
     A data is an output produced by a function and consumed by another function.
@@ -272,7 +279,8 @@ class Data:
 
 
 class State:
-    """ @anchor State
+    """@ingroup datamodel
+    @anchor State
     Basic type representing a state
     
     A state is an operational situation of the system characterized by its active functions.
@@ -368,7 +376,8 @@ class State:
 
 
 class Transition:
-    """ @anchor Transition
+    """@ingroup datamodel
+    @anchor Transition
     Basic type representing a transition
     
     A transition is a change from one initial state to a final state or the same one, whose evaluation depends on the
@@ -465,7 +474,8 @@ class Transition:
 
 
 class FunctionalElement:
-    """ @anchor FunctionalElement
+    """@ingroup datamodel
+    @anchor FunctionalElement
     Basic type representing a functional element
     
     A functional element is a part of a system element responsible for carrying out some functions devolved to
@@ -598,7 +608,8 @@ class FunctionalElement:
 
 
 class View:
-    """@anchor View
+    """@ingroup datamodel
+    @anchor View
     View class
     """
     
@@ -668,7 +679,8 @@ class View:
 
 
 class Attribute:
-    """@anchor Attribute
+    """@ingroup datamodel
+    @anchor Attribute
     Attribute class
     """
     
@@ -738,7 +750,8 @@ class Attribute:
 
 
 class FunctionalInterface:
-    """ @anchor FunctionalInterface
+    """@ingroup datamodel
+    @anchor FunctionalInterface
     Basic type representing a functional interface
     
     A functional interface is a boundary across which two functional elements and/or enabling functional elements
@@ -823,7 +836,8 @@ class FunctionalInterface:
 
 
 class PhysicalElement:
-    """ @anchor PhysicalElement
+    """@ingroup datamodel
+    @anchor PhysicalElement
     Basic type representing a physical element
     
     A physical element is a physical part of a system that satisfies specified requirements.
@@ -943,7 +957,8 @@ class PhysicalElement:
 
 
 class PhysicalInterface:
-    """ @anchor PhysicalInterface
+    """@ingroup datamodel
+    @anchor PhysicalInterface
     Basic type representing a physical interface
     
     A physical interface is a boundary across which two physical elements and/or enabling physical elements meet and
@@ -1028,7 +1043,8 @@ class PhysicalInterface:
 
 
 class Type:
-    """@anchor Type
+    """@ingroup datamodel
+    @anchor Type
     Type class
     """
     
