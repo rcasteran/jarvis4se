@@ -1,6 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module with functions to build plantuml text"""
+"""@defgroup plantuml_adapter
+Plantuml adapter module
+"""
+
 # Modules
 import datamodel
 from jarvis.question_answer import get_objects_names, check_get_object
@@ -9,7 +10,16 @@ from .util import ObjDiagram, StateDiagram, SequenceDiagram
 
 def write_function_child(string_obj, function, input_flow_list, output_flow_list,
                          xml_attribute_list):
-    """Construct plantuml_text recursively"""
+    """@ingroup plantuml_adapter
+    Construct PlantUml text recursively
+    @param[in,out] string_obj current PlantUml text
+    @param[in] function
+    @param[in] input_flow_list
+    @param[in] output_flow_list
+    @param[in] xml_attribute_list
+    @return None
+    """
+
     function_input_port = []
     function_output_port = []
     external_input_port = []
@@ -79,14 +89,13 @@ def write_function_child(string_obj, function, input_flow_list, output_flow_list
 
 
 def count_composed_component(function, count):
-    """
+    """@ingroup plantuml_adapter
     Count the number of composed function within the higher function
-        Parameters:
-            function (Function) : Function to check
-            count (int) : Number of component
-        Returns:
-            count (int) : Number of component
+    @param[in] function function to check
+    @param[in] count number of component
+    @return number of component
     """
+
     for elem in function.child_list:
         if elem.child_list:
             count += 1
@@ -97,8 +106,19 @@ def count_composed_component(function, count):
 
 def write_function_object(string_obj, function, input_flow_list, output_flow_list, check,
                           xml_attribute_list, component_obj=None, compo_diagram=False):
-    """Write 'simple' function object with associated ports for flow_lists,
-    close a pevious component if needed, returns plantuml_text"""
+    """@ingroup plantuml_adapter
+    Construct the PlantUml text for a function object with associated ports for flow lists.
+    @param[in,out] string_obj current PlantUml text
+    @param[in] function
+    @param[in] input_flow_list
+    @param[in] output_flow_list
+    @param[in] check
+    @param[in] xml_attribute_list
+    @param[in] component_obj
+    @param[in] compo_diagram
+    @return PlantUml text for the function object
+    """
+
     string_obj.create_object(function, xml_attribute_list)
 
     if check:
@@ -124,8 +144,22 @@ def write_function_object(string_obj, function, input_flow_list, output_flow_lis
 
 def get_function_diagrams(function_list, consumer_function_list, producer_function_list,
                           parent_child_dict, data_list, xml_type_list, xml_attribute_list=None):
-    """For fun_elem_function, function_context, function_decomposition and functions_chain,
-    returns plantuml_text and url_diagram"""
+    """@ingroup plantuml_adapter
+    @anchor get_function_diagrams
+    Construct the PlantUml text and url for the requested diagram between one of the following:
+    - context of function
+    - decomposition of function
+    - chain of function
+    @param[in] function_list
+    @param[in] consumer_function_list
+    @param[in] producer_function_list
+    @param[in] parent_child_dict
+    @param[in] data_list
+    @param[in] xml_type_list
+    @param[in] xml_attribute_list
+    @return PlantUml text and url of the diagram
+    """
+
     string_obj = ObjDiagram()
     # Filter output flows
     output_flow_list = get_output_flows(consumer_function_list, producer_function_list,
@@ -182,7 +216,20 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
 def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
                                  data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
                                  fun_elem_inter_list):
-    """Returns plantuml_text for fun_elem_context"""
+    """@ingroup plantuml_adapter
+    @anchor get_fun_elem_context_diagram
+    Construct the PlantUml text and url for the context diagram for functional elements
+    @param[in] function_list TBD
+    @param[in] consumer_function_list TBD
+    @param[in] producer_function_list TBD
+    @param[in] data_list TBD
+    @param[in] xml_attribute_list TBD
+    @param[in] fun_elem_list TBD
+    @param[in] fun_inter_list TBD
+    @param[in] fun_elem_inter_list TBD
+    @return PlantUml text and url of the diagram
+    """
+
     string_obj = ObjDiagram()
     if fun_inter_list:
 
@@ -234,8 +281,17 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
 
 
 def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list, fun_elem_list):
-    """Get [fun_elem_1, fun_elem_2, fun_inter] when data allocated to fun_inter
-    and pop according data from data_flow_list"""
+    """@ingroup plantuml_adapter
+    Get list of functional interfaces with the functional elements exposing them.
+    Functional interface is returned only when specifed data is allocated to it
+    @param[in] fun_inter_list TBD
+    @param[in] data_list TBD
+    @param[in] data_flow_list TBD
+    @param[in] function_list TBD
+    @param[in] fun_elem_list TBD
+    @return functional interfaces list
+    """
+
     interface_list = []
     removed_data_flow_list = []
     initial_data = list(data_flow_list)
@@ -277,9 +333,15 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
 
 
 def get_fun_elem_from_fun_inter(interface_list, fun_elem_list):
-    """Get output_list = [[fun_elem_1, fun_elem_2, fun_inter]...] list from interface_list =
+    """@ingroup plantuml_adapter
+    Get list of functional interfaces with the functional elements exposing them from interface_list =
     [[producer, consumer, fun_inter]...] and put value to False if (first, second, interface)
-    have been added to output_list (i.e. fun_elem_1/fun_elem_2 have been found for a fun_inter)"""
+    have been added to output_list (i.e. fun_elem_1/fun_elem_2 have been found for a fun_inter)
+    @param[in] interface_list TBD
+    @param[in] fun_elem_list TBD
+    @return functional interfaces list
+    """
+
     output_list = []
     for ix, (first, second, interface) in enumerate(interface_list):
         fun_elem_1 = None
@@ -333,17 +395,14 @@ def get_fun_elem_from_fun_inter(interface_list, fun_elem_list):
 
 
 def check_child_allocation(string_obj, fun_elem, function_list, xml_attribute_list):
-    """
-    Check for each function allocated to fun_elem if not allocated to any fun_elem child: in that
-    case => write function object string.
-
-        Parameters:
-            string_obj (Object) : Current object string
-            fun_elem (Functional Element) : Functional element to check
-            function_list ([Function]) : Functions list
-            xml_attribute_list ([Attributes]) : Xml list of attributes
-        Returns:
-            out_str (string) : Function object(s) string
+    """@ingroup plantuml_adapter
+    Check for each function allocated to a functional element if not allocated to any
+    functional element child: in that case => write function object string.
+    @param[in,out] string_obj current PlantUml text
+    @param[in] fun_elem functional element to check
+    @param[in] function_list list of functions
+    @param[in] xml_attribute_list xml list of attributes
+    @return None
     """
 
     for t in function_list:
@@ -358,7 +417,16 @@ def check_child_allocation(string_obj, fun_elem, function_list, xml_attribute_li
 
 def recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attribute_list,
                             first_iter=False):
-    """ Creates Functional Elements as plantuml 'component' recursively """
+    """@ingroup plantuml_adapter
+    Create PlantUml text for functional elements recursively
+    @param[in,out] string_obj current PlantUml text
+    @param[in] main_fun_elem
+    @param[in] function_list list of functions
+    @param[in] xml_attribute_list xml list of attributes
+    @param[in] first_iter
+    @return None
+    """
+
     if first_iter is True:
         string_obj.create_component(main_fun_elem)
         check_child_allocation(string_obj, main_fun_elem, function_list, xml_attribute_list)
@@ -378,24 +446,21 @@ def recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attrib
 def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_list, consumer_list,
                                producer_list, external_function_list, xml_attribute_list,
                                data_list, fun_inter_list):
+    """@ingroup plantuml_adapter
+    @anchor get_fun_elem_decomposition
+    Construct the PlantUml text for the functional element decomposition diagram
+    @param[in] main_fun_elem main functional element
+    @param[in] fun_elem_list functional element list
+    @param[in] allocated_function_list list of allocated functions to main functional element
+    @param[in] consumer_list filtered consumers list
+    @param[in] producer_list filtered producers list
+    @param[in] external_function_list filtered external functions list
+    @param[in] xml_attribute_list xml list of attributes
+    @param[in] data_list data list
+    @param[in] fun_inter_list functional interface list
+    @return PlantUml text of the diagram
     """
-    Parses input lists in order to create dedicated functional element decomposition
-    diagram by: Creating the whole string plantuml_text, retrieve url and return it.
 
-        Parameters:
-            main_fun_elem (Functional Element) : Main functional element
-            fun_elem_list ([Functional Element]) : Functional element list from xml parsing
-            allocated_function_list ([Function]) : Allocated function list to Main functional Elem.
-            consumer_list ([data_name, Function]) : Filtered consumers list
-            producer_list ([data_name, Function]) : Filtered producers list
-            external_function_list ([Function]) : Filtered external(i.e. "outside" Main) functions
-                                                    list
-            xml_attribute_list ([Attributes]) : Xml list of attributes
-            data_list ([Data]) : Data list from xml
-            fun_inter_list ([Functional Interface]) : Functional interface list from xml
-        Returns:
-            string (str) : plantuml string
-    """
     string_obj = ObjDiagram()
     interface_list = None
 
@@ -437,7 +502,17 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
 
 def get_sequence_diagram(function_list, consumer_function_list, producer_function_list,
                          parent_child_dict, data_list, str_out=False):
-    """ Generates plantuml string and url for sequence diagrams """
+    """@ingroup plantuml_adapter
+    @anchor get_sequence_diagram
+    Construct the PlantUml text for the sequence diagrams
+    @param[in] function_list TBD
+    @param[in] consumer_function_list TBD
+    @param[in] producer_function_list TBD
+    @param[in] parent_child_dict TBD
+    @param[in] data_list TBD
+    @return PlantUml text of the diagram
+    """
+
     seq_obj_string = SequenceDiagram()
 
     message_list = get_exchanged_flows(consumer_function_list, producer_function_list,
@@ -459,7 +534,12 @@ def get_sequence_diagram(function_list, consumer_function_list, producer_functio
 
 
 def get_predecessor_list(data):
-    """ Get the predecessor's list for a Data object"""
+    """@ingroup plantuml_adapter
+    Get the predecessor's list for a Data object
+    @param[in] data data object
+    @return predecessor list
+    """
+
     predecessor_list = set()
     if data.predecessor_list:
         for predecessor in data.predecessor_list:
@@ -469,7 +549,13 @@ def get_predecessor_list(data):
 
 
 def check_sequence(predecessor_list, sequence):
-    """ Checks if predecessors are in the sequence"""
+    """@ingroup plantuml_adapter
+    Check if predecessors of a data are in a sequence
+    @param[in] predecessor_list predecessor list
+    @param[in] sequence sequence
+    @return TRUE (predecessors are in the sequence) or FALSE
+    """
+
     check = False
     if predecessor_list == set():
         check = None
@@ -490,7 +576,12 @@ def check_sequence(predecessor_list, sequence):
 
 
 def clean_predecessor_list(message_object_list):
-    """ Deletes predecessor if not in the message's list """
+    """@ingroup plantuml_adapter
+    Delete predecessor if not in the message's list
+    @param[in] message_object_list TBD
+    @return updated message list
+    """
+
     for message in message_object_list:
         pred_list = get_predecessor_list(message[2])
         for pred in pred_list:
@@ -501,7 +592,15 @@ def clean_predecessor_list(message_object_list):
 
 
 def get_sequence(message, message_object_list, sequence_list, sequence=None, index=None):
-    """Returns a sequence i.e. more than 2 messages"""
+    """@ingroup plantuml_adapter
+    Return a sequence for a given message
+    @param[in] message TBD
+    @param[in] message_object_list TBD
+    @param[in] sequence_list TBD
+    @param[in] sequence TBD
+    @param[in] index TBD
+    @return sequence
+    """
     if not sequence:
         sequence = []
         index = 0
@@ -517,7 +616,12 @@ def get_sequence(message, message_object_list, sequence_list, sequence=None, ind
 
 
 def get_sequences(message_object_list):
-    """Groups all sequences"""
+    """@ingroup plantuml_adapter
+    Group all sequences into a sequence list
+    @param[in] message_object_list
+    @return sequence list
+    """
+
     sequence_list = []
     for message in message_object_list:
         if not message[2].predecessor_list:
@@ -528,8 +632,13 @@ def get_sequences(message_object_list):
 
 
 def post_check_sequence(sequence_list):
-    """Check if message isn't missing in sequence, insert it at the good place and loop if not
-    well ordered (predecessor after each one)"""
+    """@ingroup plantuml_adapter
+    Check if message isn't missing in sequence, insert it at the good place and loop if not
+    well ordered (predecessor after each one)
+    @param[in] sequence_list TBD
+    @return sequence list ordered
+    """
+
     for (idx, i) in enumerate(sequence_list):
         pred = i[2].predecessor_list
         if check_sequence(pred, sequence_list[:idx]) is True:
@@ -556,7 +665,11 @@ def post_check_sequence(sequence_list):
 
 
 def get_sequence_list(message_object_list):
-    """Call for sequences then clean_up and post_check"""
+    """@ingroup plantuml_adapter
+    Call for sequences then clean_up and post_check
+    @param[in] message_object_list TBD
+    @return sequence list
+    """
     sequence_list = get_sequences(message_object_list)
 
     sequence_list = sorted(sequence_list, key=lambda x: len(x), reverse=True)
@@ -578,7 +691,13 @@ def get_sequence_list(message_object_list):
 
 
 def order_list(message_list, data_list):
-    """Orders functions and messages"""
+    """@ingroup plantuml_adapter
+    Order functions and messages
+    @param[in] message_list TBD
+    @param[in] data_list TBD
+    @return ordered message list and ordered function list
+    """
+
     ordered_message_list = []
     ordered_function_list = []
     message_object_list = []
@@ -610,8 +729,16 @@ def order_list(message_list, data_list):
 
 def get_exchanged_flows(consumer_function_list, producer_function_list, parent_child_dict,
                         concatenate=False):
-    """Returns list of exchanged flow [[producer, consumer, data]],
-    i.e. data that have producer and consumer"""
+    """@ingroup plantuml_adapter
+    Return list of exchanged flows [[producer, consumer, data]], i.e. data that have
+    producer and consumer
+    @param[in] consumer_function_list TBD
+    @param[in] producer_function_list TBD
+    @param[in] parent_child_dict TBD
+    @param[in] concatenate TBD
+    @return list of exchanged flows
+    """
+
     output_list = []
 
     for producer_flow, producer_function in producer_function_list:
@@ -635,8 +762,14 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
 
 
 def get_output_flows(consumer_function_list, producer_function_list, concatenate=False):
-    """Returns list of output flow [[None/parent_name, producer, data]],
-    i.e. data that have only producer"""
+    """@ingroup plantuml_adapter
+    Return list of output flows [[None/parent_name, producer, data]], i.e. data that
+    have only producer
+    @param[in] consumer_function_list TBD
+    @param[in] producer_function_list TBD
+    @param[in] concatenate TBD
+    @return list of output flows
+    """
     flow_consumer_name_list = []
     flow_child_consumer_list = []
     temp_input_list = []
@@ -674,8 +807,15 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
 
 
 def get_input_flows(consumer_function_list, producer_function_list, concatenate=False):
-    """Returns list of output flow [[None/parent_name, consumer, data]],
-    i.e. data that have only consumer"""
+    """@ingroup plantuml_adapter
+    Return list of input flow [[None/parent_name, consumer, data]], i.e. data that
+    have only consumer
+    @param[in] consumer_function_list TBD
+    @param[in] producer_function_list TBD
+    @param[in] concatenate TBD
+    @return list of input flows
+    """
+
     flow_producer_name_list = []
     flow_child_producer_list = []
     temp_input_list = []
@@ -712,9 +852,14 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
 
 
 def concatenate_flows(input_list):
-    """Concatenate with same consumer and producer the flows :
-    from [[cons=A, prod=B, flow_1], [cons=A, prod=B, flow_2]] to
-    [[cons=A, prod=B, [flow_1, flow_2]]. Adaptation for flow notation in plantuml"""
+    """@ingroup plantuml_adapter
+    Concatenate the flows with same consumer and producer: from [[cons=A, prod=B, flow_1],
+    [cons=A, prod=B, flow_2]] to [[cons=A, prod=B, [flow_1, flow_2]].
+    Adaptation for flow notation in PlantUml
+    @param[in] input_list
+    @return list of output flows
+    """
+
     output_list = []
     per_function_name_filtered_list = set(map(lambda x: (x[0], x[1]), input_list))
     per_flow_filtered_list = [[y[2] for y in input_list if y[0] == x and y[1] == z] for x, z in
@@ -726,7 +871,15 @@ def concatenate_flows(input_list):
 
 
 def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list=None):
-    """Returns state_machine_text and url_diagram for state_machine_diagrams"""
+    """@ingroup plantuml_adapter
+    @anchor get_state_machine_diagram
+    Construct  the PlantUml text and url for state machine diagrams
+    @param[in] xml_state_list TBD
+    @param[in] xml_transition_list TBD
+    @param[in] fun_elem_list TBD
+    @return PlantUml text and url diagram for state machine diagram
+    """
+
     state_obj_string = StateDiagram()
     objects_conditions_list = get_objects_conditions_list(xml_state_list, xml_transition_list)
     already_added_state_id_list = []
@@ -767,7 +920,13 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
 
 
 def get_objects_conditions_list(xml_state_list, xml_transition_list):
-    """Returns all conditions associated to state_list within transiton_list"""
+    """@ingroup plantuml_adapter
+    Return all conditions associated to a list of state within a list of transition
+    @param[in] xml_state_list TBD
+    @param[in] xml_transition_list TBD
+    @return conditions list
+    """
+
     objects_conditions_list = []
     formatted_transition_list = []
     # Create transition's list [src_id, dest_id, [conditions]]
@@ -784,7 +943,15 @@ def get_objects_conditions_list(xml_state_list, xml_transition_list):
 
 
 def write_state(state_obj_string, state, new, objects_conditions_list):
-    """Returns simple state string for plantuml_text"""
+    """@ingroup plantuml_adapter
+    Returns simple state string for PlantUml text
+    @param[in, out] state_obj_string TBD
+    @param[in] state TBD
+    @param[in] new TBD
+    @param[in, out] objects_conditions_list TBD
+    @return None
+    """
+
     if not state.parent and not state.child_list:
         state_obj_string.create_state(state)
         new.append(state.id)
@@ -797,7 +964,17 @@ def write_state(state_obj_string, state, new, objects_conditions_list):
 
 def write_composed_state(state_obj_string, state, new, objects_conditions_list, output_str='',
                          count=0):
-    """Returns composed state string for plantuml_text"""
+    """@ingroup plantuml_adapter
+    Returns composed state string for PlantUml text
+    @param[in, out] state_obj_string TBD
+    @param[in] state TBD
+    @param[in] new TBD
+    @param[in, out] objects_conditions_list TBD
+    @param[in] output_str TBD
+    @param[in] count TBD
+    @return None
+    """
+
     state_obj_string.create_state(state, parent=True)
     new.insert(count, state.id)
     count += 1
@@ -818,8 +995,13 @@ def write_composed_state(state_obj_string, state, new, objects_conditions_list, 
 
 
 def match_transition_states(transition, xml_state_list):
-    """Returns transition with associated state, if not create default ENTRY or EXIT if one is
-    missing"""
+    """@ingroup plantuml_adapter
+    Return transition with associated state.
+    If not, create default ENTRY or EXIT if one is missing
+    @param[in] transition TBD
+    @param[in] xml_state_list TBD
+    @return transition
+    """
     out = None
     source_state, destination_state = get_source_and_dest(transition, xml_state_list)
 
@@ -840,7 +1022,12 @@ def match_transition_states(transition, xml_state_list):
 
 
 def get_source_and_dest(transition, xml_state_list):
-    """Iterate over states id to get source and dest objects"""
+    """@ingroup plantuml_adapter
+    Iterate over states id to get source and destination objects
+    @param[in] transition TBD
+    @param[in] xml_state_list TBD
+    @return source and destination objects
+    """
     source_state = None
     destination_state = None
 
