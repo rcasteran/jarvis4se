@@ -9,7 +9,7 @@ from . import functional_orchestrator
 from . import shared_orchestrator
 from .question_answer import get_object_list, get_pandas_table, find_question
 from .diagram_generator import filter_show_command
-
+import tools
 
 class CmdParser:
     def __init__(self, generator):
@@ -127,7 +127,7 @@ class CmdParser:
         out = filter_show_command(diagram_name_str, **kwargs)
         if out:
             url = self.generator.get_diagram_url(out)
-            hyper = get_hyperlink(url)
+            hyper = tools.get_hyperlink(url)
             display(HTML(hyper))
             print("Overview :")
             display(Markdown(f'![figure]({url})'))
@@ -267,13 +267,6 @@ def matched_src_dest(src_dest_str, **kwargs):
                                                      kwargs['xml_state_list'],
                                                      kwargs['output_xml'])
     return out
-
-
-def get_hyperlink(path):
-    """Convert file path into clickable form."""
-    text = "Click to open in new tab"
-    # convert the url into link
-    return f'<a href="{path}" target="_blank">{text}</a>'
 
 
 def matched_question_mark(question_str, **kwargs):
