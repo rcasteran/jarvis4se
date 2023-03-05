@@ -77,7 +77,7 @@ def test_fun_inter_simple_sequence(mocker):
                 'deactivate fun_elem_1\n',
                 'deactivate fun_elem_2\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) == len(''.join(expected))
-
-    remove_xml_file(file_name)

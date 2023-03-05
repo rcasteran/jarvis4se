@@ -57,10 +57,11 @@ def test_simple_function_within_xml():
                          "F1 is a function\n")
 
     function_list = xml_parser.parse_xml(file_name + ".xml")['xml_function_list']
-    assert len(function_list) == 1
-    assert [fun.name == "F1" for fun in function_list]
 
     remove_xml_file(file_name)
+
+    assert len(function_list) == 1
+    assert [fun.name == "F1" for fun in function_list]
 
 
 def test_described_attribute_within_xml(attribute_cell):
@@ -106,9 +107,9 @@ def test_described_attribute_within_xml(attribute_cell):
                 if item[0] == fun_elem.id:
                     result.add((attribute.name, fun_elem.name, item[1]))
 
-    assert expected == result
-
     remove_xml_file(file_name)
+
+    assert expected == result
 
 
 def test_set_attribute_type_within_xml():
@@ -141,9 +142,9 @@ def test_set_attribute_type_within_xml():
     for attribute in attribute_list:
         result.add((attribute.name, attribute.type.name))
 
-    assert expected == result
-
     remove_xml_file(file_name)
+
+    assert expected == result
 
 
 def test_set_allocated_item_to_view_within_xml(allocation_item_cell):
@@ -190,9 +191,9 @@ def test_set_allocated_item_to_view_within_xml(allocation_item_cell):
             if item == data.id:
                 result.add(data.name)
 
-    assert expected == result
-
     remove_xml_file(file_name)
+
+    assert expected == result
 
 
 def test_function_with_grandkids_within_xml(function_grandkids_cell):
@@ -239,11 +240,11 @@ def test_function_with_grandkids_within_xml(function_grandkids_cell):
             for child in fun.child_list:
                 result_child.add((fun.name, child.name))
 
+    remove_xml_file(file_name)
+
     assert expected_cons == result_cons
     assert expected_prod == result_prod
     assert expected_child == result_child
-
-    remove_xml_file(file_name)
 
 
 def test_function_childs_cons_prod_within_xml(function_with_childs_cell):
@@ -307,11 +308,11 @@ def test_function_childs_cons_prod_within_xml(function_with_childs_cell):
             for child in fun.child_list:
                 result_child.add((fun.name, child.name))
 
+    remove_xml_file(file_name)
+
     assert expected_cons == result_cons
     assert expected_prod == result_prod
     assert expected_child == result_child
-
-    remove_xml_file(file_name)
 
 
 def test_functional_interface_within_xml():

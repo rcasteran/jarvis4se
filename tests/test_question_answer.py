@@ -69,6 +69,6 @@ def test_list_data_functional_interface(mocker):
                  'Last producer Function(s)': ['F1'],
                  'Last producer Functional element(s)': ['E1']}]
 
-    assert expected == result
-
     remove_xml_file(file_name)
+
+    assert expected == result
