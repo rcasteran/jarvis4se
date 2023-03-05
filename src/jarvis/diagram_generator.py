@@ -5,12 +5,14 @@ them to plantuml_adapter.py"""
 # Libraries
 import re
 
+# Modules
 import plantuml_adapter
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
     get_children, check_not_family, switch_fun_elem_interface
 from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
     attribute_inheritance, reset_attribute_inheritance, view_inheritance, reset_view_inheritance, \
     allocation_inheritance, reset_alloc_inheritance
+from tools import Logger
 
 
 def filter_show_command(diagram_name_str, **kwargs):
@@ -31,7 +33,8 @@ def filter_show_command(diagram_name_str, **kwargs):
                                              diagram_object_str=diagram_object_str,
                                              **kwargs)
     else:
-        print(f"Jarvis does not understand the command {wanted_diagram_str}")
+        Logger.set_warning(__name__,
+                          f"Jarvis does not understand the command {wanted_diagram_str}")
 
     return plantuml_string
 
@@ -64,7 +67,8 @@ def case_function_diagram(**kwargs):
                                                  kwargs['xml_type_list'])
 
     else:
-        print(f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
+        Logger.set_warning(__name__,
+                          f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
 
     return plantuml_string
 
@@ -100,9 +104,10 @@ def case_context_diagram(**kwargs):
                                                 kwargs['xml_fun_inter_list'],
                                                 kwargs['xml_data_list'])
     else:
-        print(f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
-              f"{kwargs['diagram_object_str']} is not a valid "
-              f"Function/State/Functional Element name/alias")
+        Logger.set_warning(__name__,
+                          f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
+                          f"{kwargs['diagram_object_str']} is not a valid "
+                          f"Function/State/Functional Element name/alias")
 
     return plantuml_string
 
@@ -117,10 +122,12 @@ def case_decomposition_diagram(**kwargs):
         try:
             diagram_level = int(splitted_str[1])
             if diagram_level == 0:
-                print("Invalid level, please choose a valid level >= 1")
+                Logger.set_error(__name__,
+                                "Invalid level, please choose a valid level >= 1")
                 return plantuml_string
         except ValueError:
-            print("Invalid level, please choose a valid level >= 1")
+            Logger.set_error(__name__,
+                            "Invalid level, please choose a valid level >= 1")
             return plantuml_string
     else:
         diagram_object_str = kwargs['diagram_object_str']
@@ -136,6 +143,8 @@ def case_decomposition_diagram(**kwargs):
     function_list = get_object_list_from_view(diagram_object_str,
                                               kwargs['xml_function_list'],
                                               kwargs['xml_view_list'])
+
+    # TODO : why this print ?
     if isinstance(function_list, str):
         print(function_list)
         return None
@@ -178,8 +187,9 @@ def case_decomposition_diagram(**kwargs):
                                                       diagram_level)
 
     else:
-        print(f"Jarvis does not know the object {diagram_object_str}"
-              f"(i.e. it is not a function, nor a functional element)")
+        Logger.set_warning(__name__,
+                          f"Jarvis does not know the object {diagram_object_str}"
+                          f"(i.e. it is not a function, nor a functional element)")
 
     reset_view_inheritance(kwargs['xml_view_list'], v_inheritance)
 
@@ -261,10 +271,12 @@ def case_chain_diagram(**kwargs):
                 if len(i) > 0:
                     if not any(i in s for s in [*xml_function_name_list,
                                                 *xml_state_name_list]):
-                        print(f"The object {i} does not exist, "
-                              f"not a function/state's name nor an alias")
+                        Logger.set_error(__name__,
+                                        f"The object {i} does not exist, "
+                                        f"not a function/state's name nor an alias")
                 else:
-                    print(f"{kwargs['diagram_object_str']} is not a valid chain")
+                    Logger.set_error(__name__,
+                                    f"{kwargs['diagram_object_str']} is not a valid chain")
 
         elif result_function or result_state:
             if result_function:
@@ -274,9 +286,12 @@ def case_chain_diagram(**kwargs):
                 function_list = get_object_list_from_view(object_list_str,
                                                           kwargs['xml_function_list'],
                                                           kwargs['xml_view_list'])
+
+                # TODO : why this print ?
                 if isinstance(function_list, str):
                     print(function_list)
                     return None
+
                 consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
                     kwargs['xml_data_list'],
                     kwargs['xml_view_list'],
@@ -293,14 +308,18 @@ def case_chain_diagram(**kwargs):
                 state_list = get_object_list_from_view(object_list_str,
                                                        kwargs['xml_state_list'],
                                                        kwargs['xml_view_list'])
+
+                #TODO : why this print ?
                 if isinstance(state_list, str):
                     print(state_list)
                     return None
+
                 transition_list = filter_allocated_item_from_view(kwargs['xml_transition_list'],
                                                                   kwargs['xml_view_list'])
                 plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
         else:
-            print(f"{kwargs['diagram_object_str']} is not a valid chain")
+            Logger.set_error(__name__,
+                            f"{kwargs['diagram_object_str']} is not a valid chain")
 
     return plantuml_string
 
@@ -320,9 +339,12 @@ def case_sequence_diagram(**kwargs):
             # if not any item under view return string
             xml_data_list = filter_allocated_item_from_view(kwargs['xml_data_list'],
                                                             kwargs['xml_view_list'])
+
+            #TODO : why this print ?
             if isinstance(xml_data_list, str):
                 print(xml_data_list)
                 return None
+
             if all(i in get_objects_names(kwargs['xml_function_list']) for i in object_list_str):
 
                 if len(xml_data_list) != len(kwargs['xml_data_list']):
@@ -351,11 +373,12 @@ def case_sequence_diagram(**kwargs):
                 plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
 
             else:
-                print(f"{kwargs['diagram_object_str']} is not a valid sequence, availabe sequences "
-                      f"are:\n"
-                      f"- show sequence Function_A, Function_B, ...\n"
-                      f"- show sequence Functional_element_A, Functional_element_B, ...\n"
-                      f"- show sequence Functional_interface\n")
+                Logger.set_error(__name__,
+                                f"{kwargs['diagram_object_str']} is not a valid sequence, available sequences "
+                                f"are:\n"
+                                f"- show sequence Function_A, Function_B, ...\n"
+                                f"- show sequence Functional_element_A, Functional_element_B, ...\n"
+                                f"- show sequence Functional_interface\n")
     return plantuml_string
 
 
@@ -369,7 +392,8 @@ def case_state_diagram(**kwargs):
                                                       kwargs['xml_transition_list'],
                                                       kwargs['xml_fun_elem_list'])
     else:
-        print(f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
+        Logger.set_error(__name__,
+                        f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
 
     return plantuml_string
 
@@ -385,16 +409,17 @@ def case_state_sequence_diagram(**kwargs):
                                                         kwargs['xml_consumer_function_list'],
                                                         kwargs['xml_producer_function_list'],
                                                         kwargs['xml_data_list'])
-        return plantuml_string
     else:
-        print(f"Jarvis does not know the State {kwargs['diagram_object_str']}")
+        Logger.set_error(__name__,
+                        f"Jarvis does not know the State {kwargs['diagram_object_str']}")
 
     return plantuml_string
 
 
 def case_no_diagram(**kwargs):
     """Default Case when no command has been found"""
-    print(f"Jarvis does not understand the command {kwargs['diagram_type_str']}")
+    Logger.set_warning(__name__,
+                      f"Jarvis does not understand the command {kwargs['diagram_type_str']}")
 
 
 def check_level_0_allocated_child(fun_elem, function):
@@ -503,7 +528,9 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
     reset_alloc_inheritance(func_alloc_inheritance)
     reset_alloc_inheritance(fun_inter_alloc_inheritance)
 
-    print(f"Decomposition Diagram for {fun_elem_str} generated")
+    Logger.set_info(__name__,
+                   f"Decomposition Diagram for {fun_elem_str} generated")
+
     return plantuml_text
 
 
@@ -586,11 +613,14 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
     for state in state_list:
         if state_str in (state.name, state.alias):
             if not state.allocated_function_list:
-                print(f"No function allocated to {state.name} (no display)")
+                Logger.set_info(__name__,
+                               f"No function allocated to {state.name} (no display)")
                 return None
+
             state_name = state.name
             for fun_id in state.allocated_function_list:
                 allocated_function_id_list.add(fun_id)
+
     for function in function_list:
         if function.id in allocated_function_id_list.copy():
             allocated_function_id_list.remove(function.id)
@@ -601,7 +631,10 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
                                           xml_data_list, True)
 
     diagram_str = f'box "{state_name}"\n{diagram_str}end box\n'
-    print(f"Function Sequence Diagram for {state_str} generated")
+
+    Logger.set_info(__name__,
+                   f"Function Sequence Diagram for {state_str} generated")
+
     return diagram_str
 
 
@@ -616,15 +649,18 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
         return plantuml_text
 
     if not main_fun_elem.allocated_function_list:
-        print(f"No function allocated to {main_fun_elem.name} (no display)")
+        Logger.set_info(__name__,
+                       f"No function allocated to {main_fun_elem.name} (no display)")
         return plantuml_text
 
     main_fun_elem.parent = None
     main_fun_elem.child_list.clear()
     new_function_list = {f for f in xml_function_list
                          if f.id in main_fun_elem.allocated_function_list and f.parent is None}
+
     if not new_function_list:
-        print(f"No parent function allocated to {main_fun_elem.name} (no display)")
+        Logger.set_info(__name__,
+                       f"No parent function allocated to {main_fun_elem.name} (no display)")
         return plantuml_text
 
     new_consumer_list = get_cons_or_prod_paired(new_function_list,
@@ -640,7 +676,9 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
                                                            new_producer_list,
                                                            {}, None, xml_type_list)
 
-    print(f"Function Diagram for {fun_elem_str} generated")
+    Logger.set_info(__name__,
+                   f"Function Diagram for {fun_elem_str} generated")
+
     return plantuml_text
 
 
@@ -716,7 +754,9 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     reset_alloc_inheritance(func_alloc_inheritance)
     reset_alloc_inheritance(fun_inter_alloc_inheritance)
 
-    print(f"Context Diagram for {fun_elem_str} generated")
+    Logger.set_info(__name__,
+                   f"Context Diagram for {fun_elem_str} generated")
+
     return plantuml_text
 
 
@@ -793,9 +833,12 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
 
     main_fun_elem = check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
     if not main_fun_elem:
+        # TODO error message
         return None
+
     if not main_fun_elem.allocated_state_list:
-        print(f"No state allocated to {main_fun_elem.name} (no display)")
+        Logger.set_error(__name__,
+                        f"No state allocated to {main_fun_elem.name} (no display)")
         return None
 
     new_fun_elem_list.add(main_fun_elem)
@@ -807,7 +850,10 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
     plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
                                                                new_transition_list,
                                                                xml_fun_elem_list)
-    print(f"State Machine Diagram for {fun_elem_str} generated")
+
+    Logger.set_info(__name__,
+                   f"State Machine Diagram for {fun_elem_str} generated")
+
     return plantuml_text
 
 
@@ -841,9 +887,12 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
                                                                new_transition_list)
     spaced_state_list = ", ".join(state_list_str)
     if len(state_list_str) == 1:
-        print(f"Context Diagram {str(spaced_state_list)} generated")
+        Logger.set_info(__name__,
+                       f"Context Diagram {str(spaced_state_list)} generated")
     else:
-        print(f"Chain Diagram {str(spaced_state_list)} generated")
+        Logger.set_info(__name__,
+                       f"Chain Diagram {str(spaced_state_list)} generated")
+
     return plantuml_text
 
 
@@ -883,7 +932,8 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
                                                           {},
                                                           new_data_list, str_out)
     if not str_out:
-        print("Sequence Diagram " + str(", ".join(function_list_str)) + " generated")
+        Logger.set_info(__name__,
+                       "Sequence Diagram " + str(", ".join(function_list_str)) + " generated")
 
     return plantuml_text
 
@@ -924,7 +974,9 @@ def show_functions_chain(function_list_str, xml_function_list, xml_consumer_func
                                                            None,
                                                            xml_type_list)
 
-    print(f'Chain Diagram {str(", ".join(function_list_str))} generated')
+    Logger.set_info(__name__,
+                   f'Chain Diagram {str(", ".join(function_list_str))} generated')
+
     return plantuml_text
 
 
@@ -998,7 +1050,9 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
     reset_childs_inheritance(xml_function_list, derived_child_id=c_inheritance[2])
     reset_attribute_inheritance(xml_attribute_list, a_inheritance)
 
-    print(f"Decomposition Diagram {diagram_function_str} generated")
+    Logger.set_info(__name__,
+                   f"Decomposition Diagram {diagram_function_str} generated")
+
     return plantuml_text
 
 
@@ -1147,7 +1201,7 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
     if list_out:
         out = new_function_list, new_consumer_list, new_producer_list
     else:
-        plantuml_text = plantuml_adapter.get_function_diagrams(
+        out = plantuml_adapter.get_function_diagrams(
             new_function_list,
             new_consumer_list,
             new_producer_list,
@@ -1156,8 +1210,8 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
             xml_type_list,
             xml_attribute_list=xml_attribute_list)
 
-        out = plantuml_text
-        print(f"Context Diagram {diagram_function_str} generated")
+        Logger.set_info(__name__,
+                       f"Context Diagram {diagram_function_str} generated")
 
     reset_childs_inheritance(xml_function_list, derived_child_id=c_inheritance[2])
     reset_attribute_inheritance(xml_attribute_list, a_inheritance)
@@ -1207,7 +1261,8 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
         return plantuml_text
 
     else:
-        print(f"No data found for {fun_inter.name}")
+        Logger.set_warning(__name__,
+                          f"No data found for {fun_inter.name}")
 
 
 def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
@@ -1239,7 +1294,9 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
 
             data_list_fun_inter = switch_data(interface, None, **kwargs)['data']
             if not data_list_fun_inter:
-                print(f"No data allocated to {interface.name}")
+                Logger.set_warning(__name__,
+                                  f"No data allocated to {interface.name}")
+
             for elem in data_list_fun_inter:
                 fun_elem_cons = check_get_object(
                     elem['Last consumer Functional element(s)'].pop(),
@@ -1263,7 +1320,8 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
         return plantuml_text
 
     else:
-        print(f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")
+        Logger.set_warning(__name__,
+                          f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")
 
 
 def filter_allocated_item_from_view(xml_item_list, xml_view_list):

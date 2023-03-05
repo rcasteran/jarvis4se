@@ -4,9 +4,11 @@
 # Libraries
 import re
 
+# Modules
 import datamodel
 from . import shared_orchestrator
 from .question_answer import get_objects_names, check_get_object
+from tools import Logger
 
 
 def add_view(view_name_str, xml_view_list, output_xml):
@@ -43,7 +45,8 @@ def add_view(view_name_str, xml_view_list, output_xml):
 
     output_xml.write_view(view_list)
     for view in view_list:
-        print(view.name + " is a View")
+        Logger.set_info(__name__,
+                        view.name + " is a view")
     return 1
 
 
@@ -83,8 +86,9 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
     for consider_str in consider_str_list:
         if consider_str not in [*xml_fun_elem_name_list, *xml_function_name_list,
                                 *xml_data_name_list]:
-            print(f"Object {consider_str} does not exist, available object types are : "
-                  f"Functional Element, Function and Data")
+            Logger.set_warning(__name__,
+                              f"Object {consider_str} does not exist, available object types are : "
+                              f"Functional Element, Function and Data")
         else:
             result_function = any(item == consider_str for item in xml_function_name_list)
             result_fun_elem = any(item == consider_str for item in xml_fun_elem_name_list)
@@ -157,7 +161,8 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
     output_xml.write_attribute(new_attribute_list)
     for attribute in new_attribute_list:
         xml_attribute_list.add(attribute)
-        print(attribute.name + " is an attribute")
+        Logger.set_info(__name__,
+                        attribute.name + " is an attribute")
     return 1
 
 
@@ -195,16 +200,19 @@ def check_add_object_attribute(described_attribute_list, xml_attribute_list, xml
         if not any(item == elem[1] for item in whole_list) and \
                 not any(item == elem[0] for item in xml_attribute_name_list):
             is_elem_found = False
-            print(f"{elem[1]} and {elem[0]} do not exist")
+            Logger.set_error(__name__,
+                            f"{elem[1]} and {elem[0]} do not exist")
         elif not any(item == elem[1] for item in whole_list) or \
                 not any(item == elem[0] for item in xml_attribute_name_list):
             is_elem_found = False
             if any(item == elem[1] for item in whole_list) and \
                     not any(item == elem[0] for item in xml_attribute_name_list):
-                print(f"{elem[0]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_attribute_name_list) and not \
                     any(item == elem[1] for item in whole_list):
-                print(f"{elem[1]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} does not exist")
 
         if is_elem_found:
             current_attrib = None
@@ -261,8 +269,9 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
     # Warn the user once added within xml
     for described_attribute in new_obj_attribute_list:
         described_attribute[0].add_described_item(described_attribute[1])
-        print(f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
-              f"with value {described_attribute[1][1]}")
+        Logger.set_info(__name__,
+                       f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
+                       f"with value {described_attribute[1][1]}")
     return 1
 
 
@@ -287,7 +296,8 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
             continue
         type_to_extend = check_get_type_to_extend(elem[1], xml_type_list)
         if not type_to_extend:
-            print(f"Enable to find referenced type '{elem[1]}'")
+            Logger.set_error(__name__,
+                            f"Unable to find referenced type '{elem[1]}'")
             continue
         new_type = datamodel.Type()
         new_type.set_name(elem[0])
@@ -308,7 +318,10 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
             base_type = obj_type.base.name
         else:
             base_type = obj_type.base
-        print(f"{obj_type.name} is a type extending {str(base_type)}")
+
+        Logger.set_info(__name__,
+                       f"{obj_type.name} is a type extending {str(base_type)}")
+
     return 1
 
 

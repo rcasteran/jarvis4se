@@ -3,8 +3,10 @@
 # Libraries
 import re
 import pandas as pd
+
 # Modules
 import datamodel
+from tools import Logger
 
 
 questions = [
@@ -52,7 +54,8 @@ def matched_allocated(object_str, **kwargs):
     xml_state_name_list = get_objects_names(kwargs['xml_state_list'])
     whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
     if not any(s == object_str for s in whole_objects_name_list):
-        print(f"{object_str} is not a function nor a state")
+        Logger.set_warning(__name__,
+                          f"{object_str} is not a function nor a state")
     else:
         result_function = any(s == object_str for s in xml_function_name_list)
         resul_state = any(s == object_str for s in xml_state_name_list)
@@ -579,16 +582,19 @@ def get_object_list(object_str, **kwargs):
     for elem in object_str:
         wanted_object = check_get_object(elem[1], **kwargs)
         if wanted_object is None:
-            print(f"Object '{elem[1]}' does not exist")
+            Logger.set_error(__name__,
+                            f"Object '{elem[1]}' does not exist")
         else:
             object_type = get_object_type(wanted_object)
             wanted_list = switch_objects_lists(elem[0], wanted_object, object_type, **kwargs)
             if isinstance(wanted_list, (list, dict)):
                 answer_list.append(wanted_list)
             elif isinstance(wanted_list, str):
+                # Single display (not related to logging)
                 print(wanted_list)
             else:
-                print(f"Nothing to display for {elem[0]} list of '{wanted_object.name}'")
+                Logger.set_info(__name__,
+                               f"Nothing to display for {elem[0]} list of '{wanted_object.name}'")
 
     return answer_list
 

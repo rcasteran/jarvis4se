@@ -13,6 +13,7 @@ from IPython.core.magic import (Magics, magics_class, cell_magic)
 
 # Modules
 from xml_adapter import GenerateXML, XmlParser3SE
+from tools import Logger
 
 
 # The class MUST call this class decorator at creation time
@@ -46,19 +47,26 @@ class MagicJarvis(Magics):
             # If the model(i.e. file) already exists, parse it to extract lists
             if os.path.isfile(f"{xml_name}.xml"):
                 obj_dict = xml_parser.parse_xml(f"{xml_name}.xml")
+
+                # TODO : why this print ?
                 if isinstance(obj_dict, str):
                     print(obj_dict)
                     return
-                print(f"{xml_name}.xml parsed")
+
+                Logger.set_info(__name__,
+                               f"{xml_name}.xml parsed")
                 output_xml = GenerateXML(f"{xml_name}.xml")
             # Else create an empty xml_lists
             # or will be named by default "Outpout"
             else:
                 if len(xml_name) > 1:
-                    print(f"Creating {xml_name}.xml !")
+                    Logger.set_info(__name__,
+                                   f"Creating {xml_name}.xml !")
+
                     output_xml = GenerateXML(f"{xml_name}.xml")
                 else:
-                    print("Xml's file does not exists, creating it('output.xml' by default) !")
+                    Logger.set_info(__name__,
+                                   "Xml's file does not exists, creating it ('output.xml' by default) !")
                     output_xml = GenerateXML("")
                 output_xml.write()
 
@@ -69,13 +77,15 @@ class MagicJarvis(Magics):
                 return
 
             if 1 in update:
-                print(f"{output_xml.file} updated")
+                Logger.set_info(__name__,
+                               f"{output_xml.file} updated")
             else:
-                print(f"No update for {output_xml.file}")
+                Logger.set_info(__name__,
+                               f"No update for {output_xml.file}")
         else:
-            print(
-                "Bad model's declaration, model's name should be written or add a ' '(blank space) "
-                "after 'with' command to create default 'Output.xml'")
+            Logger.set_error(__name__,
+                            "Bad model's declaration, model's name should be written or add a ' '(blank space) "
+                            "after 'with' command to create default 'Output.xml'")
 
 
 def greet_user():
@@ -84,10 +94,15 @@ def greet_user():
     hour = datetime.now().hour
     # Use getpass() because available on Unix/Windows
     user_name = getpass.getuser()
+
+    # Single display (not related to logging)
     if 6 <= hour < 12:
-        print(f"Good Morning {user_name}")
+        print(f"Good morning {user_name}")
     elif 12 <= hour < 16:
         print(f"Good afternoon {user_name}")
     elif 16 <= hour < 19:
-        print(f"Good Evening {user_name}")
+        print(f"Good evening {user_name}")
+    else:
+        print(f"Hello {user_name}")
+
     print("I am Jarvis. How may I assist you?")

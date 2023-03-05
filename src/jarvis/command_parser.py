@@ -129,6 +129,7 @@ class CmdParser:
             url = self.generator.get_diagram_url(out)
             hyper = tools.get_hyperlink(url)
             display(HTML(hyper))
+            # Single display (not related to logging)
             print("Overview :")
             display(Markdown(f'![figure]({url})'))
 
@@ -275,6 +276,7 @@ def matched_question_mark(question_str, **kwargs):
     if out:
         for elem in out:
             if isinstance(elem, str):
+                # Single display (not related to logging)
                 print(elem)
             else:
                 display(elem)

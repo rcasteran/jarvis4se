@@ -77,13 +77,13 @@ class PlantUmlPicoServer:
 
         list_dir = os.listdir('.')
         if not any('.jar' in f for f in list_dir):
-            Logger.setWarning("plantuml_adapter",
+            Logger.set_warning(__name__,
                               f"Not any .jar found for plantuml in root{end_message}")
             return None
 
         jar_list = [f.string for f in [re.search("plantuml.*jar", i) for i in list_dir] if f]
         if not jar_list:
-            Logger.setWarning("plantuml_adapter",
+            Logger.set_warning(__name__,
                               f"Not any .jar found with 'plantuml' in its name{end_message}")
             return None
 
@@ -107,10 +107,11 @@ class PlantUmlPicoServer:
             if int(release_ver[0]) > int(jar_version[0]) or \
                     int(release_ver[2:6]) > int(jar_version[2:6]) or \
                     int(release_ver[7:len(release_ver)]) > int(jar_version[7:len(jar_version)]):
-                Logger.setInfo("plantuml_adapter",
+                Logger.set_info(__name__,
                            f"plantUml.jar is not up-to-date, see latest release {github_url}")
         except:
-            Logger.setInfo("plantuml_adapter", "Not able to check plantuml.jar version.")
+            Logger.set_info(__name__,
+                           "Not able to check plantuml.jar version.")
 
 
 class PlantUmlGen(PlantUmlPicoServer):
@@ -146,7 +147,7 @@ class PlantUmlGen(PlantUmlPicoServer):
             full_string = string
 
         if len(string) > 15000 and self.plantuml_jar_path is None:
-            Logger.setWarning("plantuml_adapter",
+            Logger.set_warning(__name__,
                               f"Diagram is too large to be display with PlantUml Online Server, "
                               f"please consider download .jar at https://plantuml.com/fr/download")
             return None
