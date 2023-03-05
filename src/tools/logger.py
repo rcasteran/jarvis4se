@@ -4,10 +4,11 @@ import os
 
 
 # Modules
+from . import Config
 
 
 class Logger:
-    """@ingroup logger
+    """@ingroup tools
     @anchor Logger
     Jarvis logger
     """
@@ -20,7 +21,8 @@ class Logger:
         @return None
         """
         print("[DEBUG] " + msg)
-        cls.write("DEBUG", module_name, msg)
+        if Config.is_log_file:
+            cls.write("DEBUG", module_name, msg)
 
     @classmethod
     def set_info(cls, module_name, msg):
@@ -30,7 +32,8 @@ class Logger:
         @return None
         """
         print(msg)
-        cls.write("INFO", module_name, msg)
+        if Config.is_log_file:
+            cls.write("INFO", module_name, msg)
 
     @classmethod
     def set_warning(cls, module_name, msg):
@@ -40,7 +43,8 @@ class Logger:
         @return None
         """
         print("[WARNING] " + msg)
-        cls.write("WARNING", module_name, msg)
+        if Config.is_log_file:
+            cls.write("WARNING", module_name, msg)
 
     @classmethod
     def set_error(cls, module_name, msg):
@@ -50,7 +54,8 @@ class Logger:
         @return None
         """
         print("[ERROR] " + msg)
-        cls.write("ERROR", module_name, msg)
+        if Config.is_log_file:
+            cls.write("ERROR", module_name, msg)
 
     @classmethod
     def write(cls, msg_type, module_name, msg):
@@ -74,5 +79,5 @@ class Logger:
                                   + msg_type + ";"
                                   + module_name + ";"
                                   + msg + "\n")
-        except():
-            print(f"[ERROR] Unable to write log file in {os.getcwd()}")
+        except EnvironmentError as ex:
+            print(f"[ERROR] Unable to write log file in {os.getcwd()}\\log: {ex}")

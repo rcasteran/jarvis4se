@@ -6,6 +6,7 @@ jarvi4se"""
 import re
 import os
 import getpass
+import shutil
 from datetime import datetime
 from io import StringIO
 
@@ -54,19 +55,19 @@ class MagicJarvis(Magics):
                     return
 
                 Logger.set_info(__name__,
-                               f"{xml_name}.xml parsed")
+                                f"{xml_name}.xml parsed")
                 output_xml = GenerateXML(f"{xml_name}.xml")
             # Else create an empty xml_lists
             # or will be named by default "Outpout"
             else:
                 if len(xml_name) > 1:
                     Logger.set_info(__name__,
-                                   f"Creating {xml_name}.xml !")
+                                    f"Creating {xml_name}.xml !")
 
                     output_xml = GenerateXML(f"{xml_name}.xml")
                 else:
                     Logger.set_info(__name__,
-                                   "Xml's file does not exists, creating it ('output.xml' by default) !")
+                                    "Xml's file does not exists, creating it ('output.xml' by default) !")
                     output_xml = GenerateXML("")
                 output_xml.write()
 
@@ -78,14 +79,14 @@ class MagicJarvis(Magics):
 
             if 1 in update:
                 Logger.set_info(__name__,
-                               f"{output_xml.file} updated")
+                                f"{output_xml.file} updated")
             else:
                 Logger.set_info(__name__,
-                               f"No update for {output_xml.file}")
+                                f"No update for {output_xml.file}")
         else:
             Logger.set_error(__name__,
-                            "Bad model's declaration, model's name should be written or add a ' '(blank space) "
-                            "after 'with' command to create default 'Output.xml'")
+                             "Bad model's declaration, model's name should be written or add a ' '(blank space) "
+                             "after 'with' command to create default 'Output.xml'")
 
 
 def greet_user():
@@ -106,3 +107,20 @@ def greet_user():
         print(f"Hello {user_name}")
 
     print("I am Jarvis. How may I assist you?")
+
+
+def clean_folders():
+    """ Clean Jarvis folder
+    @return None
+    """
+    for folder in ["./diagrams", "./log"]:
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.remove(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as ex:
+                # function called before Logger initialization.
+                print('[ERROR] Failed to delete %s. Reason: %s' % (file_path, ex))

@@ -31,7 +31,7 @@ class MagicTools(Magics):
         """Magic line that get Jarvis dependencies versions
         @return None
         """
-        pkg = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas']
+        pkg = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas', 'requests']
         pkg_ver =  "\n".join(['=='.join(tups) for tups in zip(pkg, map(version, pkg))])
         print(pkg_ver, "\npython=={}".format(py_ver[:6]))
 
