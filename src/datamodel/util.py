@@ -1,5 +1,6 @@
 class Point:
-    """ @anchor Point
+    """@ingroup datamodel
+    @anchor Point
     Basic type for diagram coordinates
     """
     def __init__(self, p_x='', p_y=''):
@@ -32,7 +33,8 @@ class Point:
 
 
 class EndPoint:
-    """ @anchor EndPoint
+    """@ingroup datamodel
+    @anchor EndPoint
     Basic type for diagram object defined as a set of points
     """
     

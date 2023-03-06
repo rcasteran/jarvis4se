@@ -24,8 +24,9 @@ def test_attribute_declaration_input(capsys):
                 "B is an attribute\n",
                 f"{file_name}.xml updated"]
 
-    assert all(i in captured.out for i in expected)
     remove_xml_file(file_name)
+
+    assert all(i in captured.out for i in expected)
 
 
 def test_described_attribute_input(capsys, attribute_cell):
@@ -62,9 +63,10 @@ def test_described_attribute_input(capsys, attribute_cell):
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
-    assert all(i in last_out for i in expected)
 
     remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
 
 
 def test_set_object_type_alias_input(capsys):
@@ -81,7 +83,8 @@ def test_set_object_type_alias_input(capsys):
     file_name = "set_object_type_alias_input"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "F1 is a function.\n"
-                         "high level function extends function. The alias of F1 is f1. The type of f1 is high level function\n")
+                         "high level function extends function. The alias of F1 is f1. "
+                         "The type of f1 is high level function\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -91,10 +94,10 @@ def test_set_object_type_alias_input(capsys):
                 "The type of F1 is high level function\n",
                 f"{file_name}.xml updated\n"]
 
+    remove_xml_file(file_name)
+
     assert all(i in captured.out for i in expected)
     assert len(captured.out) == len(''.join(expected))
-
-    remove_xml_file(file_name)
 
 
 def test_consider_object_input(capsys, allocation_item_cell):
@@ -102,7 +105,7 @@ def test_consider_object_input(capsys, allocation_item_cell):
     %%jarvis
     with consider_object_input
     F1 is a function
-    F2 with a long name is a function. The alias of F2 with a long name is F2.
+    F2 with a long name is a function. The alias of F2 with a long name is F2
     F3 is a function
     F4 is a function
     a is a data
@@ -110,7 +113,7 @@ def test_consider_object_input(capsys, allocation_item_cell):
     ========================================
     %%jarvis
     with consider_object_input
-    under toto
+    under test_view
     consider F1. consider toto. consider a, Fun_elem
     consider tata.
     consider F1, F2, F3, F4
@@ -120,11 +123,12 @@ def test_consider_object_input(capsys, allocation_item_cell):
     jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[1]}")
 
     captured = capsys.readouterr()
+
     expected = [f"{file_name}.xml parsed\n",
-                "test_view is a View\n",
-                "Object toto does not exist, available object types are : "
+                "test_view is a view\n",
+                "[WARNING] Object toto does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
-                "Object tata does not exist, available object types are : "
+                "[WARNING] Object tata does not exist, available object types are : "
                 "Functional Element, Function and Data\n",
                 "Function F1 is allocated to View test_view\n",
                 "Data a is allocated to View test_view\n",
@@ -133,11 +137,13 @@ def test_consider_object_input(capsys, allocation_item_cell):
                 "Function F3 is allocated to View test_view\n",
                 "Function F4 is allocated to View test_view\n",
                 f"{file_name}.xml updated\n"]
-    # Get las part from capsys
+
+    # Get last part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
-    assert all(i in last_out for i in expected)
 
     remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
 
 
 def test_functional_interface_input(capsys):
@@ -147,7 +153,6 @@ def test_functional_interface_input(capsys):
     Color is an attribute
     A is a data
     Fun_inter is a functional interface.
-    The type of Fun_inter is a_type
     The alias of Fun_inter is FI
     The Color of Fun_inter is pink
     Fun_inter allocates A.
@@ -167,15 +172,15 @@ def test_functional_interface_input(capsys):
                 "Fun_inter is a Functional interface\n",
                 "Color is an attribute\n",
                 "The alias for Fun_inter is FI\n",
-                "Data A has no producer(s) nor consumer(s) allocated to functional "
+                "[ERROR] Data A has no producer(s) nor consumer(s) allocated to functional "
                 "elements exposing Fun_inter, A not allocated to Fun_inter\n",
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]
 
+    remove_xml_file(file_name)
+
     assert len(captured.out) == len("".join(expected))
     assert all(i in captured.out for i in expected)
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_exposes_interface_input(capsys, fun_elem_exposing_cell):
@@ -211,18 +216,19 @@ def test_fun_elem_exposes_interface_input(capsys, fun_elem_exposing_cell):
     expected = ["Fun_elem exposes Fun_inter\n",
                 "Fun_elem_6 exposes Fun_inter\n",
                 "Fun_elem_ext exposes Fun_inter\n",
-                "toto does not exist, choose a valid name/alias for: "
+                "[ERROR] toto does not exist, choose a valid name/alias for: "
                 "'Functional Element' exposes Fun_inter\n",
-                "tata and titi do not exist, choose valid names/aliases for: "
+                "[ERROR] tata and titi do not exist, choose valid names/aliases for: "
                 "'Functional Element' exposes 'Functional Interface'\n",
-                "coco does not exist, choose a valid name/alias for: "
+                "[ERROR] coco does not exist, choose a valid name/alias for: "
                 "Fun_elem exposes 'Functional Interface'\n",
                 f"{file_name}.xml updated\n"]
     # Get last part from capsys
     last_out = captured.out[-len(''.join(expected)):len(captured.out)]
-    assert all(i in last_out for i in expected)
 
     remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
 
 
 def test_extends_and_set_type_object_input(capsys, extends_and_set_type_cell):
@@ -257,9 +263,9 @@ def test_extends_and_set_type_object_input(capsys, extends_and_set_type_cell):
                 "The type of Fun_inter is final one\n",
                 f"{file_name}.xml updated\n"]
 
-    assert all(i in captured.out for i in expected)
-
     remove_xml_file(file_name)
+
+    assert all(i in captured.out for i in expected)
 
 
 def test_extends_and_create_object_input(capsys, extends_and_create_object_cell):
@@ -282,6 +288,6 @@ def test_extends_and_create_object_input(capsys, extends_and_create_object_cell)
                 "3High is a High high high level function\n",
                 f"{file_name}.xml updated\n"]
 
-    assert all(i in captured.out for i in expected)
-
     remove_xml_file(file_name)
+
+    assert all(i in captured.out for i in expected)

@@ -21,10 +21,11 @@ def test_simple_function_context(mocker):
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return
     expected = 'object "F1" as f1 <<Function>>\n'
-    assert expected in result
-    assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
     remove_xml_file(file_name)
+
+    assert expected in result
+    assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
 
 def test_simple_function_context_in_out(mocker):
@@ -67,10 +68,11 @@ def test_simple_function_context_in_out(mocker):
                'circle f1_o\n' \
                'f1_i --> f1 : a\n' \
                'f1 --> f1_o  : b\n'
-    assert expected in result
-    assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
     remove_xml_file(file_name)
+
+    assert expected in result
+    assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
 
 def test_function_context_with_attribute(mocker):
@@ -109,10 +111,10 @@ def test_function_context_with_attribute(mocker):
     result = spy.spy_return
     expected = ['object "F1" as f1 <<Function>> {\n', 'A = 4,2\n', 'C = pink\n', '}\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_with_attribute(mocker):
@@ -163,10 +165,10 @@ def test_fun_elem_context_with_attribute(mocker):
                 'B = 8,5\n',
                 'end note\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_function_context_with_grandkids(mocker, function_grandkids_cell):
@@ -205,10 +207,10 @@ def test_function_context_with_grandkids(mocker, function_grandkids_cell):
                 'f1 --> f1_o  : ',
                 'c', '\\n', 'a', '\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_with_interfaces(mocker):
@@ -279,10 +281,10 @@ def test_fun_elem_context_with_interfaces(mocker):
                 'f2 #--> f1 : B\n',
                 'fun_elem_1', ' -- ', 'fun_elem_2 ', ': fun_inter_1\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_interface_with_no_flow(mocker):
@@ -318,10 +320,10 @@ def test_fun_elem_context_interface_with_no_flow(mocker):
                 '}\n',
                 'e1', ' -- ', 'e ', ': i_e_e1\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_context_interface_not_exposed(mocker):
@@ -392,10 +394,10 @@ def test_fun_elem_context_interface_not_exposed(mocker):
                 'f #--> f2 : ',
                 'a', '\\n', 'b', '\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 # Add childs to external fun_elem or create new test
@@ -458,7 +460,7 @@ def test_fun_elem_context_interface_with_child(mocker):
                 '}\n',
                 'e1', ' -- ', 'e ', ': i_e_e1\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)

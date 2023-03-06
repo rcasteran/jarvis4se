@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module to write plantuml text and write plantuml text within file"""
 # Libraries
 import os
 import re
@@ -8,20 +5,38 @@ import inspect
 import pathlib
 import subprocess
 
-import datamodel
-
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 from plantuml import PlantUML
 
+# Modules
+import datamodel
+from tools import Logger
+
 
 class PlantUmlPicoServer:
-    """Class that looks for .jar file in root, check version and handle local PlantUML PicoWeb
-    Server (https://plantuml.com/en/picoweb)"""
+    """@ingroup plantuml_adapter
+    @anchor PlantUmlPicoServer
+    Class that looks for .jar file in root, check version and handle local PlantUml PicoWeb
+    Server (https://plantuml.com/en/picoweb)
+
+    If . jar, get it, check if PicoWeb is running, if not start new process else default url
+    to online PlantUml server
+    """
     def __init__(self):
-        """If . jar, get it, check if picoweb is running, if not start new process else default url
-        to online plantuml server"""
+        """
+        @var plantuml_jar_path
+        Filepath to the PlantUml jar
+
+        @var url
+        URL for the local PlantUml PicoWeb Server
+
+        @var version_cmd
+        JAVA command to retrieve the PlantUml jar file version
+        """
+
         self.plantuml_jar_path = None
+
         jar_file = self.get_jar()
         if not jar_file:
             self.url = 'http://www.plantuml.com/plantuml/svg/'
@@ -45,31 +60,46 @@ class PlantUmlPicoServer:
                 pass
             else:
                 check_pico = True
+
             if not check_pico:
                 self.process = subprocess.Popen(pico_cmd)
 
     @classmethod
     def get_jar(cls):
-        """Get .jar file(s) in root and return first one if 'plantuml' in filename"""
+        """Return first jar filepath with 'plantuml' in filename
+
+        @return jar filepath
+        """
+
         end_message = ", large diagrams will not be displayed.\n" \
                       "See: " \
                       "https://github.com/rcasteran/jarvis4se/blob/main/docs/installation.md"
+
         list_dir = os.listdir('.')
         if not any('.jar' in f for f in list_dir):
-            print(f"WARNING:\nNot any .jar found for plantuml in root{end_message}")
+            Logger.set_warning(__name__,
+                              f"Not any .jar found for plantuml in root{end_message}")
             return None
+
         jar_list = [f.string for f in [re.search("plantuml.*jar", i) for i in list_dir] if f]
         if not jar_list:
-            print(f"WARNING:\nNot any .jar found with 'plantuml' in its name{end_message}")
+            Logger.set_warning(__name__,
+                              f"Not any .jar found with 'plantuml' in its name{end_message}")
             return None
+
         # Return first filename with plantuml in it
         return jar_list.pop(0)
 
     def check_version(self):
-        """Get .jar version and check with latest release"""
+        """ Get .jar version and check with latest release
+
+        @return None
+        """
+
         jar_version = subprocess.run(
             self.version_cmd, capture_output=True, encoding="utf-8").stdout[17:26].strip()
         github_url = "https://github.com/plantuml/plantuml/releases/latest"
+
         try:
             with urlopen(f"{github_url}") as rep:
                 release_ver = str(rep.geturl())[51:]
@@ -77,25 +107,38 @@ class PlantUmlPicoServer:
             if int(release_ver[0]) > int(jar_version[0]) or \
                     int(release_ver[2:6]) > int(jar_version[2:6]) or \
                     int(release_ver[7:len(release_ver)]) > int(jar_version[7:len(jar_version)]):
-                print(f"WARNING:\nPlantUml .jar is not up-to-date, see latest release {github_url}")
+                Logger.set_info(__name__,
+                           f"plantUml.jar is not up-to-date, see latest release {github_url}")
         except:
-            print("Not able to check plantuml .jar version.")
+            Logger.set_info(__name__,
+                           "Not able to check plantuml.jar version.")
 
 
 class PlantUmlGen(PlantUmlPicoServer):
-    """Class to encode PLantuml text and get server url as .svg"""
+    """@ingroup plantuml_adapter
+    @anchor PlantUmlGen
+    Class to encode PlantUml text and get server url as .svg
+    """
     def __init__(self):
-        """Init pico server from PlantUMLPicoServer if .jar found or default online plantuml,
-        send it to Plantuml for encoding and HTTP handling"""
+        """
+        @var server
+        PlantUml server
+        """
+
+        # Init PicoWeb server from PlantUMLPicoServer
+        # If .jar found or default online PlantUml, send it to PlantUml for encoding and HTTP handling
         super().__init__()
-        # PlantUML has encoding and handling errors
+        # PlantUml has encoding and handling errors
         self.server = PlantUML(url=self.url,
                                basic_auth={},
                                form_auth={}, http_opts={}, request_opts={})
 
     def get_diagram_url(self, string, from_diagram_cell=False):
-        """
-        Generate .svg from string using  plantuml default server or plantuml.jar picoweb
+        """ Generate .svg from PlantUml text using PlantUml default server or PlantUml .jar PicoWeb
+        @param[in] string PlantUml text
+        @param[in] from_diagram_cell indicates if PlantUml text is coming from a notebook diagram cell
+        (TRUE) or not (FALSE)
+        @return diagram url
         """
         if not from_diagram_cell:
             full_string = "@startuml\nskin rose\nskinparam NoteBackgroundColor PapayaWhip\n" \
@@ -104,17 +147,27 @@ class PlantUmlGen(PlantUmlPicoServer):
             full_string = string
 
         if len(string) > 15000 and self.plantuml_jar_path is None:
-            print(f"Diagram is too large to be display with Plantuml Online Server, "
-                  f"please consider download https://plantuml.com/fr/download .jar")
+            Logger.set_warning(__name__,
+                              f"Diagram is too large to be display with PlantUml Online Server, "
+                              f"please consider download .jar at https://plantuml.com/fr/download")
             return None
 
         return self.server.get_url(full_string)
 
 
 class StateDiagram:
-    """Class for plantuml State diagram"""
+    """@ingroup plantuml_adapter
+    @anchor StateDiagram
+    Class to encode PlantUml text for state diagram
+    """
+
     def __init__(self):
-        """Init string"""
+        """
+        @var string
+        PlantUml text
+        """
+
+        # Initialize PlantUml text
         self.string = inspect.cleandoc("""skinparam useBetaStyle true
                                             hide empty description
                                             <style>
@@ -129,11 +182,18 @@ class StateDiagram:
                                             </style>""") + "\n"
 
     def append_string(self, *string_list):
-        """Append *string_list to string"""
+        """Append *string_list to PlantUml text
+        @param[in] *string_list string list
+        @return None
+        """
         self.string = "".join([self.string, *string_list])
 
     def create_state(self, state, parent=False):
-        """Create state"""
+        """Update the PlantUml text for a state
+        @param[in] state state element
+        @param[in] parent indicates if the state is a parent (TRUE) or not (FALSE)
+        @return None
+        """
         if parent:
             open_bracket_str = ' {'
         else:
@@ -155,7 +215,10 @@ class StateDiagram:
                            ' <<', state_type_str, '>>', open_bracket_str, '\n')
 
     def create_transition(self, transition_list):
-        """Create transition"""
+        """Update the PlantUml text for a list of transitions
+        @param[in] transition_list list of transitions
+        @return None
+        """
         for transition in transition_list:
             if transition[0].alias:
                 source_alias = transition[0].alias
@@ -184,18 +247,32 @@ class StateDiagram:
 
 
 class SequenceDiagram:
-    """Class for plantuml sequence diagram"""
+    """@ingroup plantuml_adapter
+    @anchor SequenceDiagram
+    Class to encode PlantUml text for sequence diagram
+    """
+
     def __init__(self):
-        """Init string"""
+        """
+        @var string
+        PlantUml text
+        """
+
         # Allow plantuml option to put duration between 2 messages (not used yet)
         self.string = "!pragma teoz true\n"
 
     def append_string(self, *string_list):
-        """Append *string_list to string"""
+        """Append *string_list to PlantUml text
+        @param[in] *string_list string list
+        @return None
+        """
         self.string = "".join([self.string, *string_list])
 
     def create_sequence_message(self, message_list):
-        """Create sequence message"""
+        """Update the PlantUml text for a list of message
+        @param[in] message_list message list
+        @return None
+        """
         activate_list = []
         deactivate_list = []
         for idx, val in enumerate(message_list):
@@ -219,7 +296,10 @@ class SequenceDiagram:
                                        "\n")
 
     def create_participant(self, function):
-        """Create participant"""
+        """Update the PlantUml text for a function
+        @param[in] function function
+        @return None
+        """
         # If the string is not formatted like this, plantuml raises error
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
         if isinstance(function.type, datamodel.BaseType):
@@ -230,17 +310,33 @@ class SequenceDiagram:
 
 
 class ObjDiagram:
-    """Class for plantuml object/component diagram"""
+    """@ingroup plantuml_adapter
+    @anchor ObjDiagram
+    Class to encode PlantUml text for object diagram
+    """
+
     def __init__(self):
-        """Init string"""
+        """
+        @var string
+        PlantUml text
+        """
+
         self.string = ""
 
     def append_string(self, *string_list):
-        """Append *string_list to string"""
+        """Append *string_list to PlantUml text
+        @param[in] *string_list string list
+        @return None
+        """
         self.string = "".join([self.string, *string_list])
 
     def create_object(self, function, attribute_list):
-        """Create plantuml object"""
+        """Update the PlantUml text for a function
+        @param[in] function function
+        @param[in] attribute_list function attribute list
+        @return None
+        """
+
         # If the string is not formatted like this, plantuml raises error
         operand_str = ''
         function_name = function.name.lower().replace(" ", "_").replace("-", "")
@@ -262,14 +358,22 @@ class ObjDiagram:
             self.append_string("\n")
 
     def create_component_attribute(self, component, attribute_list):
-        """Create component attribute"""
+        """Update the PlantUml text for a component attribute list
+        @param[in] component component
+        @param[in] attribute_list component attribute list
+        @return None
+        """
         attribute_str = self.create_object_attributes(component, attribute_list)
         if attribute_str:
             component_name = component.name.lower().replace(" ", "_").replace("-", "")
             self.append_string('note bottom of ', component_name, '\n', attribute_str, 'end note\n')
 
     def create_port(self, flow_list, flow_direction):
-        """Create port i.e. circle"""
+        """Update the PlantUml text for a port (circle)
+        @param[in] flow_list flow list
+        @param[in] flow_direction flow direction
+        @return None
+        """
         for i in flow_list:
             end = ""
             if flow_direction == "in":
@@ -281,7 +385,11 @@ class ObjDiagram:
             self.append_string('circle ', i[0][1].replace(" ", "_").replace("-", ""), end)
 
     def create_component(self, component):
-        """Create component"""
+        """Update the PlantUml text for a component
+        @param[in] component component
+        @return None
+        """
+
         # If the string is not formatted like this, plantuml raises error
         component_name = component.name.lower().replace(" ", "_").replace("-", "")
         if isinstance(component.type, datamodel.BaseType):
@@ -292,7 +400,10 @@ class ObjDiagram:
                            component_name, ' <<', component_type_str, '>>{\n')
 
     def create_output_flow(self, output_flow_list):
-        """Create output flow"""
+        """Update the PlantUml text for output flows list
+        @param[in] output_flow_list output flows list
+        @return None
+        """
         output_flow_str = ""
         for i in output_flow_list:
             name = i[0][1].replace(" ", "_").replace("-", "")
@@ -308,7 +419,10 @@ class ObjDiagram:
                 self.append_string(relationship_str, ' : ', i[1][0], '\n')
 
     def create_input_flow(self, input_flow_list):
-        """Create input flow"""
+        """Update the PlantUml text for input flows list
+        @param[in] input_flow_list input flows list
+        @return None
+        """
         input_flow_str = ""
         for i in input_flow_list:
             relationship_str = "".join([i[0][1].replace(" ", "_").replace("-", ""), '_i', ' --> ',
@@ -319,7 +433,10 @@ class ObjDiagram:
                 self.append_string(relationship_str, ' : ', i[1][0], '\n')
 
     def create_data_flow(self, data_flow_list):
-        """Create data flow"""
+        """Update the PlantUml text for data flows list
+        @param[in] data_flow_list data flows list
+        @return None
+        """
         flow_str = ""
         for i in data_flow_list:
             relationship_str = "".join([i[0][0].replace(" ", "_").replace("-", ""), ' #--> ',
@@ -330,7 +447,10 @@ class ObjDiagram:
                 self.append_string(relationship_str, ' : ', i[1][0], '\n')
 
     def create_interface(self, interface_list):
-        """Create interfaces from interface_list"""
+        """Update the PlantUml text for interface list
+        @param[in] interface_list interface list
+        @return None
+        """
         for i in interface_list:
             relationship_str = ""
             if i[0] and i[1]:
@@ -352,7 +472,11 @@ class ObjDiagram:
 
     @classmethod
     def create_object_attributes(cls, wanted_object, attribute_list):
-        """Create object attributes"""
+        """Update the PlantUml text for object attribute list
+        @param[in] wanted_object object
+        @param[in] attribute_list object attribute list
+        @return None
+        """
         attribute_str = ''
         if attribute_list:
             for attribute in attribute_list:

@@ -8,6 +8,7 @@ import re
 import datamodel
 from . import shared_orchestrator
 from .question_answer import get_objects_names, get_children, check_get_object, check_parentality
+from tools import Logger
 
 
 def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list, output_xml):
@@ -39,13 +40,17 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
         if elem[0] not in xml_data_name_list:
             is_elem_found = False
             if elem[1] not in xml_data_name_list:
-                print(f"{elem[0]} and {elem[1]} do not exist")
+                Logger.set_error(__name__,
+                                f"{elem[0]} and {elem[1]} do not exist")
             else:
-                print(f"{elem[0]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[0]} does not exist")
+
         if elem[0] in xml_data_name_list:
             if elem[1] not in xml_data_name_list:
                 is_elem_found = False
-                print(f"{elem[1]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} does not exist")
 
         if is_elem_found:
             predecessor = None
@@ -102,8 +107,9 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
         for d in xml_data_list:
             if data_predecessor[0].id == d.id:
                 d.add_predecessor(data_predecessor[1])
-                print(f"{data_predecessor[1].name} predecessor for "
-                      f"{data_predecessor[0].name}")
+                Logger.set_info(__name__,
+                               f"{data_predecessor[1].name} predecessor for "
+                               f"{data_predecessor[0].name}")
     return 1
 
 
@@ -139,16 +145,19 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
         if not any(item == elem[1] for item in xml_function_name_list) and \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
-            print(f"{elem[1]} and {elem[0]} do not exist")
+            Logger.set_error(__name__,
+                            f"{elem[1]} and {elem[0]} do not exist")
         elif not any(item == elem[1] for item in xml_function_name_list) or \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             if any(item == elem[1] for item in xml_function_name_list) and \
                     not any(item == elem[0] for item in xml_data_name_list):
-                print(f"{elem[0]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_data_name_list) and \
                     not any(item == elem[1] for item in xml_function_name_list):
-                print(f"{elem[1]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} does not exist")
 
         if is_elem_found:
             # Loop to filter consumer and create a new list
@@ -197,7 +206,8 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     # Warn the user once added within xml
     for consumer in new_consumer_list:
         xml_consumer_function_list.append(consumer)
-        print(f"{consumer[1].name} consumes {consumer[0]}")
+        Logger.set_info(__name__,
+                       f"{consumer[1].name} consumes {consumer[0]}")
 
     return 1
 
@@ -300,13 +310,15 @@ def delete_opposite(data, function, output_xml, relationship_type):
         output_xml.delete_single_consumer_producer(data,
                                                    function,
                                                    "consumer")
-        print(f"{function.name} does not consume {data} anymore")
+        Logger.set_info(__name__,
+                       f"{function.name} does not consume {data} anymore")
     elif relationship_type == "consumer":
 
         output_xml.delete_single_consumer_producer(data,
                                                    function,
                                                    "producer")
-        print(f"{function.name} does not produce {data} anymore")
+        Logger.set_info(__name__,
+                       f"{function.name} does not produce {data} anymore")
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -340,16 +352,19 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
         if not any(item == elem[1] for item in xml_function_name_list) and \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
-            print(f"{elem[1]} and {elem[0]} do not exist")
+            Logger.set_error(__name__,
+                            f"{elem[1]} and {elem[0]} do not exist")
         elif not any(item == elem[1] for item in xml_function_name_list) or \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             if any(item == elem[1] for item in xml_function_name_list) and \
                     not any(item == elem[0] for item in xml_data_name_list):
-                print(f"{elem[0]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_data_name_list) and \
                     not any(item == elem[1] for item in xml_function_name_list):
-                print(f"{elem[1]} does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} does not exist")
 
         if is_elem_found:
             # Loop to filter consumer and create a new list
@@ -397,7 +412,8 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
     # Warn the user once added within xml
     for producer in new_producer_list:
         xml_producer_function_list.append(producer)
-        print(f"{producer[1].name} produces {producer[0]}")
+        Logger.set_info(__name__,
+                       f"{producer[1].name} produces {producer[0]}")
     return 1
 
 
@@ -424,7 +440,8 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
         is_elem_found = True
         if not any(transition_str in s for s in xml_transition_name_list):
             is_elem_found = False
-            print(f"The transition {transition_str} does not exist")
+            Logger.set_error(__name__,
+                            f"The transition {transition_str} does not exist")
 
         if is_elem_found:
             for transition in xml_transition_list:
@@ -455,7 +472,8 @@ def add_transition_condition(condition_list, output_xml):
     output_xml.write_transition_condition(condition_list)
     for elem in condition_list:
         elem[0].add_condition(elem[1])
-        print(f"Condition for {elem[0].name} : {elem[1]}")
+        Logger.set_info(__name__,
+                       f"Condition for {elem[0].name} : {elem[1]}")
     return 1
 
 
@@ -489,12 +507,15 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
             is_elem_found = False
             if any(elem[1] in s for s in xml_transition_name_list) and not any(
                     elem[2] in j for j in xml_state_name_list):
-                print(f"{elem[2]} state does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[2]} state does not exist")
             elif any(elem[2] in s for s in xml_state_name_list) and not any(
                     elem[1] in j for j in xml_transition_name_list):
-                print(f"{elem[1]} transition does not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} transition does not exist")
             else:
-                print(f"{elem[1]} transition and {elem[2]} state do not exist")
+                Logger.set_error(__name__,
+                                f"{elem[1]} transition and {elem[2]} state do not exist")
 
         if is_elem_found:
             if elem[0] == "source":
@@ -504,8 +525,9 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                             if elem[2] == state.name or elem[2] == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
                                     if 'EXIT' in state.type.name: 
-                                        print(f"{elem[2]} is typed as EXIT state, "
-                                            f"it cannot be put as source's transition (not added)")
+                                        Logger.set_error(__name__,
+                                                        f"{elem[2]} is typed as EXIT state, "
+                                                        f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
@@ -517,8 +539,9 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                             if elem[2] == state.name or elem[2] == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
                                     if 'ENTRY' in state.type.name:
-                                        print(f"{elem[2]} is typed as ENTRY state, it cannot be "
-                                            f"put as destination's transition (not added)")
+                                        Logger.set_error(__name__,
+                                                        f"{elem[2]} is typed as ENTRY state, it cannot be "
+                                                        f"put as destination's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])
@@ -550,14 +573,16 @@ def add_src_dest(src_dest_lists, output_xml):
             # Warn the user once writtent and added within xml
             for source in new_src_list:
                 source[0].set_source(source[1].id)
-                print(f"{source[1].name} source for {source[0].name}")
+                Logger.set_info(__name__,
+                               f"{source[1].name} source for {source[0].name}")
 
         if new_dest_list:
             output_xml.write_destination(new_dest_list)
             # Warn the user once writtent and added within xml
             for destination in new_dest_list:
                 destination[0].set_destination(destination[1].id)
-                print(f"{destination[1].name} destination for {destination[0].name}")
+                Logger.set_info(__name__,
+                               f"{destination[1].name} destination for {destination[0].name}")
         return 1
 
     return 0
@@ -592,7 +617,8 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
                 output = True
                 fun_elem.add_exposed_interface(fun_inter.id)
                 output_xml.write_exposed_interface([[fun_elem, fun_inter]])
-                print(f"{fun_elem.name} exposes {fun_inter.name}")
+                Logger.set_info(__name__,
+                               f"{fun_elem.name} exposes {fun_inter.name}")
 
     if output:
         return 1
@@ -643,15 +669,18 @@ def check_print_wrong_pair_object(object_a, object_b, relationship_type):
 
     """
     if object_a[1] == object_b[1] is None:
-        print(f"{object_a[0]} and {object_b[0]} do not exist, choose valid names/aliases for: "
-              f"'{object_a[2]}' {relationship_type} "
-              f"'{object_b[2]}'")
+        Logger.set_error(__name__,
+                        f"{object_a[0]} and {object_b[0]} do not exist, choose valid names/aliases for: "
+                        f"'{object_a[2]}' {relationship_type} "
+                        f"'{object_b[2]}'")
     elif object_a[1] is None or object_b[1] is None:
         if object_a[1] is None and object_b[1]:
-            print(f"{object_a[0]} does not exist, choose a valid name/alias for: "
-                  f"'{object_a[2]}' {relationship_type} "
-                  f"{object_b[1].name}")
+            Logger.set_error(__name__,
+                            f"{object_a[0]} does not exist, choose a valid name/alias for: "
+                            f"'{object_a[2]}' {relationship_type} "
+                            f"{object_b[1].name}")
         elif object_b[1] is None and object_a[1]:
-            print(f"{object_b[0]} does not exist, choose a valid name/alias for: "
-                  f"{object_a[1].name} {relationship_type} "
-                  f"'{object_b[2]}'")
+            Logger.set_error(__name__,
+                            f"{object_b[0]} does not exist, choose a valid name/alias for: "
+                            f"{object_a[1].name} {relationship_type} "
+                            f"'{object_b[2]}'")

@@ -1,14 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module with class & methods for parsing jarvis4se commands"""
+# Libraries
 import re
+import uuid
+import pathlib
+import os
+import requests
 from IPython.display import display, HTML, Markdown
 
+
+# Modules
 from . import viewpoint_orchestrator
 from . import functional_orchestrator
 from . import shared_orchestrator
 from .question_answer import get_object_list, get_pandas_table, find_question
 from .diagram_generator import filter_show_command
+from tools import get_hyperlink
+from tools import Config
+from tools import Logger
 
 
 class CmdParser:
@@ -126,9 +133,30 @@ class CmdParser:
         """Get "show" declaration"""
         out = filter_show_command(diagram_name_str, **kwargs)
         if out:
-            url = self.generator.get_diagram_url(out)
+            if Config.is_diagram_file:
+                url = self.generator.get_diagram_url(out)
+                # Generate and set unique identifier of length 10 integers
+                identi = uuid.uuid4()
+                identi = str(identi.int)[:10]
+
+                if not os.path.isdir("diagrams"):
+                    os.makedirs("diagrams")
+
+                try:
+                    current_file_path = str('./diagrams/Diagram' + identi + '.svg')
+                    response = requests.get(url)
+                    with open(current_file_path, "wb") as file_writer:
+                        file_writer.write(response.content)
+                    url = current_file_path
+                except EnvironmentError as ex:
+                    Logger.set_error(__name__,
+                                     f"Unable to write the diagram {current_file_path}: {str(ex)}")
+            else:
+                url = self.generator.get_diagram_url(out)
+
             hyper = get_hyperlink(url)
             display(HTML(hyper))
+            # Single display (not related to logging)
             print("Overview :")
             display(Markdown(f'![figure]({url})'))
 
@@ -269,19 +297,13 @@ def matched_src_dest(src_dest_str, **kwargs):
     return out
 
 
-def get_hyperlink(path):
-    """Convert file path into clickable form."""
-    text = "Click to open in new tab"
-    # convert the url into link
-    return f'<a href="{path}" target="_blank">{text}</a>'
-
-
 def matched_question_mark(question_str, **kwargs):
     """Gets "?" declaration"""
     out = find_question(question_str, **kwargs)
     if out:
         for elem in out:
             if isinstance(elem, str):
+                # Single display (not related to logging)
                 print(elem)
             else:
                 display(elem)

@@ -64,11 +64,11 @@ def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
                 'f1c #--> f1d : b\n',
                 'f1a #--> f1b : a\n',
                 'f3 #--> f1e : c\n']
-    print(result)
-    assert all(i in result for i in expected)
-    assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
     remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
 
 def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
@@ -181,10 +181,10 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
                 '}\n',
                 '}\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 11*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_decompo_with_no_childs(mocker):
@@ -215,10 +215,10 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     expected = ['component "E1" as e1 <<Functional element>>{\n',
                 '}\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)
 
 
 def test_fun_elem_decompo_with_interface(mocker):
@@ -355,7 +355,7 @@ def test_fun_elem_decompo_with_interface(mocker):
                 'f1b #--> f_ext : C\n',
                 'e1b', ' -- ', 'e1c1 ', ': fun_inter_a\n']
 
+    remove_xml_file(file_name)
+
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
-
-    remove_xml_file(file_name)

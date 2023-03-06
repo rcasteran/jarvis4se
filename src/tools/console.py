@@ -1,3 +1,7 @@
+"""@defgroup tools
+Tooling module
+"""
+
 # Libraries
 import re
 import os
@@ -9,6 +13,11 @@ from xml_adapter import GenerateXML, XmlParser3SE
 
 
 def main():
+    """@ingroup tools
+    @anchor main
+    Jarvis console
+    @return None
+    """
     is_exit = False
 
     # Initialize jarvis4se
