@@ -459,8 +459,8 @@ def test_type_within_xml(extends_and_set_type_cell):
     for type_elem in obj_dict['xml_type_list']:
         if type_elem.name == 'Safety interface':
             assert type_elem.alias == 'sf'
-        if isinstance(type_elem.base, str):
-            base_type = type_elem.base
+        if isinstance(type_elem.base, BaseType):
+            base_type = str(type_elem.base)
         else:
             base_type = type_elem.base.name
         captured_type.add((type_elem.name, base_type))
@@ -495,8 +495,8 @@ def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_
     captured_type = set()
     for type_elem in obj_dict['xml_type_list']:
         print(type_elem, type_elem.base)
-        if isinstance(type_elem.base, str):
-            base_type = type_elem.base
+        if isinstance(type_elem.base, BaseType):
+            base_type = str(type_elem.base)
         else:
             base_type = type_elem.base.name
         captured_type.add((type_elem.name, base_type))

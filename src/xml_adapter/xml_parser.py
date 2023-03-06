@@ -421,17 +421,14 @@ def get_type_list(root):
         type_list.add(type_obj)
 
     for obj_type in type_list:
+        if any(obj_type.base in a for a in [str(i) for i in datamodel.BaseType]):
+            obj_type.base = datamodel.BaseType[obj_type.base.upper().replace(" ", "_")]
+            continue
         for base in type_list:
             if obj_type.base == base.id:
                 obj_type.base = base
                 break
-            if isinstance(obj_type.base, str):
-                try:
-                    obj_type.base = datamodel.BaseType[obj_type.base]
-                    break
-                except KeyError:
-                    pass
-
+                
     return type_list
 
 

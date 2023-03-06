@@ -252,31 +252,31 @@ def get_data_info(wanted_object, object_info, **kwargs):
 
 def get_allocation_object(wanted_object, object_list):
     """Get current allocation for an object"""
-    allocation_list = set()
+    allocation_set = set()
     object_type = get_object_type(wanted_object)
 
     if object_type == 'function':
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.allocated_function_list):
-                allocation_list.add(fun_elem)
+                allocation_set.add(fun_elem)
     elif object_type == 'state':
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.allocated_state_list):
-                allocation_list.add(fun_elem)
+                allocation_set.add(fun_elem)
     elif object_type == 'data':
         for fun_inter in object_list:
             if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
-                allocation_list.add(fun_inter)
+                allocation_set.add(fun_inter)
     elif object_type == 'Functional interface':
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
-                allocation_list.add(fun_elem)
+                allocation_set.add(fun_elem)
     elif object_type == 'Functional element':
         for function in object_list:
             if any(s == function.id for s in wanted_object.allocated_function_list):
-                allocation_list.add(function)
-    if allocation_list:
-        return allocation_list
+                allocation_set.add(function)
+    if allocation_set:
+        return allocation_set
 
     return
 
@@ -309,7 +309,7 @@ def switch_objects_lists(type_list_str, wanted_object, object_type, **kwargs):
         return case_no_list(wanted_object, object_type, **kwargs)
 
 
-def switch_in(wanted_object, _, **kwargs):
+def switch_in(wanted_object, _=None, **kwargs):
     """Case 'list input Function/Functional ELement' """
     input_list = get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', **kwargs)
     if wanted_object.derived:
@@ -322,7 +322,7 @@ def switch_in(wanted_object, _, **kwargs):
         return input_dict
 
 
-def switch_out(wanted_object, _, **kwargs):
+def switch_out(wanted_object, _=None, **kwargs):
     """Case 'list output Function/Functional ELement' """
     output_list = get_input_or_output_fun_and_fun_elem(wanted_object, direction='output', **kwargs)
     if wanted_object.derived:
@@ -439,7 +439,7 @@ def switch_fun_elem_interface(wanted_object, _, **kwargs):
                                               kwargs['xml_fun_inter_list'])
 
     if not fun_inter_list:
-        return f"Not any exposed interface for {wanted_object.name}"
+        return "Not any exposed interface for {!s}".format(wanted_object.name)
 
     exposing_fun_elem = set()
     for interface in fun_inter_list:
@@ -608,7 +608,7 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
         wanted_object: current object
         direction (str: default=input): i.e. input or output asked
         unmerged (bool: default=false): used by functional elements
-        **kwargs: all xml lists
+        **kwargs: all xml lists/sets
 
     Returns:
         input or output list
@@ -626,20 +626,22 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
             for sub in current_fun_list:
                 if sub and sub[1] not in [f.name for f in allocated_fun_list]:
                     in_or_out_list.append(sub)
-        return merge_list_per_cons_prod(in_or_out_list)
-    else:
-        if direction == 'output':
-            in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs['xml_producer_function_list'],
-                                                 kwargs['xml_consumer_function_list'])
-        else:
-            in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs['xml_consumer_function_list'],
-                                                 kwargs['xml_producer_function_list'])
         if unmerged:
             return in_or_out_list
-        else:
-            return merge_list_per_cons_prod(in_or_out_list)
+        return merge_list_per_cons_prod(in_or_out_list)
+    # For Function()
+    if direction == 'output':
+        in_or_out_list = get_in_out_function(wanted_object,
+                                            kwargs['xml_producer_function_list'],
+                                            kwargs['xml_consumer_function_list'])
+    else:
+        in_or_out_list = get_in_out_function(wanted_object,
+                                            kwargs['xml_consumer_function_list'],
+                                            kwargs['xml_producer_function_list'])
+    if unmerged:
+        return in_or_out_list
+
+    return merge_list_per_cons_prod(in_or_out_list)
 
 
 def merge_list_per_cons_prod(input_list):

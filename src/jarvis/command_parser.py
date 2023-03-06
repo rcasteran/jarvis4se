@@ -317,14 +317,12 @@ def matched_list(object_str, **kwargs):
             display(HTML(get_pandas_table(i)))
 
 
-def matched_described_attribute(described_attribute_str, **kwargs):
+def matched_described_attribute(described_attribute_str, **xml_dicts):
     """Get the described attribute value for an object"""
-    out = viewpoint_orchestrator.check_add_object_attribute(described_attribute_str,
-                                                            kwargs['xml_attribute_list'],
-                                                            kwargs['xml_function_list'],
-                                                            kwargs['xml_fun_elem_list'],
-                                                            kwargs['xml_fun_inter_list'],
-                                                            kwargs['output_xml'])
+    out = viewpoint_orchestrator.check_add_object_attribute(
+        described_attribute_str,
+        **xml_dicts
+        )
     return out
 
 
