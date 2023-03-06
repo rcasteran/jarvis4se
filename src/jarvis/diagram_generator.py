@@ -6,8 +6,9 @@ them to plantuml_adapter.py"""
 import re
 
 import plantuml_adapter
+from datamodel import FunctionalElement
 from .question_answer import check_parentality, get_objects_names, check_get_object, switch_data, \
-    get_children, check_not_family, switch_fun_elem_interface
+    get_children, check_not_family, switch_fun_elem_interface, get_allocation_object
 from .shared_orchestrator import childs_inheritance, reset_childs_inheritance, \
     attribute_inheritance, reset_attribute_inheritance, view_inheritance, reset_view_inheritance, \
     allocation_inheritance, reset_alloc_inheritance
@@ -1220,45 +1221,65 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     then get/filter needed lists for plantuml_adapter.
     Args:
         fun_elem_str: functional elements name/alias from input cell
-        **kwargs: whole lists
+        **kwargs: dict with whole lists/sets
 
     Returns:
         plantuml_text (str) : plantuml_text
     """
     new_consumer_list = []
     new_producer_list = []
-    global_interface_set = set()
-    new_fun_elem_list = [check_get_object(i, **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-                         for i in fun_elem_str]
-    kwargs['xml_fun_elem_list'] = new_fun_elem_list
+
+    new_fun_elem_list = {
+        check_get_object(i, **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']}) 
+        for i in fun_elem_str
+        }
+
     for fun_elem in new_fun_elem_list:
-        interface_dict = switch_fun_elem_interface(fun_elem, None, **kwargs)[1:]
-        if isinstance(interface_dict, str):
-            continue
-        global_interface_set.update(interface_dict)
+        temp_fun_set = get_allocation_object(
+            fun_elem, 
+            kwargs['xml_function_list']
+            )
+
+        if isinstance(fun_elem.derived, FunctionalElement):
+            get_derived_if_in_view = filter_allocated_item_from_view(
+                {fun_elem.derived}, kwargs['xml_view_list']
+                )
+            # If type(list) has been returned from activated View()
+            # then add it's allocated func
+            if isinstance(get_derived_if_in_view, list):
+                alloc_derived_func_set = get_allocation_object(
+                    fun_elem.derived, 
+                    kwargs['xml_function_list']
+                    )
+                if alloc_derived_func_set is not None and temp_fun_set is not None:
+                        allocated_fun_set.update(alloc_derived_func_set)
+                    
+
+        if temp_fun_set is not None:
+            for fun in temp_fun_set:
+                new_consumer_list.extend(
+                    get_fun_elem_for_cons_prod_lists(
+                    fun_elem, fun, kwargs['xml_consumer_function_list']
+                    )
+                )
+                new_producer_list.extend(
+                    get_fun_elem_for_cons_prod_lists(
+                    fun_elem, fun, kwargs['xml_producer_function_list']
+                    )
+                )
+
         fun_elem.child_list.clear()
         fun_elem.parent = None
 
-    for item in global_interface_set:
-        if any(n == item[1] for n in [f.name for f in new_fun_elem_list]):
-            interface = check_get_object(
-                item[0], **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
+    if new_consumer_list and new_producer_list:
 
-            data_list_fun_inter = switch_data(interface, None, **kwargs)['data']
-            if not data_list_fun_inter:
-                print(f"No data allocated to {interface.name}")
-            for elem in data_list_fun_inter:
-                fun_elem_cons = check_get_object(
-                    elem['Last consumer Functional element(s)'].pop(),
-                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-                fun_elem_prod = check_get_object(
-                    elem['Last producer Functional element(s)'].pop(),
-                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-                if fun_elem_cons and fun_elem_prod:
-                    if [elem['Data'], fun_elem_cons] not in new_consumer_list:
-                        new_consumer_list.append([elem['Data'], fun_elem_cons])
-                    if [elem['Data'], fun_elem_prod] not in new_producer_list:
-                        new_producer_list.append([elem['Data'], fun_elem_prod])
+        for i in new_consumer_list:
+            if not any(i[0] in s for s in new_producer_list):
+                new_consumer_list.remove(i)
+        
+        for j in new_producer_list:
+            if not any(j[0] in s for s in new_consumer_list):
+                new_producer_list.remove(j)
 
     if new_consumer_list and new_producer_list:
         plantuml_text = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,
@@ -1271,6 +1292,19 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
 
     else:
         print(f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")
+
+
+def get_fun_elem_for_cons_prod_lists(fun_elem, func_obj, cons_or_prod_list):
+    """
+    From cons or prod list [[data_1, function_1_str], [data_2, function_2_str], ...]
+    returns [[data_1, Function(1)], [data_2, Function(2)], ...]
+    """
+    output = []
+    for cons_or_prod in cons_or_prod_list:
+        if cons_or_prod[1] == func_obj:
+            output.append([cons_or_prod[0], fun_elem])
+
+    return output
 
 
 def filter_allocated_item_from_view(xml_item_list, xml_view_list):
