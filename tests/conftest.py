@@ -1,19 +1,19 @@
-"""Module containing pytest fixtures and shared methods for tests"""
-import os
-from pathlib import Path
+""" @package test
+@defgroup test
+Module for non regression testing
+
+Defines the regression tests based on pytest fixtures
+(https://docs.pytest.org/en/stable/reference/fixtures.html).
+
+Uses the mocker fixture for spying methods (https://pytest-mock.readthedocs.io/en/latest/usage.html#).
+
+Non regression tests about context diagram:
+- @ref test_context_diagram_1 : context diagram of a single function
+
+"""
+
+# Libraries
 import pytest
-from IPython import get_ipython
-
-import jarvis
-
-
-def get_jarvis4se():
-    """Start an ipython session, init parser and jarvis4se(MagicJarvis), returns jarvi4se"""
-    ip = get_ipython()
-    generator = jarvis.PlantUmlGen()
-    parser = jarvis.command_parser.CmdParser(generator)
-    my_magic = jarvis.MagicJarvis(ip, parser)
-    return my_magic
 
 
 @pytest.fixture
@@ -62,12 +62,112 @@ def allocation_item_cell():
 
 
 @pytest.fixture
-def function_grandkids_cell():
+def input_test_issue_31():
     """Returns string see usage"""
-    return "\n".join(["F1 is a function", "F1a is a function", "F1a1 is a function",
-                      "F1 is composed of F1a", "F1a is composed of F1a1", "a is a data",
-                      "F1a produces a", "b is a data", "F1a consumes b", "c is a data",
-                      "F1a1 produces c", "d is a data", "F1a1 consumes d", ""])
+    return "\n".join(["F1 is a function",
+                      "F1a is a function",
+                      "F1a1 is a function",
+                      "F1 is composed of F1a",
+                      "F1a is composed of F1a1",
+                      "a is a data",
+                      "F1a produces a",
+                      "b is a data",
+                      "F1a consumes b",
+                      "c is a data",
+                      "F1a1 produces c",
+                      "d is a data",
+                      "F1a1 consumes d",
+                      ""])
+
+
+@pytest.fixture
+def input_test_fun_elem_context_with_interfaces():
+    """Returns string see usage"""
+    return "\n".join(["F1 is a function",
+                      "F2 is a function",
+                      "A is a data",
+                      "B is a data",
+                      "C is a data",
+                      "F1 produces A",
+                      "F2 consumes A",
+                      "F2 produces B",
+                      "F1 consumes B",
+                      "F1 produces C",
+                      "Fun_elem_1 is a functional element",
+                      "Fun_elem_2 is a functional element",
+                      "Fun_inter_1 is a functional interface",
+                      "Fun_inter_2 is a functional interface",
+                      "Fun_elem_1 allocates F1",
+                      "Fun_elem_2 allocates F2",
+                      "Fun_inter_1 allocates A",
+                      "Fun_inter_2 allocates C",
+                      "Fun_elem_1 exposes Fun_inter_1",
+                      "Fun_elem_1 exposes Fun_inter_2",
+                      "Fun_elem_2 exposes Fun_inter_1",
+                      ""])
+
+
+@pytest.fixture
+def input_test_issue_39():
+    """Returns string see usage"""
+    return "\n".join(["E is a functional element",
+                      "E1 is a functional element",
+                      "I_E_E1 is a functional interface",
+                      "E exposes I_E_E1",
+                      "E1 exposes I_E_E1",
+                      ""])
+
+
+@pytest.fixture
+def input_test_issue_38():
+    """Returns string see usage"""
+    return "\n".join(["F is a function",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "a is a data",
+                      "F produces a",
+                      "F1 consumes a",
+                      "F2 consumes a",
+                      "b is a data",
+                      "F produces b",
+                      "F2 consumes b",
+                      "",
+                      "E is a functional element",
+                      "E allocates F",
+                      "E1 is a functional element",
+                      "E1 allocates F1",
+                      "E2 is a functional element",
+                      "E2 allocates F2",
+                      "",
+                      "I_E_E1 is a functional interface",
+                      "I_E_E1 allocates a",
+                      "E exposes I_E_E1",
+                      "E1 exposes I_E_E1",
+                      ""])
+
+
+@pytest.fixture
+def input_test_issue_44():
+    """Returns string see usage"""
+    return "\n".join(["F is a function",
+                      "F1 is a function",
+                      "a is a data",
+                      "F produces a",
+                      "F1 consumes a",
+                      "E is a functional element",
+                      "E1 is a functional element",
+                      "E allocates F",
+                      "E1 allocates F1",
+                      "I_E_E1 is a functional interface",
+                      "E exposes I_E_E1",
+                      "E1 exposes I_E_E1",
+                      "I_E_E1 allocates a",
+                      "",
+                      "E11 is a functional element",
+                      "E11 composes E",
+                      "E11 allocates F",
+                      "E11 exposes I_E_E1",
+                      ""])
 
 
 @pytest.fixture
@@ -87,7 +187,7 @@ def extends_and_set_type_cell():
     first_part = "\n".join(["Safety interface extends functional interface",
                             "The alias of Safety interface is sf", ""])
     second_part = "\n".join(["sf_a extends sf", "sf_a_b extends sf_a",
-                            "final one extends sf_a_b", "Fun_inter is a functional interface",
+                             "final one extends sf_a_b", "Fun_inter is a functional interface",
                              "The type of Fun_inter is final one", ""])
     return first_part, second_part
 
@@ -99,6 +199,7 @@ def extends_and_create_object_cell():
                       '"High high level function" extends "High level function"',
                       '"High high high level function" extends "High high level function"',
                       '3High is a "High high high level function"', ""])
+
 
 @pytest.fixture
 def state_exit_entry_chain_output_diagram():
@@ -144,11 +245,3 @@ def input_test_fun_decomposition_level():
                       "F21 produces b",
                       "F22 consumes b",
                       ""])
-
-
-def remove_xml_file(file_name):
-    """Remove xml file"""
-    file_path = os.path.join("./", f"{file_name}.xml")
-    path = Path(file_path)
-    if path:
-        os.remove(path)

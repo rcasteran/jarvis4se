@@ -1,8 +1,8 @@
 """Test module with tests associated to question_answer.py"""
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 from jarvis import question_answer
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 
 
 def test_list_data_functional_interface(mocker):
@@ -69,6 +69,6 @@ def test_list_data_functional_interface(mocker):
                  'Last producer Function(s)': ['F1'],
                  'Last producer Functional element(s)': ['E1']}]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected == result

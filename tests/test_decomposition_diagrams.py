@@ -1,10 +1,9 @@
 """Module to tests decomposition diagrams"""
 import io
-
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 import plantuml_adapter
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 
 
 def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
@@ -65,7 +64,7 @@ def test_function_with_childs_decomposition(mocker, function_with_childs_cell):
                 'f1a #--> f1b : a\n',
                 'f3 #--> f1e : c\n']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
@@ -181,7 +180,7 @@ def test_fun_elem_decompo_with_no_flow(mocker, monkeypatch):
                 '}\n',
                 '}\n']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 11*len("\'id: xxxxxxxxxx\n")
@@ -215,7 +214,7 @@ def test_fun_elem_decompo_with_no_childs(mocker):
     expected = ['component "E1" as e1 <<Functional element>>{\n',
                 '}\n']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
@@ -355,7 +354,7 @@ def test_fun_elem_decompo_with_interface(mocker):
                 'f1b #--> f_ext : C\n',
                 'e1b', ' -- ', 'e1c1 ', ': fun_inter_a\n']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
@@ -378,8 +377,7 @@ def test_fun_decomposition_level(mocker, input_test_fun_decomposition_level):
                 'f1 #--> f21 : a\n',
                 'f21 #--> f22 : b\n']
 
-    remove_xml_file(file_name)
-    print(result)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")

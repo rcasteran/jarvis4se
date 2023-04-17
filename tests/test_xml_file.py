@@ -2,11 +2,11 @@
 import os
 from pathlib import Path
 
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 from xml_adapter import XmlParser3SE
 from datamodel import BaseType
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 xml_parser = XmlParser3SE()
 
 
@@ -42,7 +42,8 @@ def test_generate_xml_file_template():
                    "  </viewPoint>\n" \
                    "</systemAnalysis>\n"
         assert base_xml in read_xml
-    remove_xml_file(file_name)
+
+    test_lib.remove_xml_file(file_name)
 
 
 def test_simple_function_within_xml():
@@ -58,7 +59,7 @@ def test_simple_function_within_xml():
 
     function_list = xml_parser.parse_xml(file_name + ".xml")['xml_function_list']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert len(function_list) == 1
     assert [fun.name == "F1" for fun in function_list]
@@ -107,7 +108,7 @@ def test_described_attribute_within_xml(attribute_cell):
                 if item[0] == fun_elem.id:
                     result.add((attribute.name, fun_elem.name, item[1]))
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected == result
 
@@ -142,7 +143,7 @@ def test_set_attribute_type_within_xml():
     for attribute in attribute_list:
         result.add((attribute.name, attribute.type.name))
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected == result
 
@@ -191,12 +192,12 @@ def test_set_allocated_item_to_view_within_xml(allocation_item_cell):
             if item == data.id:
                 result.add(data.name)
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected == result
 
 
-def test_function_with_grandkids_within_xml(function_grandkids_cell):
+def test_function_with_grandkids_within_xml(input_test_issue_31):
     """See Issue #31, Notebook equivalent:
     %%jarvis
     with function_with_grandkids_within_xml
@@ -215,7 +216,7 @@ def test_function_with_grandkids_within_xml(function_grandkids_cell):
     F1a1 consumes d
     """
     file_name = "function_with_grandkids_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{function_grandkids_cell}")
+    jarvis4se.jarvis("", f"with {file_name}\n{input_test_issue_31}")
 
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
 
@@ -240,7 +241,7 @@ def test_function_with_grandkids_within_xml(function_grandkids_cell):
             for child in fun.child_list:
                 result_child.add((fun.name, child.name))
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected_cons == result_cons
     assert expected_prod == result_prod
@@ -308,7 +309,7 @@ def test_function_childs_cons_prod_within_xml(function_with_childs_cell):
             for child in fun.child_list:
                 result_child.add((fun.name, child.name))
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert expected_cons == result_cons
     assert expected_prod == result_prod
@@ -373,7 +374,7 @@ def test_functional_interface_within_xml():
     assert described_item[0] == fun_inter.id and described_item[1] == 'pink'
     assert fun_inter.allocated_data_list.pop() == data.id
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
 
 def test_fun_elem_exposes_interface_within_xml(fun_elem_exposing_cell):
@@ -426,7 +427,7 @@ def test_fun_elem_exposes_interface_within_xml(fun_elem_exposing_cell):
     assert expected_child == result_child
     assert expected_exposed == result_exposed
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
 
 def test_type_within_xml(extends_and_set_type_cell):
@@ -468,7 +469,7 @@ def test_type_within_xml(extends_and_set_type_cell):
     assert expected_type == captured_type
     assert obj_dict['xml_fun_inter_list'].pop().type.name == "final one"
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
 
 def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_cell):
@@ -504,4 +505,4 @@ def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_
     assert expected_type == captured_type
     assert obj_dict['xml_function_list'].pop().type.name == "High high high level function"
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)

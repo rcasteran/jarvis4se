@@ -1,8 +1,8 @@
 """Module to test sequece diagrams"""
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 import plantuml_adapter
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 
 
 def test_fun_inter_simple_sequence(mocker):
@@ -77,7 +77,7 @@ def test_fun_inter_simple_sequence(mocker):
                 'deactivate fun_elem_1\n',
                 'deactivate fun_elem_2\n']
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) == len(''.join(expected))

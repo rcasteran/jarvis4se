@@ -1,8 +1,8 @@
 """Module that contains tests for State()"""
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 import plantuml_adapter
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 
 
 def test_state_entry_exit_chain(mocker, state_exit_entry_chain_output_diagram):
@@ -25,7 +25,8 @@ def test_state_entry_exit_chain(mocker, state_exit_entry_chain_output_diagram):
                          "show chain S1, S2\n")
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return
+    test_lib.remove_xml_file(file_name)
+
     assert all(i in result for i in state_exit_entry_chain_output_diagram)
     assert len(result) - len(''.join(state_exit_entry_chain_output_diagram)) == 2*len("\'id: xxxxxxxxxx\n")
 
-    remove_xml_file(file_name)

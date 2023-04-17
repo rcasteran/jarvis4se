@@ -1,7 +1,7 @@
 """Modules containing tests to check jarvis ouput i.e. jupyter notebook output messages"""
-from conftest import get_jarvis4se, remove_xml_file
+import test_lib
 
-jarvis4se = get_jarvis4se()
+jarvis4se = test_lib.get_jarvis4se()[0]
 
 
 def test_attribute_declaration_input(capsys):
@@ -24,7 +24,7 @@ def test_attribute_declaration_input(capsys):
                 "B is an attribute\n",
                 f"{file_name}.xml updated"]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in captured.out for i in expected)
 
@@ -64,7 +64,7 @@ def test_described_attribute_input(capsys, attribute_cell):
     # Get las part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in last_out for i in expected)
 
@@ -94,7 +94,7 @@ def test_set_object_type_alias_input(capsys):
                 "The type of F1 is high level function\n",
                 f"{file_name}.xml updated\n"]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in captured.out for i in expected)
     assert len(captured.out) == len(''.join(expected))
@@ -141,7 +141,7 @@ def test_consider_object_input(capsys, allocation_item_cell):
     # Get last part from capsys
     last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in last_out for i in expected)
 
@@ -177,7 +177,7 @@ def test_functional_interface_input(capsys):
                 "Attribute Color for Fun_inter with value pink\n",
                 f"{file_name}.xml updated\n"]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert len(captured.out) == len("".join(expected))
     assert all(i in captured.out for i in expected)
@@ -226,7 +226,7 @@ def test_fun_elem_exposes_interface_input(capsys, fun_elem_exposing_cell):
     # Get last part from capsys
     last_out = captured.out[-len(''.join(expected)):len(captured.out)]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in last_out for i in expected)
 
@@ -263,7 +263,7 @@ def test_extends_and_set_type_object_input(capsys, extends_and_set_type_cell):
                 "The type of Fun_inter is final one\n",
                 f"{file_name}.xml updated\n"]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in captured.out for i in expected)
 
@@ -288,6 +288,6 @@ def test_extends_and_create_object_input(capsys, extends_and_create_object_cell)
                 "3High is a High high high level function\n",
                 f"{file_name}.xml updated\n"]
 
-    remove_xml_file(file_name)
+    test_lib.remove_xml_file(file_name)
 
     assert all(i in captured.out for i in expected)

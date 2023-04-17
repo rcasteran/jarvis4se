@@ -1,18 +1,16 @@
 """Test module for tools pkg i.e. MagicTools"""
-from IPython import get_ipython
+import test_lib
 
-import jarvis
-
-ip = get_ipython()
-generator = jarvis.PlantUmlGen()
-my_magic = jarvis.MagicTools(ip, generator)
+jarvis4se_all = test_lib.get_jarvis4se()
+generator = jarvis4se_all[1]
+jarvis4se_tool = jarvis4se_all[2]
 
 
 def test_retrieve_pkg_version(capsys):
     """Notebook equivalent:
     %retrieve_pkg_version
     """
-    my_magic.retrieve_pkg_version('')
+    jarvis4se_tool.retrieve_pkg_version('')
     captured = capsys.readouterr()
     expected = ["lxml==", "notebook==", "plantuml==", "jarvis4se==", "pandas==", "python=="]
     assert all(i in captured.out for i in expected)
@@ -40,7 +38,7 @@ def test_diagram_cell(capsys, mocker):
     @enduml
     """
     spy = mocker.spy(generator, "get_diagram_url")
-    my_magic.diagram('', "@startuml\n"
+    jarvis4se_tool.diagram('', "@startuml\n"
                          "!define Junction_Or circle #black\n"
                          "!define Junction_And circle #whitesmoke\n"
                          "\n"
