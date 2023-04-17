@@ -359,3 +359,27 @@ def test_fun_elem_decompo_with_interface(mocker):
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
+
+
+def test_fun_decomposition_level(mocker, input_test_fun_decomposition_level):
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+
+    file_name = "fun_elem_decomposition_level"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_decomposition_level}\n"
+                         "show decomposition F2 at level 1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F2" as f2 <<Function>>\n',
+                'object "F21" as f21 <<Function>>\n',
+                'object "F22" as f22 <<Function>>\n',
+                'object "F1" as f1 <<Function>>\n',
+                'f1 #--> f21 : a\n',
+                'f21 #--> f22 : b\n']
+
+    remove_xml_file(file_name)
+    print(result)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")

@@ -119,9 +119,36 @@ def state_exit_entry_chain_output_diagram():
             'state "S2" as s2 <<ENTRY>>\n')
 
 
+@pytest.fixture
+def input_test_fun_decomposition_level():
+    return "\n".join(["F1 is a function",
+                      "F2 is a function",
+                      "a is a data",
+                      "F1 produces a",
+                      "F2 consumes a",
+                      "F21 is a function",
+                      "F22 is a function",
+                      "F21 composes F2",
+                      "F22 composes F2",
+                      "F211 is a function",
+                      "F212 is a function",
+                      "F211 composes F21",
+                      "F212 composes F21",
+                      "F211 consumes a",
+                      "F212 produces b",
+                      "c is a data",
+                      "F211 produces c",
+                      "F212 consumes c",
+                      "F21 consumes a",
+                      "b is a data",
+                      "F21 produces b",
+                      "F22 consumes b",
+                      ""])
+
+
 def remove_xml_file(file_name):
     """Remove xml file"""
-    fname = os.path.join("./", f"{file_name}.xml")
-    path = Path(fname)
+    file_path = os.path.join("./", f"{file_name}.xml")
+    path = Path(file_path)
     if path:
         os.remove(path)
