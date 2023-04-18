@@ -14,69 +14,15 @@ jarvis4se = test_lib.get_jarvis4se()[0]
 
 def test_fun_elem_decomposition_with_interface(mocker, input_test_fun_elem_decomposition_with_interface):
     """@ingroup test_decomposition_diagrams
-    @anchor test_fun_elem_decompo_with_interface
+    @anchor test_fun_elem_decomposition_with_interface
     Test decomposition diagram display with functional element decomposition and interface allocation
 
     @param[in] mocker : mocker fixture reference
-    @param[in] input_test_fun_elem_decompo_with_interface : input fixture reference
+    @param[in] input_test_fun_elem_decomposition_with_interface : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-
-        with fun_elem_decompo_with_interface
-        F1 is a function
-        F1b is a function
-        F1c is a function
-        F1 is composed of F1b
-        F1 is composed of F1c
-
-        F1c1 is a function
-        F1c is composed of F1c1
-
-        F_ext is a function
-
-        E1 is a functional element
-        E1b is a functional element
-        E1c is a functional element
-        Ext is a functional element
-        E1 is composed of E1c
-        E1 is composed of E1b
-        E1c1 is a functional element
-        E1c is composed of E1c1
-
-        E1 allocates F1
-        E1b allocates F1b
-        E1c allocates F1c
-        E1c1 allocates F1c1
-        Ext allocates F_ext
-
-        A is a data
-        A_2 is a data
-        B is a data
-        C is a data
-
-        Fun_inter_A is a functional interface
-        Fun_inter_A allocates A
-        Fun_inter_A allocates A_2
-        Fun_inter_B is a functional interface
-        Fun_inter_B allocates B
-
-        F1c1 produces A
-        F1c1 produces A_2
-        F1b consumes A
-        F1b consumes A_2
-
-        F_ext produces B
-        F1c1 consumes B
-
-        F1b produces C
-        F_ext consumes C
-
-        E1c exposes Fun_inter_A
-        E1c1 exposes Fun_inter_A
-        E1b exposes Fun_inter_A
-
-        show decomposition E1
+    @ref input_test_fun_elem_decomposition_with_interface
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     file_name = "fun_elem_decompo_with_interface"

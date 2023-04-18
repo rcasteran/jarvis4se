@@ -2,16 +2,6 @@
 Tests about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/39
 
 @see test_issue_39_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_39
-    E is a functional element
-    E1 is a functional element
-    I_E_E1 is a functional interface
-    E exposes I_E_E1
-    E1 exposes I_E_E1
-    show context E1
 """
 # Libraries
 
@@ -31,6 +21,9 @@ def test_issue_39_diagram(mocker, input_test_issue_39):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_39 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_39
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     file_name = "test_issue_39"

@@ -2,35 +2,6 @@
 Tests about functional elements related to https://github.com/rcasteran/jarvis4se/issues/38
 
 @see test_issue_38_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_38
-    F is a function
-    F1 is a function
-    F2 is a function
-    a is a data
-    F produces a
-    F1 consumes a
-    F2 consumes a
-    b is a data
-    F produces b
-    F2 consumes b
-
-    E is a functional element
-    E allocates F
-    E1 is a functional element
-    E1 allocates F1
-    E2 is a functional element
-    E2 allocates F2
-
-    I_E_E1 is a functional interface
-    I_E_E1 allocates a
-    E exposes I_E_E1
-    E1 exposes I_E_E1
-
-    show context E2
-
 """
 # Libraries
 
@@ -50,6 +21,9 @@ def test_issue_38_diagram(mocker, input_test_issue_38):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_38 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_38
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     file_name = "test_issue_38"

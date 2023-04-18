@@ -1,21 +1,31 @@
-"""Modules containing tests to check jarvis ouput i.e. jupyter notebook output messages"""
+"""@defgroup test_input_cell
+Tests about Jarvis outputs
+"""
+# Libraries
+
+
+# Modules
 import test_lib
 
+# Initialisation of Jarvis
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_attribute_declaration_input(capsys):
-    """Notebook equivalent:
-     %%jarvis
-     with attribute_declaration_input
-     A is an attribute
-     B is an attribute. C is an attribute
+def test_attribute_declaration(capsys, input_test_fun_elem_context_with_attribute):
+    """@ingroup test_input_cell
+    @anchor test_attribute_declaration
+    Test attribute declaration
 
-     """
-    file_name = "attribute_declaration_input"
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_fun_elem_context_with_attribute : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_fun_elem_context_with_attribute
+    """
+    file_name = "attribute_declaration"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "A is an attribute\n"
-                         "B is an attribute. C is an attribute\n")
+                         f"{input_test_fun_elem_context_with_attribute[1]}\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -29,30 +39,25 @@ def test_attribute_declaration_input(capsys):
     assert all(i in captured.out for i in expected)
 
 
-def test_described_attribute_input(capsys, attribute_cell):
-    """Notebook equivalent:
-     %%jarvis
-     with described_attribute_input
-     F1 is a function
-     Fun elem is a functional element
-     ========================================
-     %%jarvis
-     with described_attribute_input
-     A is an attribute
-     B is an attribute. C is an attribute
-     ========================================
-     %%jarvis
-     with described_attribute_input
-     The A of F1 is 4,2
-     The C of F1 is pink
-     The B of Fun elem is 8,5.
-     The A of Fun elem is 100
+def test_instantiated_attribute(capsys, input_test_fun_elem_context_with_attribute):
+    """@ingroup test_input_cell
+    @anchor test_instantiated_attribute
+    Test attribute instantiation
 
-     """
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_fun_elem_context_with_attribute : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_fun_elem_context_with_attribute
+    """
     file_name = "described_attribute_input"
-    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[0]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[1]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{attribute_cell[2]}")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_context_with_attribute[0]}\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_context_with_attribute[1]}\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_context_with_attribute[2]}\n")
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",

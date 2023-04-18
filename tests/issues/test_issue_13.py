@@ -2,17 +2,6 @@
 Tests about functional element decomposition without children related to https://github.com/rcasteran/jarvis4se/issues/13
 
 @see test_issue_13_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_13
-    F1 is a function
-    F2 is a function
-    F1 is composed of F2
-    E1 is a functional element
-    E1 allocates F1
-
-    show decomposition E1
 """
 # Libraries
 
@@ -33,6 +22,9 @@ def test_issue_13_diagram(mocker, input_test_issue_13):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_13 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_7
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
     file_name = "test_issue_13"

@@ -2,24 +2,6 @@
 Tests about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/31
 
 @see test_issue_31_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_31
-    F1 is a function
-    F1a is a function
-    F1a1 is a function
-    F1 is composed of F1a
-    F1a is composed of F1a1
-    a is a data
-    F1a produces a
-    b is a data
-    F1a consumes b
-    c is a data
-    F1a1 produces c
-    d is a data
-    F1a1 consumes d
-    show context F1
 """
 # Libraries
 
@@ -39,6 +21,9 @@ def test_issue_31_diagram(mocker, input_test_issue_31):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_31 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_31
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     file_name = "test_issue_31"

@@ -2,50 +2,6 @@
 Tests about functional element decomposition related to https://github.com/rcasteran/jarvis4se/issues/7
 
 @see test_issue_7_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_7
-    F1 is a function
-    F1a is a function
-    F1b is a function
-    F1c is a function
-    F1 is composed of F1a
-    F1 is composed of F1b
-    F1 is composed of F1c
-
-    F1c1 is a function
-    F1c is composed of F1c1
-
-    F2 is a function
-    F2a is a function
-    F2 is composed of F2a
-
-    F3 is a function
-    F3a is a function
-    F3 is composed of F3a
-
-    E1 is a functional element
-    E1a is a functional element
-    E1b is a functional element
-    E1c is a functional element
-    E1 is composed of E1a
-    E1 is composed of E1b
-    E1 is composed of E1c
-    E1c1 is a functional element
-    E1c2 is a functional element
-    E1c is composed of E1c1
-    E1c is composed of E1c2
-
-    E1 allocates F1
-    E1 allocates F2
-    E1a allocates F1a
-    E1a allocates F3a
-    E1b allocates F1b
-    E1c allocates F1c
-    E1c1 allocates F1c1
-
-    show decomposition E1
 """
 # Libraries
 import io
@@ -67,6 +23,9 @@ def test_issue_7_diagram(mocker, monkeypatch, input_test_issue_7):
     @param[in] monkeypatch : monkeypatch fixture reference
     @param[in] input_test_issue_7 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_7
     """
     monkeypatch.setattr('sys.stdin', io.StringIO('y'))  # Say yes for adding F3 allocated to E1
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")

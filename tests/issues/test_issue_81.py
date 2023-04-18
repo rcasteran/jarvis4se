@@ -2,32 +2,6 @@
 Tests about functional decomposition related to https://github.com/rcasteran/jarvis4se/issues/81
 
 @see test_issue_81_diagram
-
-**Jarvis4se equivalent:**
-
-    with test_issue_81
-    F1 is a function
-    F2 is a function
-    a is a data
-    F1 produces a
-    F2 consumes a
-    F21 is a function
-    F22 is a function
-    F21 composes F2
-    F22 composes F2
-    F211 is a function
-    F212 is a function
-    F211 composes F21
-    F212 composes F21
-    F211 consumes a
-    F212 produces b
-    c is a data
-    F211 produces c
-    F212 consumes c
-    F21 consumes a
-    b is a data
-    F21 produces b
-    F22 consumes b
 """
 # Libraries
 
@@ -47,6 +21,9 @@ def test_issue_81_diagram(mocker, input_test_issue_81):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_81 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_81
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
 

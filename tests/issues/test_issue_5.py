@@ -3,41 +3,6 @@ Tests about function parent and child consumer related to https://github.com/rca
 
 @see test_issue_5_diagram
 @see test_issue_5_xml
-
-**Jarvis4se equivalent:**
-
-    with test_issue_5
-    F1 is a function
-    F1a is a function
-    F1b is a function
-    F1c is a function
-    F1d is a function
-    F1e is a function
-    F2 is a function
-    F3 is a function
-
-    F1 is composed of F1a
-    F1 is composed of F1b
-    F1 is composed of F1c
-    F1 is composed of F1d
-    F1 is composed of F1e
-
-    a is a data
-    F1 produces a
-    F2 consumes a
-
-    F1a produces a
-    F1b consumes a
-
-    b is a data
-    F1c produces b
-    F1d consumes b
-
-    c is a data
-    F3 produces c
-    F1e consumes c
-
-    show decomposition F1
 """
 # Libraries
 
@@ -59,6 +24,9 @@ def test_issue_5_diagram(mocker, input_test_issue_5):
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_5 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_5
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     file_name = "test_issue_5"
@@ -95,6 +63,9 @@ def test_issue_5_xml(input_test_issue_5):
 
     @param[in] input_test_issue_5 : input fixture reference
     @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_5
     """
     file_name = "test_issue_5"
     jarvis4se.jarvis("", f"with {file_name}\n"
