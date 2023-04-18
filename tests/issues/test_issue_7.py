@@ -1,5 +1,5 @@
 """@defgroup test_issue_7
-Test about functional element decomposition related to https://github.com/rcasteran/jarvis4se/issues/7
+Tests about functional element decomposition related to https://github.com/rcasteran/jarvis4se/issues/7
 
 @see test_issue_7_diagram
 

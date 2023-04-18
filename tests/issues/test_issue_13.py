@@ -1,5 +1,5 @@
 """@defgroup test_issue_13
-Test about functional element decomposition without children related to https://github.com/rcasteran/jarvis4se/issues/13
+Tests about functional element decomposition without children related to https://github.com/rcasteran/jarvis4se/issues/13
 
 @see test_issue_13_diagram
 

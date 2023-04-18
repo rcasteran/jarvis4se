@@ -264,7 +264,12 @@ def state_exit_entry_chain_output_diagram():
 
 
 @pytest.fixture
-def input_test_fun_decomposition_level():
+def input_test_issue_81():
+    """@ingroup test_issue_81
+    Defines input fixture for @ref test_issue_81
+
+    @return input fixture
+    """
     return "\n".join(["F1 is a function",
                       "F2 is a function",
                       "a is a data",

@@ -1,5 +1,5 @@
 """@defgroup test_issue_5
-Test about function parent and child consumer related to https://github.com/rcasteran/jarvis4se/issues/5
+Tests about function parent and child consumer related to https://github.com/rcasteran/jarvis4se/issues/5
 
 @see test_issue_5_diagram
 @see test_issue_5_xml

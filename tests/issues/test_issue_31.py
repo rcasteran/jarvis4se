@@ -1,5 +1,5 @@
 """@defgroup test_issue_31
-Test about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/31
+Tests about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/31
 
 @see test_issue_31_diagram
 
