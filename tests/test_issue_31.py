@@ -1,5 +1,25 @@
-"""@defgroup test_context_diagrams
-Tests about context diagrams
+"""@defgroup test_issue_31
+Test about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/31
+
+@see test_issue_31_diagram
+
+**Jarvis4se equivalent:**
+
+    with test_issue_31
+    F1 is a function
+    F1a is a function
+    F1a1 is a function
+    F1 is composed of F1a
+    F1a is composed of F1a1
+    a is a data
+    F1a produces a
+    b is a data
+    F1a consumes b
+    c is a data
+    F1a1 produces c
+    d is a data
+    F1a1 consumes d
+    show context F1
 """
 # Libraries
 
@@ -11,32 +31,14 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_31(mocker, input_test_issue_31):
+def test_issue_31_diagram(mocker, input_test_issue_31):
     """@ingroup test_context_diagrams
-    @anchor test_issue_31
-    Test context diagram display with function children production and consumption related to
-    https://github.com/rcasteran/jarvis4se/issues/31
+    @anchor test_issue_31_diagram
+    Test context diagram display related to @ref test_issue_31
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_31 : input fixture reference
     @return none
-
-    **Jarvis4se equivalent:**\n
-    with test_issue_31\n
-    F1 is a function\n
-    F1a is a function\n
-    F1a1 is a function\n
-    F1 is composed of F1a\n
-    F1a is composed of F1a1\n
-    a is a data\n
-    F1a produces a\n
-    b is a data\n
-    F1a consumes b\n
-    c is a data\n
-    F1a1 produces c\n
-    d is a data\n
-    F1a1 consumes d\n
-    show context F1\n
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     file_name = "test_issue_31"

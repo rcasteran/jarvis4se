@@ -1,5 +1,5 @@
-"""@defgroup test
-Module for non regression testing
+"""@defgroup test_lib
+Test libraries
 """
 
 # Libraries
@@ -12,7 +12,7 @@ import jarvis
 
 
 def get_jarvis4se():
-    """@ingroup test
+    """@ingroup test_lib
     Start an ipython session, init parser and jarvis4se magic call
     @return jarvis4se magic call, jarvis4se diagram generator, jarvis4se magic tool
     """
@@ -25,7 +25,7 @@ def get_jarvis4se():
 
 
 def remove_xml_file(file_name):
-    """@ingroup test
+    """@ingroup test_lib
     Remove the XML file generated during the test
     @return none
     """

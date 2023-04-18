@@ -1,5 +1,36 @@
-"""@defgroup test_context_diagrams
-Tests about context diagrams
+"""@defgroup test_issue_38
+Tests about functional elements related to https://github.com/rcasteran/jarvis4se/issues/38
+
+@see test_issue_38_diagram
+
+**Jarvis4se equivalent:**
+
+    with test_issue_38
+    F is a function
+    F1 is a function
+    F2 is a function
+    a is a data
+    F produces a
+    F1 consumes a
+    F2 consumes a
+    b is a data
+    F produces b
+    F2 consumes b
+
+    E is a functional element
+    E allocates F
+    E1 is a functional element
+    E1 allocates F1
+    E2 is a functional element
+    E2 allocates F2
+
+    I_E_E1 is a functional interface
+    I_E_E1 allocates a
+    E exposes I_E_E1
+    E1 exposes I_E_E1
+
+    show context E2
+
 """
 # Libraries
 
@@ -11,42 +42,14 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_38(mocker, input_test_issue_38):
+def test_issue_38_diagram(mocker, input_test_issue_38):
     """@ingroup test_context_diagrams
-    @anchor test_issue_38
-    Test context diagram display with functional elements related to
-    https://github.com/rcasteran/jarvis4se/issues/38
+    @anchor test_issue_38_diagram
+    Test context diagram display related to @ref test_issue_38
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_38 : input fixture reference
     @return none
-
-    **Jarvis4se equivalent:**\n
-    with test_issue_38\n
-    F is a function\n
-    F1 is a function\n
-    F2 is a function\n
-    a is a data\n
-    F produces a\n
-    F1 consumes a\n
-    F2 consumes a\n
-    b is a data\n
-    F produces b\n
-    F2 consumes b\n
-
-    E is a functional element\n
-    E allocates F\n
-    E1 is a functional element\n
-    E1 allocates F1\n
-    E2 is a functional element\n
-    E2 allocates F2\n
-
-    I_E_E1 is a functional interface\n
-    I_E_E1 allocates a\n
-    E exposes I_E_E1\n
-    E1 exposes I_E_E1\n
-
-    show context E2\n
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     file_name = "test_issue_38"

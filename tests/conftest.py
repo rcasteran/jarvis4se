@@ -1,5 +1,4 @@
 """ @package test
-@defgroup test
 Module for non regression testing
 
 Defines the regression tests based on pytest fixtures
@@ -7,9 +6,8 @@ Defines the regression tests based on pytest fixtures
 
 Uses the mocker fixture for spying methods (https://pytest-mock.readthedocs.io/en/latest/usage.html#).
 
-Non regression tests about context diagram:
-- @ref test_context_diagram_1 : context diagram of a single function
-
+Defines the following non regression tests:
+- @ref test_context_diagrams : Tests about context diagrams
 """
 
 # Libraries
@@ -17,17 +15,42 @@ import pytest
 
 
 @pytest.fixture
-def function_with_childs_cell():
-    """Returns string see usage"""
-    return "\n".join(["F1 is a function", "F1a is a function", "F1b is a function",
-                      "F1c is a function", "F1d is a function", "F1e is a function",
-                      "F2 is a function", "F3 is a function", "", "F1 is composed of F1a",
-                      "F1 is composed of F1b", "F1 is composed of F1c", "F1 is composed of F1d",
-                      "F1 is composed of F1e", "", "a is a data", "F1 produces a",
+def input_test_issue_5():
+    """@ingroup test_issue_5
+    Defines input fixture for @ref test_issue_5
+
+    @return input fixture
+    """
+    return "\n".join(["F1 is a function",
+                      "F1a is a function",
+                      "F1b is a function",
+                      "F1c is a function",
+                      "F1d is a function",
+                      "F1e is a function",
+                      "F2 is a function",
+                      "F3 is a function",
+                      "",
+                      "F1 is composed of F1a",
+                      "F1 is composed of F1b",
+                      "F1 is composed of F1c",
+                      "F1 is composed of F1d",
+                      "F1 is composed of F1e",
+                      "",
+                      "a is a data",
+                      "F1 produces a",
                       "F2 consumes a",
-                      "", "F1a produces a", "F1b consumes a", "", "b is a data",
-                      "F1c produces b", "F1d consumes b", "", "c is a data",
-                      "F3 produces c", "F1e consumes c", ""])
+                      "",
+                      "F1a produces a",
+                      "F1b consumes a",
+                      "",
+                      "b is a data",
+                      "F1c produces b",
+                      "F1d consumes b",
+                      "",
+                      "c is a data",
+                      "F3 produces c",
+                      "F1e consumes c",
+                      ""])
 
 
 @pytest.fixture
@@ -63,7 +86,11 @@ def allocation_item_cell():
 
 @pytest.fixture
 def input_test_issue_31():
-    """Returns string see usage"""
+    """@ingroup test_issue_31
+    Defines input fixture for @ref test_issue_31
+
+    @return input fixture
+    """
     return "\n".join(["F1 is a function",
                       "F1a is a function",
                       "F1a1 is a function",
@@ -82,7 +109,11 @@ def input_test_issue_31():
 
 @pytest.fixture
 def input_test_fun_elem_context_with_interfaces():
-    """Returns string see usage"""
+    """@ingroup test_context_diagrams
+    Defines input fixture for @ref test_fun_elem_context_with_interfaces
+
+    @return input fixture
+    """
     return "\n".join(["F1 is a function",
                       "F2 is a function",
                       "A is a data",
@@ -109,7 +140,11 @@ def input_test_fun_elem_context_with_interfaces():
 
 @pytest.fixture
 def input_test_issue_39():
-    """Returns string see usage"""
+    """@ingroup test_issue_39
+    Defines input fixture for @ref test_issue_39
+
+    @return input fixture
+    """
     return "\n".join(["E is a functional element",
                       "E1 is a functional element",
                       "I_E_E1 is a functional interface",
@@ -120,7 +155,11 @@ def input_test_issue_39():
 
 @pytest.fixture
 def input_test_issue_38():
-    """Returns string see usage"""
+    """@ingroup test_issue_38
+    Defines input fixture for @ref test_issue_38
+
+    @return input fixture
+    """
     return "\n".join(["F is a function",
                       "F1 is a function",
                       "F2 is a function",
@@ -148,7 +187,11 @@ def input_test_issue_38():
 
 @pytest.fixture
 def input_test_issue_44():
-    """Returns string see usage"""
+    """@ingroup test_issue_44
+    Defines input fixture for @ref test_issue_44
+
+    @return input fixture
+    """
     return "\n".join(["F is a function",
                       "F1 is a function",
                       "a is a data",
@@ -244,4 +287,125 @@ def input_test_fun_decomposition_level():
                       "b is a data",
                       "F21 produces b",
                       "F22 consumes b",
+                      ""])
+
+@pytest.fixture
+def input_test_issue_7():
+    """@ingroup test_issue_7
+    Defines input fixture for @ref test_issue_7
+
+    @return input fixture
+    """
+    return "\n".join(["F1 is a function",
+                      "F1a is a function",
+                      "F1b is a function",
+                      "F1c is a function",
+                      "F1 is composed of F1a",
+                      "F1 is composed of F1b",
+                      "F1 is composed of F1c",
+                      "",
+                      "F1c1 is a function",
+                      "F1c is composed of F1c1",
+                      "",
+                      "F2 is a function",
+                      "F2a is a function",
+                      "F2 is composed of F2a",
+                      "",
+                      "F3 is a function",
+                      "F3a is a function",
+                      "F3 is composed of F3a",
+                      "",
+                      "E1 is a functional element",
+                      "E1a is a functional element",
+                      "E1b is a functional element",
+                      "E1c is a functional element",
+                      "E1 is composed of E1a",
+                      "E1 is composed of E1b",
+                      "E1 is composed of E1c",
+                      "E1c1 is a functional element",
+                      "E1c2 is a functional element",
+                      "E1c is composed of E1c1",
+                      "E1c is composed of E1c2",
+                      "",
+                      "E1 allocates F1",
+                      "E1 allocates F2",
+                      "E1a allocates F1a",
+                      "E1a allocates F3a",
+                      "E1b allocates F1b",
+                      "E1c allocates F1c",
+                      "E1c1 allocates F1c1",
+                      ""])
+
+@pytest.fixture
+def input_test_issue_13():
+    """@ingroup test_issue_13
+    Defines input fixture for @ref test_issue_13
+
+    @return input fixture
+    """
+    return "\n".join(["F1 is a function",
+                      "F2 is a function",
+                      "F1 is composed of F2",
+                      "E1 is a functional element",
+                      "E1 allocates F1",
+                      ""])
+
+@pytest.fixture
+def input_test_fun_elem_decomposition_with_interface():
+    """@ingroup test_decomposition_diagrams
+    Defines input fixture for @ref test_fun_elem_decompo_with_interface
+
+    @return input fixture
+    """
+    return "\n".join(["F1 is a function",
+                      "F1b is a function",
+                      "F1c is a function",
+                      "F1 is composed of F1b",
+                      "F1 is composed of F1c",
+                      "",
+                      "F1c1 is a function",
+                      "F1c is composed of F1c1",
+                      "",
+                      "F_ext is a function",
+                      "",
+                      "E1 is a functional element",
+                      "E1b is a functional element",
+                      "E1c is a functional element",
+                      "Ext is a functional element",
+                      "E1 is composed of E1b",
+                      "E1 is composed of E1c",
+                      "E1c1 is a functional element",
+                      "E1c is composed of E1c1",
+                      "",
+                      "E1 allocates F1",
+                      "E1b allocates F1b",
+                      "E1c allocates F1c",
+                      "E1c1 allocates F1c1",
+                      "Ext allocates F_ext",
+                      "",
+                      "A is a data",
+                      "A_2 is a data",
+                      "B is a data",
+                      "C is a data",
+                      "",
+                      "Fun_inter_A is a functional interface",
+                      "Fun_inter_A allocates A",
+                      "Fun_inter_A allocates A_2",
+                      "Fun_inter_B is a functional interface",
+                      "Fun_inter_B allocates B",
+                      "",
+                      "F1c1 produces A",
+                      "F1c1 produces A_2",
+                      "F1b consumes A",
+                      "F1b consumes A_2",
+                      "",
+                      "F_ext produces B",
+                      "F1c1 consumes B",
+                      "",
+                      "F1b produces C",
+                      "F_ext consumes C",
+                      "",
+                      "E1c exposes Fun_inter_A",
+                      "E1c1 exposes Fun_inter_A",
+                      "E1b exposes Fun_inter_A",
                       ""])

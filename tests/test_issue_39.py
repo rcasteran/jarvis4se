@@ -1,5 +1,17 @@
-"""@defgroup test_context_diagrams
-Tests about context diagrams
+"""@defgroup test_issue_39
+Tests about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/39
+
+@see test_issue_39_diagram
+
+**Jarvis4se equivalent:**
+
+    with test_issue_39
+    E is a functional element
+    E1 is a functional element
+    I_E_E1 is a functional interface
+    E exposes I_E_E1
+    E1 exposes I_E_E1
+    show context E1
 """
 # Libraries
 
@@ -11,24 +23,14 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_39(mocker, input_test_issue_39):
+def test_issue_39_diagram(mocker, input_test_issue_39):
     """@ingroup test_context_diagrams
-    @anchor test_issue_39
-    Test context diagram display with function children production and consumption related to
-    https://github.com/rcasteran/jarvis4se/issues/39
+    @anchor test_issue_39_diagram
+    Test context diagram display related to @ref test_issue_39
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_39 : input fixture reference
     @return none
-
-    **Jarvis4se equivalent:**\n
-    with test_issue_39\n
-    E is a functional element\n
-    E1 is a functional element\n
-    I_E_E1 is a functional interface\n
-    E exposes I_E_E1\n
-    E1 exposes I_E_E1\n
-    show context E1\n
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
     file_name = "test_issue_39"
