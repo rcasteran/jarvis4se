@@ -1,7 +1,7 @@
 """@defgroup test_issue_31
 Tests about function children production and consumption related to https://github.com/rcasteran/jarvis4se/issues/31
 
-@see test_issue_31_context
+@see test_issue_31_plantuml_context
 """
 # Libraries
 
@@ -13,9 +13,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_31_context(mocker, input_test_issue_31):
-    """@ingroup test_context_diagrams
-    @anchor test_issue_31_context
+def test_issue_31_plantuml_context(mocker, input_test_issue_31):
+    """@ingroup test_plantuml_context
+    @anchor test_issue_31_plantuml_context
     Test context diagram display related to @ref test_issue_31
 
     @param[in] mocker : mocker fixture reference

@@ -1,7 +1,7 @@
 """@defgroup test_issue_7
 Tests about functional element decomposition related to https://github.com/rcasteran/jarvis4se/issues/7
 
-@see test_issue_7_decomposition
+@see test_issue_7_plantuml_decomposition
 """
 # Libraries
 import io
@@ -14,9 +14,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_7_decomposition(mocker, monkeypatch, input_test_issue_7):
-    """@ingroup test_decomposition_diagrams
-    @anchor test_issue_7_decomposition
+def test_issue_7_plantuml_decomposition(mocker, monkeypatch, input_test_issue_7):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_issue_7_plantuml_decomposition
     Test decomposition diagram related to @ref test_issue_7
 
     @param[in] mocker : mocker fixture reference

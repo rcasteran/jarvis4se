@@ -1,5 +1,5 @@
-"""@defgroup test_decomposition_diagrams
-Tests about decomposition diagrams
+"""@defgroup test_plantuml_decomposition
+Tests about Plantuml decomposition diagrams
 """
 # Libraries
 
@@ -12,9 +12,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_fun_elem_with_interfaces_decomposition(mocker, input_test_fun_elem_with_interfaces_2):
-    """@ingroup test_decomposition_diagrams
-    @anchor test_fun_elem_with_interfaces_decomposition
+def test_fun_elem_with_interfaces_plantuml_decomposition(mocker, input_test_fun_elem_with_interfaces_2):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_fun_elem_with_interfaces_plantuml_decomposition
     Test decomposition diagram display with functional element decomposition and interface allocation
 
     @param[in] mocker : mocker fixture reference
@@ -25,7 +25,7 @@ def test_fun_elem_with_interfaces_decomposition(mocker, input_test_fun_elem_with
     @ref input_test_fun_elem_with_interfaces_2
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    file_name = "test_fun_elem_with_interfaces_decomposition"
+    file_name = "test_fun_elem_with_interfaces_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_interfaces_2}\n"                         
                          "show decomposition E1\n")

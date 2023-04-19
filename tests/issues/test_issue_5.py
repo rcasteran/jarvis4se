@@ -1,7 +1,7 @@
 """@defgroup test_issue_5
 Tests about function parent and child consumer related to https://github.com/rcasteran/jarvis4se/issues/5
 
-@see test_issue_5_decomposition
+@see test_issue_5_plantuml_decomposition
 @see test_issue_5_xml
 """
 # Libraries
@@ -16,9 +16,9 @@ jarvis4se = test_lib.get_jarvis4se()[0]
 xml_parser = XmlParser3SE()
 
 
-def test_issue_5_decomposition(mocker, input_test_issue_5):
-    """@ingroup test_decomposition_diagrams
-    @anchor test_issue_5_decomposition
+def test_issue_5_plantuml_decomposition(mocker, input_test_issue_5):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_issue_5_plantuml_decomposition
     Test decomposition diagram related to @ref test_issue_5
 
     @param[in] mocker : mocker fixture reference

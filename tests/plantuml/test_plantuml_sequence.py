@@ -1,5 +1,5 @@
-"""@defgroup test_sequence_diagrams
-Tests about sequence diagrams
+"""@defgroup test_plantuml_sequence
+Tests about Plantuml sequence diagrams
 """
 # Modules
 import test_lib
@@ -9,9 +9,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_fun_elem_with_interfaces_sequence(mocker, input_test_fun_elem_with_interfaces_3):
-    """@ingroup test_sequence_diagrams
-    @anchor test_fun_elem_with_interfaces_sequence
+def test_fun_elem_with_interfaces_plantuml_sequence(mocker, input_test_fun_elem_with_interfaces_3):
+    """@ingroup test_plantuml_sequence
+    @anchor test_fun_elem_with_interfaces_plantuml_sequence
     Test sequence diagram display for functional elements with interfaces
 
     @param[in] mocker : mocker fixture reference

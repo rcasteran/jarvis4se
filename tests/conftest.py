@@ -7,8 +7,8 @@ Defines the regression tests based on pytest fixtures
 Uses the mocker fixture for spying methods (https://pytest-mock.readthedocs.io/en/latest/usage.html#).
 
 Defines the following non regression tests:
-- @ref test_context_diagrams : Tests about context diagrams
-- @ref test_decomposition_diagrams : Tests about decomposition diagrams
+- @ref test_plantuml_context : Tests about context diagrams
+- @ref test_plantuml_decomposition : Tests about decomposition diagrams
 - @ref test_input_cell : Tests about Jarvis outputs
 - @ref test_magic_tools : Tests about Jarvis IPython magic tools
 - @ref test_question_answer : Tests about Jarvis answer to user's question
@@ -22,7 +22,7 @@ import pytest
 def input_test_issue_5():
     """@ingroup test_issue_5
     @anchor input_test_issue_5
-    Defines input fixture for @ref test_issue_5_decomposition
+    Defines input fixture for @ref test_issue_5_plantuml_decomposition
 
     @return input fixture
 
@@ -150,7 +150,7 @@ def input_test_fun_elem_exposes_interface():
 def input_test_issue_31():
     """@ingroup test_issue_31
     @anchor input_test_issue_31
-    Defines input fixture for @ref test_issue_31_context
+    Defines input fixture for @ref test_issue_31_plantuml_context
 
     @return input fixture
 
@@ -188,9 +188,9 @@ def input_test_issue_31():
 
 @pytest.fixture
 def input_test_fun_elem_with_interfaces():
-    """@ingroup test_context_diagrams
+    """@ingroup test_plantuml_context
     @anchor input_test_fun_elem_with_interfaces
-    Defines input fixture for @ref test_fun_elem_with_interfaces_context
+    Defines input fixture for @ref test_fun_elem_with_interfaces_plantuml_context
 
     @return input fixture
 
@@ -246,7 +246,7 @@ def input_test_fun_elem_with_interfaces():
 def input_test_issue_39():
     """@ingroup test_issue_39
     @anchor input_test_issue_39
-    Defines input fixture for @ref test_issue_39_context
+    Defines input fixture for @ref test_issue_39_plantuml_context
 
     @return input fixture
 
@@ -270,7 +270,7 @@ def input_test_issue_39():
 def input_test_issue_38():
     """@ingroup test_issue_38
     @anchor input_test_issue_38
-    Defines input fixture for @ref test_issue_38_context
+    Defines input fixture for @ref test_issue_38_plantuml_context
 
     @return input fixture
 
@@ -328,7 +328,7 @@ def input_test_issue_38():
 def input_test_issue_44():
     """@ingroup test_issue_44
     @anchor input_test_issue_44
-    Defines input fixture for @ref test_issue_44_context
+    Defines input fixture for @ref test_issue_44_plantuml_context
 
     @return input fixture
 
@@ -452,7 +452,7 @@ def state_exit_entry_chain_output_diagram():
 def input_test_issue_81():
     """@ingroup test_issue_81
     @anchor input_test_issue_81
-    Defines input fixture for @ref test_issue_81_context
+    Defines input fixture for @ref test_issue_81_plantuml_context
 
     @return input fixture
 
@@ -510,7 +510,7 @@ def input_test_issue_81():
 def input_test_issue_7():
     """@ingroup test_issue_7
     @anchor input_test_issue_7
-    Defines input fixture for @ref test_issue_7_decomposition
+    Defines input fixture for @ref test_issue_7_plantuml_decomposition
 
     @return input fixture
 
@@ -600,7 +600,7 @@ def input_test_issue_7():
 def input_test_issue_13():
     """@ingroup test_issue_13
     @anchor input_test_issue_13
-    Defines input fixture for @ref test_issue_13_decomposition
+    Defines input fixture for @ref test_issue_13_plantuml_decomposition
 
     @return input fixture
 
@@ -622,9 +622,9 @@ def input_test_issue_13():
 
 @pytest.fixture
 def input_test_fun_elem_with_interfaces_2():
-    """@ingroup test_decomposition_diagrams
+    """@ingroup test_plantuml_decomposition
     @anchor input_test_fun_elem_with_interfaces_2
-    Defines input fixture for @ref test_fun_elem_with_interfaces_decomposition
+    Defines input fixture for @ref test_fun_elem_with_interfaces_plantuml_decomposition
 
     @return input fixture
 
@@ -738,9 +738,9 @@ def input_test_fun_elem_with_interfaces_2():
 
 @pytest.fixture
 def input_test_fun_elem_with_attribute():
-    """@ingroup test_context_diagrams
+    """@ingroup test_plantuml_context
     @anchor input_test_fun_elem_with_attribute
-    Defines input fixture for @ref test_fun_elem_with_attribute_context, @ref test_attribute_declaration_in,
+    Defines input fixture for @ref test_fun_elem_with_attribute_plantuml_context, @ref test_attribute_declaration_in,
     @ref test_instantiated_attribute_in and @ref test_instantiated_attribute_xml
 
     @return input fixture
@@ -922,9 +922,9 @@ def input_test_issue_55():
 
 @pytest.fixture
 def input_test_fun_elem_with_interfaces_3():
-    """@ingroup test_sequence_diagrams
+    """@ingroup test_plantuml_sequence
     @anchor input_test_fun_elem_with_interfaces_3
-    Defines input fixture for @ref test_fun_elem_with_interfaces_sequence
+    Defines input fixture for @ref test_fun_elem_with_interfaces_plantuml_sequence
 
     @return input fixture
 

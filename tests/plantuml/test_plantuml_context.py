@@ -1,5 +1,5 @@
-"""@defgroup test_context_diagrams
-Tests about context diagrams
+"""@defgroup test_plantuml_context
+Tests about Plantuml context diagrams
 """
 # Libraries
 
@@ -11,8 +11,8 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_simple_function_context(mocker):
-    """@ingroup test_context_diagrams
+def test_simple_function_plantuml_context(mocker):
+    """@ingroup test_plantuml_context
     Test context diagram display with a single function without input / output
 
     @param[in] mocker : mocker fixture reference
@@ -25,7 +25,7 @@ def test_simple_function_context(mocker):
         show context F1
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    file_name = "test_simple_function_context"
+    file_name = "test_simple_function_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "F1 is a function\n"
                          "show context F1\n")
@@ -40,8 +40,8 @@ def test_simple_function_context(mocker):
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
 
-def test_simple_function_in_out_context(mocker):
-    """@ingroup test_context_diagrams
+def test_simple_function_in_out_plantuml_context(mocker):
+    """@ingroup test_plantuml_context
     Test context diagram display with a single function with one input and one output
 
     @param[in] mocker : mocker fixture reference
@@ -64,7 +64,7 @@ def test_simple_function_in_out_context(mocker):
         show context F1
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    file_name = "test_simple_function_in_out_context"
+    file_name = "test_simple_function_in_out_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "F1 is a function\n"
                          "a is a data\n"
@@ -90,8 +90,8 @@ def test_simple_function_in_out_context(mocker):
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
 
-def test_function_with_attribute_context(mocker):
-    """@ingroup test_context_diagrams
+def test_function_with_attribute_plantuml_context(mocker):
+    """@ingroup test_plantuml_context
     Test context diagram display with a single function with attributes and their value
 
     @param[in] mocker : mocker fixture reference
@@ -114,7 +114,7 @@ def test_function_with_attribute_context(mocker):
         show context F1
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    file_name = "test_function_with_attribute_context"
+    file_name = "test_function_with_attribute_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "F1 is a function\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
@@ -136,9 +136,9 @@ def test_function_with_attribute_context(mocker):
     assert len(result) - len(''.join(expected)) == len("\'id: xxxxxxxxxx\n")
 
 
-def test_fun_elem_with_attribute_context(mocker, input_test_fun_elem_with_attribute):
-    """@ingroup test_context_diagrams
-    @anchor test_fun_elem_with_attribute_context
+def test_fun_elem_with_attribute_plantuml_context(mocker, input_test_fun_elem_with_attribute):
+    """@ingroup test_plantuml_context
+    @anchor test_fun_elem_with_attribute_plantuml_context
     Test context diagram display with a single function with attributes and their value, allocated to a functional
     element with same attributes and different values
 
@@ -150,7 +150,7 @@ def test_fun_elem_with_attribute_context(mocker, input_test_fun_elem_with_attrib
     @ref input_test_fun_elem_with_attribute
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    file_name = "test_fun_elem_with_attribute_context"
+    file_name = "test_fun_elem_with_attribute_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_attribute[0]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
@@ -178,9 +178,9 @@ def test_fun_elem_with_attribute_context(mocker, input_test_fun_elem_with_attrib
     assert len(result) - len(''.join(expected)) == 2 * len("\'id: xxxxxxxxxx\n")
 
 
-def test_fun_elem_with_interfaces_context(mocker, input_test_fun_elem_with_interfaces):
-    """@ingroup test_context_diagrams
-    @anchor test_fun_elem_with_interfaces_context
+def test_fun_elem_with_interfaces_plantuml_context(mocker, input_test_fun_elem_with_interfaces):
+    """@ingroup test_plantuml_context
+    @anchor test_fun_elem_with_interfaces_plantuml_context
     Test context diagram display with functional elements, their allocated functions and their interfaces
 
     @param[in] mocker : mocker fixture reference
@@ -191,7 +191,7 @@ def test_fun_elem_with_interfaces_context(mocker, input_test_fun_elem_with_inter
     @ref input_test_fun_elem_with_interfaces
    """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    file_name = "test_fun_elem_with_interfaces_context"
+    file_name = "test_fun_elem_with_interfaces_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_interfaces}\n"
                          f"show context Fun_elem_1")
