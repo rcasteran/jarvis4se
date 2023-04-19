@@ -21,7 +21,7 @@ def test_issue_13_plantuml_decomposition(mocker, input_test_issue_13):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_13 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_7

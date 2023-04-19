@@ -20,7 +20,7 @@ def test_issue_21_in(capsys, input_test_issue_21):
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_21 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_21

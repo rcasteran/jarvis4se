@@ -20,7 +20,7 @@ def test_issue_38_plantuml_context(mocker, input_test_issue_38):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_38 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_38

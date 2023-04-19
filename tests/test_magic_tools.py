@@ -18,7 +18,7 @@ def test_retrieve_pkg_version_tool(capsys):
     Test the magic line "%retrieve_pkg_version"
 
     @param[in] capsys : capture fixture reference
-    @return none
+    @return None
     """
     jarvis4se_tool.retrieve_pkg_version('')
     captured = capsys.readouterr()
@@ -32,7 +32,7 @@ def test_diagram_cell_tool(capsys, mocker):
 
     @param[in] capsys : capture fixture reference
     @param[in] mocker : mocker fixture reference
-    @return none
+    @return None
     """
     spy = mocker.spy(generator, "get_diagram_url")
     jarvis4se_tool.diagram('', "@startuml\n"

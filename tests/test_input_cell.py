@@ -18,7 +18,7 @@ def test_attribute_declaration_in(capsys, input_test_fun_elem_with_attribute):
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_fun_elem_with_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_attribute
@@ -46,7 +46,7 @@ def test_instantiated_attribute_in(capsys, input_test_fun_elem_with_attribute):
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_fun_elem_with_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_attribute
@@ -81,7 +81,7 @@ def test_functional_interface_in(capsys, input_test_functional_interface):
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_functional_interface : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_functional_interface
@@ -114,7 +114,7 @@ def test_fun_elem_exposes_interface_in(capsys, input_test_fun_elem_exposes_inter
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_fun_elem_exposes_interface : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_exposes_interface

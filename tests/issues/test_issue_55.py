@@ -20,7 +20,7 @@ def test_issue_55_question(mocker, input_test_issue_55):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_55 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_55

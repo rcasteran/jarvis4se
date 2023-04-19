@@ -16,7 +16,7 @@ def test_entry_exit_plantuml_state(mocker, input_test_entry_exit):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_entry_exit : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_entry_exit

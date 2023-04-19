@@ -18,7 +18,7 @@ def test_simple_function_plantuml_context(mocker, input_test_simple_function):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_simple_function : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_simple_function
@@ -44,7 +44,7 @@ def test_simple_function_in_out_plantuml_context(mocker):
     Test context diagram display with a single function with one input and one output
 
     @param[in] mocker : mocker fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
 
@@ -94,7 +94,7 @@ def test_function_with_attribute_plantuml_context(mocker):
     Test context diagram display with a single function with attributes and their value
 
     @param[in] mocker : mocker fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
 
@@ -143,7 +143,7 @@ def test_fun_elem_with_attribute_plantuml_context(mocker, input_test_fun_elem_wi
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_fun_elem_with_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_attribute
@@ -184,7 +184,7 @@ def test_fun_elem_with_interfaces_plantuml_context(mocker, input_test_fun_elem_w
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_fun_elem_with_interfaces : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_interfaces

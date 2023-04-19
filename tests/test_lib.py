@@ -29,7 +29,7 @@ def remove_xml_file(file_name):
     """@ingroup test_lib
     Remove the XML file generated during the test
 
-    @return none
+    @return None
     """
     file_path = os.path.join("./", f"{file_name}.xml")
     path = Path(file_path)

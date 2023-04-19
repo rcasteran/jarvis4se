@@ -16,7 +16,7 @@ def test_fun_elem_with_interfaces_plantuml_sequence(mocker, input_test_fun_elem_
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_fun_elem_with_interfaces_3 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_interfaces_3

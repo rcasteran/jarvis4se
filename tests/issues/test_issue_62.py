@@ -24,7 +24,7 @@ def test_issue_62_in(capsys, input_test_issue_62):
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_62 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_62
@@ -52,7 +52,7 @@ def test_issue_62_xml(input_test_issue_62):
     Test type creation from extended type related to @ref test_issue_62
 
     @param[in] input_test_issue_62 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_62

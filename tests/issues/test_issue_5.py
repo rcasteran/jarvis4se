@@ -23,7 +23,7 @@ def test_issue_5_plantuml_decomposition(mocker, input_test_issue_5):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_5 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_5
@@ -62,7 +62,7 @@ def test_issue_5_xml(input_test_issue_5):
     Test xml file related to @ref test_issue_5
 
     @param[in] input_test_issue_5 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_5

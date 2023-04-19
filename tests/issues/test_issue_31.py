@@ -22,7 +22,7 @@ def test_issue_31_plantuml_context(mocker, input_test_issue_31):
 
     @param[in] mocker : mocker fixture reference
     @param[in] input_test_issue_31 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_31
@@ -55,7 +55,7 @@ def test_issue_31_xml(input_test_issue_31):
     Test xml file generation related to @ref test_issue_31
 
     @param[in] input_test_issue_31 : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_issue_31

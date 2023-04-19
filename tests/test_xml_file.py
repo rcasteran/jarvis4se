@@ -20,7 +20,7 @@ def test_template_xml():
     @anchor test_template_xml
     Test the structure of the xml generated file against the xml template
 
-    @return none
+    @return None
     """
     file_name = "test_template_xml"
     jarvis4se.jarvis("", f"with {file_name}\n")
@@ -58,7 +58,7 @@ def test_simple_function_xml(input_test_simple_function):
     Test xml file for a single function without input / output
 
     @param[in] input_test_simple_function : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_simple_function
@@ -81,7 +81,7 @@ def test_instantiated_attribute_xml(input_test_fun_elem_with_attribute):
     Test attribute instantiation in xml file
 
     @param[in] input_test_fun_elem_with_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_attribute
@@ -122,7 +122,7 @@ def test_extended_attribute_xml(input_test_extended_attribute):
     Test attribute extension in xml file
 
     @param[in] input_test_extended_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_extended_attribute
@@ -151,7 +151,7 @@ def test_functional_interface_with_attribute_xml(input_test_functional_interface
     Test functional interface with attribute in xml file
 
     @param[in] input_test_functional_interface_with_attribute : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_functional_interface_with_attribute
@@ -185,7 +185,7 @@ def test_fun_elem_exposes_interface_xml(input_test_fun_elem_exposes_interface):
     Test functional interface allocation to functional element
 
     @param[in] input_test_fun_elem_exposes_interface : input fixture reference
-    @return none
+    @return None
 
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_exposes_interface
