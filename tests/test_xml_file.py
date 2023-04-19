@@ -143,55 +143,6 @@ def test_set_attribute_type_within_xml():
     assert expected == result
 
 
-def test_set_allocated_item_to_view_within_xml(allocation_item_cell):
-    """Relative to Issue #9 to add new allocated item to a view(i.e. filter) by verifying than
-    it's written within xml. Notebook equivalent:
-    %%jarvis
-    with set_allocated_item_to_view_within_xml
-    F1 is a function
-    F2 with a long name is a function. The alias of F2 with a long name is F2.
-    F3 is a function
-    F4 is a function
-    a is a data
-    Fun_elem is a functional element
-    ========================================
-    %%jarvis
-    with set_allocated_item_to_view_within_xml
-    under toto
-    consider F1. consider toto. consider a, Fun_elem
-    consider tata.
-    consider F1, F2, F3, F4
-    """
-    file_name = "set_allocated_item_to_view_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[0]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{allocation_item_cell[1]}")
-
-    obj_dict = xml_parser.parse_xml(file_name + ".xml")
-
-    expected = {'F1', 'F2 with a long name', 'F3', 'F4', 'a', 'Fun_elem'}
-    # xml_adapter.parse_xml() returns mainly set(), so the order can change
-    # thus we have to compare it with a set also
-    result = set()
-    assert len(obj_dict['xml_view_list']) == 1
-    assert "test_view" in {i.name for i in obj_dict['xml_view_list']}
-    for item in next(iter(obj_dict['xml_view_list'])).allocated_item_list:
-        for fun in obj_dict['xml_function_list']:
-            if item == fun.id:
-                result.add(fun.name)
-
-        for fun_elem in obj_dict['xml_fun_elem_list']:
-            if item == fun_elem.id:
-                result.add(fun_elem.name)
-
-        for data in obj_dict['xml_data_list']:
-            if item == data.id:
-                result.add(data.name)
-
-    test_lib.remove_xml_file(file_name)
-
-    assert expected == result
-
-
 def test_function_with_grandkids_within_xml(input_test_issue_31):
     """See Issue #31, Notebook equivalent:
     %%jarvis
@@ -304,32 +255,20 @@ def test_functional_interface_within_xml():
     test_lib.remove_xml_file(file_name)
 
 
-def test_fun_elem_exposes_interface_within_xml(fun_elem_exposing_cell):
-    """Notebook equivalent:
-    %%jarvis
-    with fun_elem_exposes_interface_within_xml
-    Fun_inter is a functional interface
-    Fun_elem is a functional element
-    Fun_elem_2 is a functional element
-    Fun_elem_3 is a functional element
-    Fun_elem_4 is a functional element
-    Fun_elem_5 is a functional element
-    Fun_elem_6 is a functional element
-    Fun_elem_ext is a functional element
-    Fun_elem is composed of Fun_elem_2
-    Fun_elem_2 is composed of Fun_elem_3
-    Fun_elem_3 is composed of Fun_elem_4
-    Fun_elem_4 is composed of Fun_elem_5
-    Fun_elem_5 is composed of Fun_elem_6
-    Fun_elem exposes Fun_inter
-    Fun_elem_6 exposes Fun_inter
-    Fun_elem_ext exposes Fun_inter
-    toto exposes Fun_inter
-    tata exposes titi
-    Fun_elem exposes coco
+def test_fun_elem_exposes_interface_xml(input_test_fun_elem_exposes_interface):
+    """@ingroup test_xml_file
+    @anchor test_fun_elem_exposes_interface_xml
+    Test functional interface allocation to functional element
+
+    @param[in] input_test_fun_elem_exposes_interface : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_fun_elem_exposes_interface
     """
-    file_name = "fun_elem_exposes_interface_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{fun_elem_exposing_cell}")
+    file_name = "test_fun_elem_exposes_interface_xml"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_exposes_interface}\n")
 
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
 
@@ -353,83 +292,5 @@ def test_fun_elem_exposes_interface_within_xml(fun_elem_exposing_cell):
 
     assert expected_child == result_child
     assert expected_exposed == result_exposed
-
-    test_lib.remove_xml_file(file_name)
-
-
-def test_type_within_xml(extends_and_set_type_cell):
-    """ Issue #56 Notebook equivalent:
-    %%jarvis
-    with type_within_xml
-    Safety interface extends functional interface
-    The alias of Safety interface is sf
-    ========================================
-    %%jarvis
-    sf_a extends sf
-    sf_a_b extends sf_a
-    final one extends sf_a_b
-    Fun_inter is a functional interface
-    The type of Fun_inter is final one
-    """
-    file_name = "type_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[0]}")
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_set_type_cell[1]}")
-
-    obj_dict = xml_parser.parse_xml(file_name + ".xml")
-
-    assert len([x for x in obj_dict.values() if x]) == 2
-    assert len(obj_dict['xml_type_list']) == 4
-    assert len(obj_dict['xml_fun_inter_list']) == 1
-
-    expected_type = {('sf_a', 'Safety interface'), ('sf_a_b', 'sf_a'),
-                     ('Safety interface', 'Functional interface'), ('final one', 'sf_a_b')}
-    captured_type = set()
-    for type_elem in obj_dict['xml_type_list']:
-        if type_elem.name == 'Safety interface':
-            assert type_elem.alias == 'sf'
-        if isinstance(type_elem.base, BaseType):
-            base_type = str(type_elem.base)
-        else:
-            base_type = type_elem.base.name
-        captured_type.add((type_elem.name, base_type))
-
-    assert expected_type == captured_type
-    assert obj_dict['xml_fun_inter_list'].pop().type.name == "final one"
-
-    test_lib.remove_xml_file(file_name)
-
-
-def test_extends_and_create_object_within_xml(capsys, extends_and_create_object_cell):
-    """ Issue #62 Notebook equivalent:
-    %%jarvis
-    with extends_and_create_object_within_xml
-    "High level function" extends function
-    "High high level function" extends "High level function"
-    "High high high level function" extends "High high level function"
-    3High is a "High high high level function"
-    """
-    file_name = "extends_and_create_object_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{extends_and_create_object_cell}")
-    
-    obj_dict = xml_parser.parse_xml(file_name + ".xml")
-    
-    assert len([x for x in obj_dict.values() if x]) == 2
-    assert len(obj_dict['xml_type_list']) == 3
-    assert len(obj_dict['xml_function_list']) == 1
-
-    expected_type = {('High level function', 'Function'),
-                     ('High high level function', 'High level function'),
-                     ('High high high level function', 'High high level function')}
-    captured_type = set()
-    for type_elem in obj_dict['xml_type_list']:
-        print(type_elem, type_elem.base)
-        if isinstance(type_elem.base, BaseType):
-            base_type = str(type_elem.base)
-        else:
-            base_type = type_elem.base.name
-        captured_type.add((type_elem.name, base_type))
-
-    assert expected_type == captured_type
-    assert obj_dict['xml_function_list'].pop().type.name == "High high high level function"
 
     test_lib.remove_xml_file(file_name)

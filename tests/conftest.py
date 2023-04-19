@@ -89,34 +89,59 @@ def input_test_issue_5():
 
 
 @pytest.fixture
-def fun_elem_exposing_cell():
-    """Returns string see usage"""
-    return "\n".join(["Fun_inter is a functional interface", "Fun_elem is a functional element",
-                      "Fun_elem_2 is a functional element", "Fun_elem_3 is a functional element",
-                      "Fun_elem_4 is a functional element", "Fun_elem_5 is a functional element",
-                      "Fun_elem_6 is a functional element", "Fun_elem_ext is a functional element",
+def input_test_fun_elem_exposes_interface():
+    """@ingroup test_input_cell
+    @anchor input_test_fun_elem_exposes_interface
+    Defines input fixture for @ref test_fun_elem_exposes_interface and @ref test_fun_elem_exposes_interface_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        Fun_inter is a functional interface
+        Fun_elem is a functional element
+        Fun_elem_2 is a functional element
+        Fun_elem_3 is a functional element
+        Fun_elem_4 is a functional element
+        Fun_elem_5 is a functional element
+        Fun_elem_6 is a functional element
+        Fun_elem_ext is a functional element
+        Fun_elem_ext_2 is a functional element
+        Fun_elem is composed of Fun_elem_2
+        Fun_elem_2 is composed of Fun_elem_3
+        Fun_elem_3 is composed of Fun_elem_4
+        Fun_elem_4 is composed of Fun_elem_5
+        Fun_elem_5 is composed of Fun_elem_6
+        Fun_elem exposes Fun_inter
+        Fun_elem_6 exposes Fun_inter
+        Fun_elem_ext exposes Fun_inter
+        Fun_elem_ext_2 exposes Fun_inter
+        toto exposes Fun_inter
+        tata exposes titi
+        Fun_elem exposes coco
+    """
+    return "\n".join(["Fun_inter is a functional interface",
+                      "Fun_elem is a functional element",
+                      "Fun_elem_2 is a functional element",
+                      "Fun_elem_3 is a functional element",
+                      "Fun_elem_4 is a functional element",
+                      "Fun_elem_5 is a functional element",
+                      "Fun_elem_6 is a functional element",
+                      "Fun_elem_ext is a functional element",
                       "Fun_elem_ext_2 is a functional element",
                       "Fun_elem is composed of Fun_elem_2",
                       "Fun_elem_2 is composed of Fun_elem_3",
                       "Fun_elem_3 is composed of Fun_elem_4",
                       "Fun_elem_4 is composed of Fun_elem_5",
-                      "Fun_elem_5 is composed of Fun_elem_6", "Fun_elem exposes Fun_inter",
-                      "Fun_elem_6 exposes Fun_inter", "Fun_elem_ext exposes Fun_inter",
-                      "Fun_elem_ext_2 exposes Fun_inter", "toto exposes Fun_inter",
-                      "tata exposes titi", "Fun_elem exposes coco", ""])
-
-
-@pytest.fixture
-def allocation_item_cell():
-    """Returns string see usage"""
-    first_part = "\n".join(["F1 is a function",
-                            "F2 with a long name is a function. The alias of F2 with a "
-                            "long name is F2",
-                            "F3 is a function", "F4 is a function", "a is a data",
-                            "Fun_elem is a functional element", ""])
-    second_part = "\n".join(["under test_view", "consider F1. consider toto. consider a, Fun_elem",
-                             "consider tata.", "consider F1, F2, F3, F4", ""])
-    return first_part, second_part
+                      "Fun_elem_5 is composed of Fun_elem_6",
+                      "Fun_elem exposes Fun_inter",
+                      "Fun_elem_6 exposes Fun_inter",
+                      "Fun_elem_ext exposes Fun_inter",
+                      "Fun_elem_ext_2 exposes Fun_inter",
+                      "toto exposes Fun_inter",
+                      "tata exposes titi",
+                      "Fun_elem exposes coco",
+                      ""])
 
 
 @pytest.fixture
@@ -348,23 +373,58 @@ def input_test_issue_44():
 
 
 @pytest.fixture
-def extends_and_set_type_cell():
-    """Returns string see usage"""
+def input_test_issue_56():
+    """@ingroup test_issue_56
+    @anchor input_test_issue_56
+    Defines input fixture for @ref test_issue_56_in and @ref test_issue_56_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        Safety interface extends functional interface
+        The alias of Safety interface is sf
+        ========================================
+        sf_a extends sf
+        sf_a_b extends sf_a
+        final one extends sf_a_b
+        Fun_inter is a functional interface
+        The type of Fun_inter is final one
+    """
     first_part = "\n".join(["Safety interface extends functional interface",
-                            "The alias of Safety interface is sf", ""])
-    second_part = "\n".join(["sf_a extends sf", "sf_a_b extends sf_a",
-                             "final one extends sf_a_b", "Fun_inter is a functional interface",
-                             "The type of Fun_inter is final one", ""])
+                            "The alias of Safety interface is sf",
+                            ""])
+
+    second_part = "\n".join(["sf_a extends sf",
+                             "sf_a_b extends sf_a",
+                             "final one extends sf_a_b",
+                             "Fun_inter is a functional interface",
+                             "The type of Fun_inter is final one",
+                             ""])
+
     return first_part, second_part
 
 
 @pytest.fixture
-def extends_and_create_object_cell():
-    """Returns string see usage"""
+def input_test_issue_62():
+    """@ingroup test_issue_62
+    @anchor input_test_issue_62
+    Defines input fixture for @ref test_issue_62_in and @ref test_issue_62_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        "High level function" extends function
+        "High high level function" extends "High level function"
+        "High high high level function" extends "High high level function"
+        3High is a "High high high level function"
+    """
     return "\n".join(['"High level function" extends function',
                       '"High high level function" extends "High level function"',
                       '"High high high level function" extends "High high level function"',
-                      '3High is a "High high high level function"', ""])
+                      '3High is a "High high high level function"',
+                      ""])
 
 
 @pytest.fixture
@@ -679,7 +739,7 @@ def input_test_fun_elem_context_with_attribute():
     """@ingroup test_context_diagrams
     @anchor input_test_fun_elem_context_with_attribute
     Defines input fixture for @ref test_fun_elem_context_with_attribute, @ref test_attribute_declaration,
-    @ref test_described_attribute and @ref test_instantiated_attribute
+    @ref test_instantiated_attribute and @ref test_instantiated_attribute_xml
 
     @return input fixture
 
@@ -714,3 +774,88 @@ def input_test_fun_elem_context_with_attribute():
                             ""])
 
     return first_part, second_part, third_part
+
+
+@pytest.fixture
+def input_test_issue_21():
+    """@ingroup test_issue_21
+    @anchor input_test_issue_21
+    Defines input fixture for @ref test_issue_21_in
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function.
+        high level function extends function. The alias of F1 is f1.
+        The type of f1 is high level function
+    """
+    return "\n".join(["F1 is a function.",
+                      "high level function extends function. The alias of F1 is f1.",
+                      "The type of f1 is high level function",
+                      ""])
+
+
+@pytest.fixture
+def input_test_issue_9():
+    """@ingroup test_issue_9
+    @anchor input_test_issue_9
+    Defines input fixture for @ref test_issue_9_in and @ref test_issue_9_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        F2 with a long name is a function. The alias of F2 with a long name is F2
+        F3 is a function
+        F4 is a function
+        a is a data
+        Fun_elem is a functional element
+        ========================================
+        under test_view
+        consider F1. consider toto. consider a, Fun_elem
+        consider tata.
+        consider F1, F2, F3, F4
+    """
+    first_part = "\n".join(["F1 is a function",
+                            "F2 with a long name is a function. The alias of F2 with a "
+                            "long name is F2",
+                            "F3 is a function",
+                            "F4 is a function",
+                            "a is a data",
+                            "Fun_elem is a functional element",
+                            ""])
+
+    second_part = "\n".join(["under test_view",
+                             "consider F1. consider toto. consider a, Fun_elem",
+                             "consider tata.",
+                             "consider F1, F2, F3, F4",
+                             ""])
+
+    return first_part, second_part
+
+
+@pytest.fixture
+def input_test_functional_interface():
+    """@ingroup test_input_cell
+    @anchor input_test_functional_interface
+    Defines input fixture for @ref test_functional_interface
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        Color is an attribute
+        A is a data
+        Fun_inter is a functional interface.
+        The alias of Fun_inter is FI
+        The Color of Fun_inter is pink
+        Fun_inter allocates A.
+    """
+    return "\n".join(["Color is an attribute",
+                      "A is a data",
+                      "Fun_inter is a functional interface.",
+                      "The alias of Fun_inter is FI",
+                      "The Color of Fun_inter is pink",
+                      "Fun_inter allocates A."])
