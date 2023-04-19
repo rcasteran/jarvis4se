@@ -9,23 +9,22 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_entry_exit_plantuml_state(mocker):
-    """Notebook equivalent:
-     %%jarvis
-     with state_entry_exit_chain
-    EXIT_TOTO extends state
-    ENTRY state extends state
-    S1 is a EXIT_TOTO
-    S2 is a ENTRY state
-    show chain S1, S2
-     """
+def test_entry_exit_plantuml_state(mocker, input_test_entry_exit):
+    """@ingroup test_plantuml_state
+    @anchor test_entry_exit_plantuml_state
+    Test state diagram display for entry and exit states in a chain
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_entry_exit : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_entry_exit
+    """
     spy = mocker.spy(plantuml_adapter, "get_state_machine_diagram")
     file_name = "state_entry_exit_chain"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "EXIT_TOTO extends state\n"
-                         "ENTRY state extends state\n"
-                         "S1 is a EXIT_TOTO\n"
-                         "S2 is a ENTRY state\n"
+                         f"{input_test_entry_exit}\n"
                          "show chain S1, S2\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags

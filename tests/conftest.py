@@ -959,3 +959,24 @@ def input_test_fun_elem_with_interfaces_3():
                       "Fun_inter allocates B",
                       "Fun_inter allocates C",
                       ""])
+
+
+@pytest.fixture
+def input_test_entry_exit():
+    """@ingroup test_plantuml_state
+    @anchor input_test_entry_exit
+    Defines input fixture for @ref test_entry_exit_plantuml_state
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        EXIT_TOTO extends state
+        ENTRY state extends state
+        S1 is a EXIT_TOTO
+        S2 is a ENTRY state
+    """
+    return "\n".join(["EXIT_TOTO extends state",
+                      "ENTRY state extends state",
+                      "S1 is a EXIT_TOTO",
+                      "S2 is a ENTRY state"])
