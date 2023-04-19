@@ -1,7 +1,7 @@
 """@defgroup test_issue_38
 Tests about functional elements related to https://github.com/rcasteran/jarvis4se/issues/38
 
-@see test_issue_38_diagram
+@see test_issue_38_context
 """
 # Libraries
 
@@ -13,9 +13,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_38_diagram(mocker, input_test_issue_38):
+def test_issue_38_context(mocker, input_test_issue_38):
     """@ingroup test_context_diagrams
-    @anchor test_issue_38_diagram
+    @anchor test_issue_38_context
     Test context diagram display related to @ref test_issue_38
 
     @param[in] mocker : mocker fixture reference

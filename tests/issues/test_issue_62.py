@@ -2,6 +2,7 @@
 Tests about type creation from extended type related to https://github.com/rcasteran/jarvis4se/issues/62
 
 @see test_issue_62_in
+@see test_issue_62_xml
 """
 # Libraries
 
@@ -19,7 +20,7 @@ xml_parser = XmlParser3SE()
 def test_issue_62_in(capsys, input_test_issue_62):
     """@ingroup test_input_cell
     @anchor test_issue_62_in
-    Test type creation from extended type related to https://github.com/rcasteran/jarvis4se/issues/62
+    Test type creation from extended type related to @ref test_issue_62
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_62 : input fixture reference
@@ -48,7 +49,7 @@ def test_issue_62_in(capsys, input_test_issue_62):
 def test_issue_62_xml(input_test_issue_62):
     """@ingroup test_xml_file
     @anchor test_issue_62_xml
-    Test type creation from extended type related to https://github.com/rcasteran/jarvis4se/issues/62
+    Test type creation from extended type related to @ref test_issue_62
 
     @param[in] input_test_issue_62 : input fixture reference
     @return none

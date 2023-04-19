@@ -10,6 +10,8 @@ Defines the following non regression tests:
 - @ref test_context_diagrams : Tests about context diagrams
 - @ref test_decomposition_diagrams : Tests about decomposition diagrams
 - @ref test_input_cell : Tests about Jarvis outputs
+- @ref test_magic_tools : Tests about Jarvis IPython magic tools
+- @ref test_question_answer : Tests about Jarvis answer to user's question
 """
 
 # Libraries
@@ -20,7 +22,7 @@ import pytest
 def input_test_issue_5():
     """@ingroup test_issue_5
     @anchor input_test_issue_5
-    Defines input fixture for @ref test_issue_5
+    Defines input fixture for @ref test_issue_5_decomposition
 
     @return input fixture
 
@@ -92,7 +94,7 @@ def input_test_issue_5():
 def input_test_fun_elem_exposes_interface():
     """@ingroup test_input_cell
     @anchor input_test_fun_elem_exposes_interface
-    Defines input fixture for @ref test_fun_elem_exposes_interface and @ref test_fun_elem_exposes_interface_xml
+    Defines input fixture for @ref test_fun_elem_exposes_interface_in and @ref test_fun_elem_exposes_interface_xml
 
     @return input fixture
 
@@ -148,7 +150,7 @@ def input_test_fun_elem_exposes_interface():
 def input_test_issue_31():
     """@ingroup test_issue_31
     @anchor input_test_issue_31
-    Defines input fixture for @ref test_issue_31
+    Defines input fixture for @ref test_issue_31_context
 
     @return input fixture
 
@@ -185,10 +187,10 @@ def input_test_issue_31():
 
 
 @pytest.fixture
-def input_test_fun_elem_context_with_interfaces():
+def input_test_fun_elem_with_interfaces():
     """@ingroup test_context_diagrams
-    @anchor input_test_fun_elem_context_with_interfaces
-    Defines input fixture for @ref test_fun_elem_context_with_interfaces
+    @anchor input_test_fun_elem_with_interfaces
+    Defines input fixture for @ref test_fun_elem_with_interfaces_context
 
     @return input fixture
 
@@ -244,7 +246,7 @@ def input_test_fun_elem_context_with_interfaces():
 def input_test_issue_39():
     """@ingroup test_issue_39
     @anchor input_test_issue_39
-    Defines input fixture for @ref test_issue_39
+    Defines input fixture for @ref test_issue_39_context
 
     @return input fixture
 
@@ -268,7 +270,7 @@ def input_test_issue_39():
 def input_test_issue_38():
     """@ingroup test_issue_38
     @anchor input_test_issue_38
-    Defines input fixture for @ref test_issue_38
+    Defines input fixture for @ref test_issue_38_context
 
     @return input fixture
 
@@ -326,7 +328,7 @@ def input_test_issue_38():
 def input_test_issue_44():
     """@ingroup test_issue_44
     @anchor input_test_issue_44
-    Defines input fixture for @ref test_issue_44
+    Defines input fixture for @ref test_issue_44_context
 
     @return input fixture
 
@@ -450,7 +452,7 @@ def state_exit_entry_chain_output_diagram():
 def input_test_issue_81():
     """@ingroup test_issue_81
     @anchor input_test_issue_81
-    Defines input fixture for @ref test_issue_81
+    Defines input fixture for @ref test_issue_81_context
 
     @return input fixture
 
@@ -508,7 +510,7 @@ def input_test_issue_81():
 def input_test_issue_7():
     """@ingroup test_issue_7
     @anchor input_test_issue_7
-    Defines input fixture for @ref test_issue_7
+    Defines input fixture for @ref test_issue_7_decomposition
 
     @return input fixture
 
@@ -598,7 +600,7 @@ def input_test_issue_7():
 def input_test_issue_13():
     """@ingroup test_issue_13
     @anchor input_test_issue_13
-    Defines input fixture for @ref test_issue_13
+    Defines input fixture for @ref test_issue_13_decomposition
 
     @return input fixture
 
@@ -619,10 +621,10 @@ def input_test_issue_13():
 
 
 @pytest.fixture
-def input_test_fun_elem_decomposition_with_interface():
+def input_test_fun_elem_with_interfaces_2():
     """@ingroup test_decomposition_diagrams
-    @anchor input_test_fun_elem_decomposition_with_interface
-    Defines input fixture for @ref test_fun_elem_decomposition_with_interface
+    @anchor input_test_fun_elem_with_interfaces_2
+    Defines input fixture for @ref test_fun_elem_with_interfaces_decomposition
 
     @return input fixture
 
@@ -735,11 +737,11 @@ def input_test_fun_elem_decomposition_with_interface():
 
 
 @pytest.fixture
-def input_test_fun_elem_context_with_attribute():
+def input_test_fun_elem_with_attribute():
     """@ingroup test_context_diagrams
-    @anchor input_test_fun_elem_context_with_attribute
-    Defines input fixture for @ref test_fun_elem_context_with_attribute, @ref test_attribute_declaration,
-    @ref test_instantiated_attribute and @ref test_instantiated_attribute_xml
+    @anchor input_test_fun_elem_with_attribute
+    Defines input fixture for @ref test_fun_elem_with_attribute_context, @ref test_attribute_declaration_in,
+    @ref test_instantiated_attribute_in and @ref test_instantiated_attribute_xml
 
     @return input fixture
 
@@ -840,7 +842,7 @@ def input_test_issue_9():
 def input_test_functional_interface():
     """@ingroup test_input_cell
     @anchor input_test_functional_interface
-    Defines input fixture for @ref test_functional_interface
+    Defines input fixture for @ref test_functional_interface_in
 
     @return input fixture
 
@@ -859,3 +861,61 @@ def input_test_functional_interface():
                       "The alias of Fun_inter is FI",
                       "The Color of Fun_inter is pink",
                       "Fun_inter allocates A."])
+
+
+@pytest.fixture
+def input_test_issue_55():
+    """@ingroup test_issue_55
+    @anchor input_test_issue_55
+    Defines input fixture for @ref test_issue_55
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        F2 is a function
+        F3 is a function
+
+        a is a data
+        F1 produces a
+        F2 consumes a
+        F3 consumes a
+
+        E1 is a functional element
+        E1 allocates F1
+
+        E2 is a functional element
+        E2 allocates F2
+
+        E3 is a functional element
+        E3 allocates F3
+
+        I_E1_E2 is a functional interface
+        I_E1_E2 allocates a
+        E1 exposes I_E1_E2
+        E2 exposes I_E1_E2
+    """
+    return "\n".join(["F1 is a function",
+                      "F2 is a function",
+                      "F3 is a function",
+                      "",
+                      "a is a data",
+                      "F1 produces a",
+                      "F2 consumes a",
+                      "F3 consumes a",
+                      "",
+                      "E1 is a functional element",
+                      "E1 allocates F1",
+                      "",
+                      "E2 is a functional element",
+                      "E2 allocates F2",
+                      "",
+                      "E3 is a functional element",
+                      "E3 allocates F3",
+                      "",
+                      "I_E1_E2 is a functional interface",
+                      "I_E1_E2 allocates a",
+                      "E1 exposes I_E1_E2",
+                      "E2 exposes I_E1_E2",
+                      ""])

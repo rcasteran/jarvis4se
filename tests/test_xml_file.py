@@ -67,24 +67,24 @@ def test_simple_function_within_xml():
     assert [fun.name == "F1" for fun in function_list]
 
 
-def test_instantiated_attribute_xml(input_test_fun_elem_context_with_attribute):
+def test_instantiated_attribute_xml(input_test_fun_elem_with_attribute):
     """@ingroup test_xml_file
     @anchor test_instantiated_attribute_xml
     Test attribute instantiation in xml file
 
-    @param[in] input_test_fun_elem_context_with_attribute : input fixture reference
+    @param[in] input_test_fun_elem_with_attribute : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-    @ref input_test_fun_elem_context_with_attribute
+    @ref input_test_fun_elem_with_attribute
     """
     file_name = "described_attribute_within_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[0]}\n")
+                         f"{input_test_fun_elem_with_attribute[0]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[1]}\n")
+                         f"{input_test_fun_elem_with_attribute[1]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[2]}\n")
+                         f"{input_test_fun_elem_with_attribute[2]}\n")
 
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
 

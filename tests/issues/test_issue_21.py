@@ -16,7 +16,7 @@ jarvis4se = test_lib.get_jarvis4se()[0]
 def test_issue_21_in(capsys, input_test_issue_21):
     """@ingroup test_input_cell
     @anchor test_issue_21_in
-    Test type and alias related to https://github.com/rcasteran/jarvis4se/issues/21
+    Test type and alias related to @ref test_issue_21
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_21 : input fixture reference

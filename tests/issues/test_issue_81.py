@@ -1,7 +1,7 @@
 """@defgroup test_issue_81
 Tests about functional decomposition related to https://github.com/rcasteran/jarvis4se/issues/81
 
-@see test_issue_81_diagram
+@see test_issue_81_context
 """
 # Libraries
 
@@ -13,9 +13,9 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_issue_81_diagram(mocker, input_test_issue_81):
+def test_issue_81_context(mocker, input_test_issue_81):
     """@ingroup test_decomposition_diagrams
-    @anchor test_issue_81_diagram
+    @anchor test_issue_81_context
     Test context diagram display related to @ref test_issue_81
 
     @param[in] mocker : mocker fixture reference

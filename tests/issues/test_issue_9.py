@@ -19,7 +19,7 @@ xml_parser = XmlParser3SE()
 def test_issue_9_in(capsys, input_test_issue_9):
     """@ingroup test_input_cell
     @anchor test_issue_9_in
-    Test object allocation to a view related to https://github.com/rcasteran/jarvis4se/issues/9
+    Test object allocation to a view related to @ref test_issue_9
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_9 : input fixture reference
@@ -60,7 +60,7 @@ def test_issue_9_in(capsys, input_test_issue_9):
 def test_issue_9_xml(input_test_issue_9):
     """@ingroup test_input_cell
     @anchor test_issue_9_xml
-    Test object allocation to a view related to https://github.com/rcasteran/jarvis4se/issues/9
+    Test object allocation to a view related to @ref test_issue_9
 
     @param[in] input_test_issue_9 : input fixture reference
     @return none

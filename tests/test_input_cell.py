@@ -11,21 +11,21 @@ import test_lib
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_attribute_declaration(capsys, input_test_fun_elem_context_with_attribute):
+def test_attribute_declaration_in(capsys, input_test_fun_elem_with_attribute):
     """@ingroup test_input_cell
-    @anchor test_attribute_declaration
+    @anchor test_attribute_declaration_in
     Test attribute declaration
 
     @param[in] capsys : capture fixture reference
-    @param[in] input_test_fun_elem_context_with_attribute : input fixture reference
+    @param[in] input_test_fun_elem_with_attribute : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-    @ref input_test_fun_elem_context_with_attribute
+    @ref input_test_fun_elem_with_attribute
     """
-    file_name = "attribute_declaration"
+    file_name = "test_attribute_declaration_in"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[1]}\n")
+                         f"{input_test_fun_elem_with_attribute[1]}\n")
 
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
@@ -39,25 +39,25 @@ def test_attribute_declaration(capsys, input_test_fun_elem_context_with_attribut
     assert all(i in captured.out for i in expected)
 
 
-def test_instantiated_attribute(capsys, input_test_fun_elem_context_with_attribute):
+def test_instantiated_attribute_in(capsys, input_test_fun_elem_with_attribute):
     """@ingroup test_input_cell
-    @anchor test_instantiated_attribute
+    @anchor test_instantiated_attribute_in
     Test attribute instantiation
 
     @param[in] capsys : capture fixture reference
-    @param[in] input_test_fun_elem_context_with_attribute : input fixture reference
+    @param[in] input_test_fun_elem_with_attribute : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-    @ref input_test_fun_elem_context_with_attribute
+    @ref input_test_fun_elem_with_attribute
     """
-    file_name = "described_attribute_input"
+    file_name = "test_instantiated_attribute_in"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[0]}\n")
+                         f"{input_test_fun_elem_with_attribute[0]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[1]}\n")
+                         f"{input_test_fun_elem_with_attribute[1]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_context_with_attribute[2]}\n")
+                         f"{input_test_fun_elem_with_attribute[2]}\n")
 
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
@@ -74,9 +74,9 @@ def test_instantiated_attribute(capsys, input_test_fun_elem_context_with_attribu
     assert all(i in last_out for i in expected)
 
 
-def test_functional_interface(capsys, input_test_functional_interface):
+def test_functional_interface_in(capsys, input_test_functional_interface):
     """@ingroup test_input_cell
-    @anchor test_functional_interface
+    @anchor test_functional_interface_in
     Test data allocation to functional interface
 
     @param[in] capsys : capture fixture reference
@@ -86,7 +86,7 @@ def test_functional_interface(capsys, input_test_functional_interface):
     **Jarvis4se equivalent:**
     @ref input_test_functional_interface
     """
-    file_name = "test_functional_interface"
+    file_name = "test_functional_interface_in"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_functional_interface}\n")
 
@@ -107,9 +107,9 @@ def test_functional_interface(capsys, input_test_functional_interface):
     assert all(i in captured.out for i in expected)
 
 
-def test_fun_elem_exposes_interface(capsys, input_test_fun_elem_exposes_interface):
+def test_fun_elem_exposes_interface_in(capsys, input_test_fun_elem_exposes_interface):
     """@ingroup test_input_cell
-    @anchor test_fun_elem_exposes_interface
+    @anchor test_fun_elem_exposes_interface_in
     Test functional interface allocation to functional element
 
     @param[in] capsys : capture fixture reference
@@ -119,7 +119,7 @@ def test_fun_elem_exposes_interface(capsys, input_test_fun_elem_exposes_interfac
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_exposes_interface
     """
-    file_name = "test_fun_elem_exposes_interface"
+    file_name = "test_fun_elem_exposes_interface_in"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_exposes_interface}\n")
 

@@ -14,6 +14,7 @@ import jarvis
 def get_jarvis4se():
     """@ingroup test_lib
     Start an ipython session, init parser and jarvis4se magic call
+
     @return jarvis4se magic call, jarvis4se diagram generator, jarvis4se magic tool
     """
     ip = get_ipython()
@@ -27,6 +28,7 @@ def get_jarvis4se():
 def remove_xml_file(file_name):
     """@ingroup test_lib
     Remove the XML file generated during the test
+
     @return none
     """
     file_path = os.path.join("./", f"{file_name}.xml")

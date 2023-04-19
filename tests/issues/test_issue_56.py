@@ -20,7 +20,7 @@ xml_parser = XmlParser3SE()
 def test_issue_56_in(capsys, input_test_issue_56):
     """@ingroup test_input_cell
     @anchor test_issue_56_in
-    Test extended types related to https://github.com/rcasteran/jarvis4se/issues/9
+    Test extended types related to @ref test_issue_56
 
     @param[in] capsys : capture fixture reference
     @param[in] input_test_issue_56 : input fixture reference
@@ -56,7 +56,7 @@ def test_issue_56_in(capsys, input_test_issue_56):
 def test_issue_56_xml(input_test_issue_56):
     """@ingroup test_xml_file
     @anchor test_issue_56_xml
-    Test extended types related to https://github.com/rcasteran/jarvis4se/issues/9
+    Test extended types related to @ref test_issue_56
 
     @param[in] input_test_issue_56 : input fixture reference
     @return none

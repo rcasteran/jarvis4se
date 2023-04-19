@@ -1,14 +1,24 @@
-"""Test module for tools pkg i.e. MagicTools"""
+"""@defgroup test_magic_tools
+Tests about Jarvis IPython magic tools
+"""
+# Libraries
+
+
+# Modules
 import test_lib
 
+# Initialisation of Jarvis
 jarvis4se_all = test_lib.get_jarvis4se()
 generator = jarvis4se_all[1]
 jarvis4se_tool = jarvis4se_all[2]
 
 
-def test_retrieve_pkg_version(capsys):
-    """Notebook equivalent:
-    %retrieve_pkg_version
+def test_retrieve_pkg_version_tool(capsys):
+    """@ingroup test_magic_tools
+    Test the magic line "%retrieve_pkg_version"
+
+    @param[in] capsys : capture fixture reference
+    @return none
     """
     jarvis4se_tool.retrieve_pkg_version('')
     captured = capsys.readouterr()
@@ -16,26 +26,13 @@ def test_retrieve_pkg_version(capsys):
     assert all(i in captured.out for i in expected)
 
 
-def test_diagram_cell(capsys, mocker):
-    """Notebook equivalent:
-    %%diagram
-    @startuml
-    !define Junction_Or circle #black
-    !define Junction_And circle #whitesmoke
+def test_diagram_cell_tool(capsys, mocker):
+    """@ingroup test_magic_tools
+    Test the magic cell "%%diagram"
 
-    Junction_And JunctionAnd
-    Junction_Or JunctionOr
-
-    archimate #Technology "VPN Server" as vpnServerA <<technology-device>>
-
-    rectangle GO #lightgreen
-    rectangle STOP #red
-    rectangle WAIT #orange
-    GO -up-> JunctionOr
-    STOP -up-> JunctionOr
-    STOP -down-> JunctionAnd
-    WAIT -down-> JunctionAnd
-    @enduml
+    @param[in] capsys : capture fixture reference
+    @param[in] mocker : mocker fixture reference
+    @return none
     """
     spy = mocker.spy(generator, "get_diagram_url")
     jarvis4se_tool.diagram('', "@startuml\n"

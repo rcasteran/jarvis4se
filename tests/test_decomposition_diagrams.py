@@ -12,22 +12,22 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_fun_elem_decomposition_with_interface(mocker, input_test_fun_elem_decomposition_with_interface):
+def test_fun_elem_with_interfaces_decomposition(mocker, input_test_fun_elem_with_interfaces_2):
     """@ingroup test_decomposition_diagrams
-    @anchor test_fun_elem_decomposition_with_interface
+    @anchor test_fun_elem_with_interfaces_decomposition
     Test decomposition diagram display with functional element decomposition and interface allocation
 
     @param[in] mocker : mocker fixture reference
-    @param[in] input_test_fun_elem_decomposition_with_interface : input fixture reference
+    @param[in] input_test_fun_elem_with_interfaces_2 : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-    @ref input_test_fun_elem_decomposition_with_interface
+    @ref input_test_fun_elem_with_interfaces_2
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    file_name = "fun_elem_decompo_with_interface"
+    file_name = "test_fun_elem_with_interfaces_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_decomposition_with_interface}\n"                         
+                         f"{input_test_fun_elem_with_interfaces_2}\n"                         
                          "show decomposition E1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags
