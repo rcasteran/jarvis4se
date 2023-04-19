@@ -430,25 +430,6 @@ def input_test_issue_62():
 
 
 @pytest.fixture
-def state_exit_entry_chain_output_diagram():
-    """Returns string see usage"""
-    return ('skinparam useBetaStyle true\n',
-            'hide empty description\n',
-            '<style>\n',
-            '     .Entry{\n',
-            '        FontColor white\n',
-            '        BackgroundColor black\n',
-            '     }\n',
-            '     .Exit{\n',
-            '        FontColor white\n',
-            '        BackgroundColor black\n',
-            '     }\n',
-            '</style>\n',
-            'state "S1" as s1 <<EXIT>>\n',
-            'state "S2" as s2 <<ENTRY>>\n')
-
-
-@pytest.fixture
 def input_test_issue_81():
     """@ingroup test_issue_81
     @anchor input_test_issue_81
