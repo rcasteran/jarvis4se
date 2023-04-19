@@ -1,67 +1,30 @@
-"""Module to test sequece diagrams"""
+"""@defgroup test_sequence_diagrams
+Tests about sequence diagrams
+"""
+# Modules
 import test_lib
 import plantuml_adapter
 
+# Initialisation of Jarvis
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_fun_inter_simple_sequence(mocker):
-    """Notebook equivalent:
-    %%jarvis
-    with fun_inter_simple_sequence
-    Fun_inter is a functional interface
-    Fun_elem_1 is a functional element
-    Fun_elem_2 is a functional element
-    A is a data
-    B is a data
-    C is a data
-    F1 is a function
-    F2 is a function
-    F1 produces A
-    F1 produces C
-    F2 consumes C
-    F2 produces B
-    F1 consumes B
-    F2 consumes A
-    C implies B
-    B implies A
-    Fun_elem_1 allocates F1
-    Fun_elem_2 allocates F2
-    Fun_elem_1 exposes Fun_inter
-    Fun_elem_2 exposes Fun_inter
-    Fun_inter allocates A
-    Fun_inter allocates B
-    Fun_inter allocates C
+def test_fun_elem_with_interfaces_sequence(mocker, input_test_fun_elem_with_interfaces_3):
+    """@ingroup test_sequence_diagrams
+    @anchor test_fun_elem_with_interfaces_sequence
+    Test sequence diagram display for functional elements with interfaces
 
-    show sequence Fun_inter
-     """
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_fun_elem_with_interfaces_3 : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_fun_elem_with_interfaces_3
+    """
     spy = mocker.spy(plantuml_adapter, "get_sequence_diagram")
     file_name = "fun_inter_simple_sequence"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "Fun_inter is a functional interface\n"
-                         "Fun_elem_1 is a functional element\n"
-                         "Fun_elem_2 is a functional element\n"
-                         "A is a data\n"
-                         "B is a data\n"
-                         "C is a data\n"
-                         "F1 is a function\n"
-                         "F2 is a function\n"
-                         "F1 produces A\n"
-                         "F1 produces C\n"
-                         "F2 consumes C\n"
-                         "F2 produces B\n"
-                         "F1 consumes B\n"
-                         "F2 consumes A\n"
-                         "C implies B\n"
-                         "B implies A\n"
-                         "Fun_elem_1 allocates F1\n"
-                         "Fun_elem_2 allocates F2\n"
-                         "Fun_elem_1 exposes Fun_inter\n"
-                         "Fun_elem_2 exposes Fun_inter\n"
-                         "Fun_inter allocates A\n"
-                         "Fun_inter allocates B\n"
-                         "Fun_inter allocates C\n"
-                         "\n"
+                         f"{input_test_fun_elem_with_interfaces_3}\n"
                          "show sequence Fun_inter\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags

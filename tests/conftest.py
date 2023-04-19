@@ -919,3 +919,62 @@ def input_test_issue_55():
                       "E1 exposes I_E1_E2",
                       "E2 exposes I_E1_E2",
                       ""])
+
+@pytest.fixture
+def input_test_fun_elem_with_interfaces_3():
+    """@ingroup test_sequence_diagrams
+    @anchor input_test_fun_elem_with_interfaces_3
+    Defines input fixture for @ref test_fun_elem_with_interfaces_sequence
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        Fun_inter is a functional interface
+        Fun_elem_1 is a functional element
+        Fun_elem_2 is a functional element
+        A is a data
+        B is a data
+        C is a data
+        F1 is a function
+        F2 is a function
+        F1 produces A
+        F1 produces C
+        F2 consumes C
+        F2 produces B
+        F1 consumes B
+        F2 consumes A
+        C implies B
+        B implies A
+        Fun_elem_1 allocates F1
+        Fun_elem_2 allocates F2
+        Fun_elem_1 exposes Fun_inter
+        Fun_elem_2 exposes Fun_inter
+        Fun_inter allocates A
+        Fun_inter allocates B
+        Fun_inter allocates C
+    """
+    return "\n".join(["Fun_inter is a functional interface",
+                      "Fun_elem_1 is a functional element",
+                      "Fun_elem_2 is a functional element",
+                      "A is a data",
+                      "B is a data",
+                      "C is a data",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "F1 produces A",
+                      "F1 produces C",
+                      "F2 consumes C",
+                      "F2 produces B",
+                      "F1 consumes B",
+                      "F2 consumes A",
+                      "C implies B",
+                      "B implies A",
+                      "Fun_elem_1 allocates F1",
+                      "Fun_elem_2 allocates F2",
+                      "Fun_elem_1 exposes Fun_inter",
+                      "Fun_elem_2 exposes Fun_inter",
+                      "Fun_inter allocates A",
+                      "Fun_inter allocates B",
+                      "Fun_inter allocates C",
+                      ""])
