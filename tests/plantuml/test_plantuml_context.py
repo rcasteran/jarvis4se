@@ -11,23 +11,22 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_simple_function_plantuml_context(mocker):
+def test_simple_function_plantuml_context(mocker, input_test_simple_function):
     """@ingroup test_plantuml_context
+    @anchor test_simple_function_plantuml_context
     Test context diagram display with a single function without input / output
 
     @param[in] mocker : mocker fixture reference
+    @param[in] input_test_simple_function : input fixture reference
     @return none
 
     **Jarvis4se equivalent:**
-
-        with simple_function_context
-        F1 is a function
-        show context F1
+    @ref input_test_simple_function
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     file_name = "test_simple_function_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 is a function\n"
+                         f"{input_test_simple_function}\n"
                          "show context F1\n")
 
     # result = plantuml text without "@startuml ... @enduml" tags

@@ -1,5 +1,5 @@
-""" @package test
-Module for non regression testing
+""" @package tests
+Module for non regression testing using Pytest
 
 Defines the regression tests based on pytest fixtures
 (https://docs.pytest.org/en/stable/reference/fixtures.html).
@@ -12,6 +12,7 @@ Defines the following non regression tests:
 - @ref test_input_cell : Tests about Jarvis outputs
 - @ref test_magic_tools : Tests about Jarvis IPython magic tools
 - @ref test_question_answer : Tests about Jarvis answer to user's question
+- @ref test_xml_file : Tests about xml file generation
 """
 
 # Libraries
@@ -150,7 +151,7 @@ def input_test_fun_elem_exposes_interface():
 def input_test_issue_31():
     """@ingroup test_issue_31
     @anchor input_test_issue_31
-    Defines input fixture for @ref test_issue_31_plantuml_context
+    Defines input fixture for @ref test_issue_31_plantuml_context and @ref test_issue_31_xml
 
     @return input fixture
 
@@ -901,6 +902,7 @@ def input_test_issue_55():
                       "E2 exposes I_E1_E2",
                       ""])
 
+
 @pytest.fixture
 def input_test_fun_elem_with_interfaces_3():
     """@ingroup test_plantuml_sequence
@@ -980,3 +982,89 @@ def input_test_entry_exit():
                       "ENTRY state extends state",
                       "S1 is a EXIT_TOTO",
                       "S2 is a ENTRY state"])
+
+
+@pytest.fixture
+def input_test_simple_function():
+    """@ingroup test_plantuml_context
+    @anchor input_test_simple_function
+    Defines input fixture for @ref test_simple_function_plantuml_context and @ref test_simple_function_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+    """
+    return "\n".join(["F1 is a function",
+                     ""])
+
+
+@pytest.fixture
+def input_test_extended_attribute():
+    """@ingroup test_xml_file
+    @anchor input_test_extended_attribute
+    Defines input fixture for @ref test_extended_attribute_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+         A is an attribute
+         B is an attribute.
+         attribute type A extends attribute.
+         attribute type B extends attribute
+         The type of A is attribute type A.
+         The type of B is attribute type B
+    """
+    return "\n".join(["A is an attribute",
+                      "B is an attribute.",
+                      "attribute type A extends attribute.",
+                      "attribute type B extends attribute",
+                      "The type of A is attribute type A.",
+                      "The type of B is attribute type B"])
+
+
+@pytest.fixture
+def input_test_functional_interface_with_attribute():
+    """@ingroup test_xml_file
+    @anchor input_test_functional_interface_with_attribute
+    Defines input fixture for @ref test_functional_interface_with_attribute_xml
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        Color is an attribute
+        A is a data
+        F1 is a function
+        F2 is a function
+        Fun_elem_1 is a functional element
+        Fun_elem_2 is a functional element
+        F1 produces A
+        F2 consumes A
+        Fun_elem_1 allocates F1
+        Fun_elem_2 allocates F2
+        Fun_inter is a functional interface.
+        The alias of Fun_inter is FI
+        The Color of Fun_inter is pink
+        Fun_elem_1 exposes Fun_inter
+        Fun_elem_2 exposes Fun_inter
+        Fun_inter allocates A.
+    """
+    return "\n".join(["Color is an attribute",
+                      "A is a data",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "Fun_elem_1 is a functional element",
+                      "Fun_elem_2 is a functional element",
+                      "F1 produces A",
+                      "F2 consumes A",
+                      "Fun_elem_1 allocates F1",
+                      "Fun_elem_2 allocates F2",
+                      "Fun_inter is a functional interface.",
+                      "The alias of Fun_inter is FI",
+                      "The Color of Fun_inter is pink",
+                      "Fun_elem_1 exposes Fun_inter",
+                      "Fun_elem_2 exposes Fun_inter",
+                      "Fun_inter allocates A."])

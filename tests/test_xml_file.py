@@ -1,24 +1,28 @@
 """@defgroup test_xml_file
-Tests about xml file
+Tests about xml file generation
 """
+# Libraries
 import os
 from pathlib import Path
 
+# Modules
 import test_lib
 from xml_adapter import XmlParser3SE
 from datamodel import BaseType
 
+# Initialisation of Jarvis
 jarvis4se = test_lib.get_jarvis4se()[0]
 xml_parser = XmlParser3SE()
 
 
-def test_generate_xml_file_template():
-    """Notebook equivalent:
-     %%jarvis
-     with generate_xml_file_template
+def test_template_xml():
+    """@ingroup test_xml_file
+    @anchor test_template_xml
+    Test the structure of the xml generated file against the xml template
 
-     """
-    file_name = "generate_xml_file_template"
+    @return none
+    """
+    file_name = "test_template_xml"
     jarvis4se.jarvis("", f"with {file_name}\n")
     path = Path(os.path.join("./", file_name + ".xml"))
     with path as file:
@@ -48,16 +52,20 @@ def test_generate_xml_file_template():
     test_lib.remove_xml_file(file_name)
 
 
-def test_simple_function_within_xml():
-    """Notebook equivalent:
-     %%jarvis
-     with simple_function_within_xml
-     F1 is a function
+def test_simple_function_xml(input_test_simple_function):
+    """@ingroup test_xml_file
+    @anchor test_simple_function_xml
+    Test xml file for a single function without input / output
 
-     """
-    file_name = "simple_function_within_xml"
+    @param[in] input_test_simple_function : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function
+    """
+    file_name = "test_simple_function_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 is a function\n")
+                         f"{input_test_simple_function}\n")
 
     function_list = xml_parser.parse_xml(file_name + ".xml")['xml_function_list']
 
@@ -78,7 +86,7 @@ def test_instantiated_attribute_xml(input_test_fun_elem_with_attribute):
     **Jarvis4se equivalent:**
     @ref input_test_fun_elem_with_attribute
     """
-    file_name = "described_attribute_within_xml"
+    file_name = "test_instantiated_attribute_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_attribute[0]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
@@ -108,26 +116,20 @@ def test_instantiated_attribute_xml(input_test_fun_elem_with_attribute):
     assert expected == result
 
 
-def test_set_attribute_type_within_xml():
-    """Tests that attribute types are written correctly within xml, notebook equivalent:
-     %%jarvis
-     with set_attribute_type_within_xml
-     A is an attribute
-     B is an attribute.
-     attribute type A extends attribute
-     attribute type B extends attribute
-     The type of A is attribute type A.
-     The type of B is attribute type B
+def test_extended_attribute_xml(input_test_extended_attribute):
+    """@ingroup test_xml_file
+    @anchor test_extended_attribute_xml
+    Test attribute extension in xml file
 
-     """
-    file_name = "set_attribute_type_within_xml"
+    @param[in] input_test_extended_attribute : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_extended_attribute
+    """
+    file_name = "test_extended_attribute_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "A is an attribute\n"
-                         "B is an attribute.\n"
-                         "attribute type A extends attribute\n"
-                         "attribute type B extends attribute\n"
-                         "The type of A is attribute type A.\n"
-                         "The type of B is attribute type B\n")
+                         f"{input_test_extended_attribute}\n")
 
     attribute_list = xml_parser.parse_xml(file_name + ".xml")['xml_attribute_list']
     expected = {('A', 'attribute type A'), ('B', 'attribute type B')}
@@ -143,98 +145,20 @@ def test_set_attribute_type_within_xml():
     assert expected == result
 
 
-def test_function_with_grandkids_within_xml(input_test_issue_31):
-    """See Issue #31, Notebook equivalent:
-    %%jarvis
-    with function_with_grandkids_within_xml
-    F1 is a function
-    F1a is a function
-    F1a1 is a function
-    F1 is composed of F1a
-    F1a is composed of F1a1
-    a is a data
-    F1a produces a
-    b is a data
-    F1a consumes b
-    c is a data
-    F1a1 produces c
-    d is a data
-    F1a1 consumes d
+def test_functional_interface_with_attribute_xml(input_test_functional_interface_with_attribute):
+    """@ingroup test_xml_file
+    @anchor test_functional_interface_with_attribute_xml
+    Test functional interface with attribute in xml file
+
+    @param[in] input_test_functional_interface_with_attribute : input fixture reference
+    @return none
+
+    **Jarvis4se equivalent:**
+    @ref input_test_functional_interface_with_attribute
     """
-    file_name = "function_with_grandkids_within_xml"
-    jarvis4se.jarvis("", f"with {file_name}\n{input_test_issue_31}")
-
-    obj_dict = xml_parser.parse_xml(file_name + ".xml")
-
-    expected_cons = {('b', 'F1a'), ('d', 'F1'), ('b', 'F1'), ('d', 'F1a'), ('d', 'F1a1')}
-    expected_prod = {('c', 'F1a1'), ('a', 'F1'), ('c', 'F1'), ('c', 'F1a'), ('a', 'F1a')}
-    expected_child = {('F1', 'F1a'), ('F1a', 'F1a1')}
-    # xml_adapter.parse_xml() returns mainly set(), so the order can change
-    # thus we have to compare it with a set also
-    result_cons = set()
-    result_prod = set()
-    result_child = set()
-    assert len(obj_dict['xml_data_list']) == 4 and len(obj_dict['xml_function_list']) == 3
-    assert (len(obj_dict['xml_consumer_function_list']) and
-            len(obj_dict['xml_producer_function_list'])) == 5
-
-    for cons in obj_dict['xml_consumer_function_list']:
-        result_cons.add((cons[0], cons[1].name))
-    for prod in obj_dict['xml_producer_function_list']:
-        result_prod.add((prod[0], prod[1].name))
-    for fun in obj_dict['xml_function_list']:
-        if fun.child_list:
-            for child in fun.child_list:
-                result_child.add((fun.name, child.name))
-
-    test_lib.remove_xml_file(file_name)
-
-    assert expected_cons == result_cons
-    assert expected_prod == result_prod
-    assert expected_child == result_child
-
-
-def test_functional_interface_within_xml():
-    """Notebook equivalent:
-    %%jarvis
-    with functional_interface_within_xml
-    Color is an attribute
-    A is a data
-    F1 is a function
-    F2 is a function
-    Fun_elem_1 is a functional element
-    Fun_elem_2 is a functional element
-    F1 produces A
-    F2 consumes A
-    Fun_elem_1 allocates F1
-    Fun_elem_2 allocates F2
-    Fun_inter is a functional interface.
-    The type of Fun_inter is a_type
-    The alias of Fun_inter is FI
-    The Color of Fun_inter is pink
-    Fun_elem_1 exposes Fun_inter
-    Fun_elem_2 exposes Fun_inter
-    Fun_inter allocates A.
-    """
-    file_name = "functional_interface_within_xml"
+    file_name = "test_functional_interface_with_attribute_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "Color is an attribute\n"
-                         "A is a data\n"
-                         "F1 is a function\n"
-                         "F2 is a function\n"
-                         "Fun_elem_1 is a functional element\n"
-                         "Fun_elem_2 is a functional element\n"
-                         "F1 produces A\n"
-                         "F2 consumes A\n"
-                         "Fun_elem_1 allocates F1\n"
-                         "Fun_elem_2 allocates F2\n"
-                         "Fun_inter is a functional interface.\n"
-                         "The type of Fun_inter is functional interface\n"
-                         "The alias of Fun_inter is FI\n"
-                         "The Color of Fun_inter is pink\n"
-                         "Fun_elem_1 exposes Fun_inter\n"
-                         "Fun_elem_2 exposes Fun_inter\n"
-                         "Fun_inter allocates A.\n")
+                         f"{input_test_functional_interface_with_attribute}\n")
 
     obj_dict = xml_parser.parse_xml(file_name + ".xml")
 
