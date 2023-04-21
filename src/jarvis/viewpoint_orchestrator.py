@@ -20,7 +20,7 @@ def add_view(view_name_str, xml_view_list, output_xml):
             Parameters:
                 view_name_str ([str]) : Lists of string from jarvis cell
                 xml_view_list ([Function]) : view list from xml parsing
-                output_xml (GenerateXML object) : XML's file object
+                output_xml (XmlWriter3SE object) : XML's file object
 
             Returns:
                 1 if update, else 0
@@ -70,7 +70,7 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
         xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
         xml_data_list ([Data]) : Data list from xml parsing
         xml_view_list ([View]) : View list from xml parsing
-        output_xml (GenerateXML object) : XML's file object
+        output_xml (XmlWriter3SE object) : XML's file object
 
     Returns:
         update ([0/1]) : 1 if update, else 0
@@ -137,7 +137,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
         Parameters:
             attribute_str_list ([str]) : Lists of string from jarvis cell
             xml_attribute_list ([Attribute]) : Attribute list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -223,7 +223,7 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
 
         Parameters:
             new_obj_attribute_list ([Attribute, (Object, value)]) : New described attributes
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -231,7 +231,7 @@ def add_object_attribute(new_obj_attribute_list, output_xml):
     if not new_obj_attribute_list:
         return 0
 
-    output_xml.write_described_attribute_item(new_obj_attribute_list)
+    output_xml.write_attribute_described_item(new_obj_attribute_list)
     # Warn the user once added within xml
     for described_attribute in new_obj_attribute_list:
         described_attribute[0].add_described_item(described_attribute[1])

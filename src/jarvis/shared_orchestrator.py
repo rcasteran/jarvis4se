@@ -104,7 +104,7 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
             parent_child_lists ([Parent, Child]) : [[Function],[State],[FunctionalElement],
             [PhysicalElement]]
             xml_fun_elem_list ([FunctionalElement]) : functional element list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -539,7 +539,7 @@ def delete_objects(object_lists, output_xml):
 
         Parameters:
             object_lists : see order in get_basetype_and_idx()
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -650,7 +650,7 @@ def set_object_type(object_lists, output_xml):
 
         Parameters:
             object_lists : see order in get_basetype_and_idx()
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -733,7 +733,7 @@ def set_object_alias(object_lists, output_xml):
     updates has been made.
         Parameters:
             object_lists ([Object]) : object with new alias
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -985,7 +985,7 @@ def add_allocation(allocation_dict, output_xml):
 
         Parameters:
             allocation_dict : Containing all allocation to write within xml
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
@@ -993,7 +993,7 @@ def add_allocation(allocation_dict, output_xml):
     if any(allocation_dict.values()):
         for _, k in enumerate(allocation_dict):
             if allocation_dict[k]:
-                output_xml.write_objects_allocation(allocation_dict[k])
+                output_xml.write_object_allocation(allocation_dict[k])
                 # Warn the user once added within xml
                 for elem in allocation_dict[k]:
                     Logger.set_info(__name__,
@@ -1203,13 +1203,13 @@ def add_derived(object_list, output_xml):
     updates has been made.
         Parameters:
             object_list ([Object]) : object with new derived
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             1 if update, else 0
     """
     if any(object_list):
-        output_xml.write_derived(object_list)
+        output_xml.write_object_derived(object_list)
         for obj in object_list:
             Logger.set_info(__name__,
                            f"{obj.name} inherited from {obj.derived.name}")
@@ -1348,7 +1348,7 @@ def get_unique_id():
 
 
 def add_obj_to_xml(object_lists, output_xml):
-    """Send lists object to respective methods of GenerateXML, returns 1 if at least one obj has
+    """Send lists object to respective methods of XmlWriter3SE, returns 1 if at least one obj has
     been written"""
     switch_write_obj = {
         0: output_xml.write_data,

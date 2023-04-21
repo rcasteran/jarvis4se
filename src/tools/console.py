@@ -9,7 +9,7 @@ import os
 # Modules
 from jarvis.command_parser import CmdParser
 from plantuml_adapter import PlantUmlGen
-from xml_adapter import GenerateXML, XmlParser3SE
+from xml_adapter import XmlWriter3SE, XmlParser3SE
 
 
 def main():
@@ -49,20 +49,17 @@ def main():
                 # If the model(i.e. file) already exists, parse it to extract lists
                 if os.path.isfile(f"{xml_name}.xml"):
                     obj_dict = xml_parser.parse_xml(f"{xml_name}.xml")
-                    if isinstance(obj_dict, str):
-                        print(obj_dict)
-                        return
                     print(f"{xml_name}.xml parsed")
-                    output_xml = GenerateXML(f"{xml_name}.xml")
+                    output_xml = XmlWriter3SE(f"{xml_name}.xml")
                 # Else create an empty xml_lists
                 # or will be named by default "Output"
                 else:
                     if len(xml_name) > 1:
                         print(f"Creating {xml_name}.xml !")
-                        output_xml = GenerateXML(f"{xml_name}.xml")
+                        output_xml = XmlWriter3SE(f"{xml_name}.xml")
                     else:
                         print("Xml's file does not exists, creating it('output.xml' by default) !")
-                        output_xml = GenerateXML("")
+                        output_xml = XmlWriter3SE("")
                     output_xml.write()
 
                 obj_dict['output_xml'] = output_xml

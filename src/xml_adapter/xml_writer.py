@@ -1,30 +1,49 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module containing class methods to write within xml"""
+"""@defgroup xml_adapter
+Module for 3SE xml parsing and writing
+"""
 # Libraries
 from lxml import etree
 
+# Modules
 import datamodel
+from tools import Logger
 
 
-class GenerateXML:
-    """Class to generate XML"""
+class XmlWriter3SE:
+    """@ingroup xml_adapter
+    @anchor XmlWriter3SE
+    3SE XML writer
+    """
+
     def __init__(self, xml_file):
-        """Initialize XML structure/tags and file's object"""
+        """@var root
+        Reference to the XML root object
+
+        @var tree
+        Reference to the XML elements tree
+
+        @var file
+        Reference to the XML file to be written
+        """
+
         self.root = etree.Element("systemAnalysis")
+
         fun_arch = etree.SubElement(self.root, "funcArch")
         fun_arch_tags = ['functionList', 'dataList', 'stateList', 'transitionList',
                          'functionalElementList', 'functionalInterfaceList']
         for tag in fun_arch_tags:
             etree.SubElement(fun_arch, tag)
+
         phy_arch = etree.SubElement(self.root, "phyArch")
         phy_arch_tags = ['physicalElementList', 'physicalInterfaceList']
         for tag in phy_arch_tags:
             etree.SubElement(phy_arch, tag)
+
         viewpoint = etree.SubElement(self.root, "viewPoint")
         viewpoint_tags = ['viewList', 'attributeList', 'typeList']
         for tag in viewpoint_tags:
             etree.SubElement(viewpoint, tag)
+
         self.tree = etree.ElementTree(self.root)
 
         if len(xml_file) > 0:
@@ -32,25 +51,38 @@ class GenerateXML:
         else:
             self.file = "Output.xml"
 
+    @staticmethod
+    def check_object_type(obj):
+        """Check object type against 3SE base types
+        @param[in] obj : object reference
+        @return object type to be written in XML file
+        """
+        if isinstance(obj, datamodel.BaseType):
+            # Object is a basic 3SE type
+            type_str = str(obj)
+        else:
+            type_str = obj.id
+
+        return type_str
+
     def write_function(self, function_list):
-        """Method to write functions from function's list"""
+        """Write functions from list of functions
+        @param[in] function_list : list of functions
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//functionList') is None:
                 etree.SubElement(root, 'functionList')
-            # Loop on each flow/data
+
             for function_list_tag in root.findall(".//functionList"):
-                # Loop on function's list
                 for function in function_list:
-                    if isinstance(function.type, datamodel.BaseType):
-                        type_str = str(function.type)
-                    else:
-                        type_str = function.type.id
                     function_tag = etree.SubElement(function_list_tag, "function",
                                                     {'id': function.id,
                                                      'name': function.name,
-                                                     'type': type_str,
+                                                     'type': self.check_object_type(function.type),
                                                      'alias': function.alias,
                                                      'derived': function.derived})
 
@@ -59,112 +91,143 @@ class GenerateXML:
         self.write()
 
     def write_data(self, data_list):
-        """Method to add data flows"""
+        """Write data from list of data
+        @param[in] data_list : list of data
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//dataList') is None:
                 etree.SubElement(root, 'dataList')
+
             for data_list_tag in root.findall('.//dataList'):
                 for data in data_list:
-                    if isinstance(data.type, datamodel.BaseType):
-                        type_str = str(data.type)
-                    else:
-                        type_str = data.type.id
-                    existing_data_tag = data_list_tag.find('.//dataList/data')
-                    if existing_data_tag is not None:
-                        tag = existing_data_tag
-                    else:
-                        tag = data_list_tag
-                    data_tag = etree.SubElement(tag, "data", {'name': data.name,
-                                                              'type': type_str,
-                                                              'id': data.id})
+                    data_tag = etree.SubElement(data_list_tag, "data",
+                                                {'name': data.name,
+                                                 'type': self.check_object_type(data.type),
+                                                 'id': data.id})
 
-                    _consumer_list_tag = etree.SubElement(data_tag, "consumerList")
+                _consumer_list_tag = etree.SubElement(data_tag, "consumerList")
 
-                    _producer_list_tag = etree.SubElement(data_tag, "producerList")
+                _producer_list_tag = etree.SubElement(data_tag, "producerList")
 
-                    _predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
+                _predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
 
         self.write()
 
-    def write_consumer(self, consumer_list):
-        """Method to write consumers by list [data_name, function]"""
+    def write_data_consumer(self, consumer_list):
+        """Write consumers by list [data_name, function]
+        @param[in] consumer_list : list of consumers
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for i in consumer_list:
-                for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
+
+            for consumer in consumer_list:
+                for xml_element in root.findall(".//dataList/data[@name='" + str(consumer[0]) + "']"):
+                    if xml_element.find('consumerList') is None:
+                        etree.SubElement(xml_element, 'consumerList')
+
+                for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(consumer[0])
                                                       + "']/consumerList"):
-                    if not i[1].operand:
+                    if not consumer[1].operand:
                         _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
-                                                         {'id': i[1].id, 'role': "none"})
+                                                         {'id': consumer[1].id, 'role': "none"})
                     else:
                         _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
-                                                         {'id': i[1].id, 'role': i[1].operand})
+                                                         {'id': consumer[1].id, 'role': consumer[1].operand})
 
         self.write()
 
-    def write_producer(self, producer_list):
-        """Method to write producers by list [data_name, function]"""
+    def write_data_producer(self, producer_list):
+        """Write producers by list [data_name, function]
+        @param[in] producer_list : list of producers
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for i in producer_list:
-                for producer_list_tag in root.findall(".//dataList/data[@name='" + str(i[0])
+
+            for producer in producer_list:
+                for xml_element in root.findall(".//dataList/data[@name='" + str(producer[0]) + "']"):
+                    if xml_element.find('producerList') is None:
+                        etree.SubElement(xml_element, 'producerList')
+
+                for producer_list_tag in root.findall(".//dataList/data[@name='" + str(producer[0])
                                                       + "']/producerList"):
-
-                    _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': i[1].id})
+                    _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': producer[1].id})
 
         self.write()
 
-    def write_predecessor(self, predecessor_list):
-        """Method to write predecessors by list [data, predecessor]"""
+    def write_data_predecessor(self, predecessor_list):
+        """Write predecessors by list [data, predecessor]
+        @param[in] predecessor_list : list of predecessors
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for i in predecessor_list:
+
+            for predecessor in predecessor_list:
+                for xml_element in root.findall(".//dataList/data[@name='" + str(predecessor[0].name) + "']"):
+                    if xml_element.find('predecessorList') is None:
+                        etree.SubElement(xml_element, 'predecessorList')
+
                 for predecessor_list_tag in root.findall(
-                        ".//dataList/data[@name='" + str(i[0].name) + "']/predecessorList"):
-
-                    _producer_tag = etree.SubElement(predecessor_list_tag, "predecessor",
-                                                     {'id': i[1].id})
+                        ".//dataList/data[@name='" + str(predecessor[0].name) + "']/predecessorList"):
+                    _predecessor_tag = etree.SubElement(predecessor_list_tag, "predecessor",
+                                                     {'id': predecessor[1].id})
 
         self.write()
 
-    def delete_single_consumer_producer(self, data, function, value):
-        """Method to delete the parents (consumer or producer) when flow is within a component"""
+    def delete_data_relationship(self, data_name, object_id, relationship_type):
+        """Delete data relationship (either consumer or producer or predecessor)
+
+        @param[in] data_name : name of the data
+        @param[in] object_id : identifier of the object in relation with the data
+        @param[in] relationship_type : "consumer" or "producer" or "predecessor"
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            # Find specific consumer/producer to delete
+
             for tag in root.findall(
-                    ".//data[@name='" + data + "']/" + value + "List/" + value + "[@id='"
-                    + function.id + "']"):
+                    ".//data[@name='" + data_name + "']/" + relationship_type + "List/" + relationship_type + "[@id='"
+                    + object_id + "']"):
                 tag.getparent().remove(tag)
+
         self.write()
 
     def write(self):
-        """Method to write within XML file"""
+        """Write within the XML file
+        @return None
+        """
         with open(self.file, "wb") as file:
             self.tree.write(file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_state(self, state_list):
-        """Method to write states from state's list"""
+        """Write state from list of states
+        @param[in] state_list : list of states
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//stateList') is None:
                 etree.SubElement(root, 'stateList')
+
             for state_list_tag in root.findall(".//stateList"):
                 for state in state_list:
-                    if isinstance(state.type, datamodel.BaseType):
-                        type_str = str(state.type)
-                    else:
-                        type_str = state.type.id
                     state_tag = etree.SubElement(state_list_tag, "state",
-                                                 {'id': state.id, 'name': state.name,
-                                                  'type': type_str, 'alias': state.alias})
+                                                 {'id': state.id,
+                                                  'name': state.name,
+                                                  'type': self.check_object_type(state.type),
+                                                  'alias': state.alias})
 
                     _state_part_list_tag = etree.SubElement(state_tag, "statePartList")
                     _allocated_function_list_tag = etree.SubElement(state_tag,
@@ -172,83 +235,98 @@ class GenerateXML:
         self.write()
 
     def write_transition(self, transition_list):
-        """Method to write transition from transition's list"""
+        """Write transition from list of transitions
+        @param[in] transition_list : list of transitions
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//transitionList') is None:
                 etree.SubElement(root, 'transitionList')
+
             for transition_list_tag in root.findall(".//transitionList"):
                 for transition in transition_list:
-                    if isinstance(transition.type, datamodel.BaseType):
-                        type_str = str(transition.type)
-                    else:
-                        type_str = transition.type.id
                     transition_tag = etree.SubElement(transition_list_tag, "transition",
                                                       {'id': transition.id,
                                                        'name': transition.name,
-                                                       'type': type_str,
+                                                       'type': self.check_object_type(transition.type),
                                                        'alias': transition.alias,
                                                        'source': str(transition.source),
                                                        'destination': str(transition.destination)})
                     _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
+
         self.write()
 
     def write_transition_condition(self, transition_condition_list):
-        """Method to write transition's condition by list [transition, condition]"""
+        """Write transitions by list [transition, condition]
+        @param[in] transition_condition_list : list of transitions
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            for transition in root.findall(".//transition"):
-                for tra, condition in transition_condition_list:
-                    if transition.get('id') == tra.id:
-                        tag = transition.find('conditionList')
+
+            for transition_tag in root.findall(".//transition"):
+                for transition, condition in transition_condition_list:
+                    if transition_tag.get('id') == transition.id:
+                        tag = transition_tag.find('conditionList')
                         _state_part_tag = etree.SubElement(tag, "condition",
                                                            {'text': str(condition)})
         self.write()
 
-    def write_source(self, transition_source_list):
-        """Method to write transition's source by list [transition, source]"""
+    def write_transition_source(self, transition_source_list):
+        """Write transition source by list [transition, source]
+        @param[in] transition_source_list : list of sources
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             for transition_src in transition_source_list:
                 for state_tag in root.findall(".//transition[@id='" + transition_src[0].id + "']"):
                     state_tag.set('source', transition_src[1].id)
+
         self.write()
 
-    def write_destination(self, transition_destination_list):
-        """Method to write transition's destination by list [transition, destination]"""
+    def write_transition_destination(self, transition_destination_list):
+        """Write transition destination by list [transition, destination]
+        @param[in] transition_destination_list : list of destinations
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             for transition_dest in transition_destination_list:
                 for state_tag in root.findall(".//transition[@id='" + transition_dest[0].id + "']"):
                     state_tag.set('destination', transition_dest[1].id)
+
         self.write()
 
     def write_functional_element(self, functional_element_list):
-        """Method to write functional element from functional elements list"""
+        """Write functional element from list of functional elements
+        @param[in] functional_element_list : list of functional elements
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//functionalElementList') is None:
                 etree.SubElement(root, 'functionalElementList')
+
             for functional_element_list_tag in root.findall(".//functionalElementList"):
                 for functional_element in functional_element_list:
-                    if isinstance(functional_element.type, datamodel.BaseType):
-                        type_str = str(functional_element.type)
-                    else:
-                        type_str = functional_element.type.id
                     functional_element_tag = etree.SubElement(
                         functional_element_list_tag, "functionalElement",
-                        {
-                            'id': functional_element.id,
-                            'name': functional_element.name,
-                            'type': type_str,
-                            'alias': functional_element.alias,
-                            'derived': functional_element.derived}
-                    )
+                        {'id': functional_element.id,
+                         'name': functional_element.name,
+                         'type': self.check_object_type(functional_element.type),
+                         'alias': functional_element.alias,
+                         'derived': functional_element.derived})
 
                     _fun_elem_part_list_tag = etree.SubElement(functional_element_tag,
                                                                "functionalElementPartList")
@@ -260,33 +338,41 @@ class GenerateXML:
                                                                    "exposedInterfaceList")
         self.write()
 
-    def write_exposed_interface(self, fun_elem_inter_list):
-        """Method to write exposed interfaces by list [fun_elem/phy_elem, exposed_interface]"""
-        if isinstance(fun_elem_inter_list[0][0], datamodel.FunctionalElement):
-            string_tag = ".//functionalElement"
-        else:
-            string_tag = ".//physicalElement"
-        with open(self.file, 'rb') as file:
-            parser = etree.XMLParser(remove_blank_text=True)
-            root = self.tree.parse(file, parser)
-            for functional_element in root.findall(string_tag):
-                if functional_element.find('exposedInterfaceList') is None:
-                    etree.SubElement(functional_element, 'exposedInterfaceList')
+    def write_element_exposed_interface(self, element_interface_list):
+        """Write interface by list [element, interface]
+        @param[in] element_interface_list : list of interfaces
+        @return None
+        """
+        for element, inter in element_interface_list:
+            element_tag = self.get_object_tag(element)
+            if element_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
 
-                for fun_elem, inter in fun_elem_inter_list:
-                    if functional_element.get('id') == fun_elem.id:
-                        tag = functional_element.find('exposedInterfaceList')
-                        _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
-                                                                  {'id': inter.id})
-        self.write()
+                    for xml_element in root.findall(".//" + element_tag):
+                        if xml_element.find('exposedInterfaceList') is None:
+                            etree.SubElement(xml_element, 'exposedInterfaceList')
+
+                        if xml_element.get('id') == element.id:
+                            tag = xml_element.find('exposedInterfaceList')
+                            _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
+                                                                      {'id': inter.id})
+
+                self.write()
 
     def write_view(self, view_list):
-        """Method to write views from view's list"""
+        """Write view from list of views
+        @param[in] view_list : list of views
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//viewList') is None:
                 etree.SubElement(root, 'viewList')
+
             for view_list_tag in root.findall(".//viewList"):
                 for view in view_list:
                     if isinstance(view.type, datamodel.BaseType):
@@ -294,93 +380,103 @@ class GenerateXML:
                     else:
                         type_str = view.type.id
                     view_tag = etree.SubElement(view_list_tag, "view",
-                                                 {'id': view.id, 'name': view.name,
-                                                  'type': type_str})
+                                                {'id': view.id,
+                                                 'name': view.name,
+                                                 'type': type_str})
                     _allocated_item_list_tag = etree.SubElement(view_tag, "allocatedItemList")
+
         self.write()
 
     def write_attribute(self, attribute_list):
-        """Method to write attributes from attribute's list"""
+        """Write attribute from list of attributes
+        @param[in] attribute_list : list of attributes
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//attributeList') is None:
                 etree.SubElement(root, 'attributeList')
+
             for attribute_list_tag in root.findall(".//attributeList"):
                 for attribute in attribute_list:
-                    if isinstance(attribute.type, datamodel.BaseType):
-                        type_str = str(attribute.type)
-                    else:
-                        type_str = attribute.type.id
                     attribute_tag = etree.SubElement(attribute_list_tag, "attribute",
-                                                     {'id': attribute.id, 'name': attribute.name,
-                                                      'type': type_str,
+                                                     {'id': attribute.id,
+                                                      'name': attribute.name,
+                                                      'type': self.check_object_type(attribute.type),
                                                       'alias': attribute.alias})
 
                     _described_item_list_tag = etree.SubElement(attribute_tag, "describedItemList")
 
         self.write()
 
-    def write_described_attribute_item(self, attribute_item_list):
-        """Method to write described item by list [attribute, (described_item, value)]"""
+    def write_attribute_described_item(self, attribute_item_list):
+        """Write attribute described item by list [attribute, (described_item, value)]
+        @param[in] attribute_item_list : list of attribute described items
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
-            # Loop on each attribute
+
             for attribute_element in root.findall(".//attribute"):
                 for attribute, item in attribute_item_list:
                     if attribute_element.get('id') == attribute.id:
                         tag = attribute_element.find('describedItemList')
                         _allocated_item_tag = etree.SubElement(tag, "describedItem",
                                                                {'id': item[0].id, 'value': item[1]})
+
         self.write()
 
     def write_functional_interface(self, functional_interface_list):
-        """Method to write functional interfaces from interface's list"""
+        """Write functional interface from list of functional interfaces
+        @param[in] functional_interface_list : list of functional interfaces
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//functionalInterfaceList') is None:
                 etree.SubElement(root, 'functionalInterfaceList')
+
             for fun_interface_list_tag in root.findall(".//functionalInterfaceList"):
                 for fun_interface in functional_interface_list:
-                    if isinstance(fun_interface.type, datamodel.BaseType):
-                        type_str = str(fun_interface.type)
-                    else:
-                        type_str = fun_interface.type.id
                     fun_interface_tag = etree.SubElement(fun_interface_list_tag,
                                                          "functionalInterface",
                                                          {'id': fun_interface.id,
                                                           'name': fun_interface.name,
-                                                          'type': type_str,
+                                                          'type': self.check_object_type(fun_interface.type),
                                                           'alias': fun_interface.alias,
                                                           'derived': fun_interface.derived})
+
                     _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
                                                                 "allocatedDataList")
+
         self.write()
 
     def write_physical_element(self, physical_element_list):
-        """Method to write physical element from physical elements list"""
+        """Write physical element from list of physical elements
+        @param[in] physical_element_list : list of physical elements
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//physicalElementList') is None:
                 etree.SubElement(root, 'physicalElementList')
+
             for physical_element_list_tag in root.findall(".//physicalElementList"):
                 for physical_element in physical_element_list:
-                    if isinstance(physical_element.type, datamodel.BaseType):
-                        type_str = str(physical_element.type)
-                    else:
-                        type_str = physical_element.type.id
                     physical_element_tag = etree.SubElement(
                         physical_element_list_tag, "physicalElement",
-                        {
-                            'id': physical_element.id,
-                            'name': physical_element.name,
-                            'type': type_str,
-                            'alias': physical_element.alias,
-                            'derived': physical_element.derived}
-                    )
+                        {'id': physical_element.id,
+                         'name': physical_element.name,
+                         'type': self.check_object_type(physical_element.type),
+                         'alias': physical_element.alias,
+                         'derived': physical_element.derived})
 
                     _phy_elem_part_list_tag = etree.SubElement(physical_element_tag,
                                                                "physicalElementPartList")
@@ -388,192 +484,225 @@ class GenerateXML:
                         physical_element_tag, "allocatedFunctionalElementList")
                     _exposed_interface_list_tag = etree.SubElement(physical_element_tag,
                                                                    "exposedInterfaceList")
+
         self.write()
 
     def write_physical_interface(self, physical_interface_list):
-        """Method to write physical interfaces from interface's list"""
+        """Write physical interface from list of physical interfaces
+        @param[in] physical_interface_list : list of physical interfaces
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//physicalInterfaceList') is None:
                 etree.SubElement(root, 'physicalInterfaceList')
+
             for phy_interface_list_tag in root.findall(".//physicalInterfaceList"):
                 for phy_interface in physical_interface_list:
-                    if isinstance(phy_interface.type, datamodel.BaseType):
-                        type_str = str(phy_interface.type)
-                    else:
-                        type_str = phy_interface.type.id
                     phy_interface_tag = etree.SubElement(phy_interface_list_tag,
                                                          "physicalInterface",
                                                          {'id': phy_interface.id,
                                                           'name': phy_interface.name,
-                                                          'type': str(phy_interface.type),
+                                                          'type': self.check_object_type(phy_interface.type),
                                                           'alias': phy_interface.alias,
                                                           'derived': phy_interface.derived})
+
                     _allocated_fun_inter_list_tag = etree.SubElement(
                         phy_interface_tag, "allocatedFunctionalInterfaceList")
+
         self.write()
 
-    def write_object_alias(self, object_list):
-        """Method to write object's alias by list [object]"""
-        elem_tag = get_object_tag(object_list[0])
-        if elem_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for obj in object_list:
-                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
-                        obj_tag.set('alias', str(obj.alias))
-            self.write()
+    @staticmethod
+    def get_object_tag(obj):
+        """Get the XML element tag corresponding to an object
+        @param[in] obj : object reference
+        @return XML tag (when retrieved) or None
+        """
+        elem_tag = None
+        if isinstance(obj, datamodel.Data):
+            elem_tag = "data"
+        elif isinstance(obj, datamodel.Function):
+            elem_tag = "function"
+        elif isinstance(obj, datamodel.FunctionalElement):
+            elem_tag = "functionalElement"
+        elif isinstance(obj, datamodel.FunctionalInterface):
+            elem_tag = "functionalInterface"
+        elif isinstance(obj, datamodel.PhysicalElement):
+            elem_tag = "physicalElement"
+        elif isinstance(obj, datamodel.PhysicalInterface):
+            elem_tag = "physicalInterface"
+        elif isinstance(obj, datamodel.State):
+            elem_tag = "state"
+        elif isinstance(obj, datamodel.Transition):
+            elem_tag = "transition"
+        elif isinstance(obj, datamodel.Attribute):
+            elem_tag = "attribute"
+        elif isinstance(obj, datamodel.View):
+            elem_tag = "view"
+        elif isinstance(obj, datamodel.Type):
+            # Object is an extension of the previous 3SE basic types
+            elem_tag = "type"
+        else:
+            Logger.set_error(__name__, f"Unsupported type for object {obj.id}")
+        return elem_tag
 
-    def write_derived(self, derived_list):
-        """Method to write derived by list [Object]"""
-        for obj in derived_list:
-            elem_tag = get_object_tag(obj)
-            if elem_tag in derived_obj_tag:
+    def write_object_alias(self, object_list):
+        """Write object alias by list [object]
+        @param[in] object_list : list of objects
+        @return None
+        """
+        for obj in object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
                 with open(self.file, 'rb') as file:
                     parser = etree.XMLParser(remove_blank_text=True)
                     root = self.tree.parse(file, parser)
-                    for elem in derived_list:
-                        for fun_inter_tag in root.findall(".//" + elem_tag + "[@id='" +
-                                                          elem.id + "']"):
-                            fun_inter_tag.set('derived', str(elem.derived.id))
-            self.write()
+
+                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        obj_tag.set('alias', str(obj.alias))
+
+                self.write()
+
+    def write_object_derived(self, object_list):
+        """Write object derived reference by list [object]
+        @param[in] object_list : list of objects
+        @return None
+        """
+        for obj in object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+
+                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        obj_tag.set('derived', str(obj.derived.id))
+
+                self.write()
 
     def write_object_type(self, object_list):
-        """Method to write object's type by list [object]"""
-        elem_tag = get_object_tag(object_list[0])
-        if elem_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for obj in object_list:
-                    for object_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
-                        if isinstance(obj.type, datamodel.BaseType):
-                            type_name = str(obj.type)
-                        else:
-                            type_name = obj.type.id
-                        object_tag.set('type', type_name)
-            self.write()
+        """Write object type by list [object]
+        @param[in] object_list : list of objects
+        @return None
+        """
+        for obj in object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+
+                    for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
+                        obj_tag.set('type', self.check_object_type(obj.type))
+
+                self.write()
 
     def write_object_child(self, object_child_list):
-        """Method to write child by list [parent, child]"""
-        elem_tag = get_object_tag(object_child_list[0][0])
-        if elem_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for obj in root.findall(".//" + elem_tag):
-                    for parent, child in object_child_list:
+        """Write object child by list [parent, child]
+        @param[in] object_child_list : list of children
+        @return None
+        """
+        for parent, child in object_child_list:
+            elem_tag = self.get_object_tag(parent)
+            if elem_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+                    for obj in root.findall(".//" + elem_tag):
                         if obj.get('id') == parent.id:
                             tag = obj.find(elem_tag + 'PartList')
                             _obj_element_part_tag = etree.SubElement(tag,
                                                                      elem_tag + 'Part',
                                                                      {'id': child.id})
-            self.write()
+
+                self.write()
 
     def delete_object(self, object_list):
-        """Method to delete objects by list [object]"""
-        elem_tag = get_object_tag(object_list[0])
-        if elem_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for obj in object_list:
+        """Delete object type by list [object]
+        @param[in] object_list : list of objects
+        @return None
+        """
+        for obj in object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+
                     for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                         obj_tag.getparent().remove(obj_tag)
-            self.write()
 
-    def write_objects_allocation(self, objects_list):
-        """Method to write allocated objects from list [Object, Object]"""
-        elem_tag = get_object_tag(objects_list[0][0])
-        if elem_tag:
-            with open(self.file, 'rb') as file:
-                parser = etree.XMLParser(remove_blank_text=True)
-                root = self.tree.parse(file, parser)
-                for obj_tag in root.findall(".//" + elem_tag):
-                    for obj, obj_to_alloc in objects_list:
+                self.write()
+
+    @staticmethod
+    def get_allocation_tag(obj):
+        """Get the XML allocation tag corresponding to an object
+        @param[in] obj : object reference
+        @return XML tag (when retrieved) or None
+        """
+        elem_tag = None
+        if isinstance(obj, datamodel.Function):
+            elem_tag = "allocatedFunction"
+        elif isinstance(obj, datamodel.FunctionalElement):
+            elem_tag = "allocatedFunctionalElement"
+        elif isinstance(obj, datamodel.FunctionalInterface):
+            elem_tag = "allocatedFunctionalInterface"
+        elif isinstance(obj, datamodel.State):
+            elem_tag = "allocatedState"
+        elif isinstance(obj, datamodel.Data):
+            elem_tag = "allocatedData"
+        elif isinstance(obj, datamodel.View):
+            elem_tag = "allocatedItem"
+        else:
+            Logger.set_error(__name__, f"Unsupported type for object {obj.id} allocation")
+
+        return elem_tag
+
+    def write_object_allocation(self, object_allocated_object_list):
+        """Write allocated objects from list [Object, Allocated object]
+        @param[in] object_allocated_object_list : list of allocated objects
+        @return None
+        """
+        for obj, allocated_obj in object_allocated_object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
+                with open(self.file, 'rb') as file:
+                    parser = etree.XMLParser(remove_blank_text=True)
+                    root = self.tree.parse(file, parser)
+
+                    for obj_tag in root.findall(".//" + elem_tag):
                         if obj_tag.get('id') == obj.id:
                             if elem_tag == "view":
-                                alloc_tag = get_allocation_tag(obj)
+                                allocated_tag = self.get_allocation_tag(obj)
                             else:
-                                alloc_tag = get_allocation_tag(obj_to_alloc)
-                            tag = obj_tag.find(alloc_tag + 'List')
+                                allocated_tag = self.get_allocation_tag(allocated_obj)
+
+                            tag = obj_tag.find(allocated_tag + 'List')
                             _allocated_obj_tag = etree.SubElement(
-                                tag, alloc_tag, {'id': str(obj_to_alloc.id)})
-            self.write()
+                                tag, allocated_tag, {'id': str(allocated_obj.id)})
+
+                self.write()
 
     def write_type_element(self, type_list):
-        """Method to write type element from type's list"""
+        """Write type element from list of types
+        @param[in] type_list : list of types
+        @return None
+        """
         with open(self.file, 'rb') as file:
             parser = etree.XMLParser(remove_blank_text=True)
             root = self.tree.parse(file, parser)
+
             if root.find('.//typeList') is None:
                 etree.SubElement(root.find('./viewPoint'), 'typeList')
+
             for type_list_tag in root.findall(".//typeList"):
                 for type_elem in type_list:
-                    if isinstance(type_elem.base, datamodel.Type):
-                        base_type = type_elem.base.id
-                    else:
-                        base_type = str(type_elem.base)
-                    elem_tag = etree.SubElement(type_list_tag, "type",
-                                                {'id': type_elem.id, 'name': type_elem.name,
-                                                 'alias': type_elem.alias,
-                                                 'base': base_type})
-
-                    # _described_item_list_tag = etree.SubElement(elem_tag, "describedItemList")
+                    _elem_tag = etree.SubElement(type_list_tag, "type",
+                                                 {'id': type_elem.id,
+                                                  'name': type_elem.name,
+                                                  'alias': type_elem.alias,
+                                                  'base': self.check_object_type(type_elem.base)})
 
         self.write()
-
-
-derived_obj_tag = ("physicalInterface",
-                   "physicalElement",
-                   "function",
-                   "functionalElement",
-                   "functionalInterface")
-
-
-def get_object_tag(wanted_object):
-    """Get xml element tag corresponding to wanted_object"""
-    elem_tag = None
-    if isinstance(wanted_object, datamodel.PhysicalInterface):
-        elem_tag = "physicalInterface"
-    elif isinstance(wanted_object, datamodel.PhysicalElement):
-        elem_tag = "physicalElement"
-    elif isinstance(wanted_object, datamodel.Function):
-        elem_tag = "function"
-    elif isinstance(wanted_object, datamodel.FunctionalElement):
-        elem_tag = "functionalElement"
-    elif isinstance(wanted_object, datamodel.FunctionalInterface):
-        elem_tag = "functionalInterface"
-    elif isinstance(wanted_object, datamodel.Attribute):
-        elem_tag = "attribute"
-    elif isinstance(wanted_object, datamodel.Transition):
-        elem_tag = "transition"
-    elif isinstance(wanted_object, datamodel.State):
-        elem_tag = "state"
-    elif isinstance(wanted_object, datamodel.Data):
-        elem_tag = "data"
-    elif isinstance(wanted_object, datamodel.View):
-        elem_tag = "view"
-    elif isinstance(wanted_object, datamodel.Type):
-        elem_tag = "type"
-    return elem_tag
-
-
-def get_allocation_tag(wanted_object):
-    """Get xml allocation tag corresponding to wanted_object"""
-    elem_tag = None
-    if isinstance(wanted_object, datamodel.Function):
-        elem_tag = "allocatedFunction"
-    elif isinstance(wanted_object, datamodel.FunctionalElement):
-        elem_tag = "allocatedFunctionalElement"
-    elif isinstance(wanted_object, datamodel.FunctionalInterface):
-        elem_tag = "allocatedFunctionalInterface"
-    elif isinstance(wanted_object, datamodel.State):
-        elem_tag = "allocatedState"
-    elif isinstance(wanted_object, datamodel.Data):
-        elem_tag = "allocatedData"
-    elif isinstance(wanted_object, datamodel.View):
-        elem_tag = "allocatedItem"
-    return elem_tag

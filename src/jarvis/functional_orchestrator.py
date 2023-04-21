@@ -21,7 +21,7 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
             data_predecessor_str_set ([str]) : Lists of string from jarvis cell
             xml_data_list ([Data]) : Data list from xml parsing
             xml_view_list ([View]) : View list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update ([0/1]) : 1 if update, else 0
@@ -41,16 +41,16 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
             is_elem_found = False
             if elem[1] not in xml_data_name_list:
                 Logger.set_error(__name__,
-                                f"{elem[0]} and {elem[1]} do not exist")
+                                 f"{elem[0]} and {elem[1]} do not exist")
             else:
                 Logger.set_error(__name__,
-                                f"{elem[0]} does not exist")
+                                 f"{elem[0]} does not exist")
 
         if elem[0] in xml_data_name_list:
             if elem[1] not in xml_data_name_list:
                 is_elem_found = False
                 Logger.set_error(__name__,
-                                f"{elem[1]} does not exist")
+                                 f"{elem[1]} does not exist")
 
         if is_elem_found:
             predecessor = None
@@ -66,11 +66,13 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
                     predecessor = da
             if predecessor is not None and selected_data is not None:
                 data_predecessor_list.append([selected_data, predecessor])
+
             allocation_chain_1 = shared_orchestrator.check_add_allocated_item(elem[0],
                                                                               xml_data_list,
                                                                               xml_view_list)
             if allocation_chain_1:
                 allocated_item_list.append(allocation_chain_1)
+
             allocation_chain_2 = shared_orchestrator.check_add_allocated_item(elem[1],
                                                                               xml_data_list,
                                                                               xml_view_list)
@@ -92,7 +94,7 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
             predecessor_list ([Data, Data(predecessor)]) : Data object to set new predessor and
             predecessor Data
             xml_data_list ([Data]) : Data list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -101,15 +103,17 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
     if not predecessor_list:
         return 0
 
-    output_xml.write_predecessor(predecessor_list)
-    # Warn the user once added within xml
+    output_xml.write_data_predecessor(predecessor_list)
+
     for data_predecessor in predecessor_list:
         for d in xml_data_list:
             if data_predecessor[0].id == d.id:
                 d.add_predecessor(data_predecessor[1])
-                Logger.set_info(__name__,
-                               f"{data_predecessor[1].name} predecessor for "
-                               f"{data_predecessor[0].name}")
+
+        Logger.set_info(__name__,
+                        f"{data_predecessor[1].name} predecessor for "
+                        f"{data_predecessor[0].name}")
+
     return 1
 
 
@@ -130,7 +134,7 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
             function list from xml
             xml_function_list ([Function]) : Function list from xml parsing
             xml_data_list ([Data]) : Data list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -146,18 +150,18 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                            f"{elem[1]} and {elem[0]} do not exist")
+                             f"{elem[1]} and {elem[0]} do not exist")
         elif not any(item == elem[1] for item in xml_function_name_list) or \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             if any(item == elem[1] for item in xml_function_name_list) and \
                     not any(item == elem[0] for item in xml_data_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[0]} does not exist")
+                                 f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_data_name_list) and \
                     not any(item == elem[1] for item in xml_function_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[1]} does not exist")
+                                 f"{elem[1]} does not exist")
 
         if is_elem_found:
             # Loop to filter consumer and create a new list
@@ -193,7 +197,7 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
             new_consumer_list ([Data_name_str, Function]) : Data's name and consumer's function list
             xml_consumer_function_list ([Data_name_str, Function]) : Data's name and consumer's
             function list from xml
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -202,12 +206,14 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     if not new_consumer_list:
         return 0
 
-    output_xml.write_consumer(new_consumer_list)
+    # TODO : new_producer_list to be [data, function] and not [data_name, function]
+    output_xml.write_data_consumer(new_consumer_list)
+
     # Warn the user once added within xml
     for consumer in new_consumer_list:
         xml_consumer_function_list.append(consumer)
         Logger.set_info(__name__,
-                       f"{consumer[1].name} consumes {consumer[0]}")
+                        f"{consumer[1].name} consumes {consumer[0]}")
 
     return 1
 
@@ -222,7 +228,7 @@ def add_parent_recursively(flow, function, current_list, opposite_list, new_list
             current_list ([Data_name_str, function_name_str]) : 'Current' list (producer/consumer)
             opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
             new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
             relationship_str (str) : "consumer" or "producer"
             out (bool) : List for recursivity
         Returns:
@@ -257,7 +263,7 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
             current_list ([Data_name_str, function_name_str]) : 'Current' list (producer/consumer)
             opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
             new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
             relationship_str (str) : "consumer" or "producer"
         Returns:
             elem ([data, Function]) : Return parent
@@ -300,25 +306,25 @@ def delete_opposite(data, function, output_xml, relationship_type):
         Parameters:
             data (Data_name_str) : Data's name
             function (Function) : Current Function object
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
             relationship_type (str) : Type of relationship (i.e. consumer or producer)
         Returns:
             None
     """
 
     if relationship_type == "producer":
-        output_xml.delete_single_consumer_producer(data,
-                                                   function,
-                                                   "consumer")
+        output_xml.delete_data_relationship(data,
+                                            function.id,
+                                            "consumer")
         Logger.set_info(__name__,
-                       f"{function.name} does not consume {data} anymore")
+                        f"{function.name} does not consume {data} anymore")
     elif relationship_type == "consumer":
 
-        output_xml.delete_single_consumer_producer(data,
-                                                   function,
-                                                   "producer")
+        output_xml.delete_data_relationship(data,
+                                            function.id,
+                                            "producer")
         Logger.set_info(__name__,
-                       f"{function.name} does not produce {data} anymore")
+                        f"{function.name} does not produce {data} anymore")
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -337,7 +343,7 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
             function list from xml
             xml_function_list ([Function]) : Function list from xml parsing
             xml_data_list ([Data]) : Data list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -353,18 +359,18 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                            f"{elem[1]} and {elem[0]} do not exist")
+                             f"{elem[1]} and {elem[0]} do not exist")
         elif not any(item == elem[1] for item in xml_function_name_list) or \
                 not any(item == elem[0] for item in xml_data_name_list):
             is_elem_found = False
             if any(item == elem[1] for item in xml_function_name_list) and \
                     not any(item == elem[0] for item in xml_data_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[0]} does not exist")
+                                 f"{elem[0]} does not exist")
             elif any(item == elem[0] for item in xml_data_name_list) and \
                     not any(item == elem[1] for item in xml_function_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[1]} does not exist")
+                                 f"{elem[1]} does not exist")
 
         if is_elem_found:
             # Loop to filter consumer and create a new list
@@ -400,7 +406,7 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
             new_producer_list ([Data_name_str, Function]) : Data's name and producer's function list
             xml_producer_function_list ([Data_name_str, Function]) : Data's name and producer's
             function list from xml
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -408,12 +414,13 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
     if not new_producer_list:
         return 0
 
-    output_xml.write_producer(new_producer_list)
+    # TODO : new_producer_list to be [data, function] and not [data_name, function]
+    output_xml.write_data_producer(new_producer_list)
     # Warn the user once added within xml
     for producer in new_producer_list:
         xml_producer_function_list.append(producer)
         Logger.set_info(__name__,
-                       f"{producer[1].name} produces {producer[0]}")
+                        f"{producer[1].name} produces {producer[0]}")
     return 1
 
 
@@ -428,7 +435,7 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
         Parameters:
             trans_condition_str_list ([str]) : Lists of string from jarvis cell
             xml_transition_list ([Transition]) : Transition list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -441,7 +448,7 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
         if not any(transition_str in s for s in xml_transition_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                            f"The transition {transition_str} does not exist")
+                             f"The transition {transition_str} does not exist")
 
         if is_elem_found:
             for transition in xml_transition_list:
@@ -461,7 +468,7 @@ def add_transition_condition(condition_list, output_xml):
 
         Parameters:
             condition_list ([Transition, condition_str]) : Transition object and conditions as str
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -473,7 +480,7 @@ def add_transition_condition(condition_list, output_xml):
     for elem in condition_list:
         elem[0].add_condition(elem[1])
         Logger.set_info(__name__,
-                       f"Condition for {elem[0].name} : {elem[1]}")
+                        f"Condition for {elem[0].name} : {elem[1]}")
     return 1
 
 
@@ -487,7 +494,7 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
             src_dest_str ([str]) : Lists of string from jarvis cell
             xml_transition_list ([Transition]) : Transition list from xml parsing
             xml_state_list ([State]) : State list from xml parsing
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -508,14 +515,14 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
             if any(elem[1] in s for s in xml_transition_name_list) and not any(
                     elem[2] in j for j in xml_state_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[2]} state does not exist")
+                                 f"{elem[2]} state does not exist")
             elif any(elem[2] in s for s in xml_state_name_list) and not any(
                     elem[1] in j for j in xml_transition_name_list):
                 Logger.set_error(__name__,
-                                f"{elem[1]} transition does not exist")
+                                 f"{elem[1]} transition does not exist")
             else:
                 Logger.set_error(__name__,
-                                f"{elem[1]} transition and {elem[2]} state do not exist")
+                                 f"{elem[1]} transition and {elem[2]} state do not exist")
 
         if is_elem_found:
             if elem[0] == "source":
@@ -524,10 +531,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
-                                    if 'EXIT' in state.type.name: 
+                                    if 'EXIT' in state.type.name:
                                         Logger.set_error(__name__,
-                                                        f"{elem[2]} is typed as EXIT state, "
-                                                        f"it cannot be put as source's transition (not added)")
+                                                         f"{elem[2]} is typed as EXIT state, "
+                                                         f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
@@ -540,8 +547,8 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
                                 if not isinstance(state.type, datamodel.BaseType):
                                     if 'ENTRY' in state.type.name:
                                         Logger.set_error(__name__,
-                                                        f"{elem[2]} is typed as ENTRY state, it cannot be "
-                                                        f"put as destination's transition (not added)")
+                                                         f"{elem[2]} is typed as ENTRY state, it cannot be "
+                                                         f"put as destination's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])
@@ -560,7 +567,7 @@ def add_src_dest(src_dest_lists, output_xml):
         Parameters:
             src_dest_lists ([Transition, State(Source)],[Transition, State(Destination)]) :
             Transition object and Source/Destination
-            output_xml (GenerateXML object) : XML's file object
+            output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
@@ -569,20 +576,20 @@ def add_src_dest(src_dest_lists, output_xml):
         new_src_list = src_dest_lists[0]
         new_dest_list = src_dest_lists[1]
         if new_src_list:
-            output_xml.write_source(new_src_list)
+            output_xml.write_transition_source(new_src_list)
             # Warn the user once writtent and added within xml
             for source in new_src_list:
                 source[0].set_source(source[1].id)
                 Logger.set_info(__name__,
-                               f"{source[1].name} source for {source[0].name}")
+                                f"{source[1].name} source for {source[0].name}")
 
         if new_dest_list:
-            output_xml.write_destination(new_dest_list)
+            output_xml.write_transition_destination(new_dest_list)
             # Warn the user once writtent and added within xml
             for destination in new_dest_list:
                 destination[0].set_destination(destination[1].id)
                 Logger.set_info(__name__,
-                               f"{destination[1].name} destination for {destination[0].name}")
+                                f"{destination[1].name} destination for {destination[0].name}")
         return 1
 
     return 0
@@ -598,11 +605,12 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
         xml_fun_elem_list ([Fun Elem]) : Functional Element list from xml parsing
         xml_fun_inter_list ([FunctionalInterface]) : FunctionalInterface list from xml parsing
         xml_data_list ([Data]) : Data list from xml parsing
-        output_xml (GenerateXML object) : XML's file object
+        output_xml (XmlWriter3SE object) : XML's file object
 
     Returns:
         [0/1] : if update has been made
     """
+    # TODO : add physical interface support (see write_element_exposed_interface())
     output = False
     for exposes_str in exposes_str_list:
         fun_elem = check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
@@ -616,9 +624,9 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
             if fun_inter.id not in fun_elem.exposed_interface_list and check_rule:
                 output = True
                 fun_elem.add_exposed_interface(fun_inter.id)
-                output_xml.write_exposed_interface([[fun_elem, fun_inter]])
+                output_xml.write_element_exposed_interface([[fun_elem, fun_inter]])
                 Logger.set_info(__name__,
-                               f"{fun_elem.name} exposes {fun_inter.name}")
+                                f"{fun_elem.name} exposes {fun_inter.name}")
 
     if output:
         return 1
@@ -647,10 +655,10 @@ def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
         else:
             opposite_fun_elem_list.append(elem)
 
-    for idx in range(0, len(opposite_fun_elem_list)-1):
+    for idx in range(0, len(opposite_fun_elem_list) - 1):
         if not check_parentality(
-                opposite_fun_elem_list[idx], opposite_fun_elem_list[idx+1]) and \
-                not check_parentality(opposite_fun_elem_list[idx+1], opposite_fun_elem_list[idx]):
+                opposite_fun_elem_list[idx], opposite_fun_elem_list[idx + 1]) and \
+                not check_parentality(opposite_fun_elem_list[idx + 1], opposite_fun_elem_list[idx]):
             check = False
             return check
 
@@ -670,17 +678,17 @@ def check_print_wrong_pair_object(object_a, object_b, relationship_type):
     """
     if object_a[1] == object_b[1] is None:
         Logger.set_error(__name__,
-                        f"{object_a[0]} and {object_b[0]} do not exist, choose valid names/aliases for: "
-                        f"'{object_a[2]}' {relationship_type} "
-                        f"'{object_b[2]}'")
+                         f"{object_a[0]} and {object_b[0]} do not exist, choose valid names/aliases for: "
+                         f"'{object_a[2]}' {relationship_type} "
+                         f"'{object_b[2]}'")
     elif object_a[1] is None or object_b[1] is None:
         if object_a[1] is None and object_b[1]:
             Logger.set_error(__name__,
-                            f"{object_a[0]} does not exist, choose a valid name/alias for: "
-                            f"'{object_a[2]}' {relationship_type} "
-                            f"{object_b[1].name}")
+                             f"{object_a[0]} does not exist, choose a valid name/alias for: "
+                             f"'{object_a[2]}' {relationship_type} "
+                             f"{object_b[1].name}")
         elif object_b[1] is None and object_a[1]:
             Logger.set_error(__name__,
-                            f"{object_b[0]} does not exist, choose a valid name/alias for: "
-                            f"{object_a[1].name} {relationship_type} "
-                            f"'{object_b[2]}'")
+                             f"{object_b[0]} does not exist, choose a valid name/alias for: "
+                             f"{object_a[1].name} {relationship_type} "
+                             f"'{object_b[2]}'")

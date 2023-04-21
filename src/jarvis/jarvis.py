@@ -13,7 +13,7 @@ from io import StringIO
 from IPython.core.magic import (Magics, magics_class, cell_magic)
 
 # Modules
-from xml_adapter import GenerateXML, XmlParser3SE
+from xml_adapter import XmlWriter3SE, XmlParser3SE
 from tools import Logger
 
 
@@ -48,15 +48,9 @@ class MagicJarvis(Magics):
             # If the model(i.e. file) already exists, parse it to extract lists
             if os.path.isfile(f"{xml_name}.xml"):
                 obj_dict = xml_parser.parse_xml(f"{xml_name}.xml")
-
-                # TODO : why this print ?
-                if isinstance(obj_dict, str):
-                    print(obj_dict)
-                    return
-
                 Logger.set_info(__name__,
                                 f"{xml_name}.xml parsed")
-                output_xml = GenerateXML(f"{xml_name}.xml")
+                output_xml = XmlWriter3SE(f"{xml_name}.xml")
             # Else create an empty xml_lists
             # or will be named by default "Outpout"
             else:
@@ -64,11 +58,11 @@ class MagicJarvis(Magics):
                     Logger.set_info(__name__,
                                     f"Creating {xml_name}.xml !")
 
-                    output_xml = GenerateXML(f"{xml_name}.xml")
+                    output_xml = XmlWriter3SE(f"{xml_name}.xml")
                 else:
                     Logger.set_info(__name__,
                                     "Xml's file does not exists, creating it ('output.xml' by default) !")
-                    output_xml = GenerateXML("")
+                    output_xml = XmlWriter3SE("")
                 output_xml.write()
 
             obj_dict['output_xml'] = output_xml
