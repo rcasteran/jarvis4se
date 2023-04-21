@@ -16,28 +16,36 @@ class Logger:
     @classmethod
     def set_debug(cls, module_name, msg):
         """Format DEBUG message
+
+        DEBUG message are displayed with verbosity level greater than or equal to 2
         @param[in] module_name module name responsible for the message
         @param[in] msg message to be formatted
         @return None
         """
-        print("[DEBUG] " + msg)
-        if Config.is_log_file:
-            cls.write("DEBUG", module_name, msg)
+        if Config.verbose_level >= 2:
+            print("[DEBUG] " + msg)
+            if Config.is_log_file:
+                cls.write("DEBUG", module_name, msg)
 
     @classmethod
     def set_info(cls, module_name, msg):
         """Format INFO message
+
+        INFO message are displayed with verbosity level greater than 1
         @param[in] module_name module name responsible for the message
         @param[in] msg message to be formatted
         @return None
         """
-        print(msg)
-        if Config.is_log_file:
-            cls.write("INFO", module_name, msg)
+        if Config.verbose_level >= 1:
+            print(msg)
+            if Config.is_log_file:
+                cls.write("INFO", module_name, msg)
 
     @classmethod
     def set_warning(cls, module_name, msg):
         """Format WARNING message
+
+        WARNING message are always displayed (no verbosity level consideration)
         @param[in] module_name module name responsible for the message
         @param[in] msg message to be formatted
         @return None
@@ -49,6 +57,8 @@ class Logger:
     @classmethod
     def set_error(cls, module_name, msg):
         """Format ERROR message
+
+        ERROR message are always displayed (no verbosity level consideration)
         @param[in] module_name module name responsible for the message
         @param[in] msg message to be formatted
         @return None

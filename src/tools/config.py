@@ -13,6 +13,7 @@ class Config:
 
     is_log_file = False
     is_diagram_file = False
+    verbose_level = 1
 
     @classmethod
     def read(cls):
@@ -38,6 +39,18 @@ class Config:
                                     cls.is_diagram_file = True
                                     # Logger depends from Config. Thus simple print
                                     print("Diagram file storage activated")
+                            elif lines[0].strip() == 'verbose':
+                                if lines[1].strip().isnumeric():
+                                    cls.verbose_level = int(lines[1].strip())
+                                    # Logger depends from Config. Thus simple print
+                                    if cls.verbose_level == 0:
+                                        print(f"ERROR and WARNING messages display activated")
+                                    elif cls.verbose_level == 1:
+                                        print(f"ERROR, WARNING and INFO messages display activated")
+                                    else:
+                                        print(f"ERROR, WARNING, INFO and DEBUG messages display activated")
+                                else:
+                                    error = True
                             else:
                                 error = True
                         else:
