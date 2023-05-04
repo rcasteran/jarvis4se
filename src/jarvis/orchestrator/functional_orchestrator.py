@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """Module with methods relative to Functional section"""
 # Libraries
-import re
 
 # Modules
 import datamodel
 from . import shared_orchestrator
-from .question_answer import get_objects_names, get_children, check_get_object, check_parentality
+from jarvis import question_answer
+from jarvis import util
 from tools import Logger
 
 
@@ -30,10 +30,10 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
 
     allocated_item_list = []
     # Filter input string
-    data_predecessor_str_list = shared_orchestrator.cut_string_list(data_predecessor_str_set)
+    data_predecessor_str_list = util.cut_string_list(data_predecessor_str_set)
 
     # Create data names list already in xml
-    xml_data_name_list = get_objects_names(xml_data_list)
+    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
 
     for elem in data_predecessor_str_list:
         is_elem_found = True
@@ -141,8 +141,8 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
     """
     new_consumer_list = []
     # Create object names/aliases list and data's name
-    xml_function_name_list = get_objects_names(xml_function_list)
-    xml_data_name_list = get_objects_names(xml_data_list)
+    xml_function_name_list = question_answer.get_objects_names(xml_function_list)
+    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
     # Loop to filter consumer and create a new list
     for elem in consumer_str_list:
         is_elem_found = True
@@ -273,7 +273,7 @@ def add_parent_for_data(flow, function, current_list, opposite_list, new_list, o
     check = False
 
     if function.parent is not None and elem not in [*current_list, *new_list]:
-        parent_child_list, parent_child_dict = get_children(function.parent)
+        parent_child_list, parent_child_dict = question_answer.get_children(function.parent)
 
         current_loop_check = False
         for current_loop_data in [*current_list, *new_list]:
@@ -350,8 +350,8 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
     """
     new_producer_list = []
     # Create object names/aliases list
-    xml_function_name_list = get_objects_names(xml_function_list)
-    xml_data_name_list = get_objects_names(xml_data_list)
+    xml_function_name_list = question_answer.get_objects_names(xml_function_list)
+    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
     # Loop to filter producer and create a new list
     for elem in producer_str_list:
         is_elem_found = True
@@ -442,7 +442,7 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
     """
     condition_list = []
     # Create a list with all transition names/aliases already in the xml
-    xml_transition_name_list = get_objects_names(xml_transition_list)
+    xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
     for transition_str, condition_str in trans_condition_str_list:
         is_elem_found = True
         if not any(transition_str in s for s in xml_transition_name_list):
@@ -502,8 +502,8 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
     new_src_list = []
     new_dest_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_transition_name_list = get_objects_names(xml_transition_list)
-    xml_state_name_list = get_objects_names(xml_state_list)
+    xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
+    xml_state_name_list = question_answer.get_objects_names(xml_state_list)
 
     concatenated_lists = [*xml_transition_name_list, *xml_state_name_list]
 
@@ -613,8 +613,8 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
     # TODO : add physical interface support (see write_element_exposed_interface())
     output = False
     for exposes_str in exposes_str_list:
-        fun_elem = check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
-        fun_inter = check_get_object(exposes_str[1], **{'xml_fun_inter_list': xml_fun_inter_list})
+        fun_elem = question_answer.check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
+        fun_inter = question_answer.check_get_object(exposes_str[1], **{'xml_fun_inter_list': xml_fun_inter_list})
 
         check_print_wrong_pair_object((exposes_str[0], fun_elem, 'Functional Element'),
                                       (exposes_str[1], fun_inter, 'Functional Interface'),
@@ -649,16 +649,16 @@ def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
 
     opposite_fun_elem_list = []
     for elem in exposed_fun_elem_list:
-        if check_parentality(elem, fun_elem) or \
-                check_parentality(fun_elem, elem):
+        if question_answer.check_parentality(elem, fun_elem) or \
+                question_answer.check_parentality(fun_elem, elem):
             return check
         else:
             opposite_fun_elem_list.append(elem)
 
     for idx in range(0, len(opposite_fun_elem_list) - 1):
-        if not check_parentality(
+        if not question_answer.check_parentality(
                 opposite_fun_elem_list[idx], opposite_fun_elem_list[idx + 1]) and \
-                not check_parentality(opposite_fun_elem_list[idx + 1], opposite_fun_elem_list[idx]):
+                not question_answer.check_parentality(opposite_fun_elem_list[idx + 1], opposite_fun_elem_list[idx]):
             check = False
             return check
 

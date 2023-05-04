@@ -7,34 +7,9 @@ import uuid
 
 # Modules
 import datamodel
-from .question_answer import (get_object_type, check_get_object, get_allocation_object,
-                              check_not_family, get_objects_names, get_children, get_objects_name_lists)
+from jarvis import question_answer
+from jarvis import util
 from tools import Logger
-
-
-def cut_string_list(string_tuple_list):
-    """From set of input command strings e.g for composition with input list as
-    {(Function_name, Function_name_A), (Function_name, [Function_name_B, Function_name_C])} : this
-    methods returns {(Function_name, Function_name_A), (Function_name, Function_name_B),
-    (Function_name, Function_name_C)}
-
-        Parameters:
-            string_tuple_list ([(str, str), ...]) : Lists of string tuple from jarvis cell
-        Returns:
-            output_list ([0/1]) : output list
-    """
-
-    output_list = []
-    for parent, child in string_tuple_list:
-        if "," in child:
-            child_str = child.replace(" ", "")
-            child_list_str = re.split(r',(?![^[]*\])', child_str)
-            for elem in child_list_str:
-                output_list.append((parent, elem))
-        else:
-            output_list.append((parent, child))
-
-    return output_list
 
 
 def check_add_child(parent_child_name_str_list, **kwargs):
@@ -54,26 +29,26 @@ def check_add_child(parent_child_name_str_list, **kwargs):
 
     parent_child_lists = [[] for _ in range(4)]
     available_objects = (datamodel.Function, datamodel.State,
-                         datamodel.FunctionalElement,  datamodel.PhysicalElement)
+                         datamodel.FunctionalElement, datamodel.PhysicalElement)
 
-    cleaned_parent_child_list_str = cut_string_list(parent_child_name_str_list)
+    cleaned_parent_child_list_str = util.cut_string_list(parent_child_name_str_list)
     for elem in cleaned_parent_child_list_str:
-        parent_object = check_get_object(elem[0], **kwargs)
-        child_object = check_get_object(elem[1], **kwargs)
+        parent_object = question_answer.check_get_object(elem[0], **kwargs)
+        child_object = question_answer.check_get_object(elem[1], **kwargs)
         if parent_object is None:
             if child_object is None:
                 Logger.set_error(__name__,
-                                f"{elem[0]} and {elem[1]} are not Function/State/FunctionalElement"
-                                f"/PhysicalElement or the object does not exist")
+                                 f"{elem[0]} and {elem[1]} are not Function/State/FunctionalElement"
+                                 f"/PhysicalElement or the object does not exist")
             else:
                 Logger.set_error(__name__,
-                                f"{elem[0]} is not Function/State/FunctionalElement"
-                                f"/PhysicalElement or the object does not exist")
+                                 f"{elem[0]} is not Function/State/FunctionalElement"
+                                 f"/PhysicalElement or the object does not exist")
             continue
         if child_object is None:
             Logger.set_error(__name__,
-                            f"{elem[1]} is not Function/State/FunctionalElement"
-                            f"/PhysicalElement or the object does not exist")
+                             f"{elem[1]} is not Function/State/FunctionalElement"
+                             f"/PhysicalElement or the object does not exist")
             continue
         check_pair = None
         for idx, obj_type in enumerate(available_objects):
@@ -115,7 +90,7 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
                 output_xml.write_object_child(parent_child_lists[i])
                 for k in parent_child_lists[i]:
                     Logger.set_info(__name__,
-                                   f"{k[0].name} is composed of {k[1].name}")
+                                    f"{k[0].name} is composed of {k[1].name}")
                     if i in (0, 1):
                         for fun_elem in xml_fun_elem_list:
                             if k[0].id in fun_elem.allocated_function_list:
@@ -177,10 +152,10 @@ def check_and_delete_object(delete_str_list, **kwargs):
     to_be_deleted_obj_lists = [[] for _ in range(10)]
     # Check if the wanted to delete object exists and can be deleted
     for obj_str in delete_str_list:
-        object_to_del = check_get_object(obj_str, **kwargs)
+        object_to_del = question_answer.check_get_object(obj_str, **kwargs)
         if object_to_del is None:
             Logger.set_error(__name__,
-                            f"{obj_str} does not exist")
+                             f"{obj_str} does not exist")
             continue
 
         check, list_idx = check_relationship_before_delete(object_to_del, **kwargs)
@@ -188,7 +163,7 @@ def check_and_delete_object(delete_str_list, **kwargs):
             to_be_deleted_obj_lists[list_idx].append(object_to_del)
         else:
             Logger.set_error(__name__,
-                            f"{object_to_del.name} can not be deleted")
+                             f"{object_to_del.name} can not be deleted")
 
     update = delete_objects(to_be_deleted_obj_lists, kwargs['output_xml'])
 
@@ -297,29 +272,29 @@ def check_object_no_attribute(object_to_check, attribute_list):
 def check_function(object_to_del, **kwargs):
     """Checks for Function's object"""
     check = False
-    check_list = [False]*6
+    check_list = [False] * 6
     check_list[0] = check_object_no_parent_and_child(object_to_del)
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has composition relationship(s)")
+                        f"{object_to_del.name} has composition relationship(s)")
 
     check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_state_list'])
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = check_object_not_in_prod_cons(object_to_del,
                                                   kwargs['xml_consumer_function_list'],
                                                   kwargs['xml_producer_function_list'])
     if not check_list[3]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has production/consumption relationship(s)")
+                        f"{object_to_del.name} has production/consumption relationship(s)")
 
     check_list[4] = check_object_no_attribute(object_to_del, kwargs['xml_attribute_list'])
     if not check_list[4]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has attribute(s) set")
+                        f"{object_to_del.name} has attribute(s) set")
 
     check_list[5] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
     if not check_list[5]:
@@ -334,23 +309,23 @@ def check_function(object_to_del, **kwargs):
 def check_data(object_to_del, **kwargs):
     """Checks for Data's object"""
     check = False
-    check_list = [False]*3
+    check_list = [False] * 3
     check_list[0] = check_object_not_in_prod_cons(object_to_del.name,
                                                   kwargs['xml_consumer_function_list'],
                                                   kwargs['xml_producer_function_list'])
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has production/consumption relationship(s)")
+                        f"{object_to_del.name} has production/consumption relationship(s)")
 
     check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
     if not check_list[1]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has chain relationship(s)")
+                        f"{object_to_del.name} has chain relationship(s)")
 
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_inter_list'])
     if not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     if all(check_list):
         check = True
@@ -366,19 +341,19 @@ def check_state(object_to_del, **kwargs):
     check_list[0] = check_object_no_parent_and_child(object_to_del)
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has composition relationship(s)")
+                        f"{object_to_del.name} has composition relationship(s)")
 
     check_list[1] = not object_to_del.allocated_function_list
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = not any(object_to_del.id in (trans.source, trans.destination)
                             for trans in kwargs['xml_transition_list'])
     if not check_list[3]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has transition relationship(s)")
+                        f"{object_to_del.name} has transition relationship(s)")
     if all(check_list):
         check = True
         kwargs['xml_state_list'].remove(object_to_del)
@@ -393,7 +368,7 @@ def check_transition(object_to_del, **kwargs):
     check_list[0] = object_to_del.source is None and object_to_del.destination is None
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has source/destination relationship(s)")
+                        f"{object_to_del.name} has source/destination relationship(s)")
 
     if all(check_list):
         check = True
@@ -409,19 +384,19 @@ def check_fun_elem(object_to_del, **kwargs):
     check_list[0] = check_object_no_parent_and_child(object_to_del)
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has composition relationship(s)")
+                        f"{object_to_del.name} has composition relationship(s)")
 
     check_list[1] = (not object_to_del.allocated_function_list and
                      not object_to_del.allocated_state_list)
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = not object_to_del.exposed_interface_list
     if not check_list[3]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has interface relationship(s)")
+                        f"{object_to_del.name} has interface relationship(s)")
 
     if all(check_list):
         check = True
@@ -438,7 +413,7 @@ def check_chain(object_to_del, **kwargs):
     check_list[0] = not object_to_del.allocated_item_list
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     if all(check_list):
         check = True
@@ -455,7 +430,7 @@ def check_attribute(object_to_del, **kwargs):
     check_list[0] = not object_to_del.described_item_list
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has attribute relationship(s)")
+                        f"{object_to_del.name} has attribute relationship(s)")
 
     if all(check_list):
         check = True
@@ -474,7 +449,7 @@ def check_fun_inter(object_to_del, **kwargs):
     check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_inter_list'])
     if not check_list[0] or not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     if all(check_list):
         check = True
@@ -491,17 +466,17 @@ def check_phy_elem(object_to_del, **kwargs):
     check_list[0] = check_object_no_parent_and_child(object_to_del)
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has composition relationship(s)")
+                        f"{object_to_del.name} has composition relationship(s)")
 
     check_list[1] = not object_to_del.allocated_fun_elem_list
     if not check_list[1]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[2] = not object_to_del.exposed_interface_list
     if not check_list[2]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has interface relationship(s)")
+                        f"{object_to_del.name} has interface relationship(s)")
 
     if all(check_list):
         check = True
@@ -518,12 +493,12 @@ def check_phy_inter(object_to_del, **kwargs):
     check_list[0] = not object_to_del.allocated_fun_inter_list
     if not check_list[0]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has allocation relationship(s)")
+                        f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
     if not check_list[1]:
         Logger.set_info(__name__,
-                       f"{object_to_del.name} has interface relationship(s)")
+                        f"{object_to_del.name} has interface relationship(s)")
 
     if all(check_list):
         check = True
@@ -550,7 +525,7 @@ def delete_objects(object_lists, output_xml):
                 output_xml.delete_object(object_lists[i])
                 for object_type in object_lists[i]:
                     Logger.set_info(__name__,
-                                   f"{object_type.name} deleted")
+                                    f"{object_type.name} deleted")
         return 1
     return 0
 
@@ -573,10 +548,10 @@ def check_set_object_type(type_str_list, **kwargs):
     object_type_lists = [[] for _ in range(10)]
     # Check if the wanted object exists and the type can be set
     for object_str, type_name in type_str_list:
-        object_to_set = check_get_object(object_str, **kwargs)
+        object_to_set = question_answer.check_get_object(object_str, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
-                           f"{object_str} does not exist")
+                             f"{object_str} does not exist")
             continue
         if object_to_set.type == type_name:
             continue
@@ -600,20 +575,20 @@ def check_new_type(object_to_set, type_name, xml_type_list):
             basetype_idx = obj_base_type.value
             check = True
             object_to_set.set_type(obj_base_type)
-        elif any(t == type_name for t in get_objects_names(xml_type_list)):
-            obj_type = check_get_object(type_name, **{'xml_type_list': xml_type_list})
+        elif any(t == type_name for t in question_answer.get_objects_names(xml_type_list)):
+            obj_type = question_answer.check_get_object(type_name, **{'xml_type_list': xml_type_list})
             check = check_type_recursively(obj_type)
             if not check:
                 Logger.set_info(__name__,
-                               f"{obj_type.name} is not base type: "
-                               f"{str(obj_base_type)}")
+                                f"{obj_type.name} is not base type: "
+                                f"{str(obj_base_type)}")
             else:
                 basetype_idx = obj_base_type.value
                 object_to_set.set_type(obj_type)
         else:
             Logger.set_error(__name__,
-                            f"The type {type_name} does not exist, available types are "
-                            f": {', '.join([str(i) for i in datamodel.BaseType])}.")
+                             f"The type {type_name} does not exist, available types are "
+                             f": {', '.join([str(i) for i in datamodel.BaseType])}.")
 
     return check, basetype_idx
 
@@ -633,8 +608,8 @@ def get_basetype_and_idx(object_to_set):
     """Return BaseType according to object's type"""
     # Tuple order is same as datamodel.BaseType(Enum)
     class_obj_tuple = (datamodel.Data, datamodel.Function, datamodel.FunctionalElement,
-    datamodel.FunctionalInterface, datamodel.PhysicalElement, datamodel.PhysicalInterface,
-    datamodel.State, datamodel.Transition, datamodel.Attribute, datamodel.View)
+                       datamodel.FunctionalInterface, datamodel.PhysicalElement, datamodel.PhysicalInterface,
+                       datamodel.State, datamodel.Transition, datamodel.Attribute, datamodel.View)
 
     for idx, i in enumerate(class_obj_tuple):
         if isinstance(object_to_set, i):
@@ -665,7 +640,7 @@ def set_object_type(object_lists, output_xml):
                     else:
                         type_name = object_type.type.name
                     Logger.set_info(__name__,
-                                   f"The type of {object_type.name} is {type_name}")
+                                    f"The type of {object_type.name} is {type_name}")
         return 1
     return 0
 
@@ -688,10 +663,10 @@ def check_set_object_alias(alias_str_list, **kwargs):
     object_lists = [[] for _ in range(9)]
     # Check if the wanted to object exists and the type can be set
     for object_to_set_alias, alias_str in alias_str_list:
-        object_to_set = check_get_object(object_to_set_alias, **kwargs)
+        object_to_set = question_answer.check_get_object(object_to_set_alias, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
-                            f"{object_to_set_alias} does not exist")
+                             f"{object_to_set_alias} does not exist")
             continue
 
         idx = check_new_alias(object_to_set, alias_str)
@@ -720,7 +695,7 @@ def check_new_alias(object_to_set, alias_str):
     base_type = get_base_type_recursively(object_to_set.type)
     if isinstance(base_type, datamodel.BaseType):
         # Data() and View() do not have aliases attributes
-        if base_type.value not in (0,9):
+        if base_type.value not in (0, 9):
             object_to_set.set_alias(alias_str)
             return base_type.value
 
@@ -744,7 +719,7 @@ def set_object_alias(object_lists, output_xml):
                 output_xml.write_object_alias(object_lists[i])
                 for object_alias in object_lists[i]:
                     Logger.set_info(__name__,
-                                   f"The alias for {object_alias.name} is {object_alias.alias}")
+                                    f"The alias for {object_alias.name} is {object_alias.alias}")
 
         return 1
 
@@ -776,20 +751,20 @@ def check_add_allocation(allocation_str_list, **kwargs):
         # check_parent_allocation() it's just a key with no recursivety
     }
     for elem in allocation_str_list:
-        alloc_obj = check_get_object(elem[0],
-                                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                        'xml_state_list': kwargs['xml_state_list'],
-                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                        })
-        obj_to_alloc = check_get_object(elem[1],
-                                        **{'xml_function_list': kwargs['xml_function_list'],
-                                            'xml_state_list': kwargs['xml_state_list'],
-                                           'xml_data_list': kwargs['xml_data_list'],
-                                           'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                           'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                           })
+        alloc_obj = question_answer.check_get_object(elem[0],
+                                                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                        'xml_state_list': kwargs['xml_state_list'],
+                                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                                        })
+        obj_to_alloc = question_answer.check_get_object(elem[1],
+                                                        **{'xml_function_list': kwargs['xml_function_list'],
+                                                           'xml_state_list': kwargs['xml_state_list'],
+                                                           'xml_data_list': kwargs['xml_data_list'],
+                                                           'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                           'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                                           })
         check_obj = check_allocation_objects_types(alloc_obj, obj_to_alloc, elem)
         if not check_obj:
             continue
@@ -830,12 +805,12 @@ def print_wrong_obj_allocation(obj_str):
 
     Logger.set_error(__name__,
                      name_str + " not found or can not be allocated, "
-                               "available allocations are: \n"                     
-                               "(Functional Element allocates State/Function) OR \n"
-                               "(State allocates Function) OR \n"
-                               "(Functional Interface allocates Data) OR \n"
-                               "(Physical Element allocates Functional Element) OR \n"
-                               "(Physical Interface allocates Functional Interface)\n")
+                                "available allocations are: \n"
+                                "(Functional Element allocates State/Function) OR \n"
+                                "(State allocates Function) OR \n"
+                                "(Functional Interface allocates Data) OR \n"
+                                "(Physical Element allocates Functional Element) OR \n"
+                                "(Physical Interface allocates Functional Interface)\n")
 
 
 def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
@@ -885,12 +860,12 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list):
     """Check allocation rules for fun_elem then returns objects if check"""
     count = None
     out = None
-    check_allocation = get_allocation_object(obj_to_alloc, fun_elem_list)
+    check_allocation = question_answer.get_allocation_object(obj_to_alloc, fun_elem_list)
     if check_allocation is not None:
         count = len(check_allocation)
         for item in check_allocation:
             # Checks if they are in the same family
-            if not check_not_family(item, fun_elem) and item != fun_elem:
+            if not question_answer.check_not_family(item, fun_elem) and item != fun_elem:
                 count -= 1
 
     if count in (None, 0):
@@ -906,7 +881,7 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list):
 def check_state_allocation(state, function, state_list):
     """Check allocation rules for state then returns objects if check"""
     out = None
-    check_allocation = get_allocation_object(function, state_list)
+    check_allocation = question_answer.get_allocation_object(function, state_list)
     if check_allocation is None:
         state.add_allocated_function(function.id)
         out = [state, function]
@@ -921,7 +896,7 @@ def check_state_allocation(state, function, state_list):
 def check_fun_inter_allocation(fun_inter, data, **kwargs):
     """Check allocation rules for fun_inter then returns objects if check"""
     out = None
-    check_allocation_fun_inter = get_allocation_object(data, kwargs['xml_fun_inter_list'])
+    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs['xml_fun_inter_list'])
     if check_allocation_fun_inter is None:
         check_fe = check_fun_elem_data_consumption(
             data, fun_inter,
@@ -935,22 +910,22 @@ def check_fun_inter_allocation(fun_inter, data, **kwargs):
         elif True in check_fe:
             if check_fe[0] is True:
                 Logger.set_error(__name__,
-                               f"Data {data.name} has only consumer(s) "                      
-                               f"allocated to a functional element exposing "
-                               f"{fun_inter.name}, {data.name} not "
-                               f"allocated to {fun_inter.name}")
+                                 f"Data {data.name} has only consumer(s) "
+                                 f"allocated to a functional element exposing "
+                                 f"{fun_inter.name}, {data.name} not "
+                                 f"allocated to {fun_inter.name}")
             elif check_fe[1] is True:
                 Logger.set_error(__name__,
-                               f"Data {data.name} has only producer(s) "                      
-                               f"allocated to a functional element exposing "
-                               f"{fun_inter.name}, {data.name} not "
-                               f"allocated to {fun_inter.name}")
+                                 f"Data {data.name} has only producer(s) "
+                                 f"allocated to a functional element exposing "
+                                 f"{fun_inter.name}, {data.name} not "
+                                 f"allocated to {fun_inter.name}")
         else:
             Logger.set_error(__name__,
-                            f"Data {data.name} has no producer(s) nor "
-                            f"consumer(s) allocated to functional elements "
-                            f"exposing {fun_inter.name}, {data.name} not "
-                            f"allocated to {fun_inter.name}")
+                             f"Data {data.name} has no producer(s) nor "
+                             f"consumer(s) allocated to functional elements "
+                             f"exposing {fun_inter.name}, {data.name} not "
+                             f"allocated to {fun_inter.name}")
 
     return out
 
@@ -997,8 +972,8 @@ def add_allocation(allocation_dict, output_xml):
                 # Warn the user once added within xml
                 for elem in allocation_dict[k]:
                     Logger.set_info(__name__,
-                                   f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
-                                   f"{elem[0].__class__.__name__} {elem[0].name}")
+                                    f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
+                                    f"{elem[0].__class__.__name__} {elem[0].name}")
                     # Check the dict length, if this method is called from viewpoint_orchestrator
                     # or functional_orchestrator for View => Only key[0] and no recursion wanted
                     if k in (0, 1):
@@ -1034,14 +1009,14 @@ def check_parent_allocation(elem, output_xml):
                 check_parent_allocation([fun_elem_parent, object_parent], output_xml)
             else:
                 Logger.set_error(__name__,
-                                f"{object_parent.name} is not allocated despite at least one "
-                                f"of its child is")
+                                 f"{object_parent.name} is not allocated despite at least one "
+                                 f"of its child is")
 
 
 def recursive_allocation(elem, output_xml):
     """Recursive allocation for childs of State/Function"""
     check_parent_allocation(elem, output_xml)
-    object_type = get_object_type(elem[1])
+    object_type = question_answer.get_object_type(elem[1])
     if elem[1].child_list:
         for i in elem[1].child_list:
             parent_child = [elem[1], i]
@@ -1059,13 +1034,13 @@ def recursive_allocation(elem, output_xml):
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             elem[0].add_allocated_state(elem[1].id)
             Logger.set_info(__name__,
-                           f"State {elem[1].name} is allocated to functional "
-                           f"element {elem[0].name}")
+                            f"State {elem[1].name} is allocated to functional "
+                            f"element {elem[0].name}")
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
             elem[0].add_allocated_function(elem[1].id)
             Logger.set_info(__name__,
-                           f"Function {elem[1].name} is allocated to functional "
-                           f"element {elem[0].name}")
+                            f"Function {elem[1].name} is allocated to functional "
+                            f"element {elem[0].name}")
 
 
 def get_allocated_child(elem, xml_fun_elem_list):
@@ -1117,21 +1092,21 @@ def check_add_inheritance(inherit_str_list, **kwargs):
     new_list = []
     for elem in inherit_str_list:
         # elem_0: inheriting object
-        elem_0 = check_get_object(elem[0],
-                                  **{'xml_function_list': kwargs['xml_function_list'],
-                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                     })
+        elem_0 = question_answer.check_get_object(elem[0],
+                                                  **{'xml_function_list': kwargs['xml_function_list'],
+                                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                                     })
         # elem_1: object to inherit from
-        elem_1 = check_get_object(elem[1],
-                                  **{'xml_function_list': kwargs['xml_function_list'],
-                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                     })
+        elem_1 = question_answer.check_get_object(elem[1],
+                                                  **{'xml_function_list': kwargs['xml_function_list'],
+                                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                                     })
         if not elem_0 or not elem_1:
             if not elem_0 and not elem_1:
                 print_wrong_object_inheritance(elem[0], elem[1])
@@ -1142,7 +1117,7 @@ def check_add_inheritance(inherit_str_list, **kwargs):
             continue
         if elem_0 == elem_1:
             Logger.set_warning(__name__,
-                              f"Same object {elem_0.name}")
+                               f"Same object {elem_0.name}")
             continue
         if elem_0.derived == elem_1:
             continue
@@ -1167,12 +1142,12 @@ def print_wrong_object_inheritance(*obj):
         user_message = f"{obj[0]}"
 
     Logger.set_error(__name__,
-                    f"{user_message} not found, available objects for inheritance are:\n"
-                    "- Function\n"
-                    "- Functional element\n"
-                    "- Functional interface\n"
-                    "- Physical element\n"
-                    "- Physical element\n")
+                     f"{user_message} not found, available objects for inheritance are:\n"
+                     "- Function\n"
+                     "- Functional element\n"
+                     "- Functional interface\n"
+                     "- Physical element\n"
+                     "- Physical element\n")
 
 
 def check_inheritance(elem_0, elem_1):
@@ -1189,8 +1164,8 @@ def check_inheritance(elem_0, elem_1):
 
     if type_found is None:
         Logger.set_error(__name__,
-                        f"{elem_0.__class__.__name__} and {elem_1.__class__.__name__} "
-                        f"are not of the same type")
+                         f"{elem_0.__class__.__name__} and {elem_1.__class__.__name__} "
+                         f"are not of the same type")
         return False
 
     elem_0.set_derived(elem_1)
@@ -1212,14 +1187,17 @@ def add_derived(object_list, output_xml):
         output_xml.write_object_derived(object_list)
         for obj in object_list:
             Logger.set_info(__name__,
-                           f"{obj.name} inherited from {obj.derived.name}")
+                            f"{obj.name} inherited from {obj.derived.name}")
         return 1
     return 0
+
 
 class CreateObjInstance:
     def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
         self.specific_obj_type = specific_obj_type
         self.base_type = base_type
+        self.base_type_idx = datamodel.BaseType.get_enum(
+            str(self.base_type)).value
         self.new_obj = self.create_obj(obj_str)
         # Data() and View() do not have aliases
         if not isinstance(self.new_obj, (datamodel.Data, datamodel.View)):
@@ -1268,8 +1246,8 @@ class CreateObjInstance:
 
 
 xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
-                    'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                    'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
+                 'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
+                 'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
 
 
 def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
@@ -1293,19 +1271,19 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
             base_type = next((i for i in [str(i) for i in datamodel.BaseType]
                               if i == elem[1].capitalize()))
         else:
-            spec_obj_type = check_get_object(elem[1],
-                                             **{'xml_type_list': kwargs['xml_type_list']})
+            spec_obj_type = question_answer.check_get_object(elem[1],
+                                                             **{'xml_type_list': kwargs['xml_type_list']})
             if not spec_obj_type:
                 Logger.set_error(__name__,
-                                f"No valid type found for {elem[1]}")
+                                 f"No valid type found for {elem[1]}")
                 continue
             base_type = get_base_type_recursively(spec_obj_type)
         if base_type is None:
             Logger.set_error(__name__,
-                            f"No valid base type found for {elem[1]}")
+                             f"No valid base type found for {elem[1]}")
             continue
 
-        xml_names_list = get_objects_name_lists(
+        xml_names_list = question_answer.get_objects_name_lists(
             **{key: value for (key, value) in kwargs.items() if key in xml_str_lists})
         flat_names_list = [item for sublist in xml_names_list for item in sublist]
         if any(n == elem[0] for n in flat_names_list):
@@ -1323,7 +1301,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
             type_name = new_obj.type.name
 
         Logger.set_info(__name__,
-                       f"{new_obj.name} is a {type_name}")
+                        f"{new_obj.name} is a {type_name}")
 
         object_lists[base_type_idx].append(new_obj)
 
@@ -1403,7 +1381,7 @@ def derived_childs(obj, level):
      if c.parent == obj.derived]
     for child in obj.derived.child_list:
         derived_parent_dict[str(child.id)] = str(obj.id)
-    derived_child_set = get_children(obj.derived, level=level)[0]
+    derived_child_set = question_answer.get_children(obj.derived, level=level)[0]
     derived_child_id_list = {c.id for c in obj.derived.child_list}
     obj.derived.child_list.clear()
     derived_child_set.remove(obj.derived)
@@ -1482,13 +1460,13 @@ def allocation_inheritance(xml_obj_set, xml_allocated_obj_set):
         if elem.derived:
             if isinstance(elem, datamodel.FunctionalElement):
                 pair = [elem, {i for i in elem.derived.allocated_function_list
-                                  if i not in elem.allocated_function_list}]
+                               if i not in elem.allocated_function_list}]
                 elem.allocated_function_list = elem.allocated_function_list.union(
                     elem.derived.allocated_function_list)
                 alloc_to_reset.append(pair)
             if isinstance(elem, datamodel.FunctionalInterface):
                 pair = [elem, {i for i in elem.derived.allocated_data_list
-                                  if i not in elem.allocated_data_list}]
+                               if i not in elem.allocated_data_list}]
                 elem.allocated_data_list = elem.allocated_data_list.union(
                     elem.derived.allocated_data_list)
                 alloc_to_reset.append(pair)

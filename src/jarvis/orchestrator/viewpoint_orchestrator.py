@@ -7,7 +7,7 @@ import re
 # Modules
 import datamodel
 from . import shared_orchestrator
-from .question_answer import get_objects_names, check_get_object
+from jarvis import question_answer
 from tools import Logger
 
 
@@ -27,7 +27,7 @@ def add_view(view_name_str, xml_view_list, output_xml):
         """
     view_list = []
     # Create a list with all view names already in the xml
-    xml_view_name_list = get_objects_names(xml_view_list)
+    xml_view_name_list = question_answer.get_objects_names(xml_view_list)
     # Loop on the list and create set for functions
     if view_name_str not in xml_view_name_list:
         # Instantiate view class
@@ -77,9 +77,9 @@ def check_get_consider(consider_str_list, xml_function_list, xml_fun_elem_list, 
     """
     allocated_item_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_fun_elem_name_list = get_objects_names(xml_fun_elem_list)
-    xml_function_name_list = get_objects_names(xml_function_list)
-    xml_data_name_list = get_objects_names(xml_data_list)
+    xml_fun_elem_name_list = question_answer.get_objects_names(xml_fun_elem_list)
+    xml_function_name_list = question_answer.get_objects_names(xml_function_list)
+    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
 
     consider_str_list = split_chain_from_string(consider_str_list)
 
@@ -144,7 +144,7 @@ def add_attribute(attribute_str_list, xml_attribute_list, output_xml):
     """
     new_attribute_list = []
     # Create attribute names list already in xml
-    xml_attribute_name_list = get_objects_names(xml_attribute_list)
+    xml_attribute_name_list = question_answer.get_objects_names(xml_attribute_list)
     # Filter attribute_list, keeping only the the ones not already in the xml
     for attribute_name in attribute_str_list:
         if attribute_name not in xml_attribute_name_list:
@@ -182,7 +182,7 @@ def check_add_object_attribute(described_attribute_list, **xml_dict_sets):
     """
     new_described_attribute_list = []
     for elem in described_attribute_list:
-        obj_to_set = check_get_object(
+        obj_to_set = question_answer.check_get_object(
             elem[1], 
             **{'xml_function_list': xml_dict_sets['xml_function_list'],
             'xml_fun_elem_list': xml_dict_sets['xml_fun_elem_list'],
@@ -190,7 +190,7 @@ def check_add_object_attribute(described_attribute_list, **xml_dict_sets):
             'xml_phy_elem_list': xml_dict_sets['xml_phy_elem_list'],
             'xml_phy_inter_list': xml_dict_sets['xml_phy_inter_list'],
             })
-        attribute_wanted = check_get_object(
+        attribute_wanted = question_answer.check_get_object(
             elem[0], 
             **{'xml_attribute_list': xml_dict_sets['xml_attribute_list'],
             })
@@ -257,7 +257,7 @@ def check_set_extends(extends_str_list, xml_type_list, output_xml):
     new_type_list = []
     # Capitalyze the reference type for datamodel matching
     for elem in extends_str_list:
-        if any(t == elem[0] for t in get_objects_names(xml_type_list)):
+        if any(t == elem[0] for t in question_answer.get_objects_names(xml_type_list)):
             # print(f"{elem[0]} already exists")
             continue
         type_to_extend = check_get_type_to_extend(elem[1], xml_type_list)
@@ -299,8 +299,8 @@ def check_get_type_to_extend(type_str, xml_type_list):
     if any(a == formated_type_str for a in [i.name for i in datamodel.BaseType]):
         return datamodel.BaseType[formated_type_str]
 
-    if any(a == type_str for a in get_objects_names(xml_type_list)):
-        check = check_get_object(type_str, **{'xml_type_list': xml_type_list})
+    if any(a == type_str for a in question_answer.get_objects_names(xml_type_list)):
+        check = question_answer.check_get_object(type_str, **{'xml_type_list': xml_type_list})
         return check
 
     return check
