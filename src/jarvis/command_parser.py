@@ -1,18 +1,15 @@
 # Libraries
 import re
 import uuid
-import pathlib
 import os
 import requests
 from IPython.display import display, HTML, Markdown
 
 
 # Modules
-from . import viewpoint_orchestrator
-from . import functional_orchestrator
-from . import shared_orchestrator
+from jarvis.orchestrator import functional_orchestrator, shared_orchestrator, viewpoint_orchestrator
 from .question_answer import get_object_list, get_pandas_table, find_question
-from .diagram_generator import filter_show_command
+from jarvis.diagram import diagram_generator
 from tools import get_hyperlink
 from tools import Config
 from tools import Logger
@@ -40,6 +37,8 @@ class CmdParser:
 
             (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)", matched_composition),
 
+            (r"([^. |\n][^.|\n]*) compose ([^.|\n]*)", matched_composition),
+
             (r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)", matched_consumer),
 
             (r"([^. |\n][^.|\n]*) is an input of ([^.|\n]*)", matched_consumer),
@@ -60,6 +59,8 @@ class CmdParser:
 
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", matched_implies),
 
+            (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", matched_implies),
+
             (r"Condition for (.*?) is:([^.|\n]*)", matched_condition),
 
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", matched_src_dest),
@@ -74,7 +75,9 @@ class CmdParser:
             (r"The ((?!type|alias|source|destination).*) of (.*?) is ([^.|\n]*)",
              matched_described_attribute),
         ]
+
         self.reverse = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) compose ([^.|\n]*)",
                         r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)",
                         r"([^. |\n][^.|\n]*) produces ([^.|\n]*)",
                         r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)")
@@ -131,7 +134,7 @@ class CmdParser:
 
     def matched_show(self, diagram_name_str, **kwargs):
         """Get "show" declaration"""
-        out = filter_show_command(diagram_name_str, **kwargs)
+        out = diagram_generator.filter_show_command(diagram_name_str, **kwargs)
         if out:
             if Config.is_diagram_file:
                 url = self.generator.get_diagram_url(out)
@@ -142,8 +145,8 @@ class CmdParser:
                 if not os.path.isdir("diagrams"):
                     os.makedirs("diagrams")
 
+                current_file_path = str('./diagrams/Diagram' + identi + '.svg')
                 try:
-                    current_file_path = str('./diagrams/Diagram' + identi + '.svg')
                     response = requests.get(url)
                     with open(current_file_path, "wb") as file_writer:
                         file_writer.write(response.content)
