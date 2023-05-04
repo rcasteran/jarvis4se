@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Notebook interface, this module contains ipython Magic class with cell_magic as entry point of
-jarvi4se"""
+"""@defgroup jarvis
+Jarvis module
+"""
 # Libraries
 import re
 import os
@@ -9,7 +8,6 @@ import getpass
 import shutil
 from datetime import datetime
 from io import StringIO
-
 from IPython.core.magic import (Magics, magics_class, cell_magic)
 
 # Modules

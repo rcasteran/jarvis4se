@@ -1,3 +1,7 @@
+"""@defgroup tools
+Tooling module
+"""
+
 # Libraries
 import os
 

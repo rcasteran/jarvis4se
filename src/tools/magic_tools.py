@@ -1,3 +1,7 @@
+"""@defgroup tools
+Tooling module
+"""
+
 # Libraries
 from sys import version as py_ver
 from importlib.metadata import version

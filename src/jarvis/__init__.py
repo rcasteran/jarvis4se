@@ -1,4 +1,8 @@
-"""An example magic"""
+""" @package jarvis
+Jarvis module
+
+Contains IPython Magic Class with magic cell as entry point of Jarvis
+"""
 __version__ = '0.0.1'
 from . import command_parser
 from .jarvis import MagicJarvis, greet_user, clean_folders

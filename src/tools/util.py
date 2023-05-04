@@ -1,10 +1,15 @@
+"""@defgroup tools
+Tooling module
+"""
+
 # Libraries
 
 # Modules
 
 
 def get_hyperlink(path):
-    """@anchor get_hyperlink
+    """@ingroup tools
+    @anchor get_hyperlink
     Convert file path into HTML link
     @param[in] path file path
     @return HTML link

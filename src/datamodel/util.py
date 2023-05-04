@@ -1,3 +1,7 @@
+"""@defgroup datamodel
+Module for 3SE datamodel
+"""
+
 class Point:
     """@ingroup datamodel
     @anchor Point

@@ -1,3 +1,6 @@
+"""@defgroup plantuml_adapter
+Plantuml adapter module
+"""
 # Libraries
 import os
 import re

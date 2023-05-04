@@ -1,3 +1,7 @@
+"""@defgroup tools
+Tooling module
+"""
+
 # Libraries
 from datetime import datetime
 import os
