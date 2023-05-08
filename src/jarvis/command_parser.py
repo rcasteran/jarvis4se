@@ -49,6 +49,8 @@ class CmdParser:
 
             (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", matched_exposes),
 
+            (r"([^. |\n][^.|\n]*) expose ([^.|\n]*)", matched_exposes),
+
             (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", matched_allocation),
 
             (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", matched_allocation),
@@ -103,7 +105,7 @@ class CmdParser:
                 [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
 
             if result and not result_chain:
-                # self.reverse : ("composes", "consumes", "produces", "is allocated to")
+                # self.reverse
                 if regex in self.reverse:
                     result = reverse(result)
                 update = method(result, **kwargs)

@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module with methods relative to Diagram generation for filtering objects before passing
-them to plantuml_adapter.py"""
+"""@defgroup diagram
+Jarvis diagram module
+"""
 # Libraries
 import re
 
@@ -10,6 +9,8 @@ import plantuml_adapter
 from datamodel import FunctionalElement
 from jarvis import question_answer
 from jarvis.orchestrator import shared_orchestrator
+from . import diagram_generator_fa
+from . import util
 from tools import Logger
 
 
@@ -57,12 +58,12 @@ def case_function_diagram(**kwargs):
     plantuml_string = None
     xml_fun_elem_name_list = question_answer.get_objects_names(kwargs['xml_fun_elem_list'])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        plantuml_string = show_fun_elem_function(kwargs['diagram_object_str'],
-                                                 kwargs['xml_fun_elem_list'],
-                                                 kwargs['xml_function_list'],
-                                                 kwargs['xml_consumer_function_list'],
-                                                 kwargs['xml_producer_function_list'],
-                                                 kwargs['xml_type_list'])
+        plantuml_string = diagram_generator_fa.show_fun_elem_function(kwargs['diagram_object_str'],
+                                                                      kwargs['xml_fun_elem_list'],
+                                                                      kwargs['xml_function_list'],
+                                                                      kwargs['xml_consumer_function_list'],
+                                                                      kwargs['xml_producer_function_list'],
+                                                                      kwargs['xml_attribute_list'])
 
     else:
         Logger.set_warning(__name__,
@@ -93,14 +94,33 @@ def case_context_diagram(**kwargs):
                                             kwargs['xml_transition_list'])
 
     elif kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        plantuml_string = show_fun_elem_context(kwargs['diagram_object_str'],
-                                                kwargs['xml_fun_elem_list'],
-                                                kwargs['xml_function_list'],
-                                                kwargs['xml_consumer_function_list'],
-                                                kwargs['xml_producer_function_list'],
-                                                kwargs['xml_attribute_list'],
-                                                kwargs['xml_fun_inter_list'],
-                                                kwargs['xml_data_list'])
+        c_inheritance = shared_orchestrator.childs_inheritance(kwargs['xml_function_list'],
+                                                               kwargs['xml_fun_elem_list'],
+                                                               level=None)
+        attrib_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+                                                                       kwargs['xml_function_list'],
+                                                                       kwargs['xml_fun_elem_list'],
+                                                                       kwargs['xml_fun_inter_list'])
+        func_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_elem_list'],
+                                                                            kwargs['xml_function_list'])
+        fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_inter_list'],
+                                                                                 kwargs['xml_data_list'])
+
+        plantuml_string = diagram_generator_fa.show_fun_elem_context(kwargs['diagram_object_str'],
+                                                                     kwargs['xml_fun_elem_list'],
+                                                                     kwargs['xml_function_list'],
+                                                                     kwargs['xml_consumer_function_list'],
+                                                                     kwargs['xml_producer_function_list'],
+                                                                     kwargs['xml_attribute_list'],
+                                                                     kwargs['xml_fun_inter_list'],
+                                                                     kwargs['xml_data_list'])
+
+        shared_orchestrator.reset_childs_inheritance(kwargs['xml_function_list'],
+                                                     kwargs['xml_fun_elem_list'],
+                                                     derived_child_id=c_inheritance[2])
+        shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attrib_inheritance)
+        shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
+        shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
@@ -147,14 +167,14 @@ def case_decomposition_diagram(**kwargs):
         print(function_list)
         return None
 
-    if diagram_object_str in question_answer.get_objects_names(kwargs['xml_function_list']):
-        consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
-            kwargs['xml_data_list'],
-            kwargs['xml_view_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'],
-            function_list)
+    consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
+        kwargs['xml_data_list'],
+        kwargs['xml_view_list'],
+        kwargs['xml_consumer_function_list'],
+        kwargs['xml_producer_function_list'],
+        function_list)
 
+    if diagram_object_str in question_answer.get_objects_names(kwargs['xml_function_list']):
         plantuml_string = show_function_decomposition(diagram_object_str,
                                                       function_list,
                                                       consumer_list,
@@ -167,23 +187,33 @@ def case_decomposition_diagram(**kwargs):
         fun_elem_list = get_object_list_from_view(diagram_object_str,
                                                   kwargs['xml_fun_elem_list'],
                                                   kwargs['xml_view_list'])
-        consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
-            kwargs['xml_data_list'],
-            kwargs['xml_view_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'],
-            function_list)
 
-        plantuml_string = show_fun_elem_decomposition(diagram_object_str,
-                                                      function_list,
-                                                      consumer_list,
-                                                      producer_list,
-                                                      fun_elem_list,
-                                                      kwargs['xml_attribute_list'],
-                                                      kwargs['xml_data_list'],
-                                                      kwargs['xml_fun_inter_list'],
-                                                      diagram_level)
+        c_inheritance = shared_orchestrator.childs_inheritance(function_list, fun_elem_list,
+                                                               level=diagram_level)
+        attrib_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+                                                                       function_list,
+                                                                       fun_elem_list,
+                                                                       kwargs['xml_fun_inter_list'])
+        func_alloc_inheritance = shared_orchestrator.allocation_inheritance(fun_elem_list, function_list)
+        fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_inter_list'],
+                                                                                 kwargs['xml_data_list'])
 
+        plantuml_string = diagram_generator_fa.show_fun_elem_decomposition(diagram_object_str,
+                                                                           function_list,
+                                                                           consumer_list,
+                                                                           producer_list,
+                                                                           fun_elem_list,
+                                                                           kwargs['xml_attribute_list'],
+                                                                           kwargs['xml_data_list'],
+                                                                           kwargs['xml_fun_inter_list'],
+                                                                           diagram_level)
+
+        shared_orchestrator.reset_childs_inheritance(function_list,
+                                                     fun_elem_list,
+                                                     derived_child_id=c_inheritance[2])
+        shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attrib_inheritance)
+        shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
+        shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the object {diagram_object_str}"
@@ -420,189 +450,6 @@ def case_no_diagram(**kwargs):
                        f"Jarvis does not understand the command {kwargs['diagram_type_str']}")
 
 
-def check_level_0_allocated_child(fun_elem, function):
-    """Returns True if the function can be "shown" by the functional element (i.e. no function
-    children allocated to fun_elem children => TODO: Clean 2 below methods"""
-    check = False
-    if fun_elem.child_list == set():
-        check = True
-        return check
-    if function.child_list == set() and function.parent.id not in fun_elem.allocated_function_list:
-        check = True
-        return check
-
-    allocated_function_id_list = []
-    for fun_elem_child in fun_elem.child_list:
-        for elem in fun_elem_child.allocated_function_list:
-            allocated_function_id_list.append(elem)
-    child_list, _ = question_answer.get_children(function)
-    child_id_list = [elem.id for elem in child_list]
-    if any(t in child_id_list for t in allocated_function_id_list) or not child_id_list:
-        check = False
-        return check
-
-    if function.parent is not None:
-        if function.parent.id not in fun_elem.allocated_function_list:
-            check = True
-            return check
-    else:
-        check = True
-
-    return check
-
-
-def get_level_0_function(fun_elem, function_list, allocated_function_list=None):
-    """Recursively get functions allocated to main_fun_elem and its descendant"""
-    if allocated_function_list is None:
-        allocated_function_list = set()
-        if fun_elem.child_list == set():
-            return allocated_function_list
-    for function_id in fun_elem.allocated_function_list:
-        for function in function_list:
-            if function.id == function_id and function not in allocated_function_list:
-                if check_level_0_allocated_child(fun_elem, function) is True:
-                    allocated_function_list.add(function)
-                if fun_elem.child_list != set():
-                    for child in fun_elem.child_list:
-                        get_level_0_function(child, function_list, allocated_function_list)
-
-    return allocated_function_list
-
-
-def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
-                                xml_data_list, xml_fun_inter_list, diagram_level=None):
-    """Creates lists with desired objects for <functional_element> decomposition, send them to
-    plantuml_adapter.py then returns plantuml_text"""
-    plantuml_text = None
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
-    if not main_fun_elem:
-        return plantuml_text
-    main_fun_elem.parent = None
-
-    c_inheritance = shared_orchestrator.childs_inheritance(xml_function_list, xml_fun_elem_list, level=diagram_level)
-    attrib_inheritance = shared_orchestrator.attribute_inheritance(xml_attribute_list,
-                                                                   xml_function_list,
-                                                                   xml_fun_elem_list,
-                                                                   xml_fun_inter_list)
-
-    func_alloc_inheritance = shared_orchestrator.allocation_inheritance(xml_fun_elem_list, xml_function_list)
-    fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(xml_fun_inter_list, xml_data_list)
-
-    if diagram_level:
-        xml_function_list, xml_fun_elem_list = filter_fun_elem_with_level(main_fun_elem,
-                                                                          diagram_level,
-                                                                          xml_function_list,
-                                                                          xml_fun_elem_list)
-
-    allocated_function_list = get_level_0_function(main_fun_elem, xml_function_list)
-
-    if allocated_function_list:
-        external_function_list, new_consumer_list, new_producer_list = \
-            get_cons_prod_from_allocated_functions(
-                allocated_function_list,
-                xml_producer_function_list,
-                xml_consumer_function_list)
-
-        for fun in external_function_list:
-            for child in fun.child_list.copy():
-                if not any(t == child for t in external_function_list):
-                    fun.child_list.remove(child)
-    else:
-        external_function_list, xml_fun_elem_list = set(), set()
-        new_consumer_list, new_producer_list = [], []
-
-    plantuml_text = plantuml_adapter.get_fun_elem_decomposition(main_fun_elem, xml_fun_elem_list,
-                                                                allocated_function_list,
-                                                                new_consumer_list,
-                                                                new_producer_list,
-                                                                external_function_list,
-                                                                xml_attribute_list,
-                                                                xml_data_list,
-                                                                xml_fun_inter_list)
-
-    shared_orchestrator.reset_childs_inheritance(xml_function_list, xml_fun_elem_list,
-                                                 derived_child_id=c_inheritance[2])
-    shared_orchestrator.reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)
-    shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
-    shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
-
-    Logger.set_info(__name__,
-                    f"Decomposition Diagram for {fun_elem_str} generated")
-
-    return plantuml_text
-
-
-def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, xml_fun_elem_list):
-    """Clean unwanted fun_elem and functions from xml_lists then returns them"""
-    main_fun_elem_list, _ = question_answer.get_children(main_fun_elem, level=diagram_level)
-    # Remove (child) elements from xml lists that are below the level asked
-    for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if not question_answer.check_not_family(unwanted_fun_elem, main_fun_elem):
-            for fun in xml_function_list.copy():
-                if fun.id in unwanted_fun_elem.allocated_function_list:
-                    xml_function_list.remove(fun)
-            xml_fun_elem_list.remove(unwanted_fun_elem)
-    # Remove (child) elements from external fun_elem (main_fun_elem point of view)
-    for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if question_answer.check_not_family(unwanted_fun_elem, main_fun_elem) and \
-                unwanted_fun_elem.parent is None:
-            curr_fun_elem_list, _ = question_answer.get_children(unwanted_fun_elem, level=diagram_level)
-            for un_fun_elem in xml_fun_elem_list.symmetric_difference(curr_fun_elem_list):
-                if not question_answer.check_not_family(unwanted_fun_elem, un_fun_elem):
-                    xml_fun_elem_list.remove(un_fun_elem)
-
-    return xml_function_list, xml_fun_elem_list
-
-
-def get_cons_prod_from_allocated_functions(allocated_function_list,
-                                           xml_producer_function_list,
-                                           xml_consumer_function_list):
-    """Get consumers/producers from function's allocated to main_fun_elem (and its descendant)"""
-    new_producer_list = []
-    new_consumer_list = []
-    for allocated_function in allocated_function_list:
-        allocated_function.child_list.clear()
-        allocated_function.parent = None
-        for elem in xml_producer_function_list:
-            if allocated_function in elem:
-                new_producer_list.append(elem)
-        for elem in xml_consumer_function_list:
-            if allocated_function in elem:
-                new_consumer_list.append(elem)
-
-    external_function_list, new_consumer_list, new_producer_list = get_ext_cons_prod(
-        new_producer_list,
-        new_consumer_list,
-        xml_producer_function_list,
-        xml_consumer_function_list)
-
-    return external_function_list, new_consumer_list, new_producer_list
-
-
-def get_ext_cons_prod(producer_list, consumer_list, xml_producer_function_list,
-                      xml_consumer_function_list):
-    """Get external cons/prod associated to main_fun_elem allocated functions"""
-    external_function_list = set()
-    for elem in consumer_list:
-        if not any(elem[0] in s for s in producer_list):
-            for prod in xml_producer_function_list:
-                if prod[0] == elem[0] and prod[1].parent is None:
-                    external_function_list.add(prod[1])
-                    if prod not in producer_list:
-                        producer_list.append(prod)
-
-    for elem in producer_list:
-        if not any(elem[0] in s for s in consumer_list):
-            for cons in xml_consumer_function_list:
-                if cons[0] == elem[0] and cons[1].parent is None:
-                    external_function_list.add(cons[1])
-                    if cons not in consumer_list:
-                        consumer_list.append(cons)
-
-    return external_function_list, consumer_list, producer_list
-
-
 def show_state_allocated_function(state_str, state_list, function_list, xml_consumer_function_list,
                                   xml_producer_function_list, xml_data_list):
     """Creates lists with desired objects for <state> function's allocation, send them to
@@ -635,194 +482,6 @@ def show_state_allocated_function(state_str, state_list, function_list, xml_cons
                     f"Function Sequence Diagram for {state_str} generated")
 
     return diagram_str
-
-
-def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
-                           xml_consumer_function_list, xml_producer_function_list, xml_type_list):
-    """Creates lists with desired objects for <functional_element> function's allocation,
-    send them to plantuml_adapter.py then returns plantuml_text"""
-    plantuml_text = None
-
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
-    if not main_fun_elem:
-        return plantuml_text
-
-    if not main_fun_elem.allocated_function_list:
-        Logger.set_info(__name__,
-                        f"No function allocated to {main_fun_elem.name} (no display)")
-        return plantuml_text
-
-    main_fun_elem.parent = None
-    main_fun_elem.child_list.clear()
-    new_function_list = {f for f in xml_function_list
-                         if f.id in main_fun_elem.allocated_function_list and f.parent is None}
-
-    if not new_function_list:
-        Logger.set_info(__name__,
-                        f"No parent function allocated to {main_fun_elem.name} (no display)")
-        return plantuml_text
-
-    new_consumer_list = get_cons_or_prod_paired(new_function_list,
-                                                xml_consumer_function_list,
-                                                xml_producer_function_list)
-
-    new_producer_list = get_cons_or_prod_paired(new_function_list,
-                                                xml_producer_function_list,
-                                                xml_consumer_function_list)
-
-    plantuml_text = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                           new_consumer_list,
-                                                           new_producer_list,
-                                                           {}, None, xml_type_list)
-
-    Logger.set_info(__name__,
-                    f"Function Diagram for {fun_elem_str} generated")
-
-    return plantuml_text
-
-
-def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list):
-    """Get flow list if opposite flow is existing: e.g. if flow A is consumed and produced by
-    function within function_list => Add it"""
-    new_flow_list = []
-    for func in function_list:
-        # Flow = [Data_name, Function]
-        for flow in xml_flow_list:
-            if func in flow and flow not in new_flow_list:
-                # Oppo = [Data_name, Function]
-                for oppo in xml_opposite_flow_list:
-                    if oppo[0] == flow[0] and oppo[1] in function_list:
-                        new_flow_list.append(flow)
-                        break
-    return new_flow_list
-
-
-def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
-                          xml_consumer_function_list, xml_producer_function_list,
-                          xml_attribute_list, xml_fun_inter_list, xml_data_list):
-    """Creates lists with desired objects for <functional_element> context, send them to
-    plantuml_adapter.py then returns plantuml_text"""
-
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
-    if not main_fun_elem:
-        return None
-
-    c_inheritance = shared_orchestrator.childs_inheritance(xml_function_list, xml_fun_elem_list, level=None)
-    attrib_inheritance = shared_orchestrator.attribute_inheritance(xml_attribute_list,
-                                                                   xml_function_list,
-                                                                   xml_fun_elem_list,
-                                                                   xml_fun_inter_list)
-    func_alloc_inheritance = shared_orchestrator.allocation_inheritance(xml_fun_elem_list, xml_function_list)
-    fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(xml_fun_inter_list, xml_data_list)
-
-    # Get allocated function to main_fun_elem
-    allocated_function_list = {f for f in xml_function_list
-                               if f.id in main_fun_elem.allocated_function_list}
-
-    new_function_list, cons, prod = get_allocated_function_context_lists(
-        allocated_function_list,
-        xml_consumer_function_list,
-        xml_producer_function_list)
-
-    fun_elem_list, interface_list, fun_elem_inter_list = get_fun_inter_for_fun_elem_context(
-        main_fun_elem, xml_fun_inter_list, xml_fun_elem_list)
-
-    for fun in new_function_list:
-        for elem in xml_fun_elem_list:
-            if any(z == fun.id for z in elem.allocated_function_list) and elem not in fun_elem_list:
-                fun_elem_list.add(elem)
-
-    for elem in fun_elem_list.copy():
-        for str_id in elem.allocated_function_list.copy():
-            if str_id not in [i.id for i in new_function_list]:
-                elem.allocated_function_list.remove(str_id)
-        if any(a == elem for a in main_fun_elem.child_list):
-            fun_elem_list.remove(elem)
-
-    plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
-                                                                  cons,
-                                                                  prod,
-                                                                  xml_data_list,
-                                                                  xml_attribute_list,
-                                                                  fun_elem_list,
-                                                                  interface_list,
-                                                                  fun_elem_inter_list)
-
-    shared_orchestrator.reset_childs_inheritance(xml_function_list, xml_fun_elem_list,
-                                                 derived_child_id=c_inheritance[2])
-    shared_orchestrator.reset_attribute_inheritance(xml_attribute_list, attrib_inheritance)
-    shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
-    shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
-
-    Logger.set_info(__name__,
-                    f"Context Diagram for {fun_elem_str} generated")
-
-    return plantuml_text
-
-
-def get_allocated_function_context_lists(allocated_function_list,
-                                         xml_consumer_function_list,
-                                         xml_producer_function_list):
-    """For each function within allocated_function_list, asks the context of the function then
-    adds returned list from show_function_context() to current lists"""
-    new_function_list = set()
-    cons = []
-    prod = []
-    for fun in allocated_function_list:
-        if fun.parent is None:
-            returned_list = show_function_context(fun.name, allocated_function_list,
-                                                  xml_consumer_function_list,
-                                                  xml_producer_function_list, set(),
-                                                  set(), set(), list_out=True)
-            for k in returned_list[0]:
-                new_function_list.add(k)
-            for i in returned_list[1]:
-                if i not in cons:
-                    cons.append(i)
-            for j in returned_list[2]:
-                if j not in prod:
-                    prod.append(j)
-
-    return new_function_list, cons, prod
-
-
-def get_fun_inter_for_fun_elem_context(main_fun_elem, xml_fun_inter_list, xml_fun_elem_list):
-    """Get functional interfaces and associated functional elements"""
-    fun_elem_list = set()
-    interface_list = set()
-    fun_elem_inter_list = []
-
-    # Add main_fun_elem to filtered fun_elem_list and remove it from xml_fun_elem_list
-    fun_elem_list.add(main_fun_elem)
-    xml_fun_elem_list.remove(main_fun_elem)
-
-    # Get exposed interfaces of fun_elem
-    for interface in xml_fun_inter_list:
-        if any(i == interface.id for i in main_fun_elem.exposed_interface_list):
-            interface_list.add(interface)
-
-    # Get fun_elem pair for fun_inter
-    for fun_inter in interface_list:
-        for fun_elem in xml_fun_elem_list:
-            if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
-                if get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
-                        question_answer.check_not_family(main_fun_elem, fun_elem):
-                    fun_elem_list.add(fun_elem)
-                    if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
-                        fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
-
-    return fun_elem_list, interface_list, fun_elem_inter_list
-
-
-def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
-    """Retruns True if it's highest fun_elem exposing fun_inter"""
-    check = False
-    if not fun_elem.parent:
-        check = True
-    elif not any(a == fun_inter.id for a in fun_elem.parent.exposed_interface_list):
-        check = True
-
-    return check
 
 
 def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_list,
@@ -909,13 +568,13 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
         fun.child_list.clear()
         new_function_list.add(fun)
 
-    new_consumer_list = get_cons_or_prod_paired(new_function_list,
-                                                xml_consumer_function_list,
-                                                xml_producer_function_list)
+    new_consumer_list = util.get_cons_or_prod_paired(new_function_list,
+                                                     xml_consumer_function_list,
+                                                     xml_producer_function_list)
 
-    new_producer_list = get_cons_or_prod_paired(new_function_list,
-                                                xml_producer_function_list,
-                                                xml_consumer_function_list)
+    new_producer_list = util.get_cons_or_prod_paired(new_function_list,
+                                                     xml_producer_function_list,
+                                                     xml_consumer_function_list)
     # (Re)Filter data_list with only produced(same data in consumed since paired) and functions
     # asked for sequence i.e. new_function_list used in get_cons_or_prod_paired()
     # => TBC/TBT
@@ -1136,91 +795,33 @@ def check_get_child_flows(function_list, xml_flow_list, new_flow_list=None):
 
 def show_function_context(diagram_function_str, xml_function_list, xml_consumer_function_list,
                           xml_producer_function_list, xml_data_list, xml_attribute_list,
-                          xml_type_list, list_out=False):
+                          xml_type_list):
     """Create necessary lists then returns plantuml text for context of function"""
-    new_function_list = set()
-    new_parent_dict = {}
-    new_producer_list = []
-    new_consumer_list = []
-    main = None
-
     c_inheritance = shared_orchestrator.childs_inheritance(xml_function_list)
     a_inheritance = shared_orchestrator.attribute_inheritance(xml_attribute_list, xml_function_list)
 
-    for fun in xml_function_list:
-        if diagram_function_str in (fun.name, fun.alias):
-            new_function_list.add(fun)
-            main = fun
-            for xml_producer_flow, xml_producer in xml_producer_function_list:
-                if fun == xml_producer:
-                    check = False
-                    for flow, consumer in xml_consumer_function_list:
-                        if xml_producer_flow == flow:
-                            if consumer.parent is None:
-                                current_func, current_dict = question_answer.get_children(fun)
-                                parent_check = question_answer.check_parentality(consumer, main)
-                                if consumer not in current_func and parent_check is False:
-                                    new_consumer_list.append([xml_producer_flow, consumer])
-                                    new_function_list.add(consumer)
-                                    check = True
-                            elif main.parent == consumer.parent and consumer != main:
-                                new_consumer_list.append([flow, consumer])
-                                new_function_list.add(consumer)
-                                check = True
-                    if check:
-                        if [xml_producer_flow, xml_producer] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer])
+    new_function_list, new_consumer_list, new_producer_list = util.get_function_context_lists(
+        diagram_function_str,
+        xml_function_list,
+        xml_consumer_function_list,
+        xml_producer_function_list)
 
-                    if not any(xml_producer_flow in s for s in xml_consumer_function_list):
-                        if [xml_producer_flow, xml_producer] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer])
+    plantuml_text = plantuml_adapter.get_function_diagrams(
+        new_function_list,
+        new_consumer_list,
+        new_producer_list,
+        {},
+        xml_data_list,
+        xml_type_list,
+        xml_attribute_list=xml_attribute_list)
 
-    if main is not None:
-        for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
-            if xml_consumer == main:
-                check = False
-                for flow, producer in xml_producer_function_list:
-                    if flow == xml_consumer_flow:
-                        if producer.parent is None:
-                            current_func, current_dict = question_answer.get_children(producer)
-                            if main not in current_func:
-                                new_producer_list.append([flow, producer])
-                                new_function_list.add(producer)
-                                check = True
-                        elif main.parent == producer.parent and producer != main:
-                            new_producer_list.append([flow, producer])
-                            new_function_list.add(producer)
-                            check = True
-                if check:
-                    if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
-                        new_consumer_list.append([xml_consumer_flow, xml_consumer])
-
-                if not any(xml_consumer_flow in s for s in xml_producer_function_list):
-                    if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
-                        new_consumer_list.append([xml_consumer_flow, xml_consumer])
-
-    for f in new_function_list:
-        f.child_list.clear()
-
-    if list_out:
-        out = new_function_list, new_consumer_list, new_producer_list
-    else:
-        out = plantuml_adapter.get_function_diagrams(
-            new_function_list,
-            new_consumer_list,
-            new_producer_list,
-            new_parent_dict,
-            xml_data_list,
-            xml_type_list,
-            xml_attribute_list=xml_attribute_list)
-
-        Logger.set_info(__name__,
-                        f"Context Diagram {diagram_function_str} generated")
+    Logger.set_info(__name__,
+                    f"Context Diagram {diagram_function_str} generated")
 
     shared_orchestrator.reset_childs_inheritance(xml_function_list, derived_child_id=c_inheritance[2])
     shared_orchestrator.reset_attribute_inheritance(xml_attribute_list, a_inheritance)
 
-    return out
+    return plantuml_text
 
 
 def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):

@@ -4,8 +4,8 @@ Plantuml adapter module
 
 # Modules
 import datamodel
-from jarvis.question_answer import get_objects_names, check_get_object
 from .util import ObjDiagram, StateDiagram, SequenceDiagram
+from tools import Logger
 
 
 def write_function_child(string_obj, function, input_flow_list, output_flow_list,
@@ -167,9 +167,14 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     # Filter input flows
     input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
                                       concatenate=True)
+
     # Filter consumers and producers list in order to create data flow
     data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
                                          parent_child_dict, concatenate=True)
+
+    Logger.set_debug(__name__, f"Output flows list: {output_flow_list}")
+    Logger.set_debug(__name__, f"Input flows list: {input_flow_list}")
+    Logger.set_debug(__name__, f'Exchanged flows list: {data_flow_list}')
 
     if data_list:
         per_message_data_flow_list = get_exchanged_flows(consumer_function_list,
@@ -183,28 +188,27 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
                     for j in data_flow_list:
                         for k in j[1]:
                             if i[2] == k and i[3]:
-                                new = str(idx+1) + ":" + k
+                                new = str(idx + 1) + ":" + k
                                 j[1].remove(k)
                                 j[1].append(new)
 
     # Loop in order to filter functions and write in output's file, see write_function_child()
-    if not parent_child_dict:
-        for function in function_list:
-            write_function_object(string_obj, function, input_flow_list, output_flow_list, False,
-                                  xml_attribute_list)
-
     if parent_child_dict:
         for function in function_list:
             if function.id in parent_child_dict.values() and \
                     function.id not in parent_child_dict.keys():
-                    string_obj.create_component(function)
-                    write_function_child(string_obj, function, input_flow_list, output_flow_list,
-                                         xml_attribute_list)
+                string_obj.create_component(function)
+                write_function_child(string_obj, function, input_flow_list, output_flow_list,
+                                     xml_attribute_list)
 
             if function.id not in parent_child_dict.keys() \
                     and function.id not in parent_child_dict.values():
                 write_function_object(string_obj, function, input_flow_list, output_flow_list,
                                       False, xml_attribute_list, compo_diagram=True)
+    else:
+        for function in function_list:
+            write_function_object(string_obj, function, input_flow_list, output_flow_list, False,
+                                  xml_attribute_list)
 
     string_obj.create_input_flow(input_flow_list)
     string_obj.create_output_flow(output_flow_list)
@@ -231,6 +235,8 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     """
 
     string_obj = ObjDiagram()
+    interface_list = None
+
     if fun_inter_list:
 
         unmerged_data_list = get_exchanged_flows(consumer_function_list, producer_function_list, {})
@@ -255,6 +261,20 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     input_flow_list = get_input_flows(consumer_function_list, producer_function_list,
                                       concatenate=True)
 
+    # Write external functions
+    external_function_list = []
+    for function in function_list:
+        is_external = True
+        for fun_elem in fun_elem_list:
+            if any(a == function.id for a in fun_elem.allocated_function_list):
+                is_external = False
+
+        if is_external:
+            external_function_list.append(function)
+
+    for function in external_function_list:
+        string_obj.create_object(function, xml_attribute_list)
+
     for fun_elem in fun_elem_list:
         string_obj.create_component(fun_elem)
         check_function = False
@@ -274,8 +294,11 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     string_obj.create_output_flow(output_flow_list)
     string_obj.create_data_flow(data_flow_list)
 
-    if fun_elem_inter_list:
-        string_obj.create_interface(fun_elem_inter_list)
+    # TODO : fun_elem_inter_list introduced to answer to issue #39
+    # if fun_elem_inter_list:
+    #    string_obj.create_interface(fun_elem_inter_list)
+    if interface_list:
+        string_obj.create_interface(interface_list)
 
     return string_obj.string
 
@@ -299,24 +322,27 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     # Get all fun_inter with allocated data within data_flow_list and create interface list
     # [[producer, consumer, fun_inter]...]
     for fun_inter in fun_inter_list:
-        for data_id in fun_inter.allocated_data_list:
-            for data in data_list:
-                if data_id == data.id:
-                    for elem in data_flow_list.copy():
-                        if data.name == elem[2]:
-                            first = None
-                            second = None
-                            for fun in function_list:
-                                if elem[0] == fun.name.lower():
-                                    first = fun
-                                if elem[1] == fun.name.lower():
-                                    second = fun
-                            if not (not first and not second):
-                                # if not any(fun_inter in s for s in interface_list):
-                                interface_list.insert(idx, [first, second, fun_inter])
-                                removed_data_flow_list.insert(idx, elem)
-                                data_flow_list.remove(elem)
-                                idx += 1
+        if fun_inter.allocated_data_list:
+            for data_id in fun_inter.allocated_data_list:
+                for data in data_list:
+                    if data_id == data.id:
+                        for elem in data_flow_list.copy():
+                            if data.name == elem[2]:
+                                first = None
+                                second = None
+                                for fun in function_list:
+                                    if elem[0] == fun.name.lower():
+                                        first = fun
+                                    if elem[1] == fun.name.lower():
+                                        second = fun
+                                if not (not first and not second):
+                                    # if not any(fun_inter in s for s in interface_list):
+                                    interface_list.insert(idx, [first, second, fun_inter])
+                                    removed_data_flow_list.insert(idx, elem)
+                                    data_flow_list.remove(elem)
+                                    idx += 1
+        else:
+            Logger.set_info(__name__, f"{fun_inter.name} does not have any allocated data (no display)")
 
     output_list, interface_list = get_fun_elem_from_fun_inter(interface_list, fun_elem_list)
 
@@ -405,14 +431,15 @@ def check_child_allocation(string_obj, fun_elem, function_list, xml_attribute_li
     @return None
     """
 
-    for t in function_list:
-        if t.id in fun_elem.allocated_function_list:
-            child_allocated_function_list = []
+    for function in function_list:
+        if function.id in fun_elem.allocated_function_list:
+            fun_elem_child_allocated_function_list = []
             for c in fun_elem.child_list:
                 for j in c.allocated_function_list:
-                    child_allocated_function_list.append(j)
-            if not any(s == t.id for s in child_allocated_function_list):
-                write_function_object(string_obj, t, [], [], False, xml_attribute_list)
+                    fun_elem_child_allocated_function_list.append(j)
+
+            if not any(s == function.id for s in fun_elem_child_allocated_function_list):
+                write_function_object(string_obj, function, [], [], False, xml_attribute_list)
 
 
 def recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attribute_list,
@@ -478,6 +505,20 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     else:
         # Filter consumers and producers list in order to create data flow
         data_flow_list = get_exchanged_flows(consumer_list, producer_list, {}, concatenate=True)
+
+    # Write external functions that are not already allocated to external components
+    external_function_not_allocated_list = []
+    for function in external_function_list:
+        is_external = True
+        for fun_elem in fun_elem_list:
+            if any(a == function.id for a in fun_elem.allocated_function_list):
+                is_external = False
+
+        if is_external:
+            external_function_not_allocated_list.append(function)
+
+    for function in external_function_not_allocated_list:
+        string_obj.create_object(function, xml_attribute_list)
 
     # Write functional element decompo recursively and add allocated functions
     recursive_decomposition(string_obj, main_fun_elem, allocated_function_list, xml_attribute_list,
@@ -648,7 +689,7 @@ def post_check_sequence(sequence_list):
                 curr_pred = elem[2].predecessor_list
                 if check_sequence(curr_pred, sequence_list[:index]) is True:
                     sequence_list.remove(i)
-                    sequence_list.insert(index+1, i)
+                    sequence_list.insert(index + 1, i)
                     index += 1
                 else:
                     continue
@@ -742,18 +783,16 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
     output_list = []
 
     for producer_flow, producer_function in producer_function_list:
-        if not producer_function.child_list:
+        Logger.set_debug(__name__, f'Producer flow: {producer_flow}; '
+                                   f'function: {producer_function.id}, {producer_function.name}')
+        if not producer_function.child_list or not parent_child_dict:
             for cons_flow, consumer_function in consumer_function_list:
-                if cons_flow == producer_flow:
-                    if consumer_function.id in parent_child_dict.keys() \
-                            and not consumer_function.child_list:
-                        output_list.append(
-                            [producer_function.name.lower(), consumer_function.name.lower(),
-                             producer_flow])
-                    elif not consumer_function.child_list:
-                        output_list.append(
-                            [producer_function.name.lower(), consumer_function.name.lower(),
-                             producer_flow])
+                Logger.set_debug(__name__, f'Consumer flow: {cons_flow}; '
+                                           f'function: {consumer_function.id}, {consumer_function.name}')
+                if (not consumer_function.child_list or not parent_child_dict) and cons_flow == producer_flow:
+                    output_list.append(
+                        [producer_function.name.lower(), consumer_function.name.lower(),
+                         producer_flow])
 
     if concatenate:
         output_list = concatenate_flows(output_list)
@@ -792,10 +831,12 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
                 temp_input_list.append([consumer_function.name.lower(), consumer_flow])
 
     for producer_flow, producer_function in producer_function_list:
-        for name, flow in temp_input_list:
-            if producer_flow == flow:
-                flow_child_consumer_list = [name, producer_function.name.lower(), producer_flow]
-                output_list.append(flow_child_consumer_list)
+        # TODO to be checked because returns flow with both producer and consumer (same output as get_exchanged_flows)
+        # for name, flow in temp_input_list:
+        #     if producer_flow == flow:
+        #         flow_child_consumer_list = [name, producer_function.name.lower(), producer_flow]
+        #         output_list.append(flow_child_consumer_list)
+
         # Looking for outputs (i.e. flow with only producer's function)
         if not any(producer_flow in sublist for sublist in flow_consumer_name_list):
             if not any(producer_flow in sub for sub in output_list):
@@ -803,6 +844,7 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
 
     if concatenate:
         output_list = concatenate_flows(output_list)
+
     return output_list
 
 
@@ -838,10 +880,12 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
                 temp_input_list.append([producer_function.name.lower(), producer_flow])
 
     for cons_flow, consumer_fun in consumer_function_list:
-        for name, flow in temp_input_list:
-            if cons_flow == flow:
-                flow_child_producer_list = [name, consumer_fun.name.lower(), cons_flow]
-                output_list.append(flow_child_producer_list)
+        # TODO to be checked because returns flow with both producer and consumer (same output as get_exchanged_flows)
+        # for name, flow in temp_input_list:
+        #     if cons_flow == flow:
+        #         flow_child_producer_list = [name, consumer_fun.name.lower(), cons_flow]
+        #         output_list.append(flow_child_producer_list)
+
         if not any(cons_flow in sublist for sublist in flow_producer_name_list):
             if not any(cons_flow in sublist for sublist in output_list):
                 output_list.append([None, consumer_fun.name.lower(), cons_flow])
@@ -981,7 +1025,7 @@ def write_composed_state(state_obj_string, state, new, objects_conditions_list, 
     for i in state.child_list:
         if not i.child_list:
             state_obj_string.create_state(i)
-            new.insert(count+1, i.id)
+            new.insert(count + 1, i.id)
         else:
             write_composed_state(state_obj_string, i, new, objects_conditions_list, output_str,
                                  count)
@@ -991,7 +1035,7 @@ def write_composed_state(state_obj_string, state, new, objects_conditions_list, 
             state_obj_string.create_transition([j])
             objects_conditions_list.remove(j)
 
-    state_obj_string.append_string("}\n"*count)
+    state_obj_string.append_string("}\n" * count)
 
 
 def match_transition_states(transition, xml_state_list):
@@ -1038,5 +1082,5 @@ def get_source_and_dest(transition, xml_state_list):
             destination_state = b
         if destination_state and source_state:
             return source_state, destination_state
-    
+
     return source_state, destination_state

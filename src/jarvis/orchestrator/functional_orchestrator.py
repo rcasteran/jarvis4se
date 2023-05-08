@@ -612,7 +612,8 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
     """
     # TODO : add physical interface support (see write_element_exposed_interface())
     output = False
-    for exposes_str in exposes_str_list:
+    cleaned_exposes_str_list = util.cut_string_list(exposes_str_list)
+    for exposes_str in cleaned_exposes_str_list:
         fun_elem = question_answer.check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
         fun_inter = question_answer.check_get_object(exposes_str[1], **{'xml_fun_inter_list': xml_fun_inter_list})
 
