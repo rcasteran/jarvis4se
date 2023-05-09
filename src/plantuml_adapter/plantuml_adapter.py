@@ -244,7 +244,8 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
                                                             data_list,
                                                             unmerged_data_list,
                                                             function_list,
-                                                            fun_elem_list)
+                                                            fun_elem_list,
+                                                            is_decomposition=False)
 
         data_flow_list = concatenate_flows(data_flow_list)
 
@@ -303,7 +304,8 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     return string_obj.string
 
 
-def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list, fun_elem_list):
+def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list, fun_elem_list,
+                       is_decomposition=True):
     """@ingroup plantuml_adapter
     Get list of functional interfaces with the functional elements exposing them.
     Functional interface is returned only when specifed data is allocated to it
@@ -312,6 +314,7 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     @param[in] data_flow_list TBD
     @param[in] function_list TBD
     @param[in] fun_elem_list TBD
+    @param[in] is_decomposition indicates if decomposition is required (True) or not (False)
     @return functional interfaces list
     """
 
@@ -344,7 +347,7 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
         else:
             Logger.set_info(__name__, f"{fun_inter.name} does not have any allocated data (no display)")
 
-    output_list, interface_list = get_fun_elem_from_fun_inter(interface_list, fun_elem_list)
+    output_list, interface_list = get_fun_elem_from_fun_inter(interface_list, fun_elem_list, is_decomposition)
 
     if not output_list:
         return None, initial_data
@@ -358,13 +361,14 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     return output_list, data_flow_list
 
 
-def get_fun_elem_from_fun_inter(interface_list, fun_elem_list):
+def get_fun_elem_from_fun_inter(interface_list, fun_elem_list, is_decomposition=True):
     """@ingroup plantuml_adapter
     Get list of functional interfaces with the functional elements exposing them from interface_list =
     [[producer, consumer, fun_inter]...] and put value to False if (first, second, interface)
     have been added to output_list (i.e. fun_elem_1/fun_elem_2 have been found for a fun_inter)
     @param[in] interface_list TBD
     @param[in] fun_elem_list TBD
+    @param[in] is_decomposition indicates if decomposition is required (True) or not (False)
     @return functional interfaces list
     """
 
@@ -375,42 +379,51 @@ def get_fun_elem_from_fun_inter(interface_list, fun_elem_list):
         if first:
             for elem_1 in fun_elem_list:
                 if any(s == interface.id for s in elem_1.exposed_interface_list):
-                    if not elem_1.child_list:
-                        fun_elem_1 = elem_1
-                    else:
-                        check = True
-                        for child in elem_1.child_list:
-                            if any(s == interface.id for s in child.exposed_interface_list):
-                                check = False
-                        if check:
+                    if is_decomposition:
+                        if not elem_1.child_list:
                             fun_elem_1 = elem_1
+                        else:
+                            check = True
+                            for child in elem_1.child_list:
+                                if any(s == interface.id for s in child.exposed_interface_list):
+                                    check = False
+                            if check:
+                                fun_elem_1 = elem_1
+                    else:
+                        fun_elem_1 = elem_1
 
         if second:
             for elem_2 in fun_elem_list:
                 if not first:
-                    if any(s == interface.id for s in elem_2.exposed_interface_list):
-                        if not elem_2.child_list:
-                            fun_elem_2 = elem_2
-                        else:
-                            check = True
-                            for child in elem_2.child_list:
-                                if any(s == interface.id for s in child.exposed_interface_list):
-                                    check = False
-                            if check:
+                    if is_decomposition:
+                        if any(s == interface.id for s in elem_2.exposed_interface_list):
+                            if not elem_2.child_list:
                                 fun_elem_2 = elem_2
+                            else:
+                                check = True
+                                for child in elem_2.child_list:
+                                    if any(s == interface.id for s in child.exposed_interface_list):
+                                        check = False
+                                if check:
+                                    fun_elem_2 = elem_2
+                    else:
+                        fun_elem_2 = elem_2
                 else:
                     if any(s == interface.id for s in elem_2.exposed_interface_list) and \
                             elem_2 != fun_elem_1:
-                        if not elem_2.child_list:
-                            fun_elem_2 = elem_2
-                        else:
-                            check = True
-                            for child in elem_2.child_list:
-                                if any(s == interface.id for s in child.exposed_interface_list):
-                                    check = False
-
-                            if check:
+                        if is_decomposition:
+                            if not elem_2.child_list:
                                 fun_elem_2 = elem_2
+                            else:
+                                check = True
+                                for child in elem_2.child_list:
+                                    if any(s == interface.id for s in child.exposed_interface_list):
+                                        check = False
+
+                                if check:
+                                    fun_elem_2 = elem_2
+                        else:
+                            fun_elem_2 = elem_2
 
         if not (not fun_elem_1 and not fun_elem_2):
             if [fun_elem_1, fun_elem_2, interface] not in output_list:
@@ -498,7 +511,8 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                                             unmerged_data_list,
                                                             allocated_function_list.
                                                             union(external_function_list),
-                                                            fun_elem_list)
+                                                            fun_elem_list,
+                                                            is_decomposition=True)
 
         data_flow_list = concatenate_flows(data_flow_list)
 
