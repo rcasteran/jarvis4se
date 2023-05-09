@@ -36,10 +36,40 @@ def test_issue_39_plantuml_context(mocker, input_test_issue_39):
     expected = ['component "E" as e <<Functional element>>{\n',
                 '}\n',
                 'component "E1" as e1 <<Functional element>>{\n',
-                '}\n',
-                'e1', ' -- ', 'e ', ': i_e_e1\n']
+                '}\n']
 
     test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 2 * len("\'id: xxxxxxxxxx\n")
+
+
+def test_issue_39_input_cell(capsys, input_test_issue_39):
+    """@ingroup test_input_cell
+    @anchor test_issue_39_input_cell
+    Test context diagram display related to @ref test_issue_39
+
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_issue_39 : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_39
+    """
+    file_name = "test_issue_39"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_issue_39}\n"
+                         f"show context E1\n")
+
+    captured = capsys.readouterr()
+    expected = [f"Creating {file_name}.xml !\n",
+                "E is a Functional element\n",
+                "E1 is a Functional element\n",
+                "I_E_E1 is a Functional interface\n",
+                "E exposes I_E_E1\n",
+                "E1 exposes I_E_E1\n",
+                "I_E_E1 does not have any allocated data (no display)\n"]
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in captured.out for i in expected)
