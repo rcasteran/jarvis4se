@@ -127,6 +127,10 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
         if any(a == elem for a in main_fun_elem.child_list):
             fun_elem_list.remove(elem)
 
+    # Remove parent for main functional element : we do not care about it in context diagram
+    if main_fun_elem.parent:
+        fun_elem_list.remove(main_fun_elem.parent)
+    
     plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                   new_consumer_list,
                                                                   new_producer_list,
