@@ -108,12 +108,12 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     Logger.set_debug(__name__, f'list of consumer list: {new_consumer_list}')
     Logger.set_debug(__name__, f'list of producer list: {new_producer_list}')
 
+    # TODO : fun_elem_inter_list to be removed (not used anymore)
     fun_elem_list, interface_list, fun_elem_inter_list = util.get_fun_inter_for_fun_elem_context(
         main_fun_elem, xml_fun_inter_list, xml_fun_elem_list)
 
     Logger.set_debug(__name__, f'list of functional element: {fun_elem_list}')
     Logger.set_debug(__name__, f'list of functional interfaces: {interface_list}')
-    Logger.set_debug(__name__, f'list of functional interfaces exposures: {fun_elem_inter_list}')
 
     for fun in new_function_list:
         for elem in xml_fun_elem_list:
@@ -130,15 +130,14 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     # Remove parent for main functional element : we do not care about it in context diagram
     if main_fun_elem.parent:
         fun_elem_list.remove(main_fun_elem.parent)
-    
+
     plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                   new_consumer_list,
                                                                   new_producer_list,
                                                                   xml_data_list,
                                                                   xml_attribute_list,
                                                                   fun_elem_list,
-                                                                  interface_list,
-                                                                  fun_elem_inter_list)
+                                                                  interface_list)
 
     Logger.set_info(__name__,
                     f"Context Diagram for {fun_elem_str} generated")

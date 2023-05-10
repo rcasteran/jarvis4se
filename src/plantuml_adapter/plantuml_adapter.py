@@ -218,8 +218,7 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
 
 
 def get_fun_elem_context_diagram(function_list, consumer_function_list, producer_function_list,
-                                 data_list, xml_attribute_list, fun_elem_list, fun_inter_list,
-                                 fun_elem_inter_list):
+                                 data_list, xml_attribute_list, fun_elem_list, fun_inter_list):
     """@ingroup plantuml_adapter
     @anchor get_fun_elem_context_diagram
     Construct the PlantUml text and url for the context diagram for functional elements
@@ -230,7 +229,6 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     @param[in] xml_attribute_list TBD
     @param[in] fun_elem_list TBD
     @param[in] fun_inter_list TBD
-    @param[in] fun_elem_inter_list TBD
     @return PlantUml text and url of the diagram
     """
 
@@ -295,9 +293,6 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
     string_obj.create_output_flow(output_flow_list)
     string_obj.create_data_flow(data_flow_list)
 
-    # TODO : fun_elem_inter_list introduced to answer to issue #39
-    # if fun_elem_inter_list:
-    #    string_obj.create_interface(fun_elem_inter_list)
     if interface_list:
         string_obj.create_interface(interface_list)
 
@@ -325,25 +320,47 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     # Get all fun_inter with allocated data within data_flow_list and create interface list
     # [[producer, consumer, fun_inter]...]
     for fun_inter in fun_inter_list:
+        Logger.set_debug(__name__, f"Interface {fun_inter.name}, allocated data {fun_inter.allocated_data_list}")
         if fun_inter.allocated_data_list:
             for data_id in fun_inter.allocated_data_list:
                 for data in data_list:
                     if data_id == data.id:
-                        for elem in data_flow_list.copy():
-                            if data.name == elem[2]:
-                                first = None
-                                second = None
+                        for data_flow in data_flow_list.copy():
+                            if data.name == data_flow[2]:
+                                first_fun = None
+                                second_fun = None
                                 for fun in function_list:
-                                    if elem[0] == fun.name.lower():
-                                        first = fun
-                                    if elem[1] == fun.name.lower():
-                                        second = fun
-                                if not (not first and not second):
-                                    # if not any(fun_inter in s for s in interface_list):
-                                    interface_list.insert(idx, [first, second, fun_inter])
-                                    removed_data_flow_list.insert(idx, elem)
-                                    data_flow_list.remove(elem)
-                                    idx += 1
+                                    if data_flow[0] == fun.name.lower():
+                                        first_fun = fun
+                                    if data_flow[1] == fun.name.lower():
+                                        second_fun = fun
+
+                                if first_fun or second_fun:
+                                    # Need to check consistency between [elem1, elem2, fun_inter] and [fun1, fun2, data]
+                                    # before adding to the list
+                                    is_first_fun_elem = False
+                                    is_second_fun_elem = False
+                                    for fun_elem in fun_elem_list:
+                                        if any(exposed_fun_inter_id == fun_inter.id for exposed_fun_inter_id in
+                                               fun_elem.exposed_interface_list):
+                                            if first_fun and not is_first_fun_elem:
+                                                is_first_fun_elem = any(allocated_fun_id ==
+                                                                        first_fun.id for allocated_fun_id
+                                                                        in fun_elem.allocated_function_list)
+                                            if second_fun and not is_second_fun_elem:
+                                                is_second_fun_elem = any(allocated_fun_id ==
+                                                                         second_fun.id for allocated_fun_id
+                                                                         in fun_elem.allocated_function_list)
+
+                                    if (first_fun and is_first_fun_elem and not second_fun) or \
+                                            (second_fun and is_second_fun_elem and not first_fun) or \
+                                            (first_fun and is_first_fun_elem and second_fun and is_second_fun_elem):
+                                        Logger.set_debug(__name__, f"[{first_fun}, {second_fun}, {fun_inter}] added")
+                                        interface_list.insert(idx, [first_fun, second_fun, fun_inter])
+                                        removed_data_flow_list.insert(idx, data_flow)
+                                        data_flow_list.remove(data_flow)
+                                        idx += 1
+                                        break
         else:
             Logger.set_info(__name__, f"{fun_inter.name} does not have any allocated data (no display)")
 
