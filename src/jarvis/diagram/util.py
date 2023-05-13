@@ -3,6 +3,7 @@ Jarvis diagram module
 """
 # Modules
 from jarvis import question_answer
+from tools import Logger
 
 
 def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list):
@@ -111,27 +112,27 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
     new_function_list = set()
     new_producer_list = []
     new_consumer_list = []
-    main = None
+    main_function = None
 
     for fun in xml_function_list:
         if diagram_function_str in (fun.name, fun.alias):
             new_function_list.add(fun)
-            main = fun
+            main_function = fun
             for xml_producer_flow, xml_producer in xml_producer_function_list:
                 if fun == xml_producer:
                     check = False
-                    for flow, consumer in xml_consumer_function_list:
-                        if xml_producer_flow == flow:
-                            if consumer.parent is None:
+                    for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
+                        if xml_producer_flow == xml_consumer_flow:
+                            if xml_consumer.parent is None:
                                 current_func, current_dict = question_answer.get_children(fun)
-                                parent_check = question_answer.check_parentality(consumer, main)
-                                if consumer not in current_func and parent_check is False:
-                                    new_consumer_list.append([xml_producer_flow, consumer])
-                                    new_function_list.add(consumer)
+                                parent_check = question_answer.check_parentality(xml_consumer, main_function)
+                                if xml_consumer not in current_func and parent_check is False:
+                                    new_consumer_list.append([xml_producer_flow, xml_consumer])
+                                    new_function_list.add(xml_consumer)
                                     check = True
-                            elif main.parent == consumer.parent and consumer != main:
-                                new_consumer_list.append([flow, consumer])
-                                new_function_list.add(consumer)
+                            elif main_function.parent == xml_consumer.parent and xml_consumer != main_function:
+                                new_consumer_list.append([xml_consumer_flow, xml_consumer])
+                                new_function_list.add(xml_consumer)
                                 check = True
                     if check:
                         if [xml_producer_flow, xml_producer] not in new_producer_list:
@@ -141,20 +142,20 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
                         if [xml_producer_flow, xml_producer] not in new_producer_list:
                             new_producer_list.append([xml_producer_flow, xml_producer])
 
-    if main is not None:
+    if main_function is not None:
         for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
-            if xml_consumer == main:
+            if xml_consumer == main_function:
                 check = False
-                for flow, producer in xml_producer_function_list:
-                    if flow == xml_consumer_flow:
+                for xml_producer_flow, producer in xml_producer_function_list:
+                    if xml_producer_flow == xml_consumer_flow:
                         if producer.parent is None:
                             current_func, current_dict = question_answer.get_children(producer)
-                            if main not in current_func:
-                                new_producer_list.append([flow, producer])
+                            if main_function not in current_func:
+                                new_producer_list.append([xml_producer_flow, producer])
                                 new_function_list.add(producer)
                                 check = True
-                        elif main.parent == producer.parent and producer != main:
-                            new_producer_list.append([flow, producer])
+                        elif main_function.parent == producer.parent and producer != main_function:
+                            new_producer_list.append([xml_producer_flow, producer])
                             new_function_list.add(producer)
                             check = True
                 if check:
@@ -257,3 +258,120 @@ def get_level_0_function(fun_elem, function_list, level_0_function_list):
 
     for child in fun_elem.child_list:
         get_level_0_function(child, function_list, level_0_function_list)
+
+
+def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
+    """Returns current object's list by checking view"""
+    filtered_item_list = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
+
+    if len(xml_obj_list) == len(filtered_item_list):
+        return xml_obj_list
+
+    if isinstance(obj_str, str):
+        for obj in xml_obj_list:
+            if obj_str in (obj.name, obj.alias) and not any(item == obj for item in filtered_item_list):
+                filtered_item_list.append(obj)
+    elif isinstance(obj_str, list):
+        for object_name in obj_str:
+            for obj in xml_obj_list:
+                if object_name in (obj.name, obj.alias) and \
+                        not any(item == obj for item in filtered_item_list):
+                    filtered_item_list.append(obj)
+
+    for new_obj in filtered_item_list:
+        child_list = set()
+        for child in new_obj.child_list:
+            if child in filtered_item_list:
+                child_list.add(child)
+        new_obj.child_list.clear()
+        new_obj.child_list = child_list
+
+    return filtered_item_list
+
+
+def filter_allocated_item_from_view(xml_item_list, xml_view_list):
+    """For a type of item from xml, check if a View is activated and if the item is in its
+    allocated item's list"""
+    if not any(j.activated for j in xml_view_list):
+        return xml_item_list
+
+    filtered_item_list = []
+    activated_view = ''
+    for view in xml_view_list:
+        if view.activated:
+            activated_view = view.name
+            for item in xml_item_list:
+                if item.id in view.allocated_item_list:
+                    filtered_item_list.append(item)
+
+    if not filtered_item_list:
+        Logger.set_info(__name__,
+                        f"View {activated_view} does not contain any elements")
+
+    return filtered_item_list
+
+
+def check_get_child_flows(function_list, xml_flow_list):
+    """Get flow_list associated with function_list and xml_flow_list"""
+    new_flow_list = []
+
+    for f in function_list:
+        for xml_flow, xml_function in xml_flow_list:
+            if f == xml_function:
+                if not xml_function.child_list:
+                    if [xml_flow, xml_function] not in new_flow_list:
+                        new_flow_list.append([xml_flow, xml_function])
+
+    return new_flow_list
+
+
+def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, xml_flow_list,
+                                 level):
+    """Returns external functions list, flow lists and parent dict"""
+    ext_flow_fun_list = set()
+    ext_flow_list = []
+    ext_flow_parent_dict = {}
+    for flow, _ in main_flow_list:
+        for xml_flow, xml_fun in xml_flow_list:
+            if flow == xml_flow and xml_fun.parent == main_fun.parent:
+                ext_flow_fun_list.add(xml_fun)
+            elif flow == xml_flow and question_answer.check_not_family(main_fun, xml_fun) and \
+                    xml_fun.parent is None:
+                ext_flow_fun_list.add(xml_fun)
+            elif flow == xml_flow and not question_answer.check_parentality(xml_fun, main_fun) and \
+                    [xml_flow, xml_fun.parent] not in xml_flow_list:
+                ext_flow_fun_list.add(xml_fun)
+
+    for fun in ext_flow_fun_list.copy():
+        if fun.child_list:
+            function_list_dict = question_answer.get_children(fun, level=level)
+            ext_flow_fun_list.update(function_list_dict[0])
+            ext_flow_parent_dict.update(function_list_dict[1])
+
+    for flow, _ in main_flow_list:
+        for xml_flow, xml_fun in xml_flow_list:
+            if flow == xml_flow and xml_fun in ext_flow_fun_list and \
+                    xml_fun not in main_function_list:
+                # ext_flow_list.append([xml_flow, xml_fun])
+                if not xml_fun.child_list:
+                    if [xml_flow, xml_fun] not in ext_flow_list:
+                        ext_flow_list.append([xml_flow, xml_fun])
+                else:
+                    temp = []
+                    for k in xml_fun.child_list:
+                        temp.append([xml_flow, k])
+                    if not any(t in temp for t in xml_flow_list):
+                        if [xml_flow, xml_fun] not in ext_flow_list:
+                            ext_flow_list.append([xml_flow, xml_fun])
+
+    for fun in ext_flow_fun_list.copy():
+        if not any(a == fun for a in [i[1] for i in ext_flow_list]) and not fun.child_list:
+            ext_flow_fun_list.remove(fun)
+
+    for fun in ext_flow_fun_list.copy():
+        if not any(a == fun for a in [i[1] for i in ext_flow_list]) and \
+                not any(i in fun.child_list for i in ext_flow_fun_list) and \
+                fun != main_fun:
+            ext_flow_fun_list.remove(fun)
+
+    return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict

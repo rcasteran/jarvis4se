@@ -34,9 +34,10 @@ def test_issue_81_plantuml_context(mocker, input_test_issue_81):
 
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return
-    expected = ['component "F2" as f2 <<Function>>\n',
+    expected = ['component "F2" as f2 <<Function>>{\n',
                 'object "F21" as f21 <<Function>>\n',
                 'object "F22" as f22 <<Function>>\n',
+                '}\n',
                 'object "F1" as f1 <<Function>>\n',
                 'f1 #--> f21 : a\n',
                 'f21 #--> f22 : b\n']
@@ -44,4 +45,4 @@ def test_issue_81_plantuml_context(mocker, input_test_issue_81):
     test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
-    assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")
+    assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
