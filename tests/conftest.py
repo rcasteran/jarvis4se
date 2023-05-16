@@ -1109,3 +1109,36 @@ def input_test_function_output_auto_decomposition():
                             "FE consumes a"])
 
     return first_part, second_part, third_part
+
+
+@pytest.fixture
+def input_test_issue_75():
+    """@ingroup test_issue_75
+    @anchor input_test_issue_75
+    Defines input fixture for @ref test_issue_75
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F is a function
+        F1 is a function
+        F2 is a function
+        F3 is a function
+        a is a data
+        F2 produces a
+        F3 consumes a
+        F is composed of F1
+        F1 is composed of F2
+        F1 is composed of F3
+    """
+    return "\n".join(["F is a function",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "F3 is a function",
+                      "a is a data",
+                      "F2 produces a",
+                      "F3 consumes a",
+                      "F is composed of F1",
+                      "F1 is composed of F2",
+                      "F1 is composed of F3"])
