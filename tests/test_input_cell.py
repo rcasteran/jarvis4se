@@ -67,7 +67,7 @@ def test_instantiated_attribute_in(capsys, input_test_fun_elem_with_attribute):
                 "Attribute A for Fun elem with value 100\n",
                 f"{file_name}.xml updated\n"]
     # Get las part from capsys
-    last_out = captured.out[-len(''.join(expected))-1:len(captured.out)]
+    last_out = captured.out[-len(''.join(expected)) - 1:len(captured.out)]
 
     test_lib.remove_xml_file(file_name)
 
@@ -134,6 +134,117 @@ def test_fun_elem_exposes_interface_in(capsys, input_test_fun_elem_exposes_inter
                 "[ERROR] coco does not exist, choose a valid name/alias for: "
                 "Fun_elem exposes 'Functional Interface'\n",
                 f"{file_name}.xml updated\n"]
+    # Get last part from capsys
+    last_out = captured.out[-len(''.join(expected)):len(captured.out)]
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
+
+
+def test_function_output_auto_in(capsys, input_test_function_output_auto_decomposition):
+    """@ingroup test_input_cell
+    @anchor test_function_output_auto_in
+    Test function decomposition
+
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_in"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    captured = capsys.readouterr()
+    expected = ["F is a Function\n",
+                "a is a Data\n",
+                "F1 is a Function\n",
+                "F2 is a Function\n",
+                "F is composed of F1\n",
+                "F is composed of F2\n",
+                "[WARNING] No producer found for a\n",
+                "[WARNING] No producer found for a\n"
+                "F2 consumes a\n",
+                "F consumes a\n",
+                "F does not consume a anymore\n",
+                "F produces a\n",
+                "F1 produces a\n",
+                f"{file_name}.xml updated\n"]
+
+    # Get last part from capsys
+    last_out = captured.out[-len(''.join(expected)):len(captured.out)]
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
+
+
+def test_function_output_auto_splitted_in(capsys, input_test_function_output_auto_decomposition):
+    """@ingroup test_input_cell
+    @anchor test_function_output_auto_splitted_in
+    Test function decomposition done in multiple cells
+
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_in"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    captured = capsys.readouterr()
+    expected = ["F2 is a Function\n",
+                "F is composed of F2\n",
+                "F does not produce a anymore\n",
+                "F2 consumes a\n",
+                f"{file_name}.xml updated\n"]
+
+    # Get last part from capsys
+    last_out = captured.out[-len(''.join(expected)):len(captured.out)]
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in last_out for i in expected)
+
+
+def test_function_output_auto_external_in(capsys, input_test_function_output_auto_decomposition):
+    """@ingroup test_input_cell
+    @anchor test_function_output_auto_external_in
+    Test function decomposition done in multiple cells and with external function
+
+    @param[in] capsys : capture fixture reference
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_in"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[2]}\n")
+
+    captured = capsys.readouterr()
+    expected = ["FE is a Function\n",
+                "F produces a due to one of its children\n",
+                "FE consumes a\n",
+                f"{file_name}.xml updated\n"]
+
     # Get last part from capsys
     last_out = captured.out[-len(''.join(expected)):len(captured.out)]
 

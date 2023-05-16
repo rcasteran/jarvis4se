@@ -169,13 +169,13 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
             for function in xml_function_list:
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_consumer_function_list:
-                        add_parent_recursively(elem[0],
-                                               function,
-                                               xml_consumer_function_list,
-                                               xml_producer_function_list,
-                                               new_consumer_list,
-                                               output_xml,
-                                               "consumer")
+                        add_producer_consumer_flow_recursively(elem[0],
+                                                               function,
+                                                               xml_consumer_function_list,
+                                                               xml_producer_function_list,
+                                                               new_consumer_list,
+                                                               output_xml,
+                                                               "consumer")
                     break
 
     Logger.set_debug(__name__, f"{consumer_str_list}: {new_consumer_list}")
@@ -214,10 +214,10 @@ def add_consumer_function(new_consumer_list, xml_consumer_function_list, output_
     return 1
 
 
-def add_parent_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
-                           relationship_str):
+def add_producer_consumer_flow_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
+                                           relationship_str):
     """
-    Recursive method around add_parent_for_data().
+    Recursive method to add producer / consumer function for a flow.
         Parameters:
             flow (Data_name_str) : Data's name
             function (Function) : Current function's parent
@@ -236,47 +236,111 @@ def add_parent_recursively(flow, function, current_list, opposite_list, new_list
         new_list.append([flow, function])
         Logger.set_debug(__name__, f"[{flow}, {function.name}] added")
 
+        # Check that parent opposite flow is present (if any)
+        is_opposite = False
+        for [opposite_flow, opposite_function] in opposite_list:
+            if opposite_flow == flow:
+                is_opposite = True
+                if opposite_function.parent is not None and opposite_function.parent != function and \
+                        opposite_function.parent != function.parent:
+                    if [opposite_flow, opposite_function.parent] not in opposite_list:
+                        add_producer_consumer_opposite(flow, opposite_function.parent, opposite_list, output_xml,
+                                                       relationship_str)
+
+        if not is_opposite:
+            if relationship_str == "consumer":
+                Logger.set_warning(__name__, f"No producer found for {flow}")
+            elif relationship_str == "producer":
+                Logger.set_warning(__name__, f"No consumer found for {flow}")
+            else:
+                Logger.set_error(__name__, f"Unsupported data relationship type: {relationship_str}")
+
     if function.parent is not None:
         parent_child_list, parent_child_dict = question_answer.get_children(function.parent)
 
         if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
-            add_parent_recursively(flow, function.parent, current_list, opposite_list, new_list, output_xml,
-                                   relationship_str)
+            add_producer_consumer_flow_recursively(flow, function.parent, current_list, opposite_list, new_list,
+                                                   output_xml,
+                                                   relationship_str)
         elif [flow, function.parent] in opposite_list:
-            remove_opposite(flow, function.parent, opposite_list, output_xml, relationship_str)
+            # Check that no other function needs the flow before removing it
+            ext_function_list = []
+            for [current_flow, current_function] in current_list:
+                if current_flow == flow:
+                    Logger.set_debug(__name__, f"[{current_flow}, {current_function.name}] "
+                                               f"added in external function list")
+                    ext_function_list.append([current_flow, current_function])
+
+            for parent_child in parent_child_list:
+                if [flow, parent_child] in ext_function_list:
+                    ext_function_list.remove([flow, parent_child])
+
+            if len(ext_function_list) == 0:
+                remove_producer_consumer_opposite(flow, function.parent, opposite_list, output_xml, relationship_str)
+            else:
+                Logger.set_debug(__name__, f"[{flow}, {function.parent.name}] still needed")
 
 
-def remove_opposite(flow, function, list, output_xml, relationship_type):
+def add_producer_consumer_opposite(flow, function, flow_function_list, output_xml, relationship_type):
+    """
+    Add specific consumer/producer relationship within xml's file.
+
+        Parameters:
+            flow (Data_name_str) : Data's name
+            function (Function) : Current Function object
+            flow_function_list : list of [flow, function]
+            output_xml (XmlWriter3SE object) : XML's file object
+            relationship_type (str) : Type of relationship (i.e. consumer or producer)
+        Returns:
+            None
+    """
+    flow_function_list.append([flow, function])
+
+    if relationship_type == "producer":
+        output_xml.write_data_relationship([flow, function],
+                                           "consumer")
+        Logger.set_info(__name__,
+                        f"{function.name} consumes {flow} due to one of its children")
+    elif relationship_type == "consumer":
+
+        output_xml.write_data_relationship([flow, function],
+                                           "producer")
+        Logger.set_info(__name__,
+                        f"{function.name} produces {flow} due to one of its children")
+
+    if function.parent:
+        add_producer_consumer_opposite(flow, function.parent, flow_function_list, output_xml, relationship_type)
+
+
+def remove_producer_consumer_opposite(flow, function, flow_function_list, output_xml, relationship_type):
     """
     Delete specific consumer/producer relationship within xml's file.
 
         Parameters:
             flow (Data_name_str) : Data's name
             function (Function) : Current Function object
-            list : list of [flow, function]
+            flow_function_list : list of [flow, function]
             output_xml (XmlWriter3SE object) : XML's file object
             relationship_type (str) : Type of relationship (i.e. consumer or producer)
         Returns:
             None
     """
-    list.remove([flow, function])
+    flow_function_list.remove([flow, function])
 
     if relationship_type == "producer":
-        output_xml.delete_data_relationship(flow,
-                                            function.id,
+        output_xml.delete_data_relationship([flow, function],
                                             "consumer")
         Logger.set_info(__name__,
                         f"{function.name} does not consume {flow} anymore")
     elif relationship_type == "consumer":
 
-        output_xml.delete_data_relationship(flow,
-                                            function.id,
+        output_xml.delete_data_relationship([flow, function],
                                             "producer")
         Logger.set_info(__name__,
                         f"{function.name} does not produce {flow} anymore")
 
-    if function.parent and [flow, function.parent] in list:
-        remove_opposite(flow, function.parent, list, output_xml, relationship_type)
+    if function.parent and [flow, function.parent] in flow_function_list:
+        remove_producer_consumer_opposite(flow, function.parent, flow_function_list, output_xml, relationship_type)
 
 
 def check_add_producer_function(producer_str_list, xml_consumer_function_list,
@@ -330,13 +394,13 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
             for function in xml_function_list:
                 if elem[1] == function.name or elem[1] == function.alias:
                     if [elem[0], function] not in xml_producer_function_list:
-                        add_parent_recursively(elem[0],
-                                               function,
-                                               xml_producer_function_list,
-                                               xml_consumer_function_list,
-                                               new_producer_list,
-                                               output_xml,
-                                               "producer")
+                        add_producer_consumer_flow_recursively(elem[0],
+                                                               function,
+                                                               xml_producer_function_list,
+                                                               xml_consumer_function_list,
+                                                               new_producer_list,
+                                                               output_xml,
+                                                               "producer")
                     break
 
     Logger.set_debug(__name__, f"{producer_str_list}: {new_producer_list}")

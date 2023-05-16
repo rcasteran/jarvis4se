@@ -218,3 +218,121 @@ def test_fun_elem_exposes_interface_xml(input_test_fun_elem_exposes_interface):
     assert expected_exposed == result_exposed
 
     test_lib.remove_xml_file(file_name)
+
+
+def test_function_output_auto_xml(input_test_function_output_auto_decomposition):
+    """@ingroup test_xml_file
+    @anchor test_function_output_auto_xml
+    Test function decomposition
+
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_xml"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+
+    assert len(obj_dict['xml_function_list']) == 3
+
+    expected_consumer_list = {('a', 'F2')}
+    expected_producer_list = {('a', 'F1'), ('a', 'F')}
+
+    result_consumer_list = set()
+    result_producer_list = set()
+    for flow_cons_list in obj_dict['xml_consumer_function_list']:
+        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+
+    for flow_prod_list in obj_dict['xml_producer_function_list']:
+        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+
+    assert result_consumer_list == expected_consumer_list
+    assert result_producer_list == expected_producer_list
+
+    test_lib.remove_xml_file(file_name)
+
+
+def test_function_output_auto_splitted_xml(input_test_function_output_auto_decomposition):
+    """@ingroup test_xml_file
+    @anchor test_function_output_auto_splitted_xml
+    Test function decomposition done in multiple cells
+
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_xml"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+
+    assert len(obj_dict['xml_function_list']) == 3
+
+    expected_consumer_list = {('a', 'F2')}
+    expected_producer_list = {('a', 'F1')}
+
+    result_consumer_list = set()
+    result_producer_list = set()
+    for flow_cons_list in obj_dict['xml_consumer_function_list']:
+        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+
+    for flow_prod_list in obj_dict['xml_producer_function_list']:
+        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+
+    assert result_consumer_list == expected_consumer_list
+    assert result_producer_list == expected_producer_list
+
+    test_lib.remove_xml_file(file_name)
+
+
+def test_function_output_auto_external_xml(input_test_function_output_auto_decomposition):
+    """@ingroup test_xml_file
+    @anchor test_function_output_auto_splitted_xml
+    Test function decomposition done in multiple cells and with external function
+
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    file_name = "test_function_output_auto_xml"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[2]}\n")
+
+    obj_dict = xml_parser.parse_xml(file_name + ".xml")
+
+    assert len(obj_dict['xml_function_list']) == 4
+
+    expected_consumer_list = {('a', 'F2'), ('a', 'FE')}
+    expected_producer_list = {('a', 'F1'), ('a', 'F')}
+
+    result_consumer_list = set()
+    result_producer_list = set()
+    for flow_cons_list in obj_dict['xml_consumer_function_list']:
+        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+
+    for flow_prod_list in obj_dict['xml_producer_function_list']:
+        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+
+    assert result_consumer_list == expected_consumer_list
+    assert result_producer_list == expected_producer_list
+
+    test_lib.remove_xml_file(file_name)

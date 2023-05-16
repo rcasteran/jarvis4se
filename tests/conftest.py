@@ -997,7 +997,7 @@ def input_test_simple_function():
         F1 is a function
     """
     return "\n".join(["F1 is a function",
-                     ""])
+                      ""])
 
 
 @pytest.fixture
@@ -1068,3 +1068,44 @@ def input_test_functional_interface_with_attribute():
                       "Fun_elem_1 exposes Fun_inter",
                       "Fun_elem_2 exposes Fun_inter",
                       "Fun_inter allocates A."])
+
+
+@pytest.fixture
+def input_test_function_output_auto_decomposition():
+    """@ingroup test_plantuml_decomposition
+    @anchor input_test_function_output_auto_decomposition
+    Defines input fixture for @ref test_function_output_auto_decomposition
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F is a function
+        a is a data
+        F produces a
+        F1 is a function
+        F1 composes F
+        F1 produces a
+        ================
+        F2 is a function
+        F2 composes F
+        F2 consumes a
+        ================
+        FE is a function
+        FE consumes a
+    """
+    first_part = "\n".join(["F is a function",
+                            "a is a data",
+                            "F produces a",
+                            "F1 is a function",
+                            "F1 composes F",
+                            "F1 produces a"])
+
+    second_part = "\n".join(["F2 is a function",
+                             "F2 composes F",
+                             "F2 consumes a"])
+
+    third_part = "\n".join(["FE is a function",
+                            "FE consumes a"])
+
+    return first_part, second_part, third_part

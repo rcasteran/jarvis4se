@@ -53,3 +53,82 @@ def test_fun_elem_with_interfaces_plantuml_decomposition(mocker, input_test_fun_
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
+
+
+def test_function_output_auto_splitted_decomposition(mocker, input_test_function_output_auto_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_function_output_auto_splitted_decomposition
+    Test decomposition diagram display with function decomposition done in multiple cells
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_function_output_auto_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "show decomposition F\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F" as f <<Function>>{\n',
+                'object "F2" as f2 <<Function>>\n',
+                'object "F1" as f1 <<Function>>\n',
+                '}\n',
+                'f1 #--> f2 : a\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")
+
+
+def test_function_output_auto_external_decomposition(mocker, input_test_function_output_auto_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_function_output_auto_external_decomposition
+    Test decomposition diagram display with function decomposition done in multiple cells and with external function
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_function_output_auto_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_function_output_auto_decomposition
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_function_output_auto_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_output_auto_decomposition[2]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         "show decomposition F\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F" as f <<Function>>{\n',
+                'object "F2" as f2 <<Function>>\n',
+                'object "F1" as f1 <<Function>>\n',
+                '}\n',
+                'object "FE" as fe <<Function>>\n',
+                'f1 #--> f2 : a\n',
+                'f1 #--> fe : a\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
