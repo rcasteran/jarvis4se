@@ -375,3 +375,16 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
             ext_flow_fun_list.remove(fun)
 
     return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
+
+
+def get_parent_dict(element, element_list, parent_dict):
+    if element.parent:
+        parent_dict[element.id] = element.parent.id
+
+        if element.parent not in element_list:
+            element_list.add(element.parent)
+            element.parent.child_list.clear()
+
+        element.parent.add_child(element)
+
+        get_parent_dict(element.parent, element_list, parent_dict)

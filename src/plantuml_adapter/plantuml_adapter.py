@@ -53,9 +53,10 @@ def write_function_child(string_obj, function, input_flow_list, output_flow_list
     child_with_child_list = []
     # Create a child list for each parent function
     for child_function in function.child_list:
+        Logger.set_debug(__name__, f"{child_function.name} check as child of {function.name}")
         if child_function.child_list:
             child_with_child_list.append(child_function)
-        if not child_function.child_list:
+        else:
             child_with_no_child_list.append(child_function)
 
     # For child that has no child: create object
@@ -195,16 +196,17 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
     # Loop in order to filter functions and write in output's file, see write_function_child()
     if parent_child_dict:
         for function in function_list:
-            if function.id in parent_child_dict.values() and \
-                    function.id not in parent_child_dict.keys():
-                string_obj.create_component(function)
-                write_function_child(string_obj, function, input_flow_list, output_flow_list,
-                                     xml_attribute_list)
-
-            if function.id not in parent_child_dict.keys() \
-                    and function.id not in parent_child_dict.values():
-                write_function_object(string_obj, function, input_flow_list, output_flow_list,
-                                      False, xml_attribute_list, compo_diagram=True)
+            if function.id not in parent_child_dict.keys():
+                if function.id in parent_child_dict.values():
+                    # Function is a parent
+                    string_obj.create_component(function)
+                    write_function_child(string_obj, function, input_flow_list, output_flow_list,
+                                         xml_attribute_list)
+                else:
+                    # Function is not a parent:
+                    write_function_object(string_obj, function, input_flow_list, output_flow_list,
+                                          False, xml_attribute_list, compo_diagram=True)
+            # Else do nothing : done as children of function parent
     else:
         for function in function_list:
             write_function_object(string_obj, function, input_flow_list, output_flow_list, False,

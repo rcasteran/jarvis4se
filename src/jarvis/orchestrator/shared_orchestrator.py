@@ -31,7 +31,7 @@ def check_add_child(parent_child_name_str_list, **kwargs):
     available_objects = (datamodel.Function, datamodel.State,
                          datamodel.FunctionalElement, datamodel.PhysicalElement)
 
-    cleaned_parent_child_list_str = util.cut_string_list(parent_child_name_str_list)
+    cleaned_parent_child_list_str = util.cut_tuple_list(parent_child_name_str_list)
     for elem in cleaned_parent_child_list_str:
         parent_object = question_answer.check_get_object(elem[0], **kwargs)
         child_object = question_answer.check_get_object(elem[1], **kwargs)

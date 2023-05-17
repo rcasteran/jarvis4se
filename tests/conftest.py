@@ -7,8 +7,11 @@ Defines the regression tests based on pytest fixtures
 Uses the mocker fixture for spying methods (https://pytest-mock.readthedocs.io/en/latest/usage.html#).
 
 Defines the following non regression tests:
+- @ref test_plantuml_chain : Tests about chain diagrams
 - @ref test_plantuml_context : Tests about context diagrams
 - @ref test_plantuml_decomposition : Tests about decomposition diagrams
+- @ref test_plantuml_sequence : Tests about sequence diagrams
+- @ref test_plantuml_state : Tests about state diagrams
 - @ref test_input_cell : Tests about Jarvis outputs
 - @ref test_magic_tools : Tests about Jarvis IPython magic tools
 - @ref test_question_answer : Tests about Jarvis answer to user's question
@@ -722,8 +725,11 @@ def input_test_fun_elem_with_interfaces_2():
 def input_test_fun_elem_with_attribute():
     """@ingroup test_plantuml_context
     @anchor input_test_fun_elem_with_attribute
-    Defines input fixture for @ref test_fun_elem_with_attribute_plantuml_context, @ref test_attribute_declaration_in,
-    @ref test_instantiated_attribute_in and @ref test_instantiated_attribute_xml
+    Defines input fixture for:
+    - @ref test_fun_elem_with_attribute_plantuml_context
+    - @ref test_attribute_declaration_in
+    - @ref test_instantiated_attribute_in
+    - @ref test_instantiated_attribute_xml
 
     @return input fixture
 
@@ -1074,7 +1080,15 @@ def input_test_functional_interface_with_attribute():
 def input_test_function_output_auto_decomposition():
     """@ingroup test_plantuml_decomposition
     @anchor input_test_function_output_auto_decomposition
-    Defines input fixture for @ref test_function_output_auto_decomposition
+    Defines input fixture for :
+    - @ref test_function_output_auto_external_decomposition
+    - @ref test_function_output_auto_splitted_decomposition
+    - @ref test_function_output_auto_xml
+    - @ref test_function_output_auto_splitted_xml
+    - @ref test_function_output_auto_external_xml
+    - @ref test_function_output_auto_splitted_in
+    - @ref test_function_output_auto_in
+    - @ref test_function_output_auto_external_in
 
     @return input fixture
 
@@ -1142,3 +1156,62 @@ def input_test_issue_75():
                       "F is composed of F1",
                       "F1 is composed of F2",
                       "F1 is composed of F3"])
+
+
+@pytest.fixture
+def input_test_function_plantuml_chain():
+    """@ingroup test_plantuml_chain
+    @anchor input_test_function_plantuml_chain
+    Defines input fixture for:
+    - @ref test_function_plantuml_chain
+    - @ref test_function_with_context_plantuml_chain
+    - @ref test_function_child_with_context_plantuml_chain
+    - @ref test_function_child_child_with_context_plantuml_chain
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        FE1 is a function
+        FE2 is a function
+        F1 is a function
+        F2 is a function
+        F3 is a function
+        F4 is a function
+        F5 is a function
+        F4, F5 composes F3
+        F2, F3 composes F1
+        a is a data
+        FE1 produces a
+        F2 consumes a
+        b is a data
+        F2 produces b
+        F4 consumes b
+        c is a data
+        F4 produces c
+        F5 consumes c
+        d is a data
+        F5 produces d
+        FE2 consumes d
+    """
+    return "\n".join(["FE1 is a function",
+                      "FE2 is a function",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "F3 is a function",
+                      "F4 is a function",
+                      "F5 is a function",
+                      "F4, F5 composes F3",
+                      "F2, F3 composes F1",
+                      "a is a data",
+                      "FE1 produces a",
+                      "F2 consumes a",
+                      "b is a data",
+                      "F2 produces b",
+                      "F4 consumes b",
+                      "c is a data",
+                      "F4 produces c",
+                      "F5 consumes c",
+                      "d is a data",
+                      "F5 produces d",
+                      "FE2 consumes d"])
