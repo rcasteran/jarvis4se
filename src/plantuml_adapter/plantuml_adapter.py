@@ -32,7 +32,7 @@ def write_function_child(string_obj, function, input_flow_list, output_flow_list
     for p in input_flow_list:
         if p[0][0] == function.name.lower():
             function_input_port.append(p)
-        if p[0][0] is None:
+        if p[0][0] is None and function.parent is None:
             external_input_port.append(p)
             if p[0][1] == function.name.lower():
                 parent_function_port.append(p)
@@ -40,10 +40,17 @@ def write_function_child(string_obj, function, input_flow_list, output_flow_list
     for q in output_flow_list:
         if q[0][0] == function.name.lower():
             function_output_port.append(q)
-        if q[0][0] is None:
+        if q[0][0] is None and function.parent is None:
             external_output_port.append(q)
             if q[0][1] == function.name.lower():
                 parent_function_port.append(q)
+
+    Logger.set_debug(__name__, f"Function name: {function.name}")
+    Logger.set_debug(__name__, f"Input port list: {function_input_port}")
+    Logger.set_debug(__name__, f"Output port list: {function_input_port}")
+    Logger.set_debug(__name__, f"Parent function port list: {parent_function_port}")
+    Logger.set_debug(__name__, f"External input port list: {external_input_port}")
+    Logger.set_debug(__name__, f"External output port list: {external_output_port}")
 
     string_obj.create_port(function_input_port, "in")
     string_obj.create_port(function_output_port, "out")

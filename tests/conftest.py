@@ -1215,3 +1215,71 @@ def input_test_function_plantuml_chain():
                       "d is a data",
                       "F5 produces d",
                       "FE2 consumes d"])
+
+@pytest.fixture
+def input_test_issue_82():
+    """@ingroup test_plantuml_chain
+    @anchor input_test_issue_82
+    Defines input fixture for @ref test_issue_82_plantuml_chain
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        F12 is a function
+        F12 composes F1
+        F13 is a function
+        F13 composes F1
+        F14 is a function
+        F14 composes F1
+        F141 is a function
+        F141 composes F14
+        F142 is a function
+        F142 composes F14
+        a is a data
+        F1 consumes a
+        F12 consumes a
+        b is a data
+        F12 produces b
+        F13 consumes b
+        c is a data
+        F13 produces c
+        F14 consumes c
+        F141 consumes c
+        d is a data
+        F141 produces d
+        F142 consumes d
+        e is a data
+        F142 produces e
+        F14 produces e
+        F1 produces e
+    """
+    return "\n".join(["F1 is a function",
+                      "F12 is a function",
+                      "F12 composes F1",
+                      "F13 is a function",
+                      "F13 composes F1",
+                      "F14 is a function",
+                      "F14 composes F1",
+                      "F141 is a function",
+                      "F141 composes F14",
+                      "F142 is a function",
+                      "F142 composes F14",
+                      "a is a data",
+                      "F1 consumes a",
+                      "F12 consumes a",
+                      "b is a data",
+                      "F12 produces b",
+                      "F13 consumes b",
+                      "c is a data",
+                      "F13 produces c",
+                      "F14 consumes c",
+                      "F141 consumes c",
+                      "d is a data",
+                      "F141 produces d",
+                      "F142 consumes d",
+                      "e is a data",
+                      "F142 produces e",
+                      "F14 produces e",
+                      "F1 produces e"])
