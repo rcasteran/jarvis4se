@@ -298,7 +298,7 @@ def test_function_output_auto_splitted_xml(input_test_function_output_auto_decom
 
 def test_function_output_auto_external_xml(input_test_function_output_auto_decomposition):
     """@ingroup test_xml_file
-    @anchor test_function_output_auto_splitted_xml
+    @anchor test_function_output_auto_external_xml
     Test function decomposition done in multiple cells and with external function
 
     @param[in] input_test_function_output_auto_decomposition : input fixture reference
