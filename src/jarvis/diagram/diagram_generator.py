@@ -168,12 +168,12 @@ def case_decomposition_diagram(**kwargs):
                                                    kwargs['xml_view_list'])
 
     if len(function_list) > 0:
-        consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
-            kwargs['xml_data_list'],
-            kwargs['xml_view_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'],
-            function_list)
+        _, consumer_list, producer_list = \
+            util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
+                                                        kwargs['xml_view_list'],
+                                                        kwargs['xml_consumer_function_list'],
+                                                        kwargs['xml_producer_function_list'],
+                                                        function_list)
 
         if diagram_object_str in question_answer.get_objects_names(kwargs['xml_function_list']):
             child_inheritance = shared_orchestrator.childs_inheritance(function_list, level=diagram_level)
@@ -232,36 +232,6 @@ def case_decomposition_diagram(**kwargs):
     return plantuml_string
 
 
-def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_consumer_function_list,
-                                           xml_producer_function_list, function_list):
-    """If a view is activated, returns filtered consumer/producer lists"""
-    new_consumer_list = []
-    new_producer_list = []
-    new_data_list = util.filter_allocated_item_from_view(xml_data_list, xml_view_list)
-
-    if len(new_data_list) == len(xml_data_list):
-        for prod in xml_producer_function_list:
-            if any(item == prod[1] for item in function_list):
-                new_producer_list.append(prod)
-
-        for cons in xml_consumer_function_list:
-            if any(item == cons[1] for item in function_list):
-                new_consumer_list.append(cons)
-
-    else:
-        for cons in xml_consumer_function_list:
-            if any(item.name == cons[0] for item in new_data_list) and \
-                    any(item == cons[1] for item in function_list):
-                new_consumer_list.append(cons)
-
-        for prod in xml_producer_function_list:
-            if any(item.name == prod[0] for item in new_data_list) and \
-                    any(item == prod[1] for item in function_list):
-                new_producer_list.append(prod)
-
-    return new_consumer_list, new_producer_list
-
-
 def case_chain_diagram(**kwargs):
     """Case for 'show chain <states>/<functions>'"""
     plantuml_string = None
@@ -275,25 +245,75 @@ def case_chain_diagram(**kwargs):
         xml_state_name_list = question_answer.get_objects_names(kwargs['xml_state_list'])
         result_state = all(t in xml_state_name_list for t in object_list_str)
 
+        xml_fun_elem_name_list = question_answer.get_objects_names(kwargs['xml_fun_elem_list'])
+        result_fun_elem = all(t in xml_fun_elem_name_list for t in object_list_str)
+
         if result_function:
             function_list = util.get_object_list_from_view(object_list_str,
                                                            kwargs['xml_function_list'],
                                                            kwargs['xml_view_list'])
 
             if len(function_list) > 0:
-                consumer_list, producer_list = get_cons_prod_from_view_allocated_data(
-                    kwargs['xml_data_list'],
-                    kwargs['xml_view_list'],
-                    kwargs['xml_consumer_function_list'],
-                    kwargs['xml_producer_function_list'],
-                    function_list)
+                _, consumer_list, producer_list = \
+                    util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
+                                                                kwargs['xml_view_list'],
+                                                                kwargs[
+                                                                    'xml_consumer_function_list'],
+                                                                kwargs[
+                                                                    'xml_producer_function_list'],
+                                                                function_list)
 
-                plantuml_string = diagram_generator_chain.show_functions_chain(object_list_str,
-                                                                               function_list,
-                                                                               consumer_list,
-                                                                               producer_list,
-                                                                               kwargs['xml_type_list'],
-                                                                               kwargs['xml_attribute_list'])
+                plantuml_string = diagram_generator_chain.show_function_chain(object_list_str,
+                                                                              function_list,
+                                                                              consumer_list,
+                                                                              producer_list,
+                                                                              kwargs['xml_type_list'],
+                                                                              kwargs['xml_attribute_list'])
+            else:
+                Logger.set_warning(__name__,
+                                   f"Nothing to display for the selected view")
+        elif result_fun_elem:
+            fun_elem_list_from_view = util.get_object_list_from_view(object_list_str,
+                                                                     kwargs['xml_fun_elem_list'],
+                                                                     kwargs['xml_view_list'])
+
+            if len(fun_elem_list_from_view) > 0:
+                fun_elem_list = set()
+                function_list = set()
+
+                function_list_from_view = util.get_object_list_from_view(object_list_str,
+                                                                         kwargs['xml_function_list'],
+                                                                         kwargs['xml_view_list'])
+                for i in object_list_str:
+                    for fun_elem in fun_elem_list_from_view:
+                        if i == fun_elem.name or i == fun_elem.alias:
+                            fun_elem_list.add(fun_elem)
+
+                            if len(fun_elem.allocated_function_list) > 0:
+                                for allocated_function_id in fun_elem.allocated_function_list:
+                                    for function in kwargs['xml_function_list']:
+                                        if function.id == allocated_function_id and function in function_list_from_view:
+                                            util.get_fun_elem_function_list(function, function_list, fun_elem)
+                            else:
+                                Logger.set_info(__name__,
+                                                f"No function allocated to {fun_elem.name} (no display)")
+
+                new_function_list, consumer_list, producer_list = \
+                    util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
+                                                                kwargs['xml_view_list'],
+                                                                kwargs[
+                                                                    'xml_consumer_function_list'],
+                                                                kwargs[
+                                                                    'xml_producer_function_list'],
+                                                                function_list)
+
+                plantuml_string = diagram_generator_chain.show_fun_elem_chain(object_list_str,
+                                                                              new_function_list,
+                                                                              consumer_list,
+                                                                              producer_list,
+                                                                              fun_elem_list,
+                                                                              kwargs['xml_type_list'],
+                                                                              kwargs['xml_attribute_list'])
             else:
                 Logger.set_warning(__name__,
                                    f"Nothing to display for the selected view")
@@ -313,7 +333,7 @@ def case_chain_diagram(**kwargs):
         else:
             Logger.set_warning(__name__,
                                f"Jarvis does not know the object(s): {kwargs['diagram_object_str']}"
-                               f"(i.e. it is not a function, nor a state)")
+                               f"(i.e. it is not a function, nor a functional element, nor a state)")
     else:
         Logger.set_error(__name__,
                          f"{kwargs['diagram_object_str']} is not a valid chain")

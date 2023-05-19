@@ -59,6 +59,7 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
     Logger.set_debug(__name__, f'list of producer list: {new_producer_list}')
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           fun_elem_list=None,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,
                                                            parent_child_dict={},

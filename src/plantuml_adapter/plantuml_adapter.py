@@ -143,8 +143,8 @@ def write_function_object(string_obj, function, input_flow_list, output_flow_lis
                 string_obj.create_port(output_flow_list, "out")
 
 
-def get_function_diagrams(function_list, consumer_function_list, producer_function_list,
-                          parent_child_dict, data_list, xml_type_list, xml_attribute_list=None):
+def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, producer_function_list,
+                          parent_child_dict, data_list, xml_type_list, xml_attribute_list):
     """@ingroup plantuml_adapter
     @anchor get_function_diagrams
     Construct the PlantUml text and url for the requested diagram between one of the following:
@@ -195,18 +195,34 @@ def get_function_diagrams(function_list, consumer_function_list, producer_functi
 
     # Loop in order to filter functions and write in output's file, see write_function_child()
     if parent_child_dict:
-        for function in function_list:
-            if function.id not in parent_child_dict.keys():
-                if function.id in parent_child_dict.values():
-                    # Function is a parent
-                    string_obj.create_component(function)
-                    write_function_child(string_obj, function, input_flow_list, output_flow_list,
-                                         xml_attribute_list)
-                else:
-                    # Function is not a parent:
-                    write_function_object(string_obj, function, input_flow_list, output_flow_list,
-                                          False, xml_attribute_list, compo_diagram=True)
-            # Else do nothing : done as children of function parent
+        if fun_elem_list:
+            for fun_elem in fun_elem_list:
+                string_obj.create_component(fun_elem)
+                check_function = False
+                for f in function_list:
+                    if any(a == f.id for a in fun_elem.allocated_function_list):
+                        if len(fun_elem.allocated_function_list) > 1:
+                            check_function = False
+                        else:
+                            check_function = True
+                        write_function_object(string_obj, f, input_flow_list, output_flow_list,
+                                              check_function, xml_attribute_list, component_obj=fun_elem)
+                if not check_function:
+                    string_obj.append_string('}\n')
+                    string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+        else:
+            for function in function_list:
+                if function.id not in parent_child_dict.keys():
+                    if function.id in parent_child_dict.values():
+                        # Function is a parent
+                        string_obj.create_component(function)
+                        write_function_child(string_obj, function, input_flow_list, output_flow_list,
+                                             xml_attribute_list)
+                    else:
+                        # Function is not a parent:
+                        write_function_object(string_obj, function, input_flow_list, output_flow_list,
+                                              False, xml_attribute_list, compo_diagram=True)
+                # Else do nothing : done as children of function parent
     else:
         for function in function_list:
             write_function_object(string_obj, function, input_flow_list, output_flow_list, False,

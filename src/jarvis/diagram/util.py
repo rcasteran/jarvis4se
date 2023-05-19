@@ -305,8 +305,8 @@ def filter_allocated_item_from_view(xml_item_list, xml_view_list):
                     filtered_item_list.append(item)
 
     if not filtered_item_list:
-        Logger.set_info(__name__,
-                        f"View {activated_view} does not contain any elements")
+        Logger.set_debug(__name__,
+                         f"The requested elements are not allocated to the view {activated_view}")
 
     return filtered_item_list
 
@@ -377,6 +377,45 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
     return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
 
 
+def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_consumer_function_list,
+                                           xml_producer_function_list, function_list):
+    """If a view is activated, returns filtered consumer/producer lists"""
+    new_function_list = []
+    new_consumer_list = []
+    new_producer_list = []
+    new_data_list = filter_allocated_item_from_view(xml_data_list, xml_view_list)
+
+    if len(new_data_list) == len(xml_data_list):
+        for prod in xml_producer_function_list:
+            if any(item == prod[1] for item in function_list):
+                new_producer_list.append(prod)
+                if prod[1] not in new_function_list:
+                    new_function_list.append(prod[1])
+
+        for cons in xml_consumer_function_list:
+            if any(item == cons[1] for item in function_list):
+                new_consumer_list.append(cons)
+                if cons[1] not in new_function_list:
+                    new_function_list.append(cons[1])
+
+    else:
+        for cons in xml_consumer_function_list:
+            if any(item.name == cons[0] for item in new_data_list) and \
+                    any(item == cons[1] for item in function_list):
+                new_consumer_list.append(cons)
+                if cons[1] not in new_function_list:
+                    new_function_list.append(cons[1])
+
+        for prod in xml_producer_function_list:
+            if any(item.name == prod[0] for item in new_data_list) and \
+                    any(item == prod[1] for item in function_list):
+                new_producer_list.append(prod)
+                if prod[1] not in new_function_list:
+                    new_function_list.append(prod[1])
+
+    return new_function_list, new_consumer_list, new_producer_list
+
+
 def get_parent_dict(element, element_list, parent_dict):
     if element.parent:
         parent_dict[element.id] = element.parent.id
@@ -388,3 +427,13 @@ def get_parent_dict(element, element_list, parent_dict):
         element.parent.add_child(element)
 
         get_parent_dict(element.parent, element_list, parent_dict)
+
+
+def get_fun_elem_function_list(function, function_list, fun_elem):
+    if function.parent:
+        if function.parent.id in fun_elem.allocated_function_list:
+            get_fun_elem_function_list(function.parent, function_list, fun_elem)
+        else:
+            function_list.add(function)
+    else:
+        function_list.add(function)

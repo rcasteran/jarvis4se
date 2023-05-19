@@ -49,5 +49,11 @@ def cut_string(input_string):
     @param[in] input_string : input string
     @return list of strings
     """
-    input_string_filtered = input_string.replace(" ", "")
-    return re.split(r',(?![^[]*\])', input_string_filtered)
+    splitted_string = re.split(r',(?![^[]*\])', input_string)
+
+    i = 0
+    for elem in splitted_string.copy():
+        splitted_string[i] = elem.strip()
+        i = i+1
+
+    return splitted_string

@@ -20,14 +20,14 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
         xml_consumer_function_list,
         xml_producer_function_list)
 
-    plantuml_text = plantuml_adapter.get_function_diagrams(
-        new_function_list,
-        new_consumer_list,
-        new_producer_list,
-        {},
-        xml_data_list,
-        xml_type_list,
-        xml_attribute_list=xml_attribute_list)
+    plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           fun_elem_list=None,
+                                                           consumer_function_list=new_consumer_list,
+                                                           producer_function_list=new_producer_list,
+                                                           parent_child_dict={},
+                                                           data_list=xml_data_list,
+                                                           xml_type_list=xml_type_list,
+                                                           xml_attribute_list=xml_attribute_list)
 
     Logger.set_info(__name__,
                     f"Context Diagram {diagram_function_str} generated")
@@ -101,12 +101,13 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                 if j not in new_function_list:
                     function.child_list.remove(j)
 
-    plantuml_text = plantuml_adapter.get_function_diagrams(new_function_list,
-                                                           new_consumer_list,
-                                                           new_producer_list,
-                                                           new_parent_dict,
-                                                           None,
-                                                           xml_type_list,
+    plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           fun_elem_list=None,
+                                                           consumer_function_list=new_consumer_list,
+                                                           producer_function_list=new_producer_list,
+                                                           parent_child_dict=new_parent_dict,
+                                                           data_list=None,
+                                                           xml_type_list=xml_type_list,
                                                            xml_attribute_list=xml_attribute_list)
 
     Logger.set_info(__name__,
