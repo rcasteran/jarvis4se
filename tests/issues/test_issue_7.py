@@ -29,7 +29,7 @@ def test_issue_7_plantuml_decomposition(mocker, monkeypatch, input_test_issue_7)
     """
     monkeypatch.setattr('sys.stdin', io.StringIO('y'))  # Say yes for adding F3 allocated to E1
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    file_name = "test_issue_7"
+    file_name = "test_issue_7_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_7}\n"
                          "show decomposition E1\n")

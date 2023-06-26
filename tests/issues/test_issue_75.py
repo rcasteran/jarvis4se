@@ -29,7 +29,7 @@ def test_issue_75_no_level_plantuml_decomposition(mocker, input_test_issue_75):
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
 
-    file_name = "fun_elem_decomposition_level"
+    file_name = "test_issue_75_no_level_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_75}\n"
                          "show decomposition F\n")
@@ -64,7 +64,7 @@ def test_issue_75_level_1_plantuml_decomposition(mocker, input_test_issue_75):
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
 
-    file_name = "fun_elem_decomposition_level"
+    file_name = "test_issue_75_level_1_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_75}\n"
                          "show decomposition F at level 1\n")
@@ -95,7 +95,7 @@ def test_issue_75_level_2_plantuml_decomposition(mocker, input_test_issue_75):
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
 
-    file_name = "fun_elem_decomposition_level"
+    file_name = "test_issue_75_level_2_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_75}\n"
                          "show decomposition F at level 2\n")

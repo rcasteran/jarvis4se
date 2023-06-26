@@ -68,7 +68,7 @@ def test_issue_9_xml(input_test_issue_9):
     **Jarvis4se equivalent:**
     @ref input_test_issue_9
     """
-    file_name = "set_allocated_item_to_view_within_xml"
+    file_name = "test_issue_9_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_9[0]}")
     jarvis4se.jarvis("", f"with {file_name}\n"

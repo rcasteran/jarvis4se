@@ -29,7 +29,7 @@ def test_issue_5_plantuml_decomposition(mocker, input_test_issue_5):
     @ref input_test_issue_5
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
-    file_name = "test_issue_5"
+    file_name = "test_issue_5_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_5}\n"
                          "show decomposition F1\n")
@@ -67,7 +67,7 @@ def test_issue_5_xml(input_test_issue_5):
     **Jarvis4se equivalent:**
     @ref input_test_issue_5
     """
-    file_name = "test_issue_5"
+    file_name = "test_issue_5_xml"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_5}")
 

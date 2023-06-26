@@ -26,7 +26,7 @@ def test_issue_39_plantuml_context(mocker, input_test_issue_39):
     @ref input_test_issue_39
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
-    file_name = "test_issue_39"
+    file_name = "test_issue_39_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_39}\n"
                          f"show context E1\n")
@@ -56,7 +56,7 @@ def test_issue_39_input_cell(capsys, input_test_issue_39):
     **Jarvis4se equivalent:**
     @ref input_test_issue_39
     """
-    file_name = "test_issue_39"
+    file_name = "test_issue_39_input_cell"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_39}\n"
                          f"show context E1\n")

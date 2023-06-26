@@ -27,7 +27,7 @@ def test_issue_13_plantuml_decomposition(mocker, input_test_issue_13):
     @ref input_test_issue_7
     """
     spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
-    file_name = "test_issue_13"
+    file_name = "test_issue_13_plantuml_decomposition"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_13}\n"                         
                          "show decomposition E1\n")
