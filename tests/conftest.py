@@ -437,7 +437,7 @@ def input_test_issue_62():
 def input_test_issue_81():
     """@ingroup test_issue_81
     @anchor input_test_issue_81
-    Defines input fixture for @ref test_issue_81_plantuml_context
+    Defines input fixture for @ref test_issue_81_plantuml_decomposition
 
     @return input fixture
 
@@ -1283,3 +1283,41 @@ def input_test_issue_82():
                       "F142 produces e",
                       "F14 produces e",
                       "F1 produces e"])
+
+
+@pytest.fixture
+def input_test_issue_86():
+    """@ingroup test_issue_86
+    @anchor input_test_issue_86
+    Defines input fixture for @ref test_issue_86_plantuml_decomposition
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        F11 is a function
+        F12 is a function
+        F11, F12 compose F1
+        a is a data
+        F1 consumes a
+        F11 consumes a
+        F12 consumes a
+        b is a data
+        F1 produces b
+        F11 produces b
+        F12 produces b
+    """
+    return "\n".join(["F1 is a function",
+                      "F11 is a function",
+                      "F12 is a function",
+                      "F11, F12 compose F1",
+                      "a is a data",
+                      "F1 consumes a",
+                      "F11 consumes a",
+                      "F12 consumes a",
+                      "b is a data",
+                      "F1 produces b",
+                      "F11 produces b",
+                      "F12 produces b",
+                      ""])

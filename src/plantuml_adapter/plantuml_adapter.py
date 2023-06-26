@@ -887,16 +887,8 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
                 temp_input_list.append([consumer_function.name.lower(), consumer_flow])
 
     for producer_flow, producer_function in producer_function_list:
-        # TODO to be checked because returns flow with both producer and consumer (same output as get_exchanged_flows)
-        # for name, flow in temp_input_list:
-        #     if producer_flow == flow:
-        #         flow_child_consumer_list = [name, producer_function.name.lower(), producer_flow]
-        #         output_list.append(flow_child_consumer_list)
-
-        # Looking for outputs (i.e. flow with only producer's function)
         if not any(producer_flow in sublist for sublist in flow_consumer_name_list):
-            if not any(producer_flow in sub for sub in output_list):
-                output_list.append([None, producer_function.name.lower(), producer_flow])
+            output_list.append([None, producer_function.name.lower(), producer_flow])
 
     if concatenate:
         output_list = concatenate_flows(output_list)
@@ -936,15 +928,8 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
                 temp_input_list.append([producer_function.name.lower(), producer_flow])
 
     for cons_flow, consumer_fun in consumer_function_list:
-        # TODO to be checked because returns flow with both producer and consumer (same output as get_exchanged_flows)
-        # for name, flow in temp_input_list:
-        #     if cons_flow == flow:
-        #         flow_child_producer_list = [name, consumer_fun.name.lower(), cons_flow]
-        #         output_list.append(flow_child_producer_list)
-
         if not any(cons_flow in sublist for sublist in flow_producer_name_list):
-            if not any(cons_flow in sublist for sublist in output_list):
-                output_list.append([None, consumer_fun.name.lower(), cons_flow])
+            output_list.append([None, consumer_fun.name.lower(), cons_flow])
 
     if concatenate:
         output_list = concatenate_flows(output_list)
