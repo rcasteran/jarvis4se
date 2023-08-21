@@ -24,7 +24,7 @@ class BaseType(Enum):
     TRANSITION = 7
     ATTRIBUTE = 8
     VIEW = 9
-
+    REQUIREMENT = 10
 
     def __str__(self):
         """ Get the string representation for an enum value
@@ -52,6 +52,9 @@ class BaseType(Enum):
             type_str = 'Attribute'
         elif self == self.VIEW:
             type_str = 'View'
+        elif self == self.REQUIREMENT:
+            type_str = 'Requirement'
+
         return type_str
 
     @classmethod
@@ -82,6 +85,8 @@ class BaseType(Enum):
             enum_type = cls.ATTRIBUTE
         elif obj_type == 'View':
             enum_type = cls.VIEW
+        elif obj_type == 'Requirement':
+            enum_type = cls.REQUIREMENT
         
         return enum_type
 
@@ -1099,3 +1104,92 @@ class Type:
         @return None
         """
         self.base = p_base
+
+
+class Requirement:
+    """@ingroup datamodel
+    @anchor Requirement
+    Basic type representing a requirement
+
+    1. A condition or capability needed by a user to achieve a goal.
+    2. A condition or capability that must be met or possessed by a system or system element to satisfy an agreement,
+    standard, specification, or other formally imposed documents.
+    3. A documented representation of a condition or capability as in (1) or (2)
+    """
+
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.REQUIREMENT,
+                 p_parent=None):
+        """
+        @var id
+        unique identifier
+
+        @var name
+        unique name
+
+        @var alias
+        unique alias
+
+        @var type
+        functional element type\n
+        Could be @ref BaseType .REQUIREMENT or a @ref Type based on @ref BaseType .REQUIREMENT
+
+        @var parent
+        parent identifier
+
+        @var child_list
+        child list
+        """
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.parent = p_parent
+        self.child_list = set()
+
+    def set_id(self, p_id):
+        """Set unique identifier
+        @param[in] self this class instance
+        @param[in] p_id unique identifier
+        @return None
+        """
+        self.id = p_id
+
+    def set_name(self, p_name):
+        """Set unique name
+        @param[in] self this class instance
+        @param[in] p_name unique name
+        @return None
+        """
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        """Set unique alias
+        @param[in] self this class instance
+        @param[in] p_alias unique alias
+        @return None
+        """
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        """Set type
+        @param[in] self this class instance
+        @param[in] p_type type
+        @return None
+        """
+        self.type = p_type
+
+    def set_parent(self, p_parent):
+        """Set parent
+        @param[in] self this class instance
+        @param[in] p_parent identifier of the parent
+        @return None
+        """
+        self.parent = p_parent
+
+    def add_child(self, p_child):
+        """Add child to child_list
+        @param[in] self this class instance
+        @param[in] p_child child
+        @return None
+        """
+        self.child_list.add(p_child)

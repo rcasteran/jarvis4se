@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module with methods relative to Functional section"""
+"""@defgroup jarvis
+Jarvis module
+"""
 # Libraries
 
 # Modules
@@ -11,7 +11,7 @@ from jarvis import util
 from tools import Logger
 
 
-def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list, output_xml):
+def check_add_predecessor(data_predecessor_str_set, **kwargs):
     """
     Check if each string in data_predecessor_str_set is corresponding to an actual Data object,
     create new [Data, predecessor] objects lists for object's type : Data.
@@ -26,6 +26,10 @@ def check_add_predecessor(data_predecessor_str_set, xml_data_list, xml_view_list
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
+    xml_data_list = kwargs['xml_data_list']
+    xml_view_list = kwargs['xml_view_list']
+    output_xml = kwargs['output_xml']
+
     data_predecessor_list = []
 
     allocated_item_list = []
@@ -117,9 +121,7 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
     return 1
 
 
-def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_function_list, xml_data_list,
-                                output_xml):
+def check_add_consumer_function(consumer_str_list, **kwargs):
     """
     Check if each string in consumer_str_list are corresponding to an actual object, create new
     [data, consumer] objects list for object's type : Function.
@@ -139,6 +141,12 @@ def check_add_consumer_function(consumer_str_list, xml_consumer_function_list,
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
+    xml_consumer_function_list = kwargs['xml_consumer_function_list']
+    xml_producer_function_list = kwargs['xml_producer_function_list']
+    xml_function_list = kwargs['xml_function_list']
+    xml_data_list = kwargs['xml_data_list']
+    output_xml = kwargs['output_xml']
+
     new_consumer_list = []
     # Create object names/aliases list and data's name
     xml_function_name_list = question_answer.get_objects_names(xml_function_list)
@@ -343,9 +351,7 @@ def remove_producer_consumer_opposite(flow, function, flow_function_list, output
         remove_producer_consumer_opposite(flow, function.parent, flow_function_list, output_xml, relationship_type)
 
 
-def check_add_producer_function(producer_str_list, xml_consumer_function_list,
-                                xml_producer_function_list, xml_function_list, xml_data_list,
-                                output_xml):
+def check_add_producer_function(producer_str_list, **kwargs):
     """
     Check if each string in consumer_str_list are corresponding to an actual object, create new
     [data, producer] objects list for object's type : Function.
@@ -364,6 +370,12 @@ def check_add_producer_function(producer_str_list, xml_consumer_function_list,
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
+    xml_consumer_function_list = kwargs['xml_consumer_function_list']
+    xml_producer_function_list = kwargs['xml_producer_function_list']
+    xml_function_list = kwargs['xml_function_list']
+    xml_data_list = kwargs['xml_data_list']
+    output_xml = kwargs['output_xml']
+
     new_producer_list = []
     # Create object names/aliases list
     xml_function_name_list = question_answer.get_objects_names(xml_function_list)
@@ -437,7 +449,7 @@ def add_producer_function(new_producer_list, xml_producer_function_list, output_
 
 
 # TODO: Check condition_str on data and (add LogicalType, ArithmeticType in datamodel.py)
-def check_add_transition_condition(trans_condition_str_list, xml_transition_list, output_xml):
+def check_add_transition_condition(trans_condition_str_list, **kwargs):
     """
     Check if each string in trans_condition_str_list is corresponding to an actual Transition
     object, create new [Transition, condition_str] objects lists for object's type : Transition.
@@ -452,6 +464,9 @@ def check_add_transition_condition(trans_condition_str_list, xml_transition_list
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
+    xml_transition_list = kwargs['xml_transition_list']
+    output_xml = kwargs['output_xml']
+
     condition_list = []
     # Create a list with all transition names/aliases already in the xml
     xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
@@ -496,7 +511,7 @@ def add_transition_condition(condition_list, output_xml):
     return 1
 
 
-def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output_xml):
+def check_add_src_dest(src_dest_str, **kwargs):
     """
     Check if each string in src_dest_str is corresponding to an actual Transition and State object,
     create new [Transition, State] objects lists.
@@ -511,6 +526,10 @@ def check_add_src_dest(src_dest_str, xml_transition_list, xml_state_list, output
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
+    xml_transition_list = kwargs['xml_transition_list']
+    xml_state_list = kwargs['xml_state_list']
+    output_xml = kwargs['output_xml']
+
     new_src_list = []
     new_dest_list = []
     # Create lists with all object names/aliases already in the xml
@@ -607,8 +626,7 @@ def add_src_dest(src_dest_lists, output_xml):
     return 0
 
 
-def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, xml_data_list,
-                      output_xml):
+def check_add_exposes(exposes_str_list, **kwargs):
     """
     Check and get all "Fun_elem exposes Fun_inter" strings, if Fun_inter is not exposed yet
     (or parentality relationship) => add it to Fun_elem object and as exposedInterface within xml.
@@ -623,6 +641,10 @@ def check_add_exposes(exposes_str_list, xml_fun_elem_list, xml_fun_inter_list, x
         [0/1] : if update has been made
     """
     # TODO : add physical interface support (see write_element_exposed_interface())
+    xml_fun_elem_list = kwargs['xml_fun_elem_list']
+    xml_fun_inter_list = kwargs['xml_fun_inter_list']
+    output_xml = kwargs['output_xml']
+
     output = False
     cleaned_exposes_str_list = util.cut_tuple_list(exposes_str_list)
     for exposes_str in cleaned_exposes_str_list:

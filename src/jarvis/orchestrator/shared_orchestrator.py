@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Module containing methods shared between objects/orchestrator"""
+"""@defgroup jarvis
+Jarvis module
+"""
 # Libraries
 import re
-import uuid
 
 # Modules
 import datamodel
@@ -750,7 +749,8 @@ def check_add_allocation(allocation_str_list, **kwargs):
         # 5: [],  [View, Object] in other modules or [Fun_elem_Parent, Function/State] in
         # check_parent_allocation() it's just a key with no recursivety
     }
-    for elem in allocation_str_list:
+    cleaned_allocation_str_list = util.cut_tuple_list(allocation_str_list)
+    for elem in cleaned_allocation_str_list:
         alloc_obj = question_answer.check_get_object(elem[0],
                                                      **{'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
                                                         'xml_state_list': kwargs['xml_state_list'],
@@ -1219,8 +1219,8 @@ class CreateObjInstance:
         }
         call = switch_obj_list.get(self.base_type_idx)
         if self.specific_obj_type is None:
-            return call(p_name=obj_str, p_id=get_unique_id())
-        return call(p_name=obj_str, p_id=get_unique_id(), p_type=self.specific_obj_type)
+            return call(p_name=obj_str, p_id=util.get_unique_id())
+        return call(p_name=obj_str, p_id=util.get_unique_id(), p_type=self.specific_obj_type)
 
     def create_alias(self, obj_str):
         alias_str = re.search(r"(.*)\s[-]\s", obj_str, re.MULTILINE)
@@ -1317,12 +1317,6 @@ def get_base_type_recursively(obj_type):
     elif obj_type.base in [str(i) for i in datamodel.BaseType]:
         return obj_type.base
     return get_base_type_recursively(obj_type.base)
-
-
-def get_unique_id():
-    """Generate and set unique identifier of length 10 integers"""
-    identifier = uuid.uuid4()
-    return str(identifier.int)[:10]
 
 
 def add_obj_to_xml(object_lists, output_xml):
