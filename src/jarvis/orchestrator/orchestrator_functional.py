@@ -5,7 +5,7 @@ Jarvis module
 
 # Modules
 import datamodel
-from . import shared_orchestrator
+from . import orchestrator_shared
 from jarvis import question_answer
 from jarvis import util
 from tools import Logger
@@ -71,20 +71,20 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
             if predecessor is not None and selected_data is not None:
                 data_predecessor_list.append([selected_data, predecessor])
 
-            allocation_chain_1 = shared_orchestrator.check_add_allocated_item(elem[0],
+            allocation_chain_1 = orchestrator_shared.check_add_allocated_item(elem[0],
                                                                               xml_data_list,
                                                                               xml_view_list)
             if allocation_chain_1:
                 allocated_item_list.append(allocation_chain_1)
 
-            allocation_chain_2 = shared_orchestrator.check_add_allocated_item(elem[1],
+            allocation_chain_2 = orchestrator_shared.check_add_allocated_item(elem[1],
                                                                               xml_data_list,
                                                                               xml_view_list)
             if allocation_chain_2:
                 allocated_item_list.append(allocation_chain_2)
 
     update = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
-    shared_orchestrator.add_allocation({5: allocated_item_list}, output_xml)
+    orchestrator_shared.add_allocation({5: allocated_item_list}, output_xml)
 
     return update
 

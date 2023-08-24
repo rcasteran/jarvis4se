@@ -9,8 +9,8 @@ from IPython.display import display, HTML, Markdown
 
 
 # Modules
-from jarvis.orchestrator import functional_orchestrator, shared_orchestrator, viewpoint_orchestrator, \
-    requirement_orchestrator
+from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
+    orchestrator_requirement
 from .question_answer import get_object_list, get_pandas_table, find_question
 from jarvis.diagram import diagram_generator
 from jarvis import util
@@ -23,35 +23,35 @@ class CmdParser:
     def __init__(self, generator):
         self.commands = [
             (r"under ([^.|\n]*)", self.matched_under),
-            (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", viewpoint_orchestrator.check_set_extends),
-            (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", shared_orchestrator.check_add_specific_obj_by_type),
-            (r"([^. |\n][^.|\n]*) is an attribute", viewpoint_orchestrator.add_attribute),
-            (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", shared_orchestrator.check_add_inheritance),
-            (r"The alias of (.*?) is ([^.|\n]*)", shared_orchestrator.check_set_object_alias),
-            (r"consider ([^.|\n]*)", viewpoint_orchestrator.check_get_consider),
-            (r"([^. |\n][^.|\n]*) is composed of ([^.|\n]*)", shared_orchestrator.check_add_child),
-            (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)", shared_orchestrator.check_add_child),
-            (r"([^. |\n][^.|\n]*) compose ([^.|\n]*)", shared_orchestrator.check_add_child),
-            (r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)", functional_orchestrator.check_add_consumer_function),
-            (r"([^. |\n][^.|\n]*) is an input of ([^.|\n]*)", functional_orchestrator.check_add_consumer_function),
-            (r"([^. |\n][^.|\n]*) produces ([^.|\n]*)", functional_orchestrator.check_add_producer_function),
-            (r"([^. |\n][^.|\n]*) is an output of ([^.|\n]*)", functional_orchestrator.check_add_producer_function),
-            (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", functional_orchestrator.check_add_exposes),
-            (r"([^. |\n][^.|\n]*) expose ([^.|\n]*)", functional_orchestrator.check_add_exposes),
-            (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", shared_orchestrator.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", shared_orchestrator.check_add_allocation),
-            (r"delete ([^.|\n]*)", shared_orchestrator.check_and_delete_object),
-            (r"The type of (.*?) is ([^.|\n]*)", shared_orchestrator.check_set_object_type),
-            (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", functional_orchestrator.check_add_predecessor),
-            (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", functional_orchestrator.check_add_predecessor),
-            (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", requirement_orchestrator.check_add_requirement),
-            (r"Condition for (.*?) is:([^.|\n]*)", functional_orchestrator.check_add_transition_condition),
-            (r"The (source|destination) of (.*?) is ([^.|\n]*)", functional_orchestrator.check_add_src_dest),
+            (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint.check_set_extends),
+            (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_shared.check_add_specific_obj_by_type),
+            (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint.add_attribute),
+            (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", orchestrator_shared.check_add_inheritance),
+            (r"The alias of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_alias),
+            (r"consider ([^.|\n]*)", orchestrator_viewpoint.check_get_consider),
+            (r"([^. |\n][^.|\n]*) is composed of ([^.|\n]*)", orchestrator_shared.check_add_child),
+            (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)", orchestrator_shared.check_add_child),
+            (r"([^. |\n][^.|\n]*) compose ([^.|\n]*)", orchestrator_shared.check_add_child),
+            (r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)", orchestrator_functional.check_add_consumer_function),
+            (r"([^. |\n][^.|\n]*) is an input of ([^.|\n]*)", orchestrator_functional.check_add_consumer_function),
+            (r"([^. |\n][^.|\n]*) produces ([^.|\n]*)", orchestrator_functional.check_add_producer_function),
+            (r"([^. |\n][^.|\n]*) is an output of ([^.|\n]*)", orchestrator_functional.check_add_producer_function),
+            (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", orchestrator_functional.check_add_exposes),
+            (r"([^. |\n][^.|\n]*) expose ([^.|\n]*)", orchestrator_functional.check_add_exposes),
+            (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", orchestrator_shared.check_add_allocation),
+            (r"delete ([^.|\n]*)", orchestrator_shared.check_and_delete_object),
+            (r"The type of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_type),
+            (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
+            (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
+            (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", orchestrator_requirement.check_add_requirement),
+            (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
+            (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"show ([^.|\n]*)", self.matched_show),
             (r"(.*?)\?", matched_question_mark),
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", matched_list),
             (r"The ((?!type|alias|source|destination).*) of (.*?) is ([^.|\n]*)",
-             viewpoint_orchestrator.check_add_object_attribute)
+             orchestrator_viewpoint.check_add_object_attribute)
         ]
 
         self.reverse = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -102,7 +102,7 @@ class CmdParser:
 
         for chain, rest in zip(chain_name_str[::2], chain_name_str[1::2]):
             chain = chain.replace("under ", "")
-            out.append(viewpoint_orchestrator.add_view(chain, **kwargs))
+            out.append(orchestrator_viewpoint.add_view(chain, **kwargs))
             self.lookup_table(rest, **kwargs)
 
         return 1 in out

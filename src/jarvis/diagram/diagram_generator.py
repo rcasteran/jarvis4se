@@ -8,7 +8,7 @@ import re
 import plantuml_adapter
 from datamodel import FunctionalElement
 from jarvis import question_answer
-from jarvis.orchestrator import shared_orchestrator
+from jarvis.orchestrator import orchestrator_shared
 from jarvis import util as jarvis_util
 from . import diagram_generator_chain
 from . import diagram_generator_farch
@@ -80,8 +80,8 @@ def case_context_diagram(**kwargs):
     plantuml_string = None
 
     if kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_function_list']):
-        child_inheritance = shared_orchestrator.childs_inheritance(kwargs['xml_function_list'])
-        attribute_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+        child_inheritance = orchestrator_shared.childs_inheritance(kwargs['xml_function_list'])
+        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
                                                                           kwargs['xml_function_list'])
 
         plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
@@ -92,8 +92,8 @@ def case_context_diagram(**kwargs):
                                                                        kwargs['xml_attribute_list'],
                                                                        kwargs['xml_type_list'])
 
-        shared_orchestrator.reset_childs_inheritance(kwargs['xml_function_list'], derived_child_id=child_inheritance[2])
-        shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+        orchestrator_shared.reset_childs_inheritance(kwargs['xml_function_list'], derived_child_id=child_inheritance[2])
+        orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
 
     elif kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_state_list']):
         plantuml_string = show_states_chain([kwargs['diagram_object_str']],
@@ -101,16 +101,16 @@ def case_context_diagram(**kwargs):
                                             kwargs['xml_transition_list'])
 
     elif kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_fun_elem_list']):
-        child_inheritance = shared_orchestrator.childs_inheritance(kwargs['xml_function_list'],
+        child_inheritance = orchestrator_shared.childs_inheritance(kwargs['xml_function_list'],
                                                                    kwargs['xml_fun_elem_list'],
                                                                    level=None)
-        attribute_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
                                                                           kwargs['xml_function_list'],
                                                                           kwargs['xml_fun_elem_list'],
                                                                           kwargs['xml_fun_inter_list'])
-        func_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_elem_list'],
+        func_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_elem_list'],
                                                                             kwargs['xml_function_list'])
-        fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_inter_list'],
+        fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_inter_list'],
                                                                                  kwargs['xml_data_list'])
 
         plantuml_string = diagram_generator_farch.show_fun_elem_context(kwargs['diagram_object_str'],
@@ -122,12 +122,12 @@ def case_context_diagram(**kwargs):
                                                                         kwargs['xml_fun_inter_list'],
                                                                         kwargs['xml_data_list'])
 
-        shared_orchestrator.reset_childs_inheritance(kwargs['xml_function_list'],
+        orchestrator_shared.reset_childs_inheritance(kwargs['xml_function_list'],
                                                      kwargs['xml_fun_elem_list'],
                                                      derived_child_id=child_inheritance[2])
-        shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
-        shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
-        shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
+        orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+        orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
+        orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
@@ -158,7 +158,7 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    v_inheritance = shared_orchestrator.view_inheritance(kwargs['xml_view_list'],
+    v_inheritance = orchestrator_shared.view_inheritance(kwargs['xml_view_list'],
                                                          kwargs['xml_function_list'],
                                                          kwargs['xml_fun_elem_list'])
 
@@ -176,8 +176,8 @@ def case_decomposition_diagram(**kwargs):
                                                         function_list)
 
         if diagram_object_str in question_answer.get_objects_names(kwargs['xml_function_list']):
-            child_inheritance = shared_orchestrator.childs_inheritance(function_list, level=diagram_level)
-            attribute_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+            child_inheritance = orchestrator_shared.childs_inheritance(function_list, level=diagram_level)
+            attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
                                                                               function_list)
 
             plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_object_str,
@@ -188,22 +188,22 @@ def case_decomposition_diagram(**kwargs):
                                                                                  kwargs['xml_type_list'],
                                                                                  diagram_level=diagram_level)
 
-            shared_orchestrator.reset_childs_inheritance(function_list, derived_child_id=child_inheritance[2])
-            shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+            orchestrator_shared.reset_childs_inheritance(function_list, derived_child_id=child_inheritance[2])
+            orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
         elif diagram_object_str in question_answer.get_objects_names(kwargs['xml_fun_elem_list']):
             fun_elem_list = util.get_object_list_from_view(diagram_object_str,
                                                            kwargs['xml_fun_elem_list'],
                                                            kwargs['xml_view_list'])
 
             if len(fun_elem_list) > 0:
-                child_inheritance = shared_orchestrator.childs_inheritance(function_list, fun_elem_list,
+                child_inheritance = orchestrator_shared.childs_inheritance(function_list, fun_elem_list,
                                                                            level=diagram_level)
-                attribute_inheritance = shared_orchestrator.attribute_inheritance(kwargs['xml_attribute_list'],
+                attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
                                                                                   function_list,
                                                                                   fun_elem_list,
                                                                                   kwargs['xml_fun_inter_list'])
-                func_alloc_inheritance = shared_orchestrator.allocation_inheritance(fun_elem_list, function_list)
-                fun_inter_alloc_inheritance = shared_orchestrator.allocation_inheritance(kwargs['xml_fun_inter_list'],
+                func_alloc_inheritance = orchestrator_shared.allocation_inheritance(fun_elem_list, function_list)
+                fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_inter_list'],
                                                                                          kwargs['xml_data_list'])
 
                 plantuml_string = diagram_generator_farch.show_fun_elem_decomposition(diagram_object_str,
@@ -216,18 +216,18 @@ def case_decomposition_diagram(**kwargs):
                                                                                       kwargs['xml_fun_inter_list'],
                                                                                       diagram_level)
 
-                shared_orchestrator.reset_childs_inheritance(function_list,
+                orchestrator_shared.reset_childs_inheritance(function_list,
                                                              fun_elem_list,
                                                              derived_child_id=child_inheritance[2])
-                shared_orchestrator.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
-                shared_orchestrator.reset_alloc_inheritance(func_alloc_inheritance)
-                shared_orchestrator.reset_alloc_inheritance(fun_inter_alloc_inheritance)
+                orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+                orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
+                orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
         else:
             Logger.set_warning(__name__,
                                f"Jarvis does not know the object {diagram_object_str}"
                                f"(i.e. it is not a function, nor a functional element)")
 
-    shared_orchestrator.reset_view_inheritance(kwargs['xml_view_list'], v_inheritance)
+    orchestrator_shared.reset_view_inheritance(kwargs['xml_view_list'], v_inheritance)
 
     return plantuml_string
 

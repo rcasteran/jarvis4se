@@ -2,10 +2,10 @@
 Jarvis module
 """
 # Libraries
-import re
 
 # Modules
 import datamodel
+from . import orchestrator_object
 from jarvis import question_answer
 from jarvis import util
 from tools import Logger
@@ -974,8 +974,8 @@ def add_allocation(allocation_dict, output_xml):
                     Logger.set_info(__name__,
                                     f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                                     f"{elem[0].__class__.__name__} {elem[0].name}")
-                    # Check the dict length, if this method is called from viewpoint_orchestrator
-                    # or functional_orchestrator for View => Only key[0] and no recursion wanted
+                    # Check the dict length, if this method is called from orchestrator_viewpoint
+                    # or orchestrator_functional for View => Only key[0] and no recursion wanted
                     if k in (0, 1):
                         recursive_allocation(elem, output_xml)
         return 1
@@ -1192,57 +1192,6 @@ def add_derived(object_list, output_xml):
     return 0
 
 
-class CreateObjInstance:
-    def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
-        self.specific_obj_type = specific_obj_type
-        self.base_type = base_type
-        self.base_type_idx = datamodel.BaseType.get_enum(
-            str(self.base_type)).value
-        self.new_obj = self.create_obj(obj_str)
-        # Data() and View() do not have aliases
-        if not isinstance(self.new_obj, (datamodel.Data, datamodel.View)):
-            self.create_alias(obj_str)
-        self.add_obj_to_xml_set(**kwargs)
-
-    def create_obj(self, obj_str):
-        self.base_type_idx = datamodel.BaseType.get_enum(
-            str(self.base_type)).value
-        switch_obj_list = {
-            0: datamodel.Data,
-            1: datamodel.Function,
-            2: datamodel.FunctionalElement,
-            3: datamodel.FunctionalInterface,
-            4: datamodel.PhysicalElement,
-            5: datamodel.PhysicalInterface,
-            6: datamodel.State,
-            7: datamodel.Transition,
-        }
-        call = switch_obj_list.get(self.base_type_idx)
-        if self.specific_obj_type is None:
-            return call(p_name=obj_str, p_id=util.get_unique_id())
-        return call(p_name=obj_str, p_id=util.get_unique_id(), p_type=self.specific_obj_type)
-
-    def create_alias(self, obj_str):
-        alias_str = re.search(r"(.*)\s[-]\s", obj_str, re.MULTILINE)
-        if alias_str:
-            self.new_obj.set_alias(alias_str.group(1))
-
-    def add_obj_to_xml_set(self, **kwargs):
-        switch_obj_list = {
-            0: kwargs['xml_data_list'].add,
-            1: kwargs['xml_function_list'].add,
-            2: kwargs['xml_fun_elem_list'].add,
-            3: kwargs['xml_fun_inter_list'].add,
-            4: kwargs['xml_phy_elem_list'].add,
-            5: kwargs['xml_phy_inter_list'].add,
-            6: kwargs['xml_state_list'].add,
-            7: kwargs['xml_transition_list'].add,
-        }
-        call = switch_obj_list.get(self.base_type_idx)
-        return call(self.new_obj)
-
-    def return_obj(self):
-        return self.new_obj, self.base_type_idx
 
 
 xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
@@ -1253,7 +1202,7 @@ xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fu
 def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     """
     Check if each string in obj_type_str_list are corresponding to an actual object's name/alias,
-    set_derive, create object_lists with list per obj. Send lists to add_obj_to_xml()
+    set_derive, create object_instance_per_base_type_list with list per obj. Send lists to add_obj_to_xml()
     write them within xml and then returns update from it.
 
         Parameters:
@@ -1263,10 +1212,10 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    object_lists = [[] for _ in range(8)]
+    object_instance_per_base_type_list = [orchestrator_object.ObjectInstanceList(idx) for idx in
+                                          range(orchestrator_object.ObjectInstanceList.nb_object_instance_base_type)]
     for elem in obj_type_str_list:
         spec_obj_type = None
-        base_type = None
         if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
             base_type = next((i for i in [str(i) for i in datamodel.BaseType]
                               if i == elem[1].capitalize()))
@@ -1289,55 +1238,37 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         if any(n == elem[0] for n in flat_names_list):
             # Maybe we can warn user
             continue
-        new_obj, base_type_idx = CreateObjInstance(
-            elem[0],
-            base_type,
-            spec_obj_type,
-            **kwargs
-        ).return_obj()
-        if isinstance(new_obj.type, datamodel.BaseType):
-            type_name = str(new_obj.type)
+
+        new_object = orchestrator_object.ObjectInstance(elem[0], base_type, spec_obj_type, **kwargs)
+        if isinstance(new_object.get_instance().type, datamodel.BaseType):
+            Logger.set_info(__name__,
+                            f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")
         else:
-            type_name = new_obj.type.name
+            Logger.set_info(__name__,
+                            f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
 
-        Logger.set_info(__name__,
-                        f"{new_obj.name} is a {type_name}")
+        object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
 
-        object_lists[base_type_idx].append(new_obj)
+    check = 0
+    if any(object_instance_per_base_type_list):
+        for object_base_type, object_instance_list in enumerate(object_instance_per_base_type_list):
+            if object_instance_list:
+                object_instance_list.write_instance(kwargs['output_xml'])
+                check = 1
 
-    if any(object_lists):
-        return add_obj_to_xml(object_lists, kwargs['output_xml'])
-    return 0
+    return check
 
 
 def get_base_type_recursively(obj_type):
     """Checks type: if it's a BaseType or its base else recursively return """
     if isinstance(obj_type, datamodel.BaseType):
-        return obj_type
+        base_type = obj_type
     elif obj_type.base in [str(i) for i in datamodel.BaseType]:
-        return obj_type.base
-    return get_base_type_recursively(obj_type.base)
+        base_type = obj_type.base
+    else:
+        base_type = get_base_type_recursively(obj_type.base)
 
-
-def add_obj_to_xml(object_lists, output_xml):
-    """Send lists object to respective methods of XmlWriter3SE, returns 1 if at least one obj has
-    been written"""
-    switch_write_obj = {
-        0: output_xml.write_data,
-        1: output_xml.write_function,
-        2: output_xml.write_functional_element,
-        3: output_xml.write_functional_interface,
-        4: output_xml.write_physical_element,
-        5: output_xml.write_physical_interface,
-        6: output_xml.write_state,
-        7: output_xml.write_transition,
-    }
-    check = 0
-    for idx, sub in enumerate(object_lists):
-        if sub:
-            switch_write_obj.get(idx)(sub)
-            check = 1
-    return check
+    return base_type
 
 
 # Inheritance start here - Should be moved/refactored after validation

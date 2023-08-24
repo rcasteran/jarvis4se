@@ -6,7 +6,7 @@ import re
 
 # Modules
 import datamodel
-from . import shared_orchestrator
+from . import orchestrator_shared
 from jarvis import question_answer, util
 from tools import Logger
 
@@ -103,22 +103,22 @@ def check_get_consider(consider_str_list, **kwargs):
             result_data = any(item == consider_str for item in xml_data_name_list)
 
             if result_function:
-                allocated_fun = shared_orchestrator.check_add_allocated_item(
+                allocated_fun = orchestrator_shared.check_add_allocated_item(
                     consider_str, xml_function_list, xml_view_list)
                 if allocated_fun:
                     allocated_item_list.append(allocated_fun)
             elif result_fun_elem:
-                allocated_fun_elem = shared_orchestrator.check_add_allocated_item(
+                allocated_fun_elem = orchestrator_shared.check_add_allocated_item(
                     consider_str, xml_fun_elem_list, xml_view_list)
                 if allocated_fun_elem:
                     allocated_item_list.append(allocated_fun_elem)
             elif result_data:
-                allocated_data = shared_orchestrator.check_add_allocated_item(
+                allocated_data = orchestrator_shared.check_add_allocated_item(
                     consider_str, xml_data_list, xml_view_list)
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 
-    update = shared_orchestrator.add_allocation({5: allocated_item_list}, output_xml)
+    update = orchestrator_shared.add_allocation({5: allocated_item_list}, output_xml)
 
     return update
 
