@@ -1192,13 +1192,6 @@ def add_derived(object_list, output_xml):
     return 0
 
 
-
-
-xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
-                 'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                 'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
-
-
 def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     """
     Check if each string in obj_type_str_list are corresponding to an actual object's name/alias,
@@ -1232,11 +1225,18 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                              f"No valid base type found for {elem[1]}")
             continue
 
-        xml_names_list = question_answer.get_objects_name_lists(
-            **{key: value for (key, value) in kwargs.items() if key in xml_str_lists})
-        flat_names_list = [item for sublist in xml_names_list for item in sublist]
-        if any(n == elem[0] for n in flat_names_list):
-            # Maybe we can warn user
+        existing_object = question_answer.check_get_object(elem[0], **kwargs)
+        if existing_object:
+            if isinstance(existing_object.type, datamodel.BaseType):
+                if str(existing_object.type) != base_type:
+                    Logger.set_error(__name__,
+                                     f"{existing_object.type} with the name {elem[0]} already exists")
+                # Else do not warn the user because it is the same object
+            else:
+                if str(existing_object.type.name) != spec_obj_type:
+                    Logger.set_error(__name__,
+                                     f"{existing_object.type.name} with the name {elem[0]} already exists")
+                # Else do not warn the user because it is the same object
             continue
 
         new_object = orchestrator_object.ObjectInstance(elem[0], base_type, spec_obj_type, **kwargs)

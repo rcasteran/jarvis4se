@@ -70,21 +70,22 @@ def matched_allocated(object_str, **kwargs):
 
     return
 
+
 xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
                     'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
                     'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
 
+
 def get_objects_name_lists(**kwargs):
     """Returns lists of objects with their names depending on kwargs"""
-    whole_objects_name_list = [[] for _ in range(11)]
-    for i in range(11):
+    whole_objects_name_list = [[] for _ in range(len(xml_str_lists))]
+    for i in range(len(xml_str_lists)):
         if kwargs.get(xml_str_lists[i], False):
             whole_objects_name_list[i] = get_objects_names(kwargs[xml_str_lists[i]])
 
     return whole_objects_name_list
 
 
-# TODO: Use this method within xxxxxxx_orchestrator.py
 def check_get_object(object_str, **kwargs):
     """
     Returns the desired object from object's string
@@ -99,8 +100,8 @@ def check_get_object(object_str, **kwargs):
     if not any(object_str in s for s in whole_objects_name_list):
         return None
     else:
-        result = [False] * 11
-        for i in range(11):
+        result = [False] * len(xml_str_lists)
+        for i in range(len(xml_str_lists)):
             result[i] = any(a == object_str for a in whole_objects_name_list[i])
 
         wanted_object = match_object(object_str, result, xml_str_lists=xml_str_lists, **kwargs)
@@ -116,7 +117,7 @@ def match_object(object_str, result, xml_str_lists=None, **kwargs):
                          'xml_fun_elem_list', 'xml_transition_list', 'xml_fun_inter_list',
                          'xml_phy_elem_list', 'xml_phy_inter_list', 'xml_attribute_list',
                          'xml_view_list', 'xml_type_list']
-    for i in range(11):
+    for i in range(len(xml_str_lists)):
         if result[i]:
             for obj in kwargs[xml_str_lists[i]]:
                 if object_str == obj.name:
