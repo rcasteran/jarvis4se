@@ -7,3 +7,4 @@ plantuml == 0.3.0
 pandas ~= 1.4.1
 setuptools ~= 65.5.1
 requests~=2.28.2
+nltk~=3.8.1
