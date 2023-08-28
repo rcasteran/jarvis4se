@@ -1138,6 +1138,9 @@ class Requirement:
 
         @var child_list
         child list
+
+        @var description
+        requirement description
         """
         self.id = p_id
         self.name = p_name
@@ -1145,6 +1148,7 @@ class Requirement:
         self.type = p_type
         self.parent = p_parent
         self.child_list = set()
+        self.description = ""
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1193,3 +1197,11 @@ class Requirement:
         @return None
         """
         self.child_list.add(p_child)
+
+    def set_description(self, p_description):
+        """Set description
+        @param[in] self this class instance
+        @param[in] p_description requirement description
+        @return None
+        """
+        self.description = p_description

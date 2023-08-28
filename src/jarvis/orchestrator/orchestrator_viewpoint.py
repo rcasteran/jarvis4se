@@ -316,3 +316,32 @@ def check_get_type_to_extend(type_str, xml_type_list):
         return check
 
     return check
+
+
+def add_requirement(requirement_str_list, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    output_xml = kwargs['output_xml']
+
+    new_requirement_list = []
+    # Create requirement names list already in xml
+    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
+    # Filter attribute_list, keeping only the the ones not already in the xml
+    for requirement_item in requirement_str_list:
+        if requirement_item[0] not in xml_requirement_name_list:
+            new_requirement = datamodel.Requirement()
+            new_requirement.set_name(str(requirement_item[0]))
+            new_requirement.set_description(str(requirement_item[1]))
+            # Generate and set unique identifier of length 10 integers
+            new_requirement.set_id(util.get_unique_id())
+            # alias is 'none' by default
+            new_requirement_list.append(new_requirement)
+
+    if not new_requirement_list:
+        return 0
+
+    output_xml.write_requirement(new_requirement_list)
+    for requirement in new_requirement_list:
+        xml_requirement_list.add(requirement)
+        Logger.set_info(__name__,
+                        requirement.name + " is a requirement")
+    return 1

@@ -41,7 +41,7 @@ class XmlWriter3SE:
             etree.SubElement(phy_arch, tag)
 
         viewpoint = etree.SubElement(self.root, "viewPoint")
-        viewpoint_tags = ['viewList', 'attributeList', 'typeList']
+        viewpoint_tags = ['viewList', 'attributeList', 'requirementList', 'typeList']
         for tag in viewpoint_tags:
             etree.SubElement(viewpoint, tag)
 
@@ -700,3 +700,28 @@ class XmlWriter3SE:
                                               'base': self.check_object_type(type_elem.base)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_requirement(self, requirement_list):
+        """Write attribute from list of attributes
+        @param[in] attribute_list : list of attributes
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        if root.find('.//requirementList') is None:
+            etree.SubElement(root, 'requirementList')
+
+        for requirement_list_tag in root.findall(".//requirementList"):
+            for requirement in requirement_list:
+                requirement_tag = etree.SubElement(requirement_list_tag, "requirement",
+                                                 {'id': requirement.id,
+                                                  'name': requirement.name,
+                                                  'type': self.check_object_type(requirement.type),
+                                                  'alias': requirement.alias})
+
+                description_tag = etree.SubElement(requirement_tag, "description")
+                description_tag.text = requirement.description
+
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+

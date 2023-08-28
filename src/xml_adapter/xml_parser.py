@@ -35,7 +35,9 @@ class XmlParser3SE:
                          'xml_fun_inter_list': set(),
                          'xml_phy_elem_list': set(),
                          'xml_phy_inter_list': set(),
-                         'xml_type_list': set()}
+                         'xml_type_list': set(),
+                         'xml_requirement_list': set()
+                         }
         self.root = None
 
     def parse_xml(self, input_filename):
@@ -62,6 +64,7 @@ class XmlParser3SE:
             self.xml_dict['xml_fun_inter_list'] = self.parse_functional_interface_list()
             self.xml_dict['xml_phy_elem_list'] = self.parse_physical_element_list()
             self.xml_dict['xml_phy_inter_list'] = self.parse_physical_interface_list()
+            self.xml_dict['xml_requirement_list'] = self.parse_requirement_list()
 
             # Then create data(and set predecessors), consumers, producers lists
             self.xml_dict['xml_data_list'], self.xml_dict['xml_producer_function_list'], self.xml_dict[
@@ -537,3 +540,25 @@ class XmlParser3SE:
                         if not is_found:
                             Logger.set_error(__name__,
                                              f"Unknown type {obj.type} found when parsing xml")
+
+    def parse_requirement_list(self):
+        """Parse XML requirement list
+        @return requirement list
+        """
+        requirement_list = set()
+        xml_requirement_list = self.root.iter('requirement')
+        for xml_requirement in xml_requirement_list:
+            # Instantiate Attribute and add them to a list
+            requirement = datamodel.Requirement(p_id=xml_requirement.get('id'),
+                                                p_name=xml_requirement.get('name'),
+                                                p_alias=xml_requirement.get('alias'),
+                                                p_type=xml_requirement.get('type'))
+
+            requirement_list.add(requirement)
+
+            # Looking for requirement description
+            xml_description_list = xml_requirement.iter('description')
+            for xml_description in xml_description_list:
+                requirement.set_description(xml_description.text)
+
+        return requirement_list

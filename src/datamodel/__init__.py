@@ -22,3 +22,4 @@ from .datamodel import PhysicalElement
 from .datamodel import PhysicalInterface
 from .datamodel import Type
 from .datamodel import BaseType
+from .datamodel import Requirement
