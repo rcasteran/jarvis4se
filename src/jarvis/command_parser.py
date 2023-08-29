@@ -39,12 +39,16 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", orchestrator_functional.check_add_exposes),
             (r"([^. |\n][^.|\n]*) expose ([^.|\n]*)", orchestrator_functional.check_add_exposes),
             (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
             (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", orchestrator_shared.check_add_allocation),
             (r"delete ([^.|\n]*)", orchestrator_shared.check_and_delete_object),
             (r"The type of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_type),
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
             (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
             (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", orchestrator_requirement.check_add_requirement),
+            (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
             (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"show ([^.|\n]*)", self.matched_show),
@@ -58,7 +62,10 @@ class CmdParser:
                         r"([^. |\n][^.|\n]*) compose ([^.|\n]*)",
                         r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)",
                         r"([^. |\n][^.|\n]*) produces ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)")
+                        r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)",
+                        r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)")
 
         self.generator = generator
 

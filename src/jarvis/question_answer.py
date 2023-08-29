@@ -71,9 +71,18 @@ def matched_allocated(object_str, **kwargs):
     return
 
 
-xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list', 'xml_fun_elem_list',
-                    'xml_transition_list', 'xml_fun_inter_list', 'xml_phy_elem_list',
-                    'xml_phy_inter_list', 'xml_attribute_list', 'xml_view_list', 'xml_type_list']
+xml_str_lists = ['xml_function_list',
+                 'xml_data_list',
+                 'xml_state_list',
+                 'xml_fun_elem_list',
+                 'xml_transition_list',
+                 'xml_fun_inter_list',
+                 'xml_phy_elem_list',
+                 'xml_phy_inter_list',
+                 'xml_attribute_list',
+                 'xml_view_list',
+                 'xml_type_list',
+                 'xml_requirement_list']
 
 
 def get_objects_name_lists(**kwargs):
@@ -104,22 +113,19 @@ def check_get_object(object_str, **kwargs):
         for i in range(len(xml_str_lists)):
             result[i] = any(a == object_str for a in whole_objects_name_list[i])
 
-        wanted_object = match_object(object_str, result, xml_str_lists=xml_str_lists, **kwargs)
+        wanted_object = match_object(object_str, result, p_xml_str_lists=xml_str_lists, **kwargs)
         return wanted_object
 
 
-def match_object(object_str, result, xml_str_lists=None, **kwargs):
+def match_object(object_str, result, p_xml_str_lists=None, **kwargs):
     """Returns wanted_object from object_str and result matched from name lists"""
     # Because match_object() called within match_allocated() TBC/TBT if match_allocated()
     # still needed
-    if not xml_str_lists:
-        xml_str_lists = ['xml_function_list', 'xml_data_list', 'xml_state_list',
-                         'xml_fun_elem_list', 'xml_transition_list', 'xml_fun_inter_list',
-                         'xml_phy_elem_list', 'xml_phy_inter_list', 'xml_attribute_list',
-                         'xml_view_list', 'xml_type_list']
-    for i in range(len(xml_str_lists)):
+    if not p_xml_str_lists:
+        p_xml_str_lists = xml_str_lists
+    for i in range(len(p_xml_str_lists)):
         if result[i]:
-            for obj in kwargs[xml_str_lists[i]]:
+            for obj in kwargs[p_xml_str_lists[i]]:
                 if object_str == obj.name:
                     return obj
                 try:

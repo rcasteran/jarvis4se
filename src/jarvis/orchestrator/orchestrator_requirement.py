@@ -10,6 +10,7 @@ import difflib
 import datamodel
 from tools import Logger
 from jarvis import question_answer
+from jarvis import util
 from . import orchestrator_viewpoint
 
 # Constants
@@ -121,6 +122,56 @@ def check_add_requirement(p_str_list, **kwargs):
 
     if requirement_list:
         update = orchestrator_viewpoint.add_requirement(requirement_list, **kwargs)
+    else:
+        update = 0
+
+    return update
+
+
+def check_add_allocation(p_str_list, **kwargs):
+    allocation_list = []
+    cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
+    for elem in cleaned_allocation_str_list:
+        alloc_obj = question_answer.check_get_object(elem[0],
+                                                     **{'xml_function_list': kwargs['xml_function_list'],
+                                                        'xml_state_list': kwargs['xml_state_list'],
+                                                        'xml_data_list': kwargs['xml_data_list'],
+                                                        'xml_transition_list': kwargs['xml_transition_list'],
+                                                        'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
+                                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
+                                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
+                                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+                                                        })
+
+        req_obj = question_answer.check_get_object(elem[1], **{'xml_requirement_list': kwargs['xml_requirement_list']})
+
+        if not alloc_obj:
+            Logger.set_error(__name__, f"Object {elem[0]} not found or cannot satisfy a requirement, "
+                                       f"supported satisfactions are:\n"
+                                       f"(Function satisfies Requirement) OR\n"
+                                       f"(State satisfies Requirement) OR\n"
+                                       f"(Data satisfies Requirement) OR\n"
+                                       f"(Transition satisfies Requirement) OR\n"
+                                       f"(Functional element satisfies Requirement) OR\n"
+                                       f"(Functional interface satisfies Requirement) OR\n"
+                                       f"(Physical element satisfies Requirement) OR\n"
+                                       f"(Physical interface satisfies Requirement)")
+        elif not req_obj:
+            Logger.set_error(__name__, f"Requirement {elem[1]} not found")
+        else:
+            alloc_obj.add_allocated_requirement(req_obj)
+            allocation_list.append([alloc_obj, req_obj])
+
+    if allocation_list:
+        output_xml = kwargs['output_xml']
+        output_xml.write_object_allocation(allocation_list)
+
+        for elem in allocation_list:
+            Logger.set_info(__name__,
+                            f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
+                            f"{elem[0].__class__.__name__} {elem[0].name}")
+
+        update = 1
     else:
         update = 0
 

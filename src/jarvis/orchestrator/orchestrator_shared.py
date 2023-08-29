@@ -810,7 +810,7 @@ def print_wrong_obj_allocation(obj_str):
                                 "(State allocates Function) OR \n"
                                 "(Functional Interface allocates Data) OR \n"
                                 "(Physical Element allocates Functional Element) OR \n"
-                                "(Physical Interface allocates Functional Interface)\n")
+                                "(Physical Interface allocates Functional Interface)")
 
 
 def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):

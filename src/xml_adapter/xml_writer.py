@@ -88,6 +88,8 @@ class XmlWriter3SE:
 
                 _functional_part_list_tag = etree.SubElement(function_tag, "functionPartList")
 
+                _allocated_req_list_tag = etree.SubElement(function_tag, "allocatedRequirementList")
+
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data(self, data_list):
@@ -113,6 +115,8 @@ class XmlWriter3SE:
             _producer_list_tag = etree.SubElement(data_tag, "producerList")
 
             _predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
+
+            _allocated_req_list_tag = etree.SubElement(data_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -240,8 +244,10 @@ class XmlWriter3SE:
                                               'alias': state.alias})
 
                 _state_part_list_tag = etree.SubElement(state_tag, "statePartList")
-                _allocated_function_list_tag = etree.SubElement(state_tag,
-                                                                "allocatedFunctionList")
+
+                _allocated_function_list_tag = etree.SubElement(state_tag, "allocatedFunctionList")
+
+                _allocated_req_list_tag = etree.SubElement(state_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -265,7 +271,10 @@ class XmlWriter3SE:
                                                    'alias': transition.alias,
                                                    'source': str(transition.source),
                                                    'destination': str(transition.destination)})
+
                 _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
+
+                _allocated_req_list_tag = etree.SubElement(transition_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -335,14 +344,15 @@ class XmlWriter3SE:
                      'alias': functional_element.alias,
                      'derived': functional_element.derived})
 
-                _fun_elem_part_list_tag = etree.SubElement(functional_element_tag,
-                                                           "functionalElementPartList")
-                _allocated_state_list_tag = etree.SubElement(functional_element_tag,
-                                                             "allocatedStateList")
-                _allocated_function_list_tag = etree.SubElement(functional_element_tag,
-                                                                "allocatedFunctionList")
-                _exposed_interface_list_tag = etree.SubElement(functional_element_tag,
-                                                               "exposedInterfaceList")
+                _fun_elem_part_list_tag = etree.SubElement(functional_element_tag, "functionalElementPartList")
+
+                _allocated_state_list_tag = etree.SubElement(functional_element_tag, "allocatedStateList")
+
+                _allocated_function_list_tag = etree.SubElement(functional_element_tag, "allocatedFunctionList")
+
+                _exposed_interface_list_tag = etree.SubElement(functional_element_tag, "exposedInterfaceList")
+
+                _allocated_req_list_tag = etree.SubElement(functional_element_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -454,8 +464,9 @@ class XmlWriter3SE:
                                                       'alias': fun_interface.alias,
                                                       'derived': fun_interface.derived})
 
-                _allocated_data_list_tag = etree.SubElement(fun_interface_tag,
-                                                            "allocatedDataList")
+                _allocated_data_list_tag = etree.SubElement(fun_interface_tag, "allocatedDataList")
+
+                _allocated_req_list_tag = etree.SubElement(fun_interface_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -480,12 +491,13 @@ class XmlWriter3SE:
                      'alias': physical_element.alias,
                      'derived': physical_element.derived})
 
-                _phy_elem_part_list_tag = etree.SubElement(physical_element_tag,
-                                                           "physicalElementPartList")
-                _allocated_fun_elem_list_tag = etree.SubElement(
-                    physical_element_tag, "allocatedFunctionalElementList")
-                _exposed_interface_list_tag = etree.SubElement(physical_element_tag,
-                                                               "exposedInterfaceList")
+                _phy_elem_part_list_tag = etree.SubElement(physical_element_tag, "physicalElementPartList")
+
+                _allocated_fun_elem_list_tag = etree.SubElement(physical_element_tag, "allocatedFunctionalElementList")
+
+                _exposed_interface_list_tag = etree.SubElement(physical_element_tag, "exposedInterfaceList")
+
+                _allocated_req_list_tag = etree.SubElement(physical_element_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -510,8 +522,9 @@ class XmlWriter3SE:
                                                       'alias': phy_interface.alias,
                                                       'derived': phy_interface.derived})
 
-                _allocated_fun_inter_list_tag = etree.SubElement(
-                    phy_interface_tag, "allocatedFunctionalInterfaceList")
+                _allocated_fun_inter_list_tag = etree.SubElement(phy_interface_tag, "allocatedFunctionalInterfaceList")
+
+                _allocated_req_list_tag = etree.SubElement(phy_interface_tag, "allocatedRequirementList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -651,6 +664,8 @@ class XmlWriter3SE:
             elem_tag = "allocatedData"
         elif isinstance(obj, datamodel.View):
             elem_tag = "allocatedItem"
+        elif isinstance(obj, datamodel.Requirement):
+            elem_tag = "allocatedRequirement"
         else:
             Logger.set_error(__name__, f"Unsupported type for object {obj.id} allocation")
 

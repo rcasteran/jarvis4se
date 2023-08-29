@@ -130,6 +130,9 @@ class Function:
         
         @var operand
         operand of the function
+
+        @var allocated_req_list
+        allocated requirement list
         """
 
         self.id = p_id
@@ -141,6 +144,7 @@ class Function:
         self.input_role = p_role
         self.operand = p_operand
         self.derived = p_derived
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -220,6 +224,14 @@ class Function:
         """
         self.derived = p_derived
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class Data:
     """@ingroup datamodel
@@ -244,11 +256,15 @@ class Data:
         
         @var predecessor_list
         data predecessor list
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
         self.type = p_type
         self.predecessor_list = set()
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -282,6 +298,14 @@ class Data:
         """
         self.predecessor_list.add(p_predecessor)
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class State:
     """@ingroup datamodel
@@ -314,6 +338,9 @@ class State:
         
         @var allocated_function_list
         allocated function list
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -322,6 +349,7 @@ class State:
         self.parent = p_parent
         self.child_list = set()
         self.allocated_function_list = set()
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -379,6 +407,14 @@ class State:
         """
         self.allocated_function_list.add(p_function)
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class Transition:
     """@ingroup datamodel
@@ -412,6 +448,9 @@ class Transition:
         
         @var condition_list
         condition list
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -420,6 +459,7 @@ class Transition:
         self.source = p_source
         self.destination = p_destination
         self.condition_list = set()
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -477,6 +517,14 @@ class Transition:
         """
         self.condition_list.add(p_condition)
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class FunctionalElement:
     """@ingroup datamodel
@@ -520,6 +568,9 @@ class FunctionalElement:
         
         @var derived
         identifier of the functional element from which it is derived
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -531,6 +582,7 @@ class FunctionalElement:
         self.allocated_function_list = set()
         self.exposed_interface_list = set()
         self.derived = p_derived
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -581,7 +633,7 @@ class FunctionalElement:
         self.child_list.add(p_child)
 
     def add_allocated_state(self, p_state):
-        """Add allocated state to add_allocated_state
+        """Add allocated state to allocated_state_list
         @param[in] self this class instance
         @param[in] p_state allocated state
         @return None
@@ -610,6 +662,14 @@ class FunctionalElement:
         @param[in] p_derived identifier of the functional element
         """
         self.derived = p_derived
+
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
 
 
 class View:
@@ -784,6 +844,9 @@ class FunctionalInterface:
         
         @var derived
         identifier of the functional interface from which it is derived
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -791,6 +854,7 @@ class FunctionalInterface:
         self.type = p_type
         self.allocated_data_list = set()
         self.derived = p_derived
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -839,6 +903,14 @@ class FunctionalInterface:
         """
         self.derived = p_derived
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class PhysicalElement:
     """@ingroup datamodel
@@ -878,6 +950,9 @@ class PhysicalElement:
         
         @var derived
         identifier of the functional element from which it is derived
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -888,6 +963,7 @@ class PhysicalElement:
         self.exposed_interface_list = set()
         self.child_list = set()
         self.derived = p_derived
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -960,6 +1036,14 @@ class PhysicalElement:
         """
         self.derived = p_derived
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
 
 class PhysicalInterface:
     """@ingroup datamodel
@@ -991,6 +1075,9 @@ class PhysicalInterface:
         
         @var derived
         identifier of the physical interface from which it is derived
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
@@ -998,6 +1085,7 @@ class PhysicalInterface:
         self.type = p_type
         self.allocated_fun_inter_list = set()
         self.derived = p_derived
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1045,6 +1133,14 @@ class PhysicalInterface:
         @param[in] p_derived identifier of the physical interface
         """
         self.derived = p_derived
+
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
 
 
 class Type:
