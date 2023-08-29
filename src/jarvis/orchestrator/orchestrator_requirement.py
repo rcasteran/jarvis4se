@@ -4,6 +4,7 @@ Jarvis module
 # Libraries
 import re
 import nltk
+import difflib
 
 # Modules
 import datamodel
@@ -80,27 +81,43 @@ def check_add_requirement(p_str_list, **kwargs):
             else:
                 Logger.set_info(__name__, f"Requirement identified about: {p_str[0]} shall {p_str[1]}")
 
-            answer = input(f"Please give a requirement summary: ")
-            if len(answer.lower()) > 0:
-                existing_object = question_answer.check_get_object(answer.lower(), **kwargs)
-                if existing_object:
-                    if isinstance(existing_object.type, datamodel.BaseType):
-                        if str(existing_object.type) != "Requirement":
-                            Logger.set_error(__name__,
-                                             f"{existing_object.type} with the name {elem[0]} already exists")
-                        else:
-                            requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", existing_object])
+            # Check if a requirement with the same description already exist
+            xml_requirement_list = kwargs['xml_requirement_list']
+            sequence_ratio_list = {}
+            for xml_requirement in xml_requirement_list:
+                sequence = difflib.SequenceMatcher(None, xml_requirement.description,
+                                                   f"{p_str[0]} shall {p_str[1]}")
+                if sequence.ratio() > 0.6:
+                    sequence_ratio_list[xml_requirement.name] = sequence.ratio()
 
-                    else:
-                        if str(existing_object.type.name) != "Requirement":
-                            Logger.set_error(__name__,
-                                             f"{existing_object.type.name} with the name {elem[0]} already exists")
-                        else:
-                            requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", existing_object])
-                else:
-                    requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", None])
+            if sequence_ratio_list:
+                similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+                Logger.set_info(__name__,
+                                f"Requirement {similar_requirement_name} has the same "
+                                f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
-                Logger.set_error(__name__, "No summary entered for identified requirement")
+                answer = input(f"Please give a requirement summary: ")
+                if len(answer.lower()) > 0:
+                    existing_object = question_answer.check_get_object(answer.lower(), **kwargs)
+                    if existing_object:
+                        if isinstance(existing_object.type, datamodel.BaseType):
+                            if str(existing_object.type) != "Requirement":
+                                Logger.set_error(__name__,
+                                                 f"{existing_object.type} with the name {elem[0]} already exists")
+                            else:
+                                requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
+                                                         existing_object])
+                        else:
+                            if str(existing_object.type.name) != "Requirement":
+                                Logger.set_error(__name__,
+                                                 f"{existing_object.type.name} with the name {elem[0]} already exists")
+                            else:
+                                requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
+                                                         existing_object])
+                    else:
+                        requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", None])
+                else:
+                    Logger.set_error(__name__, "No summary entered for identified requirement")
 
     if requirement_list:
         update = orchestrator_viewpoint.add_requirement(requirement_list, **kwargs)
