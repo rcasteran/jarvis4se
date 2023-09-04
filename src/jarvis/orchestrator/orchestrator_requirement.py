@@ -24,6 +24,7 @@ ADJECTIVE_TAG = "JJ"
 
 def check_add_requirement(p_str_list, **kwargs):
     requirement_list = []
+
     for p_str in p_str_list:
         # Detect if...then pattern before the requirement subject
         pattern_if = re.compile(r'if (.*?), then ([^.|\n]*)', re.IGNORECASE).split(p_str[0])
@@ -109,7 +110,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer.lower()} already exists")
                             else:
                                 requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object])
+                                                         existing_object, req_subject_object])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
@@ -117,9 +118,10 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer.lower()} already exists")
                             else:
                                 requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object])
+                                                         existing_object, req_subject_object])
                     else:
-                        requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", None])
+                        requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", None,
+                                                 req_subject_object])
                 else:
                     Logger.set_error(__name__, "No summary entered for identified requirement")
 
