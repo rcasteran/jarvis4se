@@ -14,6 +14,7 @@ from jarvis import util
 from . import orchestrator_viewpoint
 
 # Constants
+REQUIREMENT_CONFIDENCE_RATIO = 0.78
 NOUN_SINGULAR_TAG = "NN"
 NOUN_PLURAL_TAG = "NNS"
 PROPER_NOUN_SINGULAR_TAG = "NNP"
@@ -88,7 +89,7 @@ def check_add_requirement(p_str_list, **kwargs):
             for xml_requirement in xml_requirement_list:
                 sequence = difflib.SequenceMatcher(None, xml_requirement.description,
                                                    f"{p_str[0]} shall {p_str[1]}")
-                if sequence.ratio() > 0.6:
+                if sequence.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
                     sequence_ratio_list[xml_requirement.name] = sequence.ratio()
 
             if sequence_ratio_list:
@@ -104,14 +105,16 @@ def check_add_requirement(p_str_list, **kwargs):
                         if isinstance(existing_object.type, datamodel.BaseType):
                             if str(existing_object.type) != "Requirement":
                                 Logger.set_error(__name__,
-                                                 f"{existing_object.type} with the name {elem[0]} already exists")
+                                                 f"{existing_object.type} with the name "
+                                                 f"{answer.lower()} already exists")
                             else:
                                 requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
                                                          existing_object])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
-                                                 f"{existing_object.type.name} with the name {elem[0]} already exists")
+                                                 f"{existing_object.type.name} with the name "
+                                                 f"{answer.lower()} already exists")
                             else:
                                 requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
                                                          existing_object])
@@ -159,8 +162,13 @@ def check_add_allocation(p_str_list, **kwargs):
         elif not req_obj:
             Logger.set_error(__name__, f"Requirement {elem[1]} not found")
         else:
-            alloc_obj.add_allocated_requirement(req_obj)
-            allocation_list.append([alloc_obj, req_obj])
+            if not any(allocated_req_id == req_obj.id for allocated_req_id in alloc_obj.allocated_req_list):
+                alloc_obj.add_allocated_requirement(req_obj)
+                allocation_list.append([alloc_obj, req_obj])
+            else:
+                Logger.set_info(__name__,
+                                f"{req_obj.__class__.__name__} {req_obj.name} already satisfied by "
+                                f"{alloc_obj.__class__.__name__} {alloc_obj.name}")
 
     if allocation_list:
         output_xml = kwargs['output_xml']

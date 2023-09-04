@@ -152,6 +152,15 @@ class XmlParser3SE:
             for xml_part in xml_part_list:
                 parent_list[xml_part.get('id')] = function.id
 
+            # Looking for allocated requirements and add them to the function
+            xml_allocated_requirement_list = xml_function.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                function.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"function [{function.id}, {function.name}]")
+
         # Loop to set parent and child to functions
         self.update_parental_relationship(parent_list, function_list)
 
@@ -176,6 +185,15 @@ class XmlParser3SE:
                                   p_type=xml_data.get('type'))
             data_list.add(data)
 
+            # Looking for allocated requirements and add them to the data
+            xml_allocated_requirement_list = xml_data.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                data.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"data [{data.id}, {data.name}]")
+
             # looking for all elements with tag "consumer" and create a list [flow_name, consumer_function]
             xml_consumer_list = xml_data.iter('consumer')
             for xml_consumer in xml_consumer_list:
@@ -184,7 +202,7 @@ class XmlParser3SE:
                         consumer_function_list.append([xml_data.get('name'), function])
                         Logger.set_debug(__name__, f"Data [{xml_data.get('id')}, {xml_data.get('name')}]"
                                                    f" is consumed by "
-                                                   f"function [{function.id}, {function.name}]")
+                                                   f"data [{function.id}, {function.name}]")
 
                         if xml_consumer.get('role') != 'none':
                             function.set_input_role(xml_data.get('name'))
@@ -249,6 +267,15 @@ class XmlParser3SE:
                                            f" is allocated to "
                                            f"state [{state.id}, {state.name}]")
 
+            # Looking for allocated requirements and add them to the state
+            xml_allocated_requirement_list = xml_state.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                state.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"state [{state.id}, {state.name}]")
+
         # Loop to set parent and child to states
         self.update_parental_relationship(parent_list, state_list)
 
@@ -275,6 +302,15 @@ class XmlParser3SE:
             xml_transition_condition_list = xml_transition.iter('condition')
             for xml_condition in xml_transition_condition_list:
                 transition.add_condition(xml_condition.get("text"))
+
+            # Looking for allocated requirements and add them to the transition
+            xml_allocated_requirement_list = xml_transition.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                transition.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"transition [{transition.id}, {transition.name}]")
 
         return transition_list
 
@@ -321,6 +357,15 @@ class XmlParser3SE:
                 fun_elem.add_exposed_interface(xml_exp_inter.get("id"))
                 Logger.set_debug(__name__, f"Functional interface [{xml_exp_inter.get('id')}]"
                                            f" is exposed by "
+                                           f"functional element [{fun_elem.id}, {fun_elem.name}]")
+
+            # Looking for allocated requirements and add them to the functional element
+            xml_allocated_requirement_list = xml_func_elem.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                fun_elem.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
                                            f"functional element [{fun_elem.id}, {fun_elem.name}]")
 
         # Loop to set parent and child to functional elements
@@ -406,6 +451,15 @@ class XmlParser3SE:
                                            f" is allocated to "
                                            f"functional interface [{fun_inter.id}, {fun_inter.name}]")
 
+            # Looking for allocated requirements and add them to the functional interface
+            xml_allocated_requirement_list = xml_fun_inter.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                fun_inter.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"functional interface [{fun_inter.id}, {fun_inter.name}]")
+
         # Loop to update derived functional elements according to their ids
         self.update_derived_object(functional_interface_list)
 
@@ -448,6 +502,15 @@ class XmlParser3SE:
                                            f" is exposed by "
                                            f"physical element [{phy_elem.id}, {phy_elem.name}]")
 
+            # Looking for allocated requirements and add them to the physical element
+            xml_allocated_requirement_list = xml_phy_elem.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                phy_elem.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"physical element [{phy_elem.id}, {phy_elem.name}]")
+
         # Loop to set parent and child to functions
         self.update_parental_relationship(parent_list, physical_element_list)
 
@@ -477,6 +540,15 @@ class XmlParser3SE:
                 phy_inter.add_allocated_fun_inter(xml_inter.get("id"))
                 Logger.set_debug(__name__, f"Functional interface [{xml_inter.get('id')}]"
                                            f" is allocated to "
+                                           f"physical interface [{phy_inter.id}, {phy_inter.name}]")
+
+            # Looking for allocated requirements and add them to the physical interface
+            xml_allocated_requirement_list = xml_phy_inter.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                phy_inter.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
                                            f"physical interface [{phy_inter.id}, {phy_inter.name}]")
 
         # Loop to update derived functions according to their ids

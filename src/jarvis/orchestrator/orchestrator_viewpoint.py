@@ -335,6 +335,8 @@ def add_requirement(requirement_str_list, **kwargs):
             new_requirement.set_id(util.get_unique_id())
             # alias is 'none' by default
             new_requirement_list.append(new_requirement)
+        else:
+            Logger.set_info(__name__, requirement_item[0] + " already exists")
 
     if not new_requirement_list:
         return 0
