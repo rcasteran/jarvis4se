@@ -9,7 +9,7 @@ import difflib
 # Modules
 import datamodel
 from tools import Logger
-from jarvis import question_answer
+from jarvis.query import question_answer
 from jarvis import util
 from . import orchestrator_viewpoint
 

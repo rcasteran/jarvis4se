@@ -5,7 +5,7 @@ Jarvis diagram module
 
 # Modules
 import plantuml_adapter
-from jarvis import question_answer
+from jarvis.query import question_answer
 from . import util
 from tools import Logger
 

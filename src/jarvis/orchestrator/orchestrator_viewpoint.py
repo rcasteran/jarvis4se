@@ -7,7 +7,8 @@ import re
 # Modules
 import datamodel
 from . import orchestrator_shared
-from jarvis import question_answer, util
+from jarvis.query import question_answer
+from jarvis import util
 from tools import Logger
 
 

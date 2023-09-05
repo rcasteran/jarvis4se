@@ -10,9 +10,10 @@ from IPython.display import display, HTML, Markdown
 
 # Modules
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
-    orchestrator_requirement
-from .question_answer import get_object_list, get_pandas_table, find_question
+    orchestrator_requirement, orchestrator_object
+from jarvis.query import question_answer, query_object_list
 from jarvis.diagram import diagram_generator
+from jarvis.handler import handler_question
 from jarvis import util
 from tools import get_hyperlink
 from tools import Config
@@ -21,10 +22,10 @@ from tools import Logger
 
 class CmdParser:
     def __init__(self, generator):
-        self.commands = [
+        self.command_list = [
             (r"under ([^.|\n]*)", self.matched_under),
             (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint.check_set_extends),
-            (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_shared.check_add_specific_obj_by_type),
+            (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
             (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint.add_attribute),
             (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", orchestrator_shared.check_add_inheritance),
             (r"The alias of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_alias),
@@ -52,27 +53,32 @@ class CmdParser:
             (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"show ([^.|\n]*)", self.matched_show),
-            (r"(.*?)\?", matched_question_mark),
-            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", matched_list),
+            (r"(.*?)\?", self.matched_question_mark),
+            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
             (r"The ((?!type|alias|source|destination).*) of (.*?) is ([^.|\n]*)",
              orchestrator_viewpoint.check_add_object_attribute)
         ]
 
-        self.reverse = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) compose ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) produces ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)",
-                        r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)")
+        self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) compose ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) consumes ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) produces ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)")
+
+        self.question_list = [
+            (r"What is (.*)", handler_question.question_object_info),
+            (r"Is (.*) allocated", handler_question.question_object_allocation)
+        ]
 
         self.generator = generator
 
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
         update_list = []
-        for regex, method in self.commands:
+        for regex, method in self.command_list:
             result_chain = None
             result = None
             update = None
@@ -90,7 +96,7 @@ class CmdParser:
 
             if result and not result_chain:
                 # self.reverse
-                if regex in self.reverse:
+                if regex in self.reverse_command_list:
                     result = util.reverse_tuple_list(result)
                 update = method(result, **kwargs)
             elif result_chain:
@@ -147,40 +153,38 @@ class CmdParser:
 
         return None
 
+    def matched_question_mark(self, p_str_list, **kwargs):
+        """@ingroup jarvis
+        @anchor matched_question_mark
+        Get question declaration for question answering
 
-def matched_question_mark(p_str_list, **kwargs):
-    """@ingroup jarvis
-    @anchor matched_question_mark
-    Get question declaration for question answering
+        @param[in] p_str_list : list of input strings
+        @param[in] kwargs : jarvis data structure
+        @return None (no xml update, no info displayed)
+        """
+        for regex, method in self.question_list:
+            for elem in p_str_list:
+                result = re.findall(regex, elem, re.MULTILINE)
+                if result:
+                    answer = method(result, **kwargs)
+                    if answer:
+                        display(answer)
 
-    @param[in] p_str_list : list of input strings
-    @param[in] kwargs : jarvis data structure
-    @return None (no xml update, no info displayed)
-    """
-    out = find_question(p_str_list, **kwargs)
-    if out:
-        for elem in out:
-            if isinstance(elem, str):
-                # Single display (not related to logging)
-                print(elem)
-            else:
-                display(elem)
+        return None
 
-    return None
+    @staticmethod
+    def matched_list(p_str_list, **kwargs):
+        """@ingroup jarvis
+        @anchor matched_list
+        Get "list" declaration for listing objects
 
+        @param[in] p_str_list : list of input strings
+        @param[in] kwargs : jarvis data structure
+        @return None (no xml update, no info displayed)
+        """
+        out = query_object_list.get_object_list(p_str_list, **kwargs)
+        if out:
+            for i in out:
+                display(HTML(question_answer.get_pandas_table(i)))
 
-def matched_list(p_str_list, **kwargs):
-    """@ingroup jarvis
-    @anchor matched_list
-    Get "list" declaration for listing objects
-
-    @param[in] p_str_list : list of input strings
-    @param[in] kwargs : jarvis data structure
-    @return None (no xml update, no info displayed)
-    """
-    out = get_object_list(p_str_list, **kwargs)
-    if out:
-        for i in out:
-            display(HTML(get_pandas_table(i)))
-
-    return None
+        return None

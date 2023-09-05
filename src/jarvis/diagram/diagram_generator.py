@@ -7,7 +7,7 @@ import re
 # Modules
 import plantuml_adapter
 from datamodel import FunctionalElement
-from jarvis import question_answer
+from jarvis.query import question_answer, query_object_list
 from jarvis.orchestrator import orchestrator_shared
 from jarvis import util as jarvis_util
 from . import diagram_generator_chain
@@ -601,7 +601,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
         fun_inter_str, **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
 
     if fun_inter:
-        data_list_fun_inter = question_answer.switch_data(fun_inter, None, **kwargs)['data']
+        data_list_fun_inter = query_object_list.get_fun_intf_data(fun_inter, None, **kwargs)['data']
         for elem in data_list_fun_inter:
             fun_elem_cons = question_answer.check_get_object(
                 elem['Last consumer Functional element(s)'].pop(),

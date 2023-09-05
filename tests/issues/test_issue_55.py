@@ -7,7 +7,7 @@ Tests about interface data list to https://github.com/rcasteran/jarvis4se/issues
 
 # Modules
 import test_lib
-from jarvis import question_answer
+from jarvis.query import query_object_list
 
 # Initialisation of Jarvis
 jarvis4se = test_lib.get_jarvis4se()[0]
@@ -25,7 +25,7 @@ def test_issue_55_question(mocker, input_test_issue_55):
     **Jarvis4se equivalent:**
     @ref input_test_issue_55
     """
-    spy = mocker.spy(question_answer, "switch_data")
+    spy = mocker.spy(query_object_list, "get_fun_intf_data")
     file_name = "test_issue_55_question"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_issue_55}\n"                         

@@ -5,7 +5,7 @@ Tests about Jarvis answer to user's question
 
 # Modules
 import test_lib
-from jarvis import question_answer
+from jarvis.query import question_answer
 
 # Initialisation of Jarvis
 jarvis4se = test_lib.get_jarvis4se()[0]

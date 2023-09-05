@@ -50,7 +50,7 @@ class MagicJarvis(Magics):
                                 f"{xml_name}.xml parsed")
                 output_xml = XmlWriter3SE(f"{xml_name}.xml")
             # Else create an empty xml_lists
-            # or will be named by default "Outpout"
+            # or will be named by default "Output"
             else:
                 if len(xml_name) > 1:
                     Logger.set_info(__name__,
@@ -59,7 +59,7 @@ class MagicJarvis(Magics):
                     output_xml = XmlWriter3SE(f"{xml_name}.xml")
                 else:
                     Logger.set_info(__name__,
-                                    "Xml's file does not exists, creating it ('output.xml' by default) !")
+                                    "Xml's file does not exist, creating it ('output.xml' by default) !")
                     output_xml = XmlWriter3SE("")
                 output_xml.write()
 

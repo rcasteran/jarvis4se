@@ -58,7 +58,7 @@ def main():
                         print(f"Creating {xml_name}.xml !")
                         output_xml = XmlWriter3SE(f"{xml_name}.xml")
                     else:
-                        print("Xml's file does not exists, creating it('output.xml' by default) !")
+                        print("Xml's file does not exist, creating it ('output.xml' by default) !")
                         output_xml = XmlWriter3SE("")
                     output_xml.write()
 
@@ -66,14 +66,15 @@ def main():
             elif len(xml_name) > 0:
                 update = parser.lookup_table(input_str, **obj_dict)
 
-                if 1 in update:
-                    print(f"{output_xml.file} updated")
-                else:
-                    print(f"No update for {output_xml.file}")
+                if update:
+                    if 1 in update:
+                        print(f"{output_xml.file} updated")
+                    else:
+                        print(f"No update for {output_xml.file}")
+                # Else do nothing
             else:
-                print(
-                    "Bad model's declaration, model's name should be written or add a ' '(blank space) "
-                    "after 'with' command to create default 'Output.xml'")
+                print("Bad model's declaration, model's name should be written or add a ' '(blank space) "
+                      "after 'with' command to create default 'Output.xml'")
 
 
 if __name__ == "__main__":

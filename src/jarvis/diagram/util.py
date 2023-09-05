@@ -2,7 +2,7 @@
 Jarvis diagram module
 """
 # Modules
-from jarvis import question_answer
+from jarvis.query import question_answer
 from tools import Logger
 
 
