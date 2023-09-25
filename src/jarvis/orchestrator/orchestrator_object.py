@@ -98,47 +98,43 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     """
     object_instance_per_base_type_list = [ObjectInstanceList(idx) for idx in
                                           range(ObjectInstanceList.nb_object_instance_base_type)]
+
     for elem in obj_type_str_list:
-        spec_obj_type = None
-        if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
-            base_type = next((i for i in [str(i) for i in datamodel.BaseType]
-                              if i == elem[1].capitalize()))
-        else:
-            spec_obj_type = question_answer.check_get_object(elem[1],
-                                                             **{'xml_type_list': kwargs['xml_type_list']})
-            if not spec_obj_type:
-                Logger.set_error(__name__,
-                                 f"No valid type found for {elem[1]}")
-                continue
-            base_type = get_base_type_recursively(spec_obj_type)
-        if base_type is None:
-            Logger.set_error(__name__,
-                             f"No valid base type found for {elem[1]}")
-            continue
-
-        existing_object = question_answer.check_get_object(elem[0], **kwargs)
-        if existing_object:
-            if isinstance(existing_object.type, datamodel.BaseType):
-                if str(existing_object.type) != base_type:
-                    Logger.set_info(__name__,
-                                     f"{existing_object.type} with the name {elem[0]} already exists")
-                # Else do not warn the user because it is the same object
+        if "?" not in elem[1]:
+            spec_obj_type = None
+            if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
+                base_type = next((i for i in [str(i) for i in datamodel.BaseType]
+                                  if i == elem[1].capitalize()))
             else:
-                if str(existing_object.type.name) != spec_obj_type:
-                    Logger.set_info(__name__,
-                                     f"{existing_object.type.name} with the name {elem[0]} already exists")
-                # Else do not warn the user because it is the same object
-            continue
+                spec_obj_type = question_answer.check_get_object(elem[1],
+                                                                 **{'xml_type_list': kwargs['xml_type_list']})
+                if not spec_obj_type:
+                    Logger.set_error(__name__,
+                                     f"No valid type found for {elem[1]}")
+                    continue
+                base_type = get_base_type_recursively(spec_obj_type)
+            if base_type is None:
+                Logger.set_error(__name__,
+                                 f"No valid base type found for {elem[1]}")
+                continue
 
-        new_object = ObjectInstance(elem[0], base_type, spec_obj_type, **kwargs)
-        if isinstance(new_object.get_instance().type, datamodel.BaseType):
-            Logger.set_info(__name__,
-                            f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")
-        else:
-            Logger.set_info(__name__,
-                            f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
+            existing_object = question_answer.check_get_object(elem[0], **kwargs)
+            if existing_object:
+                if isinstance(existing_object.type, datamodel.BaseType):
+                    Logger.set_info(__name__, f"{existing_object.type} with the name {elem[0]} already exists")
+                else:
+                    Logger.set_info(__name__, f"{existing_object.type.name} with the name {elem[0]} already exists")
+                continue
 
-        object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
+            new_object = ObjectInstance(elem[0], base_type, spec_obj_type, **kwargs)
+            if isinstance(new_object.get_instance().type, datamodel.BaseType):
+                Logger.set_info(__name__,
+                                f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")
+            else:
+                Logger.set_info(__name__,
+                                f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
+
+            object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
 
     check = 0
     if any(object_instance_per_base_type_list):

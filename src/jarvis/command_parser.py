@@ -88,11 +88,12 @@ class CmdParser:
                 del result_chain[0]
             # Only one diagram per cell can be output
             elif regex == r"show ([^.|\n]*)":
-                result = re.search(regex, string, re.MULTILINE)
+                result = re.search(regex, string, flags=re.MULTILINE | re.IGNORECASE)
             else:
                 # Transform to avoid duplicated function's declaration within cells input
                 result = []
-                [result.append(x) for x in re.findall(regex, string, re.MULTILINE) if x not in result]
+                [result.append(x) for x in re.findall(regex, string, flags=re.MULTILINE | re.IGNORECASE)
+                 if x not in result]
 
             if result and not result_chain:
                 # self.reverse
@@ -164,7 +165,7 @@ class CmdParser:
         """
         for regex, method in self.question_list:
             for elem in p_str_list:
-                result = re.findall(regex, elem, re.MULTILINE)
+                result = re.findall(regex, elem, flags=re.MULTILINE | re.IGNORECASE)
                 if result:
                     answer = method(result, **kwargs)
                     if answer:
