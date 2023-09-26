@@ -69,3 +69,44 @@ class EndPoint:
         """
         self.point_list.add(p_point)
 
+
+def str_child_list(obj):
+    """@ingroup datamodel
+    @anchor str_child_list
+    Return a string representation of the child list of a class instance
+    @param[in] obj class instance
+    @return string
+    """
+    if len(obj.child_list) > 1:
+        rep = f'"{obj.name}" has {len(obj.child_list)} children:\n'
+        for item in obj.child_list:
+            rep += f' - "{item.name}" with identifier {item.id}\n'
+    elif len(obj.child_list) == 1:
+        rep = f'"{obj.name}" has one child:\n'
+        for item in obj.child_list:
+            rep += f' - "{item.name}" with identifier {item.id}\n'
+    else:
+        rep = f'"{obj.name}" has no child.\n'
+
+    return rep
+
+
+def str_allocated_req(obj):
+    """@ingroup datamodel
+    @anchor str_allocated_req
+    Return a string representation of the allocated requirement list of a class instance
+    @param[in] obj class instance
+    @return string
+    """
+    if len(obj.allocated_req_list) > 1:
+        rep = f'"{obj.name}" has {len(obj.allocated_req_list)} allocated requirements:\n'
+        for item in obj.allocated_req_list:
+            rep += f' - "{item.name}" with identifier {item.id}\n'
+    elif len(obj.allocated_req_list) == 1:
+        rep = f'"{obj.name}" has one allocated requirement:\n'
+        for item in obj.allocated_req_list:
+            rep += f' - "{item.name}" with identifier {item.id}\n'
+    else:
+        rep = f'"{obj.name}" has no allocated requirement.\n'
+
+    return rep

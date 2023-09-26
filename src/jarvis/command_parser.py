@@ -7,7 +7,6 @@ import os
 import requests
 from IPython.display import display, HTML, Markdown
 
-
 # Modules
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
     orchestrator_requirement, orchestrator_object
@@ -169,7 +168,8 @@ class CmdParser:
                 if result:
                     answer = method(result, **kwargs)
                     if answer:
-                        display(answer)
+                        # Single display (not related to logging)
+                        print(answer)
 
         return None
 

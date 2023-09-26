@@ -232,6 +232,32 @@ class Function:
         """
         self.allocated_req_list.add(p_req)
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.derived) > 0:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        if self.parent is not None:
+            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
+
+        rep += util.str_child_list(self)
+        rep += util.str_allocated_req(self)
+
+        # No display of input_role and operand
+
+        return rep
+
 
 class Data:
     """@ingroup datamodel
@@ -305,6 +331,22 @@ class Data:
         @return None
         """
         self.allocated_req_list.add(p_req)
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        rep += util.str_allocated_req(self)
+
+        # No display of predecessor list
+
+        return rep
 
 
 class State:
@@ -415,6 +457,29 @@ class State:
         """
         self.allocated_req_list.add(p_req)
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        if self.parent is not None:
+            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
+
+        rep += util.str_child_list(self)
+        rep += util.str_allocated_req(self)
+
+        # No display of allocated function list
+
+        return rep
+
 
 class Transition:
     """@ingroup datamodel
@@ -524,6 +589,25 @@ class Transition:
         @return None
         """
         self.allocated_req_list.add(p_req)
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        rep += util.str_allocated_req(self)
+
+        # No display of source, destination and condition_list
+
+        return rep
 
 
 class FunctionalElement:
@@ -671,6 +755,32 @@ class FunctionalElement:
         """
         self.allocated_req_list.add(p_req)
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.derived) > 0:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        if self.parent is not None:
+            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
+
+        rep += util.str_child_list(self)
+        rep += util.str_allocated_req(self)
+
+        # No display of allocated function, allocated state and exposed interface
+
+        return rep
+
 
 class View:
     """@ingroup datamodel
@@ -742,6 +852,20 @@ class View:
         """
         self.activated = p_activation
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        # No display of allocated item list
+
+        return rep
+
 
 class Attribute:
     """@ingroup datamodel
@@ -812,6 +936,23 @@ class Attribute:
         @return None
         """
         self.described_item_list.add(p_item)
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        # No display of described item list
+
+        return rep
 
 
 class FunctionalInterface:
@@ -910,6 +1051,28 @@ class FunctionalInterface:
         @return None
         """
         self.allocated_req_list.add(p_req)
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.derived) > 0:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        rep += util.str_allocated_req(self)
+
+        # No display of allocated data list
+
+        return rep
 
 
 class PhysicalElement:
@@ -1044,6 +1207,32 @@ class PhysicalElement:
         """
         self.allocated_req_list.add(p_req)
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.derived) > 0:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        if self.parent is not None:
+            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
+
+        rep += util.str_child_list(self)
+        rep += util.str_allocated_req(self)
+
+        # No display of allocated functional element list and exposed interface list
+
+        return rep
+
 
 class PhysicalInterface:
     """@ingroup datamodel
@@ -1142,6 +1331,28 @@ class PhysicalInterface:
         """
         self.allocated_req_list.add(p_req)
 
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.derived) > 0:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        rep += util.str_allocated_req(self)
+
+        # No display of allocated functional interface list
+
+        return rep
+
 
 class Type:
     """@ingroup datamodel
@@ -1200,6 +1411,20 @@ class Type:
         @return None
         """
         self.base = p_base
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        rep = f'"{self.name}" is a type with identifier {self.id}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        # No display of base type
+
+        return rep
 
 
 class Requirement:
@@ -1301,3 +1526,25 @@ class Requirement:
         @return None
         """
         self.description = p_description
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        if self.type == type(self).__name__:
+            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
+        else:
+            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+
+        if len(self.alias) > 0:
+            rep += f'"{self.name}" alias is {self.alias}.\n'
+
+        if self.parent is not None:
+            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
+
+        rep += util.str_child_list(self)
+
+        # No display of description
+
+        return rep

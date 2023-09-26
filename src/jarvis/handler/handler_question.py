@@ -11,9 +11,7 @@ def question_object_info(question_str, **kwargs):
     wanted_object = question_answer.check_get_object(object_str, **kwargs)
 
     if wanted_object:
-        object_info = get_object_info(wanted_object, **kwargs)
-        if object_info:
-            return object_info
+        return str(wanted_object)
     else:
         Logger.set_info(__name__, f"I do not know the following object: {object_str}")
 
@@ -33,8 +31,9 @@ def get_object_info(wanted_object, **kwargs):
     except AttributeError:
         # To avoid error when there is no such attribute for the object
         pass
+
     if object_info['Object Class'] == 'Function':
-        get_function_info(wanted_object, object_info, **kwargs)
+        return str(wanted_object)
     elif object_info['Object Class'] == 'FunctionalElement':
         get_fun_elem_info(wanted_object, object_info, **kwargs)
     elif object_info['Object Class'] == 'State':
@@ -44,11 +43,13 @@ def get_object_info(wanted_object, **kwargs):
         get_transition_info(wanted_object, kwargs['xml_state_list'], object_info)
     elif object_info['Object Class'] == 'Data':
         get_data_info(wanted_object, object_info, **kwargs)
+    elif object_info['Object Class'] == 'Requirement':
+        object_info['Description'] = wanted_object.description
+        if any(wanted_object.child_list):
+            object_info['Child List'] = question_answer.get_child_name_list(wanted_object,
+                                                                            kwargs['xml_requirement_list'])
 
-    if object_info:
-        return object_info
-
-    return
+    return object_info
 
 
 def get_function_info(wanted_object, object_info, **kwargs):

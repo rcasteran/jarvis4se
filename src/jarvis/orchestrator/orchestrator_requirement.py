@@ -82,7 +82,7 @@ def check_add_requirement(p_str_list, **kwargs):
                 Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
                                           f"{p_str[0]} shall {p_str[1]}")
             else:
-                Logger.set_info(__name__, f"Requirement identified about: {p_str[0]} shall {p_str[1]}")
+                Logger.set_info(__name__, f"Requirement identified: {p_str[0]} shall {p_str[1]}")
 
             # Check if a requirement with the same description already exist
             xml_requirement_list = kwargs['xml_requirement_list']
