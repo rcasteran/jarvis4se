@@ -100,27 +100,27 @@ def check_add_requirement(p_str_list, **kwargs):
                                 f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
                 answer = input(f"Please give a requirement summary: ")
-                if len(answer.lower()) > 0:
-                    existing_object = question_answer.check_get_object(answer.lower(), **kwargs)
+                if len(answer) > 0:
+                    existing_object = question_answer.check_get_object(answer, **kwargs)
                     if existing_object:
                         if isinstance(existing_object.type, datamodel.BaseType):
                             if str(existing_object.type) != "Requirement":
                                 Logger.set_error(__name__,
                                                  f"{existing_object.type} with the name "
-                                                 f"{answer.lower()} already exists")
+                                                 f"{answer} already exists")
                             else:
-                                requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
+                                requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
                                                          existing_object, req_subject_object])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
                                                  f"{existing_object.type.name} with the name "
-                                                 f"{answer.lower()} already exists")
+                                                 f"{answer} already exists")
                             else:
-                                requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}",
+                                requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
                                                          existing_object, req_subject_object])
                     else:
-                        requirement_list.append([answer.lower(), f"{p_str[0]} shall {p_str[1]}", None,
+                        requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
                                                  req_subject_object])
                 else:
                     Logger.set_error(__name__, "No summary entered for identified requirement")

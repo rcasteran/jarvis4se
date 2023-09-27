@@ -101,11 +101,11 @@ def str_allocated_req(obj):
     if len(obj.allocated_req_list) > 1:
         rep = f'"{obj.name}" has {len(obj.allocated_req_list)} allocated requirements:\n'
         for item in obj.allocated_req_list:
-            rep += f' - "{item.name}" with identifier {item.id}\n'
+            rep += f' - requirement with identifier {item}\n'
     elif len(obj.allocated_req_list) == 1:
         rep = f'"{obj.name}" has one allocated requirement:\n'
         for item in obj.allocated_req_list:
-            rep += f' - "{item.name}" with identifier {item.id}\n'
+            rep += f' - requirement with identifier {item}\n'
     else:
         rep = f'"{obj.name}" has no allocated requirement.\n'
 
