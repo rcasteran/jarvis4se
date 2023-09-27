@@ -994,7 +994,10 @@ def input_test_entry_exit():
 def input_test_simple_function():
     """@ingroup test_plantuml_context
     @anchor input_test_simple_function
-    Defines input fixture for @ref test_simple_function_plantuml_context and @ref test_simple_function_xml
+    Defines input fixture for:
+    - @ref test_simple_function_plantuml_context
+    - @ref test_simple_function_xml
+    - @ref test_simple_function_handler_question
 
     @return input fixture
 
@@ -1089,6 +1092,7 @@ def input_test_function_output_auto_decomposition():
     - @ref test_function_output_auto_splitted_in
     - @ref test_function_output_auto_in
     - @ref test_function_output_auto_external_in
+    - @ref test_function_output_auto_handler_question
 
     @return input fixture
 
@@ -1321,3 +1325,25 @@ def input_test_issue_86():
                       "F11 produces b",
                       "F12 produces b",
                       ""])
+
+@pytest.fixture
+def input_single_requirement():
+    """@ingroup test_requirement
+    @anchor input_single_requirement
+    Defines input fixture for @ref test_single_requirement and @ref test_simple_function_allocation_requirement
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        F1 is a function
+
+        The function F1 shall compute the ambient temperature value based on the acquired temperature value as specified
+        in the following formula: AMBIENT_TEMPERATURE_VALUE = ACQUIRED_TEMPERATURE_VALUE * 56 / 100
+    """
+    first_req = "\n".join(["F1 is a function"])
+
+    second_req = "\n".join(["The function F1 shall compute the ambient temperature value based on the acquired "
+                            "temperature value as specified in the following formula: "
+                            "AMBIENT_TEMPERATURE_VALUE = ACQUIRED_TEMPERATURE_VALUE * 56 / 100"])
+
+    return first_req, second_req
