@@ -4,6 +4,7 @@ Tests about requirements
 # Libraries
 import nltk
 nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 # Modules
 import test_lib
