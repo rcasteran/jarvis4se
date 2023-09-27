@@ -2,7 +2,8 @@
 Tests about requirements
 """
 # Libraries
-
+import nltk
+nltk.download('punkt')
 
 # Modules
 import test_lib
