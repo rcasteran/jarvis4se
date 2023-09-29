@@ -1330,7 +1330,10 @@ def input_test_issue_86():
 def input_single_requirement():
     """@ingroup test_requirement
     @anchor input_single_requirement
-    Defines input fixture for @ref test_single_requirement and @ref test_simple_function_allocation_requirement
+    Defines input fixture for:
+    - @ref test_simple_requirement_function
+    - @ref test_simple_function_allocation_requirement_function
+    - @ref test_simple_function_allocation_manual_requirement_function
 
     @return input fixture
 
@@ -1339,6 +1342,8 @@ def input_single_requirement():
 
         The function F1 shall compute the ambient temperature value based on the acquired temperature value as specified
         in the following formula: AMBIENT_TEMPERATURE_VALUE = ACQUIRED_TEMPERATURE_VALUE * 56 / 100
+
+        F1 satisfies F1 behavior
     """
     first_req = "\n".join(["F1 is a function"])
 
@@ -1346,4 +1351,47 @@ def input_single_requirement():
                             "temperature value as specified in the following formula: "
                             "AMBIENT_TEMPERATURE_VALUE = ACQUIRED_TEMPERATURE_VALUE * 56 / 100"])
 
-    return first_req, second_req
+    third_req = "\n".join(["F1 satisfies F1 behavior"])
+
+    return first_req, second_req, third_req
+
+
+def input_requirement_decomposition():
+    """@ingroup test_requirement
+    @anchor input_single_requirement
+    Defines input fixture for test_function_decomposition_requirement_allocation
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        F1 is a function
+        F11 is a function
+        F12 is a function
+
+        F11, F12 compose F1
+
+        The function F1 shall store permanently the vehicle mileage received from the CAN message MSG_VEHICLE_DATA
+        The function F11 shall store in a non-volatile memory the received vehicle mileage RECEIVED_VEHICLE_MILEAGE
+        The function F12 shall compute the received vehicle mileage RECEIVED_VEHICLE_MILEAGE based on the CAN message
+        MSG_VEHICLE_DATA as specified in the following formula : RECEIVED_VEHICLE_MILEAGE = MSG_VEHICLE_DATA[4][0]
+
+        F1 satisfies F1 behavior
+        F11 satisfies F11 behavior
+        F12 satisfies F12 behavior
+    """
+    first_req = "\n".join(["F1 is a function",
+                           "F11 is a function",
+                           "F12 is a function",
+                           "F11, F12 compose F1"])
+
+    second_req = "\n".join(["The function F1 shall store permanently the vehicle mileage received from the CAN message "
+                            "MSG_VEHICLE_DATA",
+                            "The function F11 shall store in a non-volatile memory the received vehicle mileage "
+                            "RECEIVED_VEHICLE_MILEAGE",
+                            "The function F12 shall compute the received vehicle mileage RECEIVED_VEHICLE_MILEAGE "
+                            "based on the CAN message MSG_VEHICLE_DATA as specified in the following formula:"
+                            "RECEIVED_VEHICLE_MILEAGE = MSG_VEHICLE_DATA[4][0]"])
+
+    third_req = "\n".join(["F11 behavior, F12 behavior derives from F1 behavior"])
+
+    return first_req, second_req, third_req

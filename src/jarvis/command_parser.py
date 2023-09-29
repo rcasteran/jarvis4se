@@ -9,7 +9,7 @@ from IPython.display import display, HTML, Markdown
 
 # Modules
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
-    orchestrator_requirement, orchestrator_object
+    orchestrator_viewpoint_requirement, orchestrator_object
 from jarvis.query import question_answer, query_object_list
 from jarvis.diagram import diagram_generator
 from jarvis.handler import handler_question
@@ -45,10 +45,12 @@ class CmdParser:
             (r"The type of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_type),
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
             (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
-            (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", orchestrator_requirement.check_add_requirement),
-            (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_requirement),
+            (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) derives from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
+            (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"show ([^.|\n]*)", self.matched_show),

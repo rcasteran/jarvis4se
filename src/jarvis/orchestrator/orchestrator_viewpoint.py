@@ -2,11 +2,11 @@
 Jarvis module
 """
 # Libraries
-import re
 
 # Modules
 import datamodel
 from . import orchestrator_shared
+from . import orchestrator_viewpoint_requirement
 from jarvis.query import question_answer
 from jarvis import util
 from tools import Logger
@@ -317,52 +317,3 @@ def check_get_type_to_extend(type_str, xml_type_list):
         return check
 
     return check
-
-
-def add_requirement(requirement_str_list, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
-    output_xml = kwargs['output_xml']
-
-    new_requirement_list = []
-    new_allocation_list = []
-
-    update = 0
-    # Create requirement names list already in xml
-    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
-    # Filter attribute_list, keeping only the the ones not already in the xml
-    for requirement_item in requirement_str_list:
-        if requirement_item[0] not in xml_requirement_name_list:
-            new_requirement = datamodel.Requirement()
-            new_requirement.set_name(str(requirement_item[0]))
-            new_requirement.set_description(str(requirement_item[1]))
-            # Generate and set unique identifier of length 10 integers
-            new_requirement.set_id(util.get_unique_id())
-            # alias is 'none' by default
-            new_requirement_list.append(new_requirement)
-
-            # Test if allocated object is identified
-            if requirement_item[3]:
-                requirement_item[3].add_allocated_requirement(new_requirement)
-                new_allocation_list.append([requirement_item[3], new_requirement])
-            # Else do nothing
-        else:
-            Logger.set_info(__name__, requirement_item[0] + " already exists")
-
-    if new_requirement_list:
-        output_xml.write_requirement(new_requirement_list)
-        if new_allocation_list:
-            output_xml.write_object_allocation(new_allocation_list)
-
-        for requirement in new_requirement_list:
-            xml_requirement_list.add(requirement)
-            Logger.set_info(__name__,
-                            requirement.name + " is a requirement")
-
-        for elem in new_allocation_list:
-            Logger.set_info(__name__,
-                            f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
-                            f"{elem[0].__class__.__name__} {elem[0].name}")
-
-        update = 1
-
-    return update

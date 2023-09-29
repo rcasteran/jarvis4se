@@ -11,7 +11,7 @@ import datamodel
 from tools import Logger
 from jarvis.query import question_answer
 from jarvis import util
-from . import orchestrator_viewpoint
+
 
 # Constants
 REQUIREMENT_CONFIDENCE_RATIO = 0.78
@@ -20,6 +20,8 @@ NOUN_PLURAL_TAG = "NNS"
 PROPER_NOUN_SINGULAR_TAG = "NNP"
 DETERMINER_TAG = "DT"
 ADJECTIVE_TAG = "JJ"
+SUBORDINATE_TAG = "IN"
+COORDINATE_TAG = "CC"
 
 
 def check_add_requirement(p_str_list, **kwargs):
@@ -126,9 +128,63 @@ def check_add_requirement(p_str_list, **kwargs):
                     Logger.set_error(__name__, "No summary entered for identified requirement")
 
     if requirement_list:
-        update = orchestrator_viewpoint.add_requirement(requirement_list, **kwargs)
+        update = add_requirement(requirement_list, **kwargs)
     else:
         update = 0
+
+    return update
+
+
+def add_requirement(requirement_str_list, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    output_xml = kwargs['output_xml']
+
+    new_requirement_list = []
+    new_allocation_list = []
+
+    update = 0
+    # Create requirement names list already in xml
+    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
+    # Filter attribute_list, keeping only the the ones not already in the xml
+    for requirement_item in requirement_str_list:
+        if requirement_item[0] not in xml_requirement_name_list:
+            new_requirement = datamodel.Requirement()
+            new_requirement.set_name(str(requirement_item[0]))
+            new_requirement.set_description(str(requirement_item[1]))
+            # Generate and set unique identifier of length 10 integers
+            new_requirement.set_id(util.get_unique_id())
+            # alias is 'none' by default
+            new_requirement_list.append(new_requirement)
+
+            # Test if allocated object is identified
+            if requirement_item[3]:
+                requirement_item[3].add_allocated_requirement(new_requirement)
+                new_allocation_list.append([requirement_item[3], new_requirement])
+            # Else do nothing
+        else:
+            Logger.set_info(__name__, requirement_item[0] + " already exists")
+
+    if new_requirement_list:
+        output_xml.write_requirement(new_requirement_list)
+        if new_allocation_list:
+            output_xml.write_object_allocation(new_allocation_list)
+
+        for requirement in new_requirement_list:
+            xml_requirement_list.add(requirement)
+            Logger.set_info(__name__,
+                            requirement.name + " is a requirement")
+
+        for elem in new_allocation_list:
+            Logger.set_info(__name__,
+                            f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
+                            f"{elem[0].__class__.__name__} {elem[0].name}")
+
+            # Check for potential req parent in allocated obj parent
+            if elem[0].parent:
+                if hasattr(elem[0].parent, 'allocated_req_list'):
+                    update_requirement_link(elem[0].parent, elem[1], **kwargs)
+
+        update = 1
 
     return update
 
@@ -167,6 +223,11 @@ def check_add_allocation(p_str_list, **kwargs):
             if not any(allocated_req_id == req_obj.id for allocated_req_id in alloc_obj.allocated_req_list):
                 alloc_obj.add_allocated_requirement(req_obj)
                 allocation_list.append([alloc_obj, req_obj])
+
+                # Check for potential req parent in allocated obj parent
+                if alloc_obj.parent:
+                    if hasattr(alloc_obj.parent, 'allocated_req_list'):
+                        update_requirement_link(alloc_obj.parent, req_obj, **kwargs)
             else:
                 Logger.set_info(__name__,
                                 f"{req_obj.__class__.__name__} {req_obj.name} already satisfied by "
@@ -179,6 +240,93 @@ def check_add_allocation(p_str_list, **kwargs):
         for elem in allocation_list:
             Logger.set_info(__name__,
                             f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
+                            f"{elem[0].__class__.__name__} {elem[0].name}")
+
+        update = 1
+    else:
+        update = 0
+
+    return update
+
+
+def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
+    sequence_ratio_list = {}
+    sequence_req_list = {}
+    for req in p_allocated_parent.allocated_req_list:
+        for xml_req in kwargs['xml_requirement_list']:
+            if xml_req.id == req.id:
+                parent_req_object = get_requirement_object(xml_req.description.split("shall")[1])
+                req_object = get_requirement_object(p_requirement.description.split("shall")[1])
+                sequence = difflib.SequenceMatcher(None, parent_req_object, req_object)
+                Logger.set_debug(__name__, f"{parent_req_object} from requirement {xml_req.id} compared with "
+                                           f"{req_object} from requirement {p_requirement.id} - confidence factor: "
+                                           f"{sequence.ratio()}")
+
+                if sequence.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
+                    sequence_ratio_list[xml_req.name] = sequence.ratio()
+                    sequence_req_list[xml_req.name] = xml_req
+
+    if sequence_ratio_list:
+        similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+        Logger.set_info(__name__, f"Requirement {similar_requirement_name} deals with the same object "
+                                  f"(confidence factor: {sequence_ratio_list[similar_requirement_name]})")
+
+        sequence_req_list[similar_requirement_name].add_child(p_requirement)
+        p_requirement.set_parent(sequence_req_list[similar_requirement_name])
+
+        output_xml = kwargs['output_xml']
+        output_xml.write_object_child([[sequence_req_list[similar_requirement_name], p_requirement]])
+
+        Logger.set_info(__name__, f"{p_requirement.__class__.__name__} {p_requirement.name} derives from "
+                                  f"{sequence_req_list[similar_requirement_name].__class__.__name__} "
+                                  f"{similar_requirement_name}")
+
+
+def get_requirement_object(p_requirement_object_str):
+    req_object = ''
+    token_list = nltk.word_tokenize(p_requirement_object_str)
+    tag_list = nltk.pos_tag(token_list)
+
+    for word, tag in tag_list[1:]:
+        if tag == NOUN_SINGULAR_TAG or tag == NOUN_PLURAL_TAG:
+            req_object += word + " "
+        elif tag == COORDINATE_TAG or tag == SUBORDINATE_TAG:
+            break
+
+    return req_object.strip()
+
+
+def check_add_derived(p_str_list, **kwargs):
+    derived_list = []
+    cleaned_derived_str_list = util.cut_tuple_list(p_str_list)
+    for elem in cleaned_derived_str_list:
+        derived_req_obj = question_answer.check_get_object(elem[0],
+                                                           **{'xml_requirement_list': kwargs['xml_requirement_list']})
+
+        parent_req_obj = question_answer.check_get_object(elem[1],
+                                                          **{'xml_requirement_list': kwargs['xml_requirement_list']})
+
+        if not derived_req_obj:
+            Logger.set_error(__name__, f"Requirement {elem[0]} not found")
+        elif not parent_req_obj:
+            Logger.set_error(__name__, f"Requirement {elem[1]} not found")
+        else:
+            if not any(child_req.id == derived_req_obj.id for child_req in parent_req_obj.child_list):
+                parent_req_obj.add_child(derived_req_obj)
+                derived_req_obj.set_parent(parent_req_obj)
+                derived_list.append([parent_req_obj, derived_req_obj])
+            else:
+                Logger.set_info(__name__,
+                                f"{derived_req_obj.__class__.__name__} {derived_req_obj.name} already derives from "
+                                f"{parent_req_obj.__class__.__name__} {parent_req_obj.name}")
+
+    if derived_list:
+        output_xml = kwargs['output_xml']
+        output_xml.write_object_child(derived_list)
+
+        for elem in derived_list:
+            Logger.set_info(__name__,
+                            f"{elem[1].__class__.__name__} {elem[1].name} derives from "
                             f"{elem[0].__class__.__name__} {elem[0].name}")
 
         update = 1

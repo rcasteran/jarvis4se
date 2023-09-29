@@ -553,6 +553,8 @@ class XmlWriter3SE:
             elem_tag = "transition"
         elif isinstance(obj, datamodel.Attribute):
             elem_tag = "attribute"
+        elif isinstance(obj, datamodel.Requirement):
+            elem_tag = "requirement"
         elif isinstance(obj, datamodel.View):
             elem_tag = "view"
         elif isinstance(obj, datamodel.Type):
@@ -737,6 +739,8 @@ class XmlWriter3SE:
 
                 description_tag = etree.SubElement(requirement_tag, "description")
                 description_tag.text = requirement.description
+
+                _req_part_list_tag = etree.SubElement(requirement_tag, "requirementPartList")
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 

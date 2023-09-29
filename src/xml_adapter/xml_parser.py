@@ -161,7 +161,7 @@ class XmlParser3SE:
                                            f" is satisfied by "
                                            f"function [{function.id}, {function.name}]")
 
-        # Loop to set parent and child to functions
+        # Loop to set parent and child relationship
         self.update_parental_relationship(parent_list, function_list)
 
         # Loop to update derived functions according to their ids
@@ -276,7 +276,7 @@ class XmlParser3SE:
                                            f" is satisfied by "
                                            f"state [{state.id}, {state.name}]")
 
-        # Loop to set parent and child to states
+        # Loop to set parent and child relationship
         self.update_parental_relationship(parent_list, state_list)
 
         return state_list
@@ -368,7 +368,7 @@ class XmlParser3SE:
                                            f" is satisfied by "
                                            f"functional element [{fun_elem.id}, {fun_elem.name}]")
 
-        # Loop to set parent and child to functional elements
+        # Loop to set parent and child relationship
         self.update_parental_relationship(parent_list, functional_element_list)
 
         # Loop to update derived functional elements according to their ids
@@ -482,8 +482,8 @@ class XmlParser3SE:
             physical_element_list.add(phy_elem)
 
             # Looking for "physicalPart" i.e child and create a list
-            xml_functional_part_list = xml_phy_elem.iter('physicalElementPart')
-            for xml_part in xml_functional_part_list:
+            xml_physical_part_list = xml_phy_elem.iter('physicalElementPart')
+            for xml_part in xml_physical_part_list:
                 parent_list[xml_part.get('id')] = phy_elem.id
 
             # Looking for allocated functions and add them to the functional element
@@ -511,7 +511,7 @@ class XmlParser3SE:
                                            f" is satisfied by "
                                            f"physical element [{phy_elem.id}, {phy_elem.name}]")
 
-        # Loop to set parent and child to functions
+        # Loop to set parent and child relationship
         self.update_parental_relationship(parent_list, physical_element_list)
 
         # Loop to update derived functions according to their ids
@@ -618,6 +618,7 @@ class XmlParser3SE:
         @return requirement list
         """
         requirement_list = set()
+        parent_list = {}
         xml_requirement_list = self.root.iter('requirement')
         for xml_requirement in xml_requirement_list:
             # Instantiate Attribute and add them to a list
@@ -632,5 +633,13 @@ class XmlParser3SE:
             xml_description_list = xml_requirement.iter('description')
             for xml_description in xml_description_list:
                 requirement.set_description(xml_description.text)
+
+            # Looking for requirement child
+            xml_requirement_part_list = xml_requirement.iter('requirementPart')
+            for xml_part in xml_requirement_part_list:
+                parent_list[xml_part.get('id')] = requirement.id
+
+        # Loop to set parent and child relationship
+        self.update_parental_relationship(parent_list, requirement_list)
 
         return requirement_list
