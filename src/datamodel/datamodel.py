@@ -8,6 +8,8 @@ from enum import Enum
 # Modules
 from . import util
 
+# Type definition
+
 
 class BaseType(Enum):
     """@ingroup datamodel
@@ -242,10 +244,10 @@ class Function:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if len(self.derived) > 0:
+        if self.derived:
             rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
 
-        if len(self.alias) > 0:
+        if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         if self.parent is not None:
@@ -765,10 +767,10 @@ class FunctionalElement:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if len(self.derived) > 0:
+        if self.derived:
             rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
 
-        if len(self.alias) > 0:
+        if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         if self.parent is not None:
@@ -1062,10 +1064,10 @@ class FunctionalInterface:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if len(self.derived) > 0:
+        if self.derived:
             rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
 
-        if len(self.alias) > 0:
+        if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         rep += util.str_allocated_req(self)
@@ -1217,10 +1219,10 @@ class PhysicalElement:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if len(self.derived) > 0:
+        if self.derived:
             rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
 
-        if len(self.alias) > 0:
+        if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         if self.parent is not None:
@@ -1341,10 +1343,10 @@ class PhysicalInterface:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if len(self.derived) > 0:
+        if self.derived:
             rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
 
-        if len(self.alias) > 0:
+        if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         rep += util.str_allocated_req(self)
@@ -1548,3 +1550,7 @@ class Requirement:
         # No display of description
 
         return rep
+
+
+# Global variables definition
+TypeWithChildList = (Function, State, FunctionalElement, PhysicalElement, Requirement)

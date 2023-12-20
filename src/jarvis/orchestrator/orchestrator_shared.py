@@ -26,50 +26,40 @@ def check_add_child(parent_child_name_str_list, **kwargs):
             update ([0/1]) : 1 if update, else 0
     """
 
-    parent_child_lists = [[] for _ in range(4)]
-    available_objects = (datamodel.Function, datamodel.State,
-                         datamodel.FunctionalElement, datamodel.PhysicalElement)
+    parent_child_lists = [[] for _ in range(len(datamodel.TypeWithChildList))]
 
     cleaned_parent_child_list_str = util.cut_tuple_list(parent_child_name_str_list)
     for elem in cleaned_parent_child_list_str:
         parent_object = question_answer.check_get_object(elem[0], **kwargs)
         child_object = question_answer.check_get_object(elem[1], **kwargs)
-        if parent_object is None:
-            if child_object is None:
-                Logger.set_error(__name__,
-                                 f"{elem[0]} and {elem[1]} are not Function/State/FunctionalElement"
-                                 f"/PhysicalElement or the object does not exist")
+        if parent_object is not None and child_object is not None:
+            check_pair = None
+            for idx, obj_type in enumerate(datamodel.TypeWithChildList):
+                if isinstance(parent_object, obj_type) and isinstance(child_object, obj_type):
+                    check_pair = idx
+                    break
+            if isinstance(check_pair, int):
+                if child_object.parent is None:
+                    parent_object.add_child(child_object)
+                    child_object.set_parent(parent_object)
+                    parent_child_lists[check_pair].append([parent_object, child_object])
+                elif child_object.parent.id != parent_object.id:
+                    Logger.set_warning(__name__, f"{elem[1]} has already a parent: {child_object.parent.name}")
             else:
-                Logger.set_error(__name__,
-                                 f"{elem[0]} is not Function/State/FunctionalElement"
-                                 f"/PhysicalElement or the object does not exist")
-            continue
-        if child_object is None:
-            Logger.set_error(__name__,
-                             f"{elem[1]} is not Function/State/FunctionalElement"
-                             f"/PhysicalElement or the object does not exist")
-            continue
-        check_pair = None
-        for idx, obj_type in enumerate(available_objects):
-            if isinstance(parent_object, obj_type) and isinstance(child_object, obj_type):
-                check_pair = idx
-                break
-        if isinstance(check_pair, int):
-            if child_object.parent is None:
-                parent_object.add_child(child_object)
-                child_object.set_parent(parent_object)
-                parent_child_lists[check_pair].append([parent_object, child_object])
+                # Single display (not related to logging)
+                print(f"Please choose a valid pair of element(Function/State/FunctionalElement"
+                      f"/PhysicalElement) for {parent_object.name} and {child_object.name}")
+        elif parent_object is None:
+            Logger.set_error(__name__, f"{elem[0]} does not exist")
         else:
-            # Single display (not related to logging)
-            print(f"Please choose a valid pair of element(Function/State/FunctionalElement"
-                  f"/PhysicalElement) for {parent_object.name} and {child_object.name}")
+            Logger.set_error(__name__, f"{elem[1]} does not exist")
 
-    update = add_child(parent_child_lists, kwargs['xml_fun_elem_list'], kwargs['output_xml'])
+    update = add_child(parent_child_lists, **kwargs)
 
     return update
 
 
-def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
+def add_child(parent_child_lists, **kwargs):
     """
     Check if input lists are not empty, write in xml for each list and return update list if some
     updates has been made
@@ -83,20 +73,58 @@ def add_child(parent_child_lists, xml_fun_elem_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
+    update = 0
     if any(parent_child_lists):
-        for i in range(4):
-            if parent_child_lists[i]:
-                output_xml.write_object_child(parent_child_lists[i])
-                for k in parent_child_lists[i]:
-                    Logger.set_info(__name__,
-                                    f"{k[0].name} is composed of {k[1].name}")
-                    if i in (0, 1):
-                        for fun_elem in xml_fun_elem_list:
-                            if k[0].id in fun_elem.allocated_function_list:
-                                recursive_allocation([fun_elem, k[1]], output_xml)
-        return 1
+        xml_fun_elem_list = kwargs['xml_fun_elem_list']
+        output_xml = kwargs['output_xml']
+        for object_type in range(len(datamodel.TypeWithChildList)):
+            if parent_child_lists[object_type]:
+                output_xml.write_object_child(parent_child_lists[object_type])
+                update = 1
 
-    return 0
+                for obj in parent_child_lists[object_type]:
+                    Logger.set_info(__name__,
+                                    f"{obj[0].name} is composed of {obj[1].name}")
+                    if object_type in (0, 1):
+                        # Considering function and state allocation to a functional element
+                        for fun_elem in xml_fun_elem_list:
+                            if obj[0].id in fun_elem.allocated_function_list:
+                                allocate_all_children_in_element([fun_elem, obj[1]], output_xml)
+
+                        if object_type == 0:
+                            # Considering function allocation
+                            xml_consumer_function_list = kwargs['xml_consumer_function_list']
+                            xml_producer_function_list = kwargs['xml_producer_function_list']
+
+                            for (flow, function) in xml_consumer_function_list:
+                                if obj[1].id == function.id and [flow, obj[0]] not in xml_consumer_function_list:
+                                    if [flow, obj[0]] not in xml_producer_function_list:
+                                        output_xml.write_data_consumer([[flow, obj[0]]])
+                                        xml_consumer_function_list.append([flow, obj[0]])
+
+                                        Logger.set_info(__name__, f"{obj[0].name} produces {flow}")
+                                    else:
+                                        # Case of a parent child is producing the data
+                                        output_xml.delete_data_relationship([flow, obj[0]], "producer")
+                                        xml_producer_function_list.remove([flow, obj[0]])
+
+                                        Logger.set_info(__name__, f"{obj[0].name} does not produce {flow} anymore")
+
+                            for (flow, function) in xml_producer_function_list:
+                                if obj[1].id == function.id and [flow, obj[0]] not in xml_producer_function_list:
+                                    if [flow, obj[0]] not in xml_consumer_function_list:
+                                        output_xml.write_data_producer([[flow, obj[0]]])
+                                        xml_producer_function_list.append([flow, obj[0]])
+
+                                        Logger.set_info(__name__, f"{obj[0].name} consumes {flow}")
+                                    else:
+                                        # Case of a parent child is consuming the data
+                                        output_xml.delete_data_relationship([flow, obj[0]], "consumer")
+                                        xml_consumer_function_list.remove([flow, obj[0]])
+
+                                        Logger.set_info(__name__, f"{obj[0].name} does not consume {flow} anymore")
+
+    return update
 
 
 def check_add_allocated_item(item, xml_item_list, xml_view_list):
@@ -977,7 +1005,7 @@ def add_allocation(allocation_dict, output_xml):
                     # Check the dict length, if this method is called from orchestrator_viewpoint
                     # or orchestrator_functional for View => Only key[0] and no recursion wanted
                     if k in (0, 1):
-                        recursive_allocation(elem, output_xml)
+                        allocate_all_children_in_element(elem, output_xml)
         return 1
     return 0
 
@@ -1013,7 +1041,7 @@ def check_parent_allocation(elem, output_xml):
                                  f"of its child is")
 
 
-def recursive_allocation(elem, output_xml):
+def allocate_all_children_in_element(elem, output_xml):
     """Recursive allocation for childs of State/Function"""
     check_parent_allocation(elem, output_xml)
     object_type = question_answer.get_object_type(elem[1])

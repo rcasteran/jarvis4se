@@ -23,3 +23,4 @@ from .datamodel import PhysicalInterface
 from .datamodel import Type
 from .datamodel import BaseType
 from .datamodel import Requirement
+from .datamodel import TypeWithChildList
