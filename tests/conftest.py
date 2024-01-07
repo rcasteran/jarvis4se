@@ -1084,8 +1084,8 @@ def input_test_function_output_auto_decomposition():
     """@ingroup test_plantuml_decomposition
     @anchor input_test_function_output_auto_decomposition
     Defines input fixture for :
-    - @ref test_function_output_auto_external_decomposition
-    - @ref test_function_output_auto_splitted_decomposition
+    - @ref test_function_output_auto_external_plantuml_decomposition
+    - @ref test_function_output_auto_splitted_plantuml_decomposition
     - @ref test_function_output_auto_xml
     - @ref test_function_output_auto_splitted_xml
     - @ref test_function_output_auto_external_xml
@@ -1426,5 +1426,43 @@ def input_test_issue_87():
     second_part = "\n".join(["F is a function",
                              "F1 composes F",
                              ""])
+
+    return first_part, second_part
+
+
+@pytest.fixture
+def input_test_fun_elem_simple_decomposition():
+    """@ingroup test_plantuml_decomposition
+    @anchor input_test_fun_elem_simple_decomposition
+    Defines input fixture for @ref test_fun_elem_simple_plantuml_decomposition
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        E is a functional element
+        I is a functional interface
+        E exposes I
+
+        E1 is a functional element
+        I1 is a functional interface
+        E1 exposes I
+        E1 exposes I1
+        E2 is a functional element
+        E2 exposes I1
+        E is composed of E1, E2
+    """
+    first_part = "\n".join(["E is a functional element",
+                            "I is a functional interface",
+                            "E exposes I",
+                            ""])
+
+    second_part = "\n".join(["E1 is a functional element",
+                             "I1 is a functional interface",
+                             "E1 exposes I",
+                             "E1 exposes I1",
+                             "E2 is a functional element",
+                             "E2 exposes I1",
+                             "E is composed of E1, E2"])
 
     return first_part, second_part

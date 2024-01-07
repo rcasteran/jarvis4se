@@ -12,6 +12,42 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
+def test_fun_elem_simple_plantuml_decomposition(mocker, input_test_fun_elem_simple_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_fun_elem_simple_plantuml_decomposition
+    Test decomposition diagram display with simple functional element decomposition
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_fun_elem_simple_decomposition : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_fun_elem_simple_decomposition
+    """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
+    file_name = "test_fun_elem_simple_plantuml_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_simple_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_simple_decomposition[1]}\n"                         
+                         "show decomposition E\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "E" as e <<Functional element>>{\n',
+                'component "E2" as e2 <<Functional element>>{\n',
+                'component "E1" as e1 <<Functional element>>{\n',
+                '}\n',
+                '}\n',
+                '}\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")
+
+
 def test_fun_elem_with_interfaces_plantuml_decomposition(mocker, input_test_fun_elem_with_interfaces_2):
     """@ingroup test_plantuml_decomposition
     @anchor test_fun_elem_with_interfaces_plantuml_decomposition
@@ -55,9 +91,9 @@ def test_fun_elem_with_interfaces_plantuml_decomposition(mocker, input_test_fun_
     assert len(result) - len(''.join(expected)) == 8*len("\'id: xxxxxxxxxx\n")
 
 
-def test_function_output_auto_splitted_decomposition(mocker, input_test_function_output_auto_decomposition):
+def test_function_output_auto_splitted_plantuml_decomposition(mocker, input_test_function_output_auto_decomposition):
     """@ingroup test_plantuml_decomposition
-    @anchor test_function_output_auto_splitted_decomposition
+    @anchor test_function_output_auto_splitted_plantuml_decomposition
     Test decomposition diagram display with function decomposition done in multiple cells
 
     @param[in] mocker : mocker fixture reference
@@ -92,9 +128,9 @@ def test_function_output_auto_splitted_decomposition(mocker, input_test_function
     assert len(result) - len(''.join(expected)) == 3*len("\'id: xxxxxxxxxx\n")
 
 
-def test_function_output_auto_external_decomposition(mocker, input_test_function_output_auto_decomposition):
+def test_function_output_auto_external_plantuml_decomposition(mocker, input_test_function_output_auto_decomposition):
     """@ingroup test_plantuml_decomposition
-    @anchor test_function_output_auto_external_decomposition
+    @anchor test_function_output_auto_external_plantuml_decomposition
     Test decomposition diagram display with function decomposition done in multiple cells and with external function
 
     @param[in] mocker : mocker fixture reference
