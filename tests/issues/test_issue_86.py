@@ -1,7 +1,7 @@
 """@defgroup test_issue_86
 Tests about functional decomposition related to https://github.com/rcasteran/jarvis4se/issues/86
 
-@see test_issue_86_plantuml_context
+@see test_issue_86_plantuml_decomposition
 """
 # Libraries
 
