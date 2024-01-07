@@ -1395,3 +1395,36 @@ def input_requirement_decomposition():
     third_req = "\n".join(["F11 behavior, F12 behavior derives from F1 behavior"])
 
     return first_req, second_req, third_req
+
+
+@pytest.fixture
+def input_test_issue_87():
+    """@ingroup test_issue_87
+    @anchor input_test_issue_87
+    Defines input fixture for @ref test_issue_87_plantuml_context
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        A is a data
+        B is a data
+        F1 consumes A
+        F1 produces B
+
+        F is a function
+        F1 composes F
+    """
+    first_part = "\n".join(["F1 is a function",
+                            "A is a data",
+                            "B is a data",
+                            "F1 consumes A",
+                            "F1 produces B",
+                            ""])
+
+    second_part = "\n".join(["F is a function",
+                             "F1 composes F",
+                             ""])
+
+    return first_part, second_part
