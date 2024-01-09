@@ -136,7 +136,7 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 
 <mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
 
-### State transition definition
+### Transition definition
 
 #### Definition
 
@@ -164,7 +164,7 @@ Condition for <transition name> is: <transition condition value>
 
 <mark style="color:orange;">Note: two transition conditions for the same transition differs only in their syntax.</mark> For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
 
-### State context
+### Context visualization
 
 ## Data allocation
 
