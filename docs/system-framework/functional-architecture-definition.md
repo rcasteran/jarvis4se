@@ -193,6 +193,7 @@ T_S0_S1 is a transition
 Condition for T_S0_S1 is: VOLTAGE > 7V
 The source of T_S0_S1 is S0
 The destination of T_S0_S1 is S1
+show context S0
 ```
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
