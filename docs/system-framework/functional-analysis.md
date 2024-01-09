@@ -1,6 +1,6 @@
 # Functional analysis
 
-Functional analysis is the systematic examination of a defined [function](../engineering-concepts/definitions.md) to identify all the subfunctions necessary to accomplish that function and to identify the incoming / outgoing [data](../engineering-concepts/definitions.md) flowing between them (Adapted from [REF\_3](../engineering-concepts/references.md))
+Functional analysis is the systematic examination of a defined [function](../engineering-concepts/definitions.md) to identify all the subfunctions necessary to accomplish that function and to identify the incoming / outgoing [data](../engineering-concepts/definitions.md) flowing between them (adapted from [REF\_3](../engineering-concepts/references.md))
 
 From a methodological point of view, the definition of a function can be justified by:
 
@@ -89,7 +89,7 @@ F produces y
 show context F
 ```
 
-![](<../../.gitbook/assets/image (1).png>)
+![](<../../.gitbook/assets/image (1) (1) (1).png>)
 
 ## Function decomposition
 
@@ -101,7 +101,7 @@ JARVIS4SE allows to decompose a function named _\<function name>_ into subfuncti
 <function name> is composed of <subfunction 1 name>, <subfunction 2 name>
 ```
 
-<mark style="color:orange;">Note: the subfunctions must be created before as functions</mark>. Please refer to chapter <mark style="color:orange;"></mark> [#function-creation](functional-analysis.md#function-creation "mention")<mark style="color:orange;"></mark>
+<mark style="color:orange;">Note: the subfunctions must be created before as functions</mark>. Please refer to chapter [#function-creation](functional-analysis.md#function-creation "mention")
 
 ### Decomposition visualization
 
@@ -125,7 +125,7 @@ F is composed of F1, F2
 show decomposition F
 ```
 
-![](../../.gitbook/assets/image.png)
+![](<../../.gitbook/assets/image (3).png>)
 
 ## Activity allocation
 
@@ -155,6 +155,14 @@ show chain <function 1 name>, <function 2 name>
 
 <mark style="color:orange;">Note: chain visualization could be equivalent to a decomposition visualization in case of dealing with the chain of all subfunctions of the same function.</mark>
 
+Below an example of a chain visualization with the previous F1 and F2 subfunctions:
+
+```
+show chain F1, F2
+```
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
 ### Sequence visualization
 
 JARVIS4SE allows to visualize a chain of functions named _\<function i name>,_ linked together by the data they produce/consume, as a sequence of functions, through the following command:
@@ -169,4 +177,4 @@ Below an example of a sequence visualization with the previous F1 and F2 subfunc
 show sequence F1, F2
 ```
 
-![](<../../.gitbook/assets/image (3).png>)
+![](<../../.gitbook/assets/image (3) (1).png>)
