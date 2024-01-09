@@ -1,6 +1,6 @@
 # Functional architecture definition
 
-Functional architecture is the systematic examination of different implementation-independant architecture candidates to identify independent groups of [functions](../engineering-concepts/definitions.md) <mark style="color:blue;"></mark> and their required ressources to be executed (so called [functional elements](../engineering-concepts/definitions.md)) from the [functional analysis](functional-analysis.md), to organize the way they exchange [data](../engineering-concepts/definitions.md) (so called [functional interfaces](../engineering-concepts/definitions.md)), and to select the best one according to the selected architecture criteria (Adapted from [REF\_3](../engineering-concepts/references.md))
+Functional architecture is the systematic examination of different implementation-independant architecture candidates to identify independent groups of [functions](../engineering-concepts/definitions.md) and their required ressources to be executed (so called [functional elements](../engineering-concepts/definitions.md)) from the [functional analysis](functional-analysis.md), to organize the way they exchange [data](../engineering-concepts/definitions.md) (so called [functional interfaces](../engineering-concepts/definitions.md)), and to select the best one according to the selected architecture criteria (Adapted from [REF\_3](../engineering-concepts/references.md))
 
 ## Functional interface creation
 
@@ -24,10 +24,6 @@ The <attribute name> of <functional interface name> is <attribute value>
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the functional interface.
 
 <mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
-
-### Interaction visualization
-
-TBD
 
 ## Functional element creation
 
@@ -70,12 +66,15 @@ show context <functional element name>
 
 Below an example of a context visualization for a functional element E which exposes an interface I with PlantUML:
 
-```
-E is a functional element
-I is a functional interface
-E exposes I
+<pre><code>E is a functional element
+<strong>I is a functional interface
+</strong>E exposes I
 show context E
-```
+</code></pre>
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+<mark style="color:orange;">Note: the interface I is not shown until it allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
 
 ## Functional element decomposition
 
@@ -110,15 +109,62 @@ E is composed of E1, E2
 show decomposition E
 ```
 
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+<mark style="color:orange;">Note: the interfaces I and I1 are not shown until they allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
+
 ## Functional element state creation
 
-### Transition definition
+### Definition
 
-### State definition
+JARVIS4SE allows to define a new state named _\<state name>_ through the following command:
+
+```
+<state name> is a state
+```
+
+### Attributes
+
+JARVIS4SE allows to define an attribute named _\<attribute name>_ for a state named _\<state name>_ through the following commands:
+
+```
+<attribute name> is an attribute
+The <attribute name> of <state name> is <attribute value>
+```
+
+The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the functional element.
+
+<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+
+### State transition definition
+
+#### Definition
+
+JARVIS4SE allows to define a new state transition named _\<transition name>_ through the following command:
+
+```
+<transition name> is a transition
+```
+
+#### Source definition
+
+
+
+#### Destination definition
+
+
+
+#### Condition definition
+
+JARVIS4SE allows to add a transition condition _\<transition condition value>_ for a transition named <_transition name_> through the following command:
+
+```
+Condition for <transition name> is: <transition condition value>
+```
+
+<mark style="color:orange;">Note: two transition conditions for the same transition differs only in their syntax.</mark> For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
 
 ### State context
-
-### State attributes
 
 ## Data allocation
 
@@ -131,4 +177,12 @@ show decomposition E
 ## Requirement allocation
 
 ## Functional architecture chain
+
+### Chain visualization
+
+
+
+### Sequence visualization
+
+(including interactions for a given interface)
 
