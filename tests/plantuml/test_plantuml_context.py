@@ -212,3 +212,47 @@ def test_fun_elem_with_interfaces_plantuml_context(mocker, input_test_fun_elem_w
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4 * len("\'id: xxxxxxxxxx\n")
+
+
+def test_simple_state_in_out_plantuml_context(mocker, input_test_simple_state_in_out):
+    """@ingroup test_plantuml_context
+    @anchor test_simple_function_plantuml_context
+    Test context diagram display with 3 states and 2 transitions
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_simple_state_in_out : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function
+    """
+    spy = mocker.spy(plantuml_adapter, "get_state_machine_diagram")
+    file_name = "test_simple_state_in_out_plantuml_context"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_simple_state_in_out}\n"
+                         "show context S1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['skinparam useBetaStyle true\n',
+                'hide empty description\n',
+                '<style>\n',
+                '     .Entry{\n',
+                '        FontColor white\n',
+                '        BackgroundColor black\n',
+                '     }\n',
+                '     .Exit{\n',
+                '        FontColor white\n',
+                '        BackgroundColor black\n',
+                '     }\n',
+                '</style>\n',
+                'state "S0" as s0 <<State>>\n',
+                'state "S1" as s1 <<State>>\n',
+                'state "S2" as s2 <<State>>\n',
+                's0 --> s1 : VOLTAGE > 7V\n',
+                's1 --> s2 : BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 3 * len("\'id: xxxxxxxxxx\n")

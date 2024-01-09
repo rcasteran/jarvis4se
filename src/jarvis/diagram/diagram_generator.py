@@ -522,18 +522,22 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
     """Creates lists with desired objects for <states> chain, send them to plantuml_adapter.py
     then returns plantuml_text"""
     new_state_list = set()
-    for state_str in state_list_str:
-        for state in xml_state_list:
-            if state_str in (state.name, state.alias):
-                state.child_list.clear()
-                state.set_parent(None)
-                new_state_list.add(state)
+
+    spaced_state_list = ", ".join(state_list_str)
+    if len(state_list_str) == 1:
+        new_state_list = xml_state_list
+    else:
+        for state_str in state_list_str:
+            for state in xml_state_list:
+                if state_str in (state.name, state.alias):
+                    state.child_list.clear()
+                    state.set_parent(None)
+                    new_state_list.add(state)
 
     new_transition_list = get_transitions(new_state_list, xml_transition_list)
 
     plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
                                                                new_transition_list)
-    spaced_state_list = ", ".join(state_list_str)
     if len(state_list_str) == 1:
         Logger.set_info(__name__,
                         f"Context Diagram {str(spaced_state_list)} generated")

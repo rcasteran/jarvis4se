@@ -482,6 +482,10 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
                 if transition_str == transition.name or transition_str == transition.alias:
                     if not condition_str.lstrip(' ') in transition.condition_list:
                         condition_list.append([transition, condition_str.lstrip(' ')])
+                    else:
+                        Logger.set_info(__name__,
+                                        f'Condition "{condition_str.lstrip(" ")}" already exists '
+                                        f'for transition {transition_str}')
 
     update = add_transition_condition(condition_list, output_xml)
 
@@ -569,6 +573,9 @@ def check_add_src_dest(src_dest_str, **kwargs):
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
+                                    else:
+                                        Logger.set_info(__name__,
+                                                        f'{elem[2]} already the source of transition {elem[1]}')
 
             elif elem[0] == "destination":
                 for transition in xml_transition_list:
@@ -583,6 +590,9 @@ def check_add_src_dest(src_dest_str, **kwargs):
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])
+                                    else:
+                                        Logger.set_info(__name__,
+                                                        f'{elem[2]} already the destination of transition {elem[1]}')
 
     src_dest_lists = [new_src_list, new_dest_list]
     update = add_src_dest(src_dest_lists, output_xml)

@@ -1466,3 +1466,39 @@ def input_test_fun_elem_simple_decomposition():
                              "E is composed of E1, E2"])
 
     return first_part, second_part
+
+
+@pytest.fixture
+def input_test_simple_state_in_out():
+    """@ingroup test_plantuml_context
+    @anchor input_test_simple_state_in_out
+    Defines input fixture for @ref test_simple_state_in_out_plantuml_context
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        S0 is a state
+        S1 is a state
+        S2 is a state
+        T_S0_S1 is a transition
+        Condition for T_S0_S1 is: VOLTAGE > 7V
+        The source of T_S0_S1 is S0
+        The destination of T_S0_S1 is S1
+        T_S1_S2 is a transition
+        The source of T_S1_S2 is S1
+        The destination of T_S1_S2 is S2
+        Condition for T_S1_S2 is: BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON
+    """
+    return "\n".join(["S0 is a state",
+                      "S1 is a state",
+                      "S2 is a state",
+                      "T_S0_S1 is a transition",
+                      "Condition for T_S0_S1 is: VOLTAGE > 7V",
+                      "The source of T_S0_S1 is S0",
+                      "The destination of T_S0_S1 is S1",
+                      "T_S1_S2 is a transition",
+                      "The source of T_S1_S2 is S1",
+                      "The destination of T_S1_S2 is S2",
+                      "Condition for T_S1_S2 is: BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON",
+                      ""])
+
