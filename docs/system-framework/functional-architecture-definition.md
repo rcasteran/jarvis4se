@@ -72,7 +72,7 @@ Below an example of a context visualization for a functional element E which exp
 show context E
 </code></pre>
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 <mark style="color:orange;">Note: the interface I is not shown until it allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
 
@@ -109,7 +109,7 @@ E is composed of E1, E2
 show decomposition E
 ```
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 <mark style="color:orange;">Note: the interfaces I and I1 are not shown until they allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
 
@@ -195,7 +195,7 @@ The source of T_S0_S1 is S0
 The destination of T_S0_S1 is S1
 ```
 
-
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Data allocation
 
