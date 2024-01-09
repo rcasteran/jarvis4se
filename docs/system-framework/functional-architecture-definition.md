@@ -148,11 +148,23 @@ JARVIS4SE allows to define a new state transition named _\<transition name>_ thr
 
 #### Source definition
 
+JARVIS4SE allows to define the source of a transition named _\<transition name>_ as a state named <_state name_> through the following command:
 
+```
+The source of <transition name> is <state name>
+```
+
+<mark style="color:orange;">Note: the source of a transition is handled as an attribute of the transition named "source"</mark>. Therefore using this command multiple times for the same transition will only keep the latest state name.
 
 #### Destination definition
 
+JARVIS4SE allows to define the destination of a transition named _\<transition name>_ as a state named <_state name_> through the following command:
 
+```
+The destination of <transition name> is <state name>
+```
+
+<mark style="color:orange;">Note: the destination of a transition is handled as an attribute of the transition named "destination"</mark>. Therefore using this command multiple times for the same transition will only keep the latest state name.
 
 #### Condition definition
 
@@ -165,6 +177,25 @@ Condition for <transition name> is: <transition condition value>
 <mark style="color:orange;">Note: two transition conditions for the same transition differs only in their syntax.</mark> For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
 
 ### Context visualization
+
+JARVIS4SE allows to visualize the context of a state named _\<state name>_ through the following command:
+
+```
+show context <state name>
+```
+
+Below an example of a context visualization for a state S0 linked to a state S1 by a transition condition "VOLTAGE > 7V" with PlantUML:
+
+```
+S0 is a state
+S1 is a state
+T_S0_S1 is a transition
+Condition for T_S0_S1 is: VOLTAGE > 7V
+The source of T_S0_S1 is S0
+The destination of T_S0_S1 is S1
+```
+
+
 
 ## Data allocation
 
