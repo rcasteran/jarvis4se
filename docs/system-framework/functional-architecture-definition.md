@@ -198,13 +198,39 @@ show context S0
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-## Data allocation
+## Functional element state allocation
+
+JARVIS4SE allows to allocate a state named \<state name> to a functional element named \<functional element name> through the following command:
+
+```
+<functional element name> allocates <state name>
+```
+
+<mark style="color:orange;">Note: when allocating a state to a functional element, all the state children are also allocated to this functional element</mark>. This allow to allocate these state children to the functional element children if any.
 
 ## Function allocation
 
 ### Allocation to functional element
 
+JARVIS4SE allows to allocate a function named \<function name> to a functional element named \<functional element name> through the following command:
+
+```
+<functional element name> allocates <function name>
+```
+
+<mark style="color:orange;">Note: when allocating a function to a functional element, all the function children are also allocated to this functional element</mark>. This will allow to allocate these function children to the functional element children if any.
+
 ### Allocation to functional element state
+
+JARVIS4SE allows to allocate a function named \<function name> to a state named \<state name> through the following command:
+
+```
+<state name> allocates <function name>
+```
+
+<mark style="color:orange;">Note: when allocating a function to a state, if the function is allocated to a functional element, then the state is allocated to this functional element</mark>. Reversewise, when allocating a function to a state, if the state is allocated to a functional element, then the function is allocated to this functional element.
+
+## Data allocation
 
 ## Requirement allocation
 
