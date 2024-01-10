@@ -996,11 +996,6 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
             if check:
                 state_obj_string.append_string('}\n')
 
-    for p in objects_conditions_list.copy():
-        if (p[0].id and not p[1].id) or (not p[0].id and p[1].id):
-            state_obj_string.create_transition([p])
-            objects_conditions_list.remove(p)
-
     return state_obj_string.string
 
 
@@ -1014,15 +1009,32 @@ def get_objects_conditions_list(xml_state_list, xml_transition_list):
 
     objects_conditions_list = []
     formatted_transition_list = []
-    # Create transition's list [src_id, dest_id, [conditions]]
-    for i in xml_transition_list:
-        formatted_transition_list.append([i.source, i.destination, i.condition_list])
+    # Create transition's list [name, src_id, dest_id, [conditions]]
+    for transition in xml_transition_list:
+        formatted_transition_list.append([transition.name, transition.source, transition.destination,
+                                          transition.condition_list])
 
     # Create transition's list [src_state_obj, dest_state_obj, [conditions]]
-    for j in formatted_transition_list:
-        result = match_transition_states(j, xml_state_list)
-        if result:
-            objects_conditions_list.append(result)
+    for formatted_transition in formatted_transition_list:
+        src_state_obj = None
+        dest_state_obj = None
+        for state in xml_state_list:
+            if formatted_transition[1] == state.id:
+                src_state_obj = state
+            # Else do nothing
+
+            if formatted_transition[2] == state.id:
+                dest_state_obj = state
+            # Else do nothing
+
+        if src_state_obj is not None and dest_state_obj is not None:
+            objects_conditions_list.append([src_state_obj, dest_state_obj, formatted_transition[3]])
+        elif src_state_obj is None:
+            Logger.set_warning(__name__,
+                               f'{formatted_transition[0]} is not displayed because it has an unknown source state')
+        else:
+            Logger.set_warning(__name__,
+                               f'{formatted_transition[0]} is not displayed because it has unknown destination state')
 
     return objects_conditions_list
 
@@ -1041,10 +1053,10 @@ def write_state(state_obj_string, state, new, objects_conditions_list):
         state_obj_string.create_state(state)
         new.append(state.id)
 
-    for j in objects_conditions_list:
-        if all(x in new for x in [j[0].id, j[1].id]):
-            state_obj_string.create_transition([j])
-            objects_conditions_list.remove(j)
+    for object_conditions in objects_conditions_list.copy():
+        if object_conditions[0].id == state.id:
+            state_obj_string.create_transition([object_conditions])
+            objects_conditions_list.remove(object_conditions)
 
 
 def write_composed_state(state_obj_string, state, new, objects_conditions_list, output_str='',
@@ -1059,69 +1071,20 @@ def write_composed_state(state_obj_string, state, new, objects_conditions_list, 
     @param[in] count TBD
     @return None
     """
-
     state_obj_string.create_state(state, parent=True)
     new.insert(count, state.id)
     count += 1
-    for i in state.child_list:
-        if not i.child_list:
-            state_obj_string.create_state(i)
-            new.insert(count + 1, i.id)
+    for state_child in state.child_list:
+        if not state_child.child_list:
+            state_obj_string.create_state(state_child)
+            new.insert(count + 1, state_child.id)
         else:
-            write_composed_state(state_obj_string, i, new, objects_conditions_list, output_str,
+            write_composed_state(state_obj_string, state_child, new, objects_conditions_list, output_str,
                                  count)
 
-    for j in objects_conditions_list:
-        if all(x in new for x in [j[0].id, j[1].id]):
-            state_obj_string.create_transition([j])
-            objects_conditions_list.remove(j)
+    for objects_conditions in objects_conditions_list.copy():
+        if objects_conditions[0].id == state.id:
+            state_obj_string.create_transition([objects_conditions])
+            objects_conditions_list.remove(objects_conditions)
 
     state_obj_string.append_string("}\n" * count)
-
-
-def match_transition_states(transition, xml_state_list):
-    """@ingroup plantuml_adapter
-    Return transition with associated state.
-    If not, create default ENTRY or EXIT if one is missing
-    @param[in] transition TBD
-    @param[in] xml_state_list TBD
-    @return transition
-    """
-    out = None
-    source_state, destination_state = get_source_and_dest(transition, xml_state_list)
-
-    if source_state is not None and destination_state is not None:
-        out = [source_state, destination_state, transition[2]]
-    elif source_state is not None and destination_state is None:
-        n = datamodel.State()
-        n.set_name('EXIT')
-        xml_state_list.add(n)
-        out = [source_state, n, transition[2]]
-    elif source_state is None and destination_state is not None:
-        n = datamodel.State()
-        n.set_name('ENTRY')
-        xml_state_list.add(n)
-        out = [n, destination_state, transition[2]]
-
-    return out
-
-
-def get_source_and_dest(transition, xml_state_list):
-    """@ingroup plantuml_adapter
-    Iterate over states id to get source and destination objects
-    @param[in] transition TBD
-    @param[in] xml_state_list TBD
-    @return source and destination objects
-    """
-    source_state = None
-    destination_state = None
-
-    for a, b in zip(xml_state_list, xml_state_list):
-        if transition[0] == a.id:
-            source_state = a
-        if transition[1] == b.id:
-            destination_state = b
-        if destination_state and source_state:
-            return source_state, destination_state
-
-    return source_state, destination_state

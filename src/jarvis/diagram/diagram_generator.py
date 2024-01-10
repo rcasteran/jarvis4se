@@ -522,22 +522,48 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
     """Creates lists with desired objects for <states> chain, send them to plantuml_adapter.py
     then returns plantuml_text"""
     new_state_list = set()
-
+    new_transition_list = set()
+    context_state_list = set()
     spaced_state_list = ", ".join(state_list_str)
-    if len(state_list_str) == 1:
-        new_state_list = xml_state_list
-    else:
-        for state_str in state_list_str:
-            for state in xml_state_list:
-                if state_str in (state.name, state.alias):
-                    state.child_list.clear()
-                    state.set_parent(None)
-                    new_state_list.add(state)
 
-    new_transition_list = get_transitions(new_state_list, xml_transition_list)
+    for state_str in state_list_str:
+        for state in xml_state_list:
+            if state_str in (state.name, state.alias):
+                state.child_list.clear()
+                state.set_parent(None)
+                new_state_list.add(state)
+            else:
+                context_state_list.add(state)
 
-    plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
-                                                               new_transition_list)
+    if len(state_list_str) > 1:
+        # In case of chain diagram, discard the context
+        context_state_list = new_state_list
+    # Else do nothing
+
+    for state in new_state_list.copy():
+        # State list depends on transition reachable from the state
+        for transition in xml_transition_list:
+            if transition.source == state.id:
+                for context_state in context_state_list:
+                    if transition.destination == context_state.id:
+                        context_state.child_list.clear()
+                        context_state.set_parent(None)
+                        new_state_list.add(context_state)
+                        new_transition_list.add(transition)
+            # Else do nothing
+            if transition.destination == state.id:
+                for context_state in context_state_list:
+                    if transition.source == context_state.id:
+                        context_state.child_list.clear()
+                        context_state.set_parent(None)
+                        new_state_list.add(context_state)
+                        new_transition_list.add(transition)
+            # Else do nothing
+
+    plantuml_text = plantuml_adapter.get_state_machine_diagram(sorted(new_state_list, key=lambda x: x.name,
+                                                                      reverse=False),
+                                                               sorted(new_transition_list, key=lambda x: x.name,
+                                                                      reverse=False))
     if len(state_list_str) == 1:
         Logger.set_info(__name__,
                         f"Context Diagram {str(spaced_state_list)} generated")
