@@ -123,6 +123,26 @@ JARVIS4SE allows to define a new state named _\<state name>_ through the followi
 <state name> is a state
 ```
 
+#### Entry state
+
+JARVIS4SE allows to define a new entry state named _\<entry state name>_ through the following command:
+
+```
+<entry state name> is a <entry state type>
+```
+
+Where _\<entry state type>_ is an extension of the state concept defined in [Broken link](broken-reference "mention") which contains the keyword "entry".
+
+#### Exit state
+
+JARVIS4SE allows to define a new exit state named _\<exit state name>_ through the following command:
+
+```
+<exit state name> is a <exit state type>
+```
+
+Where _\<exit state type>_ is an extension of the state concept defined in [Broken link](broken-reference "mention") which contains the keyword "exit".
+
 ### Attributes
 
 JARVIS4SE allows to define an attribute named _\<attribute name>_ for a state named _\<state name>_ through the following commands:
@@ -198,6 +218,43 @@ show context S0
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
+### Chain visualization
+
+JARVIS4SE allows to visualize a chain of states named _\<state i name>_, linked together by the transitions for which the source and the destination are one of these states, through the following command:
+
+```
+show chain <state 1 name>, <state 2 name>
+```
+
+<mark style="color:orange;">Note:</mark> <mark style="color:orange;">chain visualization could be equivalent to a:</mark>
+
+* <mark style="color:orange;">Context visualization in case of dealing with the same states</mark>
+* <mark style="color:orange;">Decomposition visualization in case of dealing with the chain of all substates of the same state.</mark>
+
+Below an example of a chain visualization with the previous S0 and S1 states and the following additional elements:
+
+* A new state S2
+* A new transition T\_S1\_S0
+* A new transition T\_S1\_S2
+
+```
+S2 is a state
+
+T_S1_S0 is a transition
+Condition for T_S1_S0 is: VOLTAGE < 6V
+The source of T_S1_S0 is S1
+The destination of T_S1_S0 is S0
+
+T_S1_S2 is a transition
+The source of T_S1_S2 is S1
+The destination of T_S1_S2 is S2
+Condition for T_S1_S2 is: BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON
+
+show chain S1, S2
+```
+
+<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
 ## Functional element state allocation
 
 JARVIS4SE allows to allocate a state named \<state name> to a functional element named \<functional element name> through the following command:
@@ -207,6 +264,42 @@ JARVIS4SE allows to allocate a state named \<state name> to a functional element
 ```
 
 <mark style="color:orange;">Note: when allocating a state to a functional element, all the state children are also allocated to this functional element</mark>. This allow to allocate these state children to the functional element children if any.
+
+## Functional element state machine
+
+JARVIS4SE allows to visualize the state machine of a functional element named _\<functional element name_> through the following command:
+
+```
+show state <functional element name>
+```
+
+The state machine of a functional element comprises all the states allocated to this functional element and their related transitions.
+
+Below an example of the state machine of the previous functional element E which allocates the previous S0 and S1 states and the following additional states:
+
+* SE as an entry state with a transition to S0
+* S2 as a state with a transition from S1
+* SF as an exit state with a transition from S2
+
+<pre><code><strong>"Entry state" extends state
+</strong>"Exit state" extends state
+SE is an Entry state
+SF is an Exit state
+
+T_SE_S0 is a transition
+The source of T_SE_S0 is SE
+The destination of T_SE_S0 is S0
+
+T_S2_SF is a transition
+The source of T_S2_SF is S2
+The destination of T_S2_SF is SF
+
+E allocates SE, S0, S1, S2, SF
+
+show state E
+</code></pre>
+
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 ## Function allocation
 
