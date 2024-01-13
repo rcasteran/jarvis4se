@@ -255,6 +255,41 @@ show chain S1, S2
 
 <figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
+## Functional element state decomposition
+
+### Child definition
+
+JARVIS4SE allows to decompose a state named \<state name> into substates named _\<substate i name>_ through the following command:
+
+```
+<state name> is composed of <substate 1 name>, <substate 2 name>
+```
+
+<mark style="color:orange;">Note: the substates must be created before as states</mark>. Please refer to the chapter [#functional-element-state-creation](functional-architecture-definition.md#functional-element-state-creation "mention")
+
+### Decomposition visualization
+
+JARVIS4SE allows to visualize the decomposition of a state named _\<state name>_ through the following command:
+
+```
+show decomposition <state name>
+```
+
+Below an exemple of a decomposition of the previous state S1 into S11 and S12 with a dedicated transition between the two substates with PlantUML:
+
+```
+S11 is a state
+S12 is a state
+T_S11_S12 is a transition
+The source of T_S11_S12 is S11
+The destination of T_S11_S12 is S12
+S1 is composed of S11, S12
+
+show decomposition S1
+```
+
+
+
 ## Functional element state allocation
 
 JARVIS4SE allows to allocate a state named \<state name> to a functional element named \<functional element name> through the following command:
@@ -275,7 +310,7 @@ show state <functional element name>
 
 The state machine of a functional element comprises all the states allocated to this functional element and their related transitions.
 
-Below an example of the state machine of the previous functional element E which allocates the previous S0 and S1 states and the following additional states:
+Below an example of the state machine of the previous functional element E which allocates the previous S0 and S1 states and the following additional states with PlantUML:
 
 * SE as an entry state with a transition to S0
 * S2 as a state with a transition from S1
