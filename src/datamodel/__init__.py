@@ -24,3 +24,5 @@ from .datamodel import Type
 from .datamodel import BaseType
 from .datamodel import Requirement
 from .datamodel import TypeWithChildList
+from .datamodel import EntryStateLabel
+from .datamodel import ExitStateLabel

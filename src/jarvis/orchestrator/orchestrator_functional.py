@@ -566,9 +566,15 @@ def check_add_src_dest(src_dest_str, **kwargs):
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
-                                    if 'EXIT' in state.type.name:
+                                    if datamodel.ExitStateLabel in state.type.name.lower():
                                         Logger.set_error(__name__,
                                                          f"{elem[2]} is typed as EXIT state, "
+                                                         f"it cannot be put as source's transition (not added)")
+                                    elif datamodel.EntryStateLabel in state.type.name.lower():
+                                        new_src_list.append([transition, state])
+                                    else:
+                                        Logger.set_error(__name__,
+                                                         f"{elem[2]} is not typed as state, "
                                                          f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
@@ -583,10 +589,16 @@ def check_add_src_dest(src_dest_str, **kwargs):
                         for state in xml_state_list:
                             if elem[2] == state.name or elem[2] == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
-                                    if 'ENTRY' in state.type.name:
+                                    if datamodel.EntryStateLabel in state.type.name.lower():
                                         Logger.set_error(__name__,
                                                          f"{elem[2]} is typed as ENTRY state, it cannot be "
                                                          f"put as destination's transition (not added)")
+                                    elif datamodel.ExitStateLabel in state.type.name.lower():
+                                        new_dest_list.append([transition, state])
+                                    else:
+                                        Logger.set_error(__name__,
+                                                         f"{elem[2]} is not typed as state, "
+                                                         f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])

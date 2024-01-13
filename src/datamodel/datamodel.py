@@ -1554,3 +1554,5 @@ class Requirement:
 
 # Global variables definition
 TypeWithChildList = (Function, State, FunctionalElement, PhysicalElement, Requirement)
+EntryStateLabel = 'entry'
+ExitStateLabel = 'exit'

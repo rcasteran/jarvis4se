@@ -25,6 +25,7 @@ class CmdParser:
             (r"under ([^.|\n]*)", self.matched_under),
             (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint.check_set_extends),
             (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
+            (r"([^. |\n][^.|\n]*) is an ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
             (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint.add_attribute),
             (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", orchestrator_shared.check_add_inheritance),
             (r"The alias of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_alias),

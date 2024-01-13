@@ -208,9 +208,9 @@ class StateDiagram:
 
         if isinstance(state.type, datamodel.BaseType):
             state_type_str = str(state.type).capitalize().replace("_", " ")
-        elif 'EXIT' in state.type.name:
+        elif datamodel.ExitStateLabel in state.type.name.lower():
             state_type_str = 'EXIT'
-        elif 'ENTRY' in state.type.name:
+        elif datamodel.EntryStateLabel in state.type.name.lower():
             state_type_str = 'ENTRY'
         else:
             state_type_str = state.type.name
