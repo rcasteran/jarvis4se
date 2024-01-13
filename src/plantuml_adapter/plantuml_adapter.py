@@ -978,23 +978,25 @@ def get_state_machine_diagram(xml_state_list, xml_transition_list, fun_elem_list
                             check = True
                             state_obj_string.create_state(fun_elem, True)
 
-            write_composed_state(state_obj_string, state, already_added_state_id_list,
-                                 objects_conditions_list)
+            write_composed_state(state_obj_string, state, already_added_state_id_list)
             if check:
                 state_obj_string.append_string('}\n')
 
-    for s in xml_state_list:
-        if s.id not in already_added_state_id_list:
+    for state in xml_state_list:
+        if state.id not in already_added_state_id_list:
             check = False
             if fun_elem_list:
                 for fun_elem in fun_elem_list:
-                    if s.id in fun_elem.allocated_state_list:
+                    if state.id in fun_elem.allocated_state_list:
                         if fun_elem.parent is None:
                             check = True
                             state_obj_string.create_state(fun_elem, True)
-            write_state(state_obj_string, s, already_added_state_id_list, objects_conditions_list)
+            write_state(state_obj_string, state, already_added_state_id_list)
             if check:
                 state_obj_string.append_string('}\n')
+
+    for state in xml_state_list:
+        write_transition(state_obj_string, state, objects_conditions_list)
 
     return state_obj_string.string
 
@@ -1039,13 +1041,12 @@ def get_objects_conditions_list(xml_state_list, xml_transition_list):
     return objects_conditions_list
 
 
-def write_state(state_obj_string, state, new, objects_conditions_list):
+def write_state(state_obj_string, state, new):
     """@ingroup plantuml_adapter
     Returns simple state string for PlantUml text
     @param[in, out] state_obj_string TBD
     @param[in] state TBD
     @param[in] new TBD
-    @param[in, out] objects_conditions_list TBD
     @return None
     """
 
@@ -1053,21 +1054,13 @@ def write_state(state_obj_string, state, new, objects_conditions_list):
         state_obj_string.create_state(state)
         new.append(state.id)
 
-    for object_conditions in objects_conditions_list.copy():
-        if object_conditions[0].id == state.id:
-            state_obj_string.create_transition([object_conditions])
-            objects_conditions_list.remove(object_conditions)
 
-
-def write_composed_state(state_obj_string, state, new, objects_conditions_list, output_str='',
-                         count=0):
+def write_composed_state(state_obj_string, state, new, count=0):
     """@ingroup plantuml_adapter
     Returns composed state string for PlantUml text
     @param[in, out] state_obj_string TBD
     @param[in] state TBD
     @param[in] new TBD
-    @param[in, out] objects_conditions_list TBD
-    @param[in] output_str TBD
     @param[in] count TBD
     @return None
     """
@@ -1079,12 +1072,21 @@ def write_composed_state(state_obj_string, state, new, objects_conditions_list, 
             state_obj_string.create_state(state_child)
             new.insert(count + 1, state_child.id)
         else:
-            write_composed_state(state_obj_string, state_child, new, objects_conditions_list, output_str,
-                                 count)
-
-    for objects_conditions in objects_conditions_list.copy():
-        if objects_conditions[0].id == state.id:
-            state_obj_string.create_transition([objects_conditions])
-            objects_conditions_list.remove(objects_conditions)
+            write_composed_state(state_obj_string, state_child, new, count)
 
     state_obj_string.append_string("}\n" * count)
+
+
+def write_transition(state_obj_string, state, objects_conditions_list):
+    """@ingroup plantuml_adapter
+    Returns simple transition string for PlantUml text
+    @param[in, out] state_obj_string TBD
+    @param[in] state TBD
+    @param[in] new TBD
+    @param[in, out] objects_conditions_list TBD
+    @return None
+    """
+    for object_conditions in objects_conditions_list.copy():
+        if object_conditions[0].id == state.id:
+            state_obj_string.create_transition([object_conditions])
+            objects_conditions_list.remove(object_conditions)
