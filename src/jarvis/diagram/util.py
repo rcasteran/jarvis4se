@@ -311,16 +311,19 @@ def filter_allocated_item_from_view(xml_item_list, xml_view_list):
     return filtered_item_list
 
 
-def check_get_child_flows(function_list, xml_flow_list):
+def check_get_flows(function_list, xml_flow_list):
     """Get flow_list associated with function_list and xml_flow_list"""
     new_flow_list = []
 
-    for f in function_list:
+    for function in function_list:
         for xml_flow, xml_function in xml_flow_list:
-            if f == xml_function:
-                if not xml_function.child_list:
-                    if [xml_flow, xml_function] not in new_flow_list:
-                        new_flow_list.append([xml_flow, xml_function])
+            if function == xml_function:
+                if [xml_flow, xml_function] not in new_flow_list:
+                    new_flow_list.append([xml_flow, xml_function])
+
+    for xml_flow, xml_function in new_flow_list.copy():
+        if [xml_flow, xml_function.parent] in new_flow_list:
+            new_flow_list.remove([xml_flow, xml_function.parent])
 
     return new_flow_list
 

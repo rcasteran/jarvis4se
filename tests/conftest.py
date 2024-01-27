@@ -1502,3 +1502,46 @@ def input_test_simple_state_in_out():
                       "Condition for T_S1_S2 is: BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON",
                       ""])
 
+@pytest.fixture
+def input_test_function_simple_decomposition():
+    """@ingroup test_plantuml_decomposition
+    @anchor input_test_function_simple_decomposition
+    Defines input fixture for:
+    - @ref test_function_simple_plantuml_decomposition
+    - @ref test_function_simple_in_plantuml_decomposition
+    - @ref test_function_simple_out_plantuml_decomposition
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        F1 is a function
+        x is a data
+        y is a data
+        F1 consumes x
+        F1 produces y
+
+        F11 is a function
+        F11 composes F1
+
+        F11 consumes x
+
+        F11 produces y
+    """
+    first_part = "\n".join(["F1 is a function",
+                            "x is a data",
+                            "y is a data",
+                            "F1 consumes x",
+                            "F1 produces y",
+                            ""])
+
+    second_part = "\n".join(["F11 is a function",
+                             "F11 composes F1",
+                             ""])
+
+    third_part = "\n".join(["F11 consumes x",
+                            ""])
+
+    fourth_part = "\n".join(["F11 produces y",
+                            ""])
+
+    return first_part, second_part, third_part, fourth_part

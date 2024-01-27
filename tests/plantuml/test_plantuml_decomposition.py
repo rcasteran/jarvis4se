@@ -12,6 +12,127 @@ import plantuml_adapter
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
+def test_function_simple_plantuml_decomposition(mocker, input_test_function_simple_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_function_simple_plantuml_decomposition
+    Test decomposition diagram display with function decomposition without input / output allocation
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_issue_87 : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_87
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_function_simple_plantuml_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[1]}\n"
+                         "show decomposition F1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F1" as f1 <<Function>>{\n',
+                'circle f1_1\n',
+                'circle f1_2\n',
+                'object "F11" as f11 <<Function>>\n',
+                '}\n',
+                'circle f1_i\n',
+                'circle f1_o\n',
+                'f1_i --> f1_1 : x\n',
+                'f1_2 --> f1_o  : y\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
+
+
+def test_function_simple_in_plantuml_decomposition(mocker, input_test_function_simple_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_function_simple_in_plantuml_decomposition
+    Test decomposition diagram display with function decomposition without output allocation
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_issue_87 : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_87
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_function_simple_in_plantuml_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[2]}\n"
+                         "show decomposition F1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F1" as f1 <<Function>>{\n',
+                'circle f1_1\n',
+                'object "F11" as f11 <<Function>>\n',
+                '}\n',
+                'circle f11_i\n',
+                'circle f1_o\n',
+                'f11_i --> f11 : x\n',
+                'f1_1 --> f1_o  : y\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
+
+
+def test_function_simple_out_plantuml_decomposition(mocker, input_test_function_simple_decomposition):
+    """@ingroup test_plantuml_decomposition
+    @anchor test_function_simple_out_plantuml_decomposition
+    Test decomposition diagram display with function decomposition without input allocation
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_issue_87 : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_issue_87
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_function_simple_out_plantuml_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[0]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_function_simple_decomposition[3]}\n"
+                         "show decomposition F1\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "F1" as f1 <<Function>>{\n',
+                'circle f1_1\n',
+                'object "F11" as f11 <<Function>>\n',
+                '}\n',
+                'circle f1_i\n',
+                'circle f11_o\n',
+                'f1_i --> f1_1 : x\n',
+                'f11 --> f11_o  : y\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 2*len("\'id: xxxxxxxxxx\n")
+
+
 def test_fun_elem_simple_plantuml_decomposition(mocker, input_test_fun_elem_simple_decomposition):
     """@ingroup test_plantuml_decomposition
     @anchor test_fun_elem_simple_plantuml_decomposition

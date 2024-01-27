@@ -26,24 +26,33 @@ def write_function_child(string_obj, function, input_flow_list, output_flow_list
     external_output_port = []
     parent_function_port = []
     count = 1
+    parent_function_port_count = 1
     nb_component = count_composed_component(function, count)
 
     # TODO: Create get_port_lists() and optimize
-    for p in input_flow_list:
+    for p in input_flow_list.copy():
         if p[0][0] == function.name.lower():
             function_input_port.append(p)
         if p[0][0] is None and function.parent is None:
             external_input_port.append(p)
             if p[0][1] == function.name.lower():
-                parent_function_port.append(p)
+                p_new = [(p[0][0], function.name.lower() + "_" + str(parent_function_port_count)), p[1]]
+                parent_function_port.append(p_new)
+                parent_function_port_count = parent_function_port_count + 1
+                input_flow_list.remove(p)
+                input_flow_list.append(p_new)
 
-    for q in output_flow_list:
+    for q in output_flow_list.copy():
         if q[0][0] == function.name.lower():
             function_output_port.append(q)
         if q[0][0] is None and function.parent is None:
             external_output_port.append(q)
             if q[0][1] == function.name.lower():
-                parent_function_port.append(q)
+                q_new = [(q[0][0], function.name.lower() + "_" + str(parent_function_port_count)), q[1]]
+                parent_function_port.append(q_new)
+                parent_function_port_count = parent_function_port_count + 1
+                output_flow_list.remove(q)
+                output_flow_list.append(q_new)
 
     Logger.set_debug(__name__, f"Function name: {function.name}")
     Logger.set_debug(__name__, f"Input port list: {function_input_port}")

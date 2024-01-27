@@ -409,13 +409,19 @@ class ObjDiagram:
         """
         output_flow_str = ""
         for i in output_flow_list:
-            name = i[0][1].replace(" ", "_").replace("-", "")
-            middle_arrow = ''
             if i[0][0] is not None:
                 middle_arrow = ' #--> '
-            if i[0][0] is None:
+            else:
                 middle_arrow = ' --> '
-            relationship_str = name + middle_arrow + name + '_o '
+            if '_' in i[0][1]:
+                name = i[0][1]
+                relationship_str = "".join([name.replace(" ", "_").replace("-", ""),
+                                            middle_arrow,
+                                            name[0:name.index('_')].replace(" ", "_").replace("-", ""),
+                                            '_o '])
+            else:
+                name = i[0][1].replace(" ", "_").replace("-", "")
+                relationship_str = "".join([name, middle_arrow, name, '_o '])
             if len(i[1]) > 1:
                 self.string += self.create_multiple_arrow(relationship_str, output_flow_str, i)
             else:
@@ -428,8 +434,15 @@ class ObjDiagram:
         """
         input_flow_str = ""
         for i in input_flow_list:
-            relationship_str = "".join([i[0][1].replace(" ", "_").replace("-", ""), '_i', ' --> ',
-                                        i[0][1].replace(" ", "_").replace("-", "")])
+            if '_' in i[0][1]:
+                name = i[0][1]
+                relationship_str = "".join([name[0:name.index('_')].replace(" ", "_").replace("-", ""),
+                                            '_i',
+                                            ' --> ',
+                                            name.replace(" ", "_").replace("-", "")])
+            else:
+                name = i[0][1].replace(" ", "_").replace("-", "")
+                relationship_str = "".join([name, '_i', ' --> ', name])
             if len(i[1]) > 1:
                 self.string += self.create_multiple_arrow(relationship_str, input_flow_str, i)
             else:

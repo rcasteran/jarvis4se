@@ -79,8 +79,8 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
     Logger.set_debug(__name__, f"consumer function list: {xml_consumer_function_list}")
     Logger.set_debug(__name__, f"producer function list: {xml_producer_function_list}")
 
-    main_consumer_list = util.check_get_child_flows(main_function_list, xml_consumer_function_list)
-    main_producer_list = util.check_get_child_flows(main_function_list, xml_producer_function_list)
+    main_consumer_list = util.check_get_flows(main_function_list, xml_consumer_function_list)
+    main_producer_list = util.check_get_flows(main_function_list, xml_producer_function_list)
 
     ext_prod_fun_list, ext_producer_list, ext_prod_parent_dict = util.get_external_flow_with_level(
         main_consumer_list, main_function_list, main_fun, xml_producer_function_list, diagram_level)
