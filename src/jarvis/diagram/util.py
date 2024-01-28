@@ -416,6 +416,9 @@ def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_con
                 if prod[1] not in new_function_list:
                     new_function_list.append(prod[1])
 
+    if len(new_consumer_list) == 0 and len(new_producer_list) == 0:
+        new_function_list = function_list
+
     return new_function_list, new_consumer_list, new_producer_list
 
 

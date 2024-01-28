@@ -188,10 +188,16 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                 xml_producer_function_list,
                 xml_consumer_function_list)
 
-        for fun in external_function_list:
-            for child in fun.child_list.copy():
-                if not any(t == child for t in external_function_list):
-                    fun.child_list.remove(child)
+        if external_function_list:
+            for fun in external_function_list:
+                for child in fun.child_list.copy():
+                    if not any(t == child for t in external_function_list):
+                        fun.child_list.remove(child)
+        else:
+            xml_fun_elem_list = set()
+            xml_fun_elem_list.add(main_fun_elem)
+            for child in main_fun_elem.child_list:
+                xml_fun_elem_list.add(child)
     else:
         external_function_list, xml_fun_elem_list = set(), set()
         new_consumer_list, new_producer_list = [], []

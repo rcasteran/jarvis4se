@@ -62,8 +62,11 @@ def show_fun_elem_chain(fun_elem_list_str, xml_function_list, xml_consumer_funct
     parent_child_dict = {}
 
     for i in fun_elem_list_str:
-        for fun_elem in xml_fun_elem_list:
+        for fun_elem in xml_fun_elem_list.copy():
             if i == fun_elem.name or i == fun_elem.alias:
+                if fun_elem.parent:
+                    xml_fun_elem_list.add(fun_elem.parent)
+                    parent_child_dict[fun_elem.id] = fun_elem.parent.id
                 if len(fun_elem.allocated_function_list) > 0:
                     for allocated_function_id in fun_elem.allocated_function_list:
                         parent_child_dict[allocated_function_id] = fun_elem.id

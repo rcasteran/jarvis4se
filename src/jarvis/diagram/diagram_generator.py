@@ -287,6 +287,7 @@ def case_chain_diagram(**kwargs):
                 function_list_from_view = util.get_object_list_from_view(object_list_str,
                                                                          kwargs['xml_function_list'],
                                                                          kwargs['xml_view_list'])
+
                 for i in object_list_str:
                     for fun_elem in fun_elem_list_from_view:
                         if i == fun_elem.name or i == fun_elem.alias:

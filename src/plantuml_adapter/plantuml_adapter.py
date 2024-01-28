@@ -213,19 +213,52 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
     if parent_child_dict:
         if fun_elem_list:
             for fun_elem in fun_elem_list:
-                string_obj.create_component(fun_elem)
-                check_function = False
-                for f in function_list:
-                    if any(a == f.id for a in fun_elem.allocated_function_list):
-                        if len(fun_elem.allocated_function_list) > 1:
-                            check_function = False
-                        else:
-                            check_function = True
-                        write_function_object(string_obj, f, input_flow_list, output_flow_list,
-                                              check_function, xml_attribute_list, component_obj=fun_elem)
-                if not check_function:
-                    string_obj.append_string('}\n')
-                    string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+                if fun_elem.id not in parent_child_dict.keys():
+                    if fun_elem.id in parent_child_dict.values():
+                        # Fun elem is a parent
+                        string_obj.create_component(fun_elem)
+                        check_function = False
+                        for key, value in parent_child_dict.items():
+                            if value == fun_elem.id:
+                                is_fun_elem_child = False
+                                for fun_elem_child in fun_elem_list:
+                                    if fun_elem_child.id == key:
+                                        is_fun_elem_child = True
+                                        string_obj.create_component(fun_elem_child)
+                                        check_function = False
+                                        for f in function_list:
+                                            if any(a == f.id for a in fun_elem_child.allocated_function_list):
+                                                if len(fun_elem.allocated_function_list) > 1:
+                                                    check_function = False
+                                                else:
+                                                    check_function = True
+                                                write_function_object(string_obj, f, input_flow_list, output_flow_list,
+                                                                      check_function, xml_attribute_list,
+                                                                      component_obj=fun_elem_child)
+
+                                        if not check_function:
+                                            string_obj.append_string('}\n')
+                                            string_obj.create_component_attribute(fun_elem_child, xml_attribute_list)
+
+                                check_function = False
+                                if not is_fun_elem_child:
+                                    for f in function_list:
+                                        if any(a == f.id for a in fun_elem.allocated_function_list):
+                                            if f.id == key:
+                                                if len(fun_elem.allocated_function_list) > 1:
+                                                    check_function = False
+                                                else:
+                                                    check_function = True
+                                                write_function_object(string_obj, f, input_flow_list, output_flow_list,
+                                                                      check_function,
+                                                                      xml_attribute_list,
+                                                                      component_obj=fun_elem)
+
+                        if not check_function:
+                            string_obj.append_string('}\n')
+                        string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+                    # Else do nothing : done as children of fun elem parent
+                # Else do nothing : done as children of fun elem parent
         else:
             for function in function_list:
                 if function.id not in parent_child_dict.keys():
@@ -234,6 +267,7 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
                         string_obj.create_component(function)
                         write_function_child(string_obj, function, input_flow_list, output_flow_list,
                                              xml_attribute_list)
+                        string_obj.create_component_attribute(function, xml_attribute_list)
                     else:
                         # Function is not a parent:
                         write_function_object(string_obj, function, input_flow_list, output_flow_list,
@@ -531,7 +565,6 @@ def recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attrib
                 recursive_decomposition(string_obj, c, function_list, xml_attribute_list)
             string_obj.append_string('}\n')
             string_obj.create_component_attribute(c, xml_attribute_list)
-        string_obj.create_component_attribute(main_fun_elem, xml_attribute_list)
 
 
 def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_list, consumer_list,
