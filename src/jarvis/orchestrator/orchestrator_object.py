@@ -156,3 +156,40 @@ def get_base_type_recursively(obj_type):
         base_type = get_base_type_recursively(obj_type.base)
 
     return base_type
+
+
+def check_object_relationship(object_src, object_dest):
+    if isinstance(object_src.type, datamodel.BaseType):
+        object_src_type = object_src.type
+    else:
+        object_src_type = object_src.type.name
+
+    if isinstance(object_dest.type, datamodel.BaseType):
+        object_dest_type = object_dest.type
+    else:
+        object_dest_type = object_dest.type.name
+
+    if object_src_type == datamodel.BaseType.FUNCTION:
+        # Relationship with DATA, ATTRIBUTE
+        print("Function case")
+    elif object_src_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+        # Relationship with FUNCTION, FUNCTIONAL_INTERFACE, STATE, ATTRIBUTE
+        print("Functional element case")
+    elif object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+        # Relationship with DATA, ATTRIBUTE
+        print("Functional interface case")
+    elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+        # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
+        print("Physical element case")
+    elif object_src_type == datamodel.BaseType.PHYSICAL_INTERFACE:
+        # Relationship with FUNCTIONAL_INTERFACE, ATTRIBUTE
+        print("Physical interface case")
+    elif object_src_type == datamodel.BaseType.STATE:
+        # Relationship with FUNCTION, FUNCTIONAL_ELEMENT, ATTRIBUTE
+        print("State case")
+    elif object_src_type == datamodel.BaseType.TRANSITION:
+        # Relationship with STATE
+        print("Transition case")
+    else:
+        # Warn about improper object source type
+        print("Not supported")

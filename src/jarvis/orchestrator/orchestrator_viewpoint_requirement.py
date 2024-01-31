@@ -8,10 +8,10 @@ import difflib
 
 # Modules
 import datamodel
+from . import orchestrator_object
 from tools import Logger
 from jarvis.query import question_answer
 from jarvis import util
-
 
 # Constants
 REQUIREMENT_CONFIDENCE_RATIO = 0.78
@@ -56,30 +56,14 @@ def check_add_requirement(p_str_list, **kwargs):
         Logger.set_debug(__name__, f"Requirement is temporal: {req_temporal}")
 
         # Retrieve the subject in object list
-        req_subject_object = None
-        is_previous_proper_noun_singular_tag = False
-        is_error = False
-        token_list = nltk.word_tokenize(req_subject)
-        tag_list = nltk.pos_tag(token_list)
-        for tag in tag_list:
-            if tag[1] == PROPER_NOUN_SINGULAR_TAG:
-                req_subject_object = question_answer.check_get_object(tag[0], **kwargs)
-                is_previous_proper_noun_singular_tag = True
-            elif tag[1] == NOUN_SINGULAR_TAG or tag[1] == NOUN_PLURAL_TAG:
-                if not is_previous_proper_noun_singular_tag:
-                    req_subject_object = question_answer.check_get_object(tag[0], **kwargs)
-                # Else dismiss the noun
-
-                is_previous_proper_noun_singular_tag = False
-            elif tag[1] == DETERMINER_TAG or tag[1] == ADJECTIVE_TAG:
-                is_previous_proper_noun_singular_tag = False
-            elif tag[1] != DETERMINER_TAG:
-                Logger.set_error(__name__,
-                                 f"Requirement bad formatted: {tag[0]} is not a determiner nor an adjective nor a noun")
-                is_error = True
-                break
+        req_subject_object_list, is_error = retrieve_proper_noun(req_subject, is_subject=True, **kwargs)
 
         if not is_error:
+            req_subject_object = None
+            for obj in req_subject_object_list:
+                if obj:
+                    req_subject_object = obj
+
             if req_subject_object:
                 Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
                                           f"{p_str[0]} shall {p_str[1]}")
@@ -101,6 +85,13 @@ def check_add_requirement(p_str_list, **kwargs):
                                 f"Requirement {similar_requirement_name} has the same "
                                 f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
+                # Check requirement object content
+                req_object_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
+                if req_subject_object:
+                    for req_object_object in req_object_object_list:
+                        if req_object_object:
+                            orchestrator_object.check_object_relationship(req_subject_object, req_object_object)
+
                 answer = input(f"Please give a requirement summary: ")
                 if len(answer) > 0:
                     existing_object = question_answer.check_get_object(answer, **kwargs)
@@ -145,7 +136,7 @@ def add_requirement(requirement_str_list, **kwargs):
     update = 0
     # Create requirement names list already in xml
     xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
-    # Filter attribute_list, keeping only the the ones not already in the xml
+    # Filter attribute_list, keeping only the ones not already in the xml
     for requirement_item in requirement_str_list:
         if requirement_item[0] not in xml_requirement_name_list:
             new_requirement = datamodel.Requirement()
@@ -334,3 +325,33 @@ def check_add_derived(p_str_list, **kwargs):
         update = 0
 
     return update
+
+
+def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
+    req_string_object_list = []
+    is_error = False
+
+    is_previous_proper_noun_singular_tag = False
+    token_list = nltk.word_tokenize(req_string)
+    tag_list = nltk.pos_tag(token_list)
+    for tag in tag_list:
+        if tag[1] == PROPER_NOUN_SINGULAR_TAG:
+            # sign '=' is tagged as PROPER_NOUN_SINGULAR_TAG
+            if tag[0] != '=':
+                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+                is_previous_proper_noun_singular_tag = True
+        elif tag[1] == NOUN_SINGULAR_TAG or tag[1] == NOUN_PLURAL_TAG:
+            if not is_previous_proper_noun_singular_tag:
+                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+            # Else dismiss the noun
+
+            is_previous_proper_noun_singular_tag = False
+        elif tag[1] == DETERMINER_TAG or tag[1] == ADJECTIVE_TAG:
+            is_previous_proper_noun_singular_tag = False
+        elif tag[1] != DETERMINER_TAG and is_subject:
+            Logger.set_error(__name__,
+                             f"Requirement bad formatted: {tag[0]} is not a determiner nor an adjective nor a noun")
+            is_error = True
+            break
+
+    return req_string_object_list, is_error
