@@ -88,9 +88,16 @@ def check_add_requirement(p_str_list, **kwargs):
                 # Check requirement object content
                 req_object_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
                 if req_subject_object:
-                    for req_object_object in req_object_object_list:
+                    for req_object_object in req_object_object_list.copy():
                         if req_object_object:
-                            orchestrator_object.check_object_relationship(req_subject_object, req_object_object)
+                            if not orchestrator_object.check_object_relationship(req_subject_object, req_object_object,
+                                                                                 **kwargs):
+                                # No relationship found in the datamodel between requirement subject and requirement
+                                # object. Remove it from the list.
+                                req_object_object_list.remove(req_object_object)
+                            # Else do nothing
+                        else:
+                            req_object_object_list.remove(req_object_object)
 
                 answer = input(f"Please give a requirement summary: ")
                 if len(answer) > 0:
@@ -103,7 +110,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object])
+                                                         existing_object, req_subject_object, req_object_object_list])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
@@ -111,10 +118,10 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object])
+                                                         existing_object, req_subject_object, req_object_object_list])
                     else:
                         requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
-                                                 req_subject_object])
+                                                 req_subject_object, req_object_object_list])
                 else:
                     Logger.set_error(__name__, "No summary entered for identified requirement")
 
@@ -126,7 +133,7 @@ def check_add_requirement(p_str_list, **kwargs):
     return update
 
 
-def add_requirement(requirement_str_list, **kwargs):
+def add_requirement(requirement_list, **kwargs):
     xml_requirement_list = kwargs['xml_requirement_list']
     output_xml = kwargs['output_xml']
 
@@ -137,7 +144,7 @@ def add_requirement(requirement_str_list, **kwargs):
     # Create requirement names list already in xml
     xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
     # Filter attribute_list, keeping only the ones not already in the xml
-    for requirement_item in requirement_str_list:
+    for requirement_item in requirement_list:
         if requirement_item[0] not in xml_requirement_name_list:
             new_requirement = datamodel.Requirement()
             new_requirement.set_name(str(requirement_item[0]))
@@ -147,11 +154,18 @@ def add_requirement(requirement_str_list, **kwargs):
             # alias is 'none' by default
             new_requirement_list.append(new_requirement)
 
-            # Test if allocated object is identified
+            # Test if allocated object is identified in the requirement subject
             if requirement_item[3]:
                 requirement_item[3].add_allocated_requirement(new_requirement)
                 new_allocation_list.append([requirement_item[3], new_requirement])
             # Else do nothing
+
+            # Test if allocated object is identified in the requirement object
+            if requirement_item[4]:
+                for item in requirement_item[4]:
+                    if item:
+                        item.add_allocated_requirement(new_requirement)
+                        new_allocation_list.append([item, new_requirement])
         else:
             Logger.set_info(__name__, requirement_item[0] + " already exists")
 
@@ -171,9 +185,10 @@ def add_requirement(requirement_str_list, **kwargs):
                             f"{elem[0].__class__.__name__} {elem[0].name}")
 
             # Check for potential req parent in allocated obj parent
-            if elem[0].parent:
-                if hasattr(elem[0].parent, 'allocated_req_list'):
-                    update_requirement_link(elem[0].parent, elem[1], **kwargs)
+            if hasattr(elem[0], 'parent'):
+                if elem[0].parent:
+                    if hasattr(elem[0].parent, 'allocated_req_list'):
+                        update_requirement_link(elem[0].parent, elem[1], **kwargs)
 
         update = 1
 

@@ -158,7 +158,9 @@ def get_base_type_recursively(obj_type):
     return base_type
 
 
-def check_object_relationship(object_src, object_dest):
+def check_object_relationship(object_src, object_dest, **kwargs):
+    is_relationship = False
+
     if isinstance(object_src.type, datamodel.BaseType):
         object_src_type = object_src.type
     else:
@@ -169,27 +171,107 @@ def check_object_relationship(object_src, object_dest):
     else:
         object_dest_type = object_dest.type.name
 
-    if object_src_type == datamodel.BaseType.FUNCTION:
+    if object_src_type == datamodel.BaseType.FUNCTION or object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
         # Relationship with DATA, ATTRIBUTE
-        print("Function case")
+        Logger.set_debug(__name__,
+                         f"Relationship detected in requirement between {object_src_type} {object_src.name} and "
+                         f"{object_dest_type} {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.DATA:
+            if object_src_type == datamodel.BaseType.FUNCTION:
+                xml_consumer_function_list = kwargs['xml_consumer_function_list']
+                xml_producer_function_list = kwargs['xml_producer_function_list']
+
+                for xml_consumer_function in xml_consumer_function_list:
+                    if xml_consumer_function[0] == object_dest.name and xml_consumer_function[1] == object_src:
+                        Logger.set_info(__name__,
+                                        f"{object_src_type} {object_src.name} consumes "
+                                        f"{object_dest_type} {object_dest.name}")
+                        is_relationship = True
+                        break
+
+                if not is_relationship:
+                    for xml_producer_function in xml_producer_function_list:
+                        if xml_producer_function[0] == object_dest.name and xml_producer_function[1] == object_src:
+                            Logger.set_info(__name__,
+                                            f"{object_src_type} {object_src.name} produces "
+                                            f"{object_dest_type} {object_dest.name}")
+                            is_relationship = True
+                            break
+                # Else do nothing
+
+                if not is_relationship:
+                    Logger.set_warning(__name__,
+                                       f"{object_src_type} {object_src.name} does not consume nor produce "
+                                       f"{object_dest_type} {object_dest.name}")
+                # Else do nothing
+            else:
+                print("Data for Functional interface")
+        elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            print("Attribute case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     elif object_src_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
         # Relationship with FUNCTION, FUNCTIONAL_INTERFACE, STATE, ATTRIBUTE
-        print("Functional element case")
-    elif object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-        # Relationship with DATA, ATTRIBUTE
-        print("Functional interface case")
+        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+              f"{object_dest_type}: {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.FUNCTION:
+            print("Function case")
+        elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+            print("Functional interface case")
+        elif object_dest_type == datamodel.BaseType.STATE:
+            print("State case")
+        elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            print("Attribute case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
         # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
-        print("Physical element case")
+        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+              f"{object_dest_type}: {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+            print("Functional element case")
+        elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            print("Attribute case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     elif object_src_type == datamodel.BaseType.PHYSICAL_INTERFACE:
         # Relationship with FUNCTIONAL_INTERFACE, ATTRIBUTE
-        print("Physical interface case")
+        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+              f"{object_dest_type}: {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+            print("Functional interface case")
+        elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            print("Attribute case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     elif object_src_type == datamodel.BaseType.STATE:
         # Relationship with FUNCTION, FUNCTIONAL_ELEMENT, ATTRIBUTE
-        print("State case")
+        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+              f"{object_dest_type}: {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.FUNCTION:
+            print("Function case")
+        elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+            print("Functional element case")
+        elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            print("Attribute case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     elif object_src_type == datamodel.BaseType.TRANSITION:
         # Relationship with STATE
-        print("Transition case")
+        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+              f"{object_dest_type}: {object_dest.name}")
+        if object_dest_type == datamodel.BaseType.STATE:
+            print("State case")
+        else:
+            # Warn about improper relationship between source type and destination type
+            print("Not supported")
     else:
         # Warn about improper object source type
         print("Not supported")
+
+    return is_relationship

@@ -34,11 +34,11 @@ def test_simple_requirement_function(capsys, monkeypatch, input_single_requireme
     # result is a text about requirement creation
     captured = capsys.readouterr()
     expected = [f"Creating {file_name}.xml !\n",
-                'Requirement identified: The function F1 shall compute the ambient temperature value based on the '
-                'acquired temperature value as specified in the following formula: '
+                'Requirement identified: The function F1 shall compute the ambient temperature value based '
+                'on the acquired temperature value as specified in the following formula: '
                 'AMBIENT_TEMPERATURE_VALUE = ACQUIRED_TEMPERATURE_VALUE * 56 / 100\n',
                 f'{req_name} is a requirement\n',
-                f'{file_name}.xml updated']
+                f'{file_name}.xml updated\n']
 
     test_lib.remove_xml_file(file_name)
 
