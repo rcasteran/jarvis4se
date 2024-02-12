@@ -413,7 +413,14 @@ class ObjDiagram:
                 middle_arrow = ' #--> '
             else:
                 middle_arrow = ' --> '
-            if '_' in i[0][1]:
+
+            is_digit = False
+            last_underscore_position = i[0][1].rfind('_')
+            if 0 < last_underscore_position < len(i[0][1])-1:
+                is_digit = i[0][1][last_underscore_position+1:].isdigit()
+            # Else do nothing
+
+            if is_digit:
                 name = i[0][1]
                 relationship_str = "".join([name.replace(" ", "_").replace("-", ""),
                                             middle_arrow,
@@ -434,7 +441,13 @@ class ObjDiagram:
         """
         input_flow_str = ""
         for i in input_flow_list:
-            if '_' in i[0][1]:
+            is_digit = False
+            last_underscore_position = i[0][1].rfind('_')
+            if 0 < last_underscore_position < len(i[0][1])-1:
+                is_digit = i[0][1][last_underscore_position+1:].isdigit()
+            # Else do nothing
+
+            if is_digit:
                 name = i[0][1]
                 relationship_str = "".join([name[0:name.index('_')].replace(" ", "_").replace("-", ""),
                                             '_i',
