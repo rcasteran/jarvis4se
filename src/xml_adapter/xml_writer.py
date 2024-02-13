@@ -132,6 +132,8 @@ class XmlWriter3SE:
             for xml_element in root.findall(".//dataList/data[@name='" + str(consumer[0]) + "']"):
                 if xml_element.find('consumerList') is None:
                     etree.SubElement(xml_element, 'consumerList')
+                    if xml_element.find('producerList') is None:
+                        etree.SubElement(xml_element, 'producerList')
 
             for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(consumer[0])
                                                   + "']/consumerList"):
@@ -155,6 +157,8 @@ class XmlWriter3SE:
         for producer in producer_list:
             for xml_element in root.findall(".//dataList/data[@name='" + str(producer[0]) + "']"):
                 if xml_element.find('producerList') is None:
+                    if xml_element.find('consumerList') is None:
+                        etree.SubElement(xml_element, 'consumerList')
                     etree.SubElement(xml_element, 'producerList')
 
             for producer_list_tag in root.findall(".//dataList/data[@name='" + str(producer[0])
