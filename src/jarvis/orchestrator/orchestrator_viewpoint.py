@@ -119,7 +119,7 @@ def check_get_consider(consider_str_list, **kwargs):
                 if allocated_data:
                     allocated_item_list.append(allocated_data)
 
-    update = orchestrator_shared.add_allocation({5: allocated_item_list}, output_xml)
+    update = orchestrator_shared.add_allocation({5: allocated_item_list}, **kwargs)
 
     return update
 

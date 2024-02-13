@@ -84,7 +84,7 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
                 allocated_item_list.append(allocation_chain_2)
 
     update = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
-    orchestrator_shared.add_allocation({5: allocated_item_list}, output_xml)
+    orchestrator_shared.add_allocation({5: allocated_item_list}, **kwargs)
 
     return update
 

@@ -85,13 +85,13 @@ def add_child(parent_child_lists, **kwargs):
                 for obj in parent_child_lists[object_type]:
                     Logger.set_info(__name__,
                                     f"{obj[0].name} is composed of {obj[1].name}")
-                    if object_type in (0, 1):
+                    if object_type in (datamodel.TypeWithChildListFunctionIndex, datamodel.TypeWithChildListStateIndex):
                         # Considering function and state allocation to a functional element
                         for fun_elem in xml_fun_elem_list:
                             if obj[0].id in fun_elem.allocated_function_list:
-                                allocate_all_children_in_element([fun_elem, obj[1]], output_xml)
+                                allocate_all_children_in_element([fun_elem, obj[1]], **kwargs)
 
-                        if object_type == 0:
+                        if object_type == datamodel.TypeWithChildListFunctionIndex:
                             # Considering function allocation
                             xml_consumer_function_list = kwargs['xml_consumer_function_list']
                             xml_producer_function_list = kwargs['xml_producer_function_list']
@@ -800,7 +800,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
         if check_rule and alloc:
             new_allocation[alloc[0]].append(alloc[1])
 
-    update = add_allocation(new_allocation, kwargs['output_xml'])
+    update = add_allocation(new_allocation, **kwargs)
 
     return update
 
@@ -981,7 +981,7 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
     return [cons_list, prod_list]
 
 
-def add_allocation(allocation_dict, output_xml):
+def add_allocation(allocation_dict, **kwargs):
     """
     Check if allocation_lists is not empty, write in xml for each list and return 0/1
     if some update has been made.
@@ -996,6 +996,7 @@ def add_allocation(allocation_dict, output_xml):
     if any(allocation_dict.values()):
         for _, k in enumerate(allocation_dict):
             if allocation_dict[k]:
+                output_xml = kwargs['output_xml']
                 output_xml.write_object_allocation(allocation_dict[k])
                 # Warn the user once added within xml
                 for elem in allocation_dict[k]:
@@ -1005,12 +1006,12 @@ def add_allocation(allocation_dict, output_xml):
                     # Check the dict length, if this method is called from orchestrator_viewpoint
                     # or orchestrator_functional for View => Only key[0] and no recursion wanted
                     if k in (0, 1):
-                        allocate_all_children_in_element(elem, output_xml)
+                        allocate_all_children_in_element(elem, **kwargs)
         return 1
     return 0
 
 
-def check_parent_allocation(elem, output_xml):
+def check_parent_allocation(elem, **kwargs):
     """Check if parent's Function/Sate are allocated to parent's Fucntional Element:
     if not print message to user asking if he wants to, if yes write it in xml then continue
     with parents"""
@@ -1033,17 +1034,18 @@ def check_parent_allocation(elem, output_xml):
                 else:
                     fun_elem_parent.add_allocated_function(object_parent.id)
 
-                add_allocation({5: [[fun_elem_parent, object_parent]]}, output_xml)
-                check_parent_allocation([fun_elem_parent, object_parent], output_xml)
+                add_allocation({5: [[fun_elem_parent, object_parent]]}, **kwargs)
+                check_parent_allocation([fun_elem_parent, object_parent], **kwargs)
             else:
                 Logger.set_error(__name__,
                                  f"{object_parent.name} is not allocated despite at least one "
                                  f"of its child is")
 
 
-def allocate_all_children_in_element(elem, output_xml):
-    """Recursive allocation for childs of State/Function"""
-    check_parent_allocation(elem, output_xml)
+def allocate_all_children_in_element(elem, **kwargs):
+    """Recursive allocation for children of State/Function"""
+    output_xml = kwargs['output_xml']
+    check_parent_allocation(elem, **kwargs)
     object_type = question_answer.get_object_type(elem[1])
     if elem[1].child_list:
         for i in elem[1].child_list:
@@ -1056,19 +1058,34 @@ def allocate_all_children_in_element(elem, output_xml):
                     else:
                         item[0].add_allocated_function(item[1].id)
                 # We want recursivety so it trigger for (0, 1) keys in the dict
-                add_allocation({0: allocated_child_list}, output_xml)
+                add_allocation({0: allocated_child_list}, **kwargs)
     else:
-        # TBT/TBC
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
+            # Remove previous allocation if any
+            xml_fun_elem_list = kwargs['xml_fun_elem_list']
+            for xml_fun_elem in xml_fun_elem_list:
+                if elem[1].id in xml_fun_elem.allocated_state_list:
+                    xml_fun_elem.remove_allocated_state(elem[1].id)
+                    output_xml.delete_object_allocation([[xml_fun_elem, elem[1]]])
+                    Logger.set_info(__name__,
+                                    f"State {elem[1].name} is not allocated to Functional element "
+                                    f"{xml_fun_elem.name} anymore")
+
             elem[0].add_allocated_state(elem[1].id)
-            Logger.set_info(__name__,
-                            f"State {elem[1].name} is allocated to functional "
-                            f"element {elem[0].name}")
+            add_allocation({5: [elem]}, **kwargs)
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
+            # Remove previous allocation if any
+            xml_fun_elem_list = kwargs['xml_fun_elem_list']
+            for xml_fun_elem in xml_fun_elem_list:
+                if elem[1].id in xml_fun_elem.allocated_function_list:
+                    xml_fun_elem.remove_allocated_function(elem[1].id)
+                    output_xml.delete_object_allocation([[xml_fun_elem, elem[1]]])
+                    Logger.set_info(__name__,
+                                    f"Function {elem[1].name} is not allocated to Functional element "
+                                    f"{xml_fun_elem.name} anymore")
+
             elem[0].add_allocated_function(elem[1].id)
-            Logger.set_info(__name__,
-                            f"Function {elem[1].name} is allocated to functional "
-                            f"element {elem[0].name}")
+            add_allocation({5: [elem]}, **kwargs)
 
 
 def get_allocated_child(elem, xml_fun_elem_list):

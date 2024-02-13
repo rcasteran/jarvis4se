@@ -24,5 +24,10 @@ from .datamodel import Type
 from .datamodel import BaseType
 from .datamodel import Requirement
 from .datamodel import TypeWithChildList
+from .datamodel import TypeWithChildListFunctionIndex
+from .datamodel import TypeWithChildListStateIndex
+from .datamodel import TypeWithChildListFunctionalElementIndex
+from .datamodel import TypeWithChildListPhysicalElementIndex
+from .datamodel import TypeWithChildListRequirementIndex
 from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel

@@ -697,6 +697,31 @@ class XmlWriter3SE:
 
             self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
+    def delete_object_allocation(self, object_allocated_object_list):
+        """Delete allocated objects from list [Object, Allocated object]
+        @param[in] object_allocated_object_list : list of allocated objects
+        @return None
+        """
+        for obj, allocated_obj in object_allocated_object_list:
+            elem_tag = self.get_object_tag(obj)
+            if elem_tag:
+                parser = etree.XMLParser(remove_blank_text=True)
+                root = self.tree.parse(self.file, parser)
+
+                for obj_tag in root.findall(".//" + elem_tag):
+                    if obj_tag.get('id') == obj.id:
+                        if elem_tag == "view":
+                            allocated_tag = self.get_allocation_tag(obj)
+                        else:
+                            allocated_tag = self.get_allocation_tag(allocated_obj)
+
+                        tag = obj_tag.find(allocated_tag + 'List')
+
+                        for allocated_obj_tag in tag.findall(allocated_tag + "[@id='" + allocated_obj.id + "']"):
+                            tag.remove(allocated_obj_tag)
+
+            self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
     def write_type_element(self, type_list):
         """Write type element from list of types
         @param[in] type_list : list of types

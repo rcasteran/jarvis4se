@@ -726,6 +726,14 @@ class FunctionalElement:
         """
         self.allocated_state_list.add(p_state)
 
+    def remove_allocated_state(self, p_state):
+        """Remove allocated state from allocated_state_list
+        @param[in] self this class instance
+        @param[in] p_state allocated state
+        @return None
+        """
+        self.allocated_state_list.remove(p_state)
+
     def add_allocated_function(self, p_function):
         """Add allocated function to allocated_function_list
         @param[in] self this class instance
@@ -733,6 +741,14 @@ class FunctionalElement:
         @return None
         """
         self.allocated_function_list.add(p_function)
+
+    def remove_allocated_function(self, p_function):
+        """Remove allocated function from allocated_function_list
+        @param[in] self this class instance
+        @param[in] p_function allocated function
+        @return None
+        """
+        self.allocated_function_list.remove(p_function)
 
     def add_exposed_interface(self, p_interface):
         """Add exposed interface to exposed_interface_list
@@ -1554,5 +1570,10 @@ class Requirement:
 
 # Global variables definition
 TypeWithChildList = (Function, State, FunctionalElement, PhysicalElement, Requirement)
+TypeWithChildListFunctionIndex = 0
+TypeWithChildListStateIndex = 1
+TypeWithChildListFunctionalElementIndex = 2
+TypeWithChildListPhysicalElementIndex = 3
+TypeWithChildListRequirementIndex = 4
 EntryStateLabel = 'entry'
 ExitStateLabel = 'exit'
