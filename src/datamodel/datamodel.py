@@ -451,6 +451,14 @@ class State:
         """
         self.allocated_function_list.add(p_function)
 
+    def remove_allocated_function(self, p_function):
+        """Remove allocated function from allocated_function_list
+        @param[in] self this class instance
+        @param[in] p_function allocated function
+        @return None
+        """
+        self.allocated_function_list.remove(p_function)
+
     def add_allocated_requirement(self, p_req):
         """Add allocated requirement to allocated_req_list
         @param[in] self this class instance

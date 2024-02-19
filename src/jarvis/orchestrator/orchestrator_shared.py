@@ -1003,8 +1003,71 @@ def add_allocation(allocation_dict, **kwargs):
                     Logger.set_info(__name__,
                                     f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                                     f"{elem[0].__class__.__name__} {elem[0].name}")
-                    # Check the dict length, if this method is called from orchestrator_viewpoint
-                    # or orchestrator_functional for View => Only key[0] and no recursion wanted
+                    if k == 1:
+                        # Allocation of [State, Function]
+                        # Need to remove previous allocation if any
+                        xml_fun_elem_list = kwargs['xml_fun_elem_list']
+                        xml_state_list = kwargs['xml_state_list']
+                        for xml_state in xml_state_list:
+                            if xml_state.id != elem[0].id:
+                                if elem[1].id in xml_state.allocated_function_list:
+                                    is_fun_elem = False
+                                    for xml_fun_elem in xml_fun_elem_list:
+                                        if xml_state.id in xml_fun_elem.allocated_state_list:
+                                            is_fun_elem = True
+                                            if elem[0].id not in xml_fun_elem.allocated_state_list:
+                                                xml_state.remove_allocated_function(elem[1].id)
+                                                output_xml.delete_object_allocation([[xml_state, elem[1]]])
+                                                Logger.set_info(__name__,
+                                                                f"Function {elem[1].name} is not allocated to "
+                                                                f"State {xml_state.name} anymore")
+                                                xml_fun_elem.remove_allocated_function(elem[1].id)
+                                                output_xml.delete_object_allocation([[xml_fun_elem, elem[1]]])
+                                                Logger.set_info(__name__,
+                                                                f"Function {elem[1].name} is not allocated to "
+                                                                f"Functional element {xml_fun_elem.name} anymore")
+
+                                            else:
+                                                Logger.set_info(__name__,
+                                                                f"Function {elem[1].name} is still allocated to "
+                                                                f"State {xml_state.name}")
+                                                Logger.set_info(__name__,
+                                                                f"Function {elem[1].name} is still allocated to "
+                                                                f"Functional element {xml_fun_elem.name}")
+                                        # Else do nothing
+
+                                    if not is_fun_elem:
+                                        xml_state.remove_allocated_function(elem[1].id)
+                                        output_xml.delete_object_allocation([[xml_state, elem[1]]])
+                                        Logger.set_info(__name__,
+                                                        f"Function {elem[1].name} is not allocated to "
+                                                        f"State {xml_state.name} anymore")
+                                # Else do nothing
+                            # Else do nothing
+
+                        # Finalize allocation
+                        for xml_fun_elem in xml_fun_elem_list:
+                            # Check if state is allocated to functional element to allocate function to
+                            # functional element
+                            if elem[0].id in xml_fun_elem.allocated_state_list and elem[1].id not in \
+                                    xml_fun_elem.allocated_function_list:
+                                xml_fun_elem.add_allocated_function(elem[1].id)
+                                output_xml.write_object_allocation([[xml_fun_elem, elem[1]]])
+                                Logger.set_info(__name__,
+                                                f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
+                                                f"{xml_fun_elem.__class__.__name__} {xml_fun_elem.name}")
+                            # Check if state is not allocated to functional element to allocate state to
+                            # functional element
+                            elif elem[0].id not in xml_fun_elem.allocated_state_list and \
+                                    elem[1].id in elem[0].allocated_function_list and \
+                                    elem[1].id in xml_fun_elem.allocated_function_list:
+                                xml_fun_elem.add_allocated_state(elem[0].id)
+                                output_xml.write_object_allocation([[xml_fun_elem, elem[0]]])
+                                Logger.set_info(__name__,
+                                                f"{elem[0].__class__.__name__} {elem[0].name} is allocated to "
+                                                f"{xml_fun_elem.__class__.__name__} {xml_fun_elem.name}")
+                            # Else do nothing
+
                     if k in (0, 1):
                         allocate_all_children_in_element(elem, **kwargs)
         return 1
