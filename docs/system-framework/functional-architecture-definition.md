@@ -316,7 +316,7 @@ S1 is composed of S11, S12
 show decomposition S1
 ```
 
-
+<mark style="color:red;">This function is not yet available.</mark> Please refer to [https://github.com/rcasteran/jarvis4se/issues/88](https://github.com/rcasteran/jarvis4se/issues/88)
 
 ## Functional element state allocation
 
@@ -396,7 +396,33 @@ Reversewise, when allocating a function to a state, if the state is allocated to
 
 ## Data allocation
 
+JARVIS4SE allows to allocate a data named \<data name> to a functional interface named \<functional interface name> through the following command:
+
+```
+<functional interface name> allocates <data name>
+```
+
+{% hint style="info" %}
+Data is allocated to the functional interface only if one of its consumer and one of its producer are allocated to a functional element exposing the functional interface. Please refer to [#function-allocation](functional-architecture-definition.md#function-allocation "mention")
+{% endhint %}
+
 ## Requirement allocation
+
+### Requirement allocation to functional element
+
+JARVIS4SE allows to allocate a requirement named \<requirement name> to a functional element named \<functional element name> through the following command:
+
+```
+<functional element name> allocates <requirement name>
+```
+
+### Requirement allocation to functional interface
+
+JARVIS4SE allows to allocate a requirement named \<requirement name> to a functional interface named \<functional interface name> through the following command:
+
+```
+<functional interface name> allocates <requirement name>
+```
 
 ## Functional architecture chain
 
