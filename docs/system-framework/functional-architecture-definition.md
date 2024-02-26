@@ -406,19 +406,19 @@ JARVIS4SE allows to allocate a data named \<data name> to a functional interface
 Data is allocated to the functional interface only if one of its consumer and one of its producer are allocated to a functional element exposing the functional interface. Please refer to [#function-allocation](functional-architecture-definition.md#function-allocation "mention")
 {% endhint %}
 
-## Requirement allocation
+## Requirement satisfaction
 
-### Requirement allocation to functional element
+### Requirement satisfied by a functional element
 
-JARVIS4SE allows to allocate a requirement named \<requirement name> to a functional element named \<functional element name> through the following command:
+JARVIS4SE allows to indicate that a functional element named \<functional element name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
 <functional element name> allocates <requirement name>
 ```
 
-### Requirement allocation to functional interface
+### Requirement satisfied by a functional interface
 
-JARVIS4SE allows to allocate a requirement named \<requirement name> to a functional interface named \<functional interface name> through the following command:
+JARVIS4SE allows to indicate that a functional interface named \<functional interface name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
 <functional interface name> allocates <requirement name>

@@ -27,7 +27,7 @@ From a methodological point of view, the definition of an activity can be justif
 
 
 
-## Goal allocation
+## Goal satisfaction
 
 ## Operational chain
 

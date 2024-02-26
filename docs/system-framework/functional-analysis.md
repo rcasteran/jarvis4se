@@ -141,12 +141,12 @@ JARVIS4SE allows to allocate an activity named \<activity name> to a function na
 <function name> allocates <activity name>
 ```
 
-## Requirement allocation
+## Requirement satisfaction
 
-JARVIS4SE allows to allocate a requirement named \<requirement name> to a function named \<function name> through the following command:
+JARVIS4SE allows to indicate that a function named \<function name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
-<function name> allocates <requirement name>
+<function name> satisfies <requirement name>
 ```
 
 ## Functional chain
