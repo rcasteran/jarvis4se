@@ -22,6 +22,7 @@ DETERMINER_TAG = "DT"
 ADJECTIVE_TAG = "JJ"
 SUBORDINATE_TAG = "IN"
 COORDINATE_TAG = "CC"
+PRONOUN_PERSONAL_TAG = "PRP"
 
 
 def check_add_requirement(p_str_list, **kwargs):
@@ -350,7 +351,7 @@ def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
     token_list = nltk.word_tokenize(req_string)
     tag_list = nltk.pos_tag(token_list)
     for tag in tag_list:
-        if tag[1] == PROPER_NOUN_SINGULAR_TAG:
+        if tag[1] == PROPER_NOUN_SINGULAR_TAG or tag[1] == PRONOUN_PERSONAL_TAG:
             # sign '=' is tagged as PROPER_NOUN_SINGULAR_TAG
             if tag[0] != '=':
                 req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
