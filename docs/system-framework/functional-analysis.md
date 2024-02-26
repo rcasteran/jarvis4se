@@ -29,7 +29,9 @@ The <attribute name> of <data name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the data.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist
+{% endhint %}
 
 ## Function creation
 
@@ -52,7 +54,9 @@ The <attribute name> of <function name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the function.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist
+{% endhint %}
 
 ### Data consumption
 
@@ -101,7 +105,9 @@ JARVIS4SE allows to decompose a function named _\<function name>_ into subfuncti
 <function name> is composed of <subfunction 1 name>, <subfunction 2 name>
 ```
 
-<mark style="color:orange;">Note: the subfunctions must be created before as functions</mark>. Please refer to chapter [#function-creation](functional-analysis.md#function-creation "mention")
+{% hint style="info" %}
+The subfunctions must be created before as functions. Please refer to chapter [#function-creation](functional-analysis.md#function-creation "mention")
+{% endhint %}
 
 ### Decomposition visualization
 
@@ -153,7 +159,9 @@ JARVIS4SE allows to visualize a chain of functions named _\<function i name>,_ l
 show chain <function 1 name>, <function 2 name>
 ```
 
-<mark style="color:orange;">Note: chain visualization could be equivalent to a decomposition visualization in case of dealing with the chain of all subfunctions of the same function.</mark>
+{% hint style="info" %}
+Chain visualization could be equivalent to a decomposition visualization in case of dealing with the chain of all subfunctions of the same function.
+{% endhint %}
 
 Below an example of a chain visualization with the previous F1 and F2 subfunctions:
 

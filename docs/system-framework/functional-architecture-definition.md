@@ -23,7 +23,9 @@ The <attribute name> of <functional interface name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the functional interface.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
 
 ## Functional element creation
 
@@ -46,7 +48,9 @@ The <attribute name> of <functional element name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the functional element.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
 
 ### Functional interface exposure
 
@@ -74,7 +78,9 @@ show context E
 
 <figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-<mark style="color:orange;">Note: the interface I is not shown until it allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
+{% hint style="info" %}
+The interface I is not shown until it allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
+{% endhint %}
 
 ## Functional element decomposition
 
@@ -86,7 +92,9 @@ JARVIS4SE allows to decompose a functional element named _\<functional element n
 <functional element name> is composed of <functional subelement 1 name>, <functional subelement 2 name>
 ```
 
-<mark style="color:orange;">Note: the functional subelements must be created before as functional elements</mark>. Please refer to chapter [#functional-element-creation](functional-architecture-definition.md#functional-element-creation "mention")
+{% hint style="info" %}
+The functional subelements must be created before as functional elements. Please refer to chapter [#functional-element-creation](functional-architecture-definition.md#functional-element-creation "mention")
+{% endhint %}
 
 ### Decomposition visualization
 
@@ -111,7 +119,9 @@ show decomposition E
 
 <figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-<mark style="color:orange;">Note: the interfaces I and I1 are not shown until they allocated at least one data</mark>. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
+{% hint style="info" %}
+The interfaces I and I1 are not shown until they allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
+{% endhint %}
 
 ## Functional element state creation
 
@@ -154,7 +164,9 @@ The <attribute name> of <state name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the functional element.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
 
 ### Transition definition
 
@@ -174,7 +186,11 @@ JARVIS4SE allows to define the source of a transition named _\<transition name>_
 The source of <transition name> is <state name>
 ```
 
-<mark style="color:orange;">Note: the source of a transition is handled as an attribute of the transition named "source"</mark>. Therefore using this command multiple times for the same transition will only keep the latest state name.
+{% hint style="info" %}
+The source of a transition is handled as an attribute of the transition named "source".
+
+Therefore using this command multiple times for the same transition will only keep the latest state name.
+{% endhint %}
 
 #### Destination definition
 
@@ -184,7 +200,11 @@ JARVIS4SE allows to define the destination of a transition named _\<transition n
 The destination of <transition name> is <state name>
 ```
 
-<mark style="color:orange;">Note: the destination of a transition is handled as an attribute of the transition named "destination"</mark>. Therefore using this command multiple times for the same transition will only keep the latest state name.
+{% hint style="info" %}
+The destination of a transition is handled as an attribute of the transition named "destination".&#x20;
+
+Therefore using this command multiple times for the same transition will only keep the latest state name.
+{% endhint %}
 
 #### Condition definition
 
@@ -194,7 +214,11 @@ JARVIS4SE allows to add a transition condition _\<transition condition value>_ f
 Condition for <transition name> is: <transition condition value>
 ```
 
-<mark style="color:orange;">Note: two transition conditions for the same transition differs only in their syntax.</mark> For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
+{% hint style="info" %}
+Two transition conditions for the same transition differs only in their syntax.
+
+For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
+{% endhint %}
 
 ### Context visualization
 
@@ -226,10 +250,12 @@ JARVIS4SE allows to visualize a chain of states named _\<state i name>_, linked 
 show chain <state 1 name>, <state 2 name>
 ```
 
-<mark style="color:orange;">Note:</mark> <mark style="color:orange;">chain visualization could be equivalent to a:</mark>
+{% hint style="info" %}
+Chain visualization could be equivalent to a:
 
-* <mark style="color:orange;">Context visualization in case of dealing with the same states</mark>
-* <mark style="color:orange;">Decomposition visualization in case of dealing with the chain of all substates of the same state.</mark>
+* Context visualization in case of dealing with the same states
+* Decomposition visualization in case of dealing with the chain of all substates of the same state.
+{% endhint %}
 
 Below an example of a chain visualization with the previous S0 and S1 states and the following additional elements:
 
@@ -265,7 +291,9 @@ JARVIS4SE allows to decompose a state named \<state name> into substates named _
 <state name> is composed of <substate 1 name>, <substate 2 name>
 ```
 
-<mark style="color:orange;">Note: the substates must be created before as states</mark>. Please refer to the chapter [#functional-element-state-creation](functional-architecture-definition.md#functional-element-state-creation "mention")
+{% hint style="info" %}
+The substates must be created before as states. Please refer to the chapter [#functional-element-state-creation](functional-architecture-definition.md#functional-element-state-creation "mention")
+{% endhint %}
 
 ### Decomposition visualization
 
@@ -298,7 +326,9 @@ JARVIS4SE allows to allocate a state named \<state name> to a functional element
 <functional element name> allocates <state name>
 ```
 
-<mark style="color:orange;">Note: when allocating a state to a functional element, all the state children are also allocated to this functional element</mark>. This allow to allocate these state children to the functional element children if any.
+{% hint style="info" %}
+When allocating a state to a functional element, all the state children are also allocated to this functional element. This allow to allocate these state children to the functional element children if any.
+{% endhint %}
 
 ## Functional element state machine
 
@@ -346,7 +376,9 @@ JARVIS4SE allows to allocate a function named \<function name> to a functional e
 <functional element name> allocates <function name>
 ```
 
-<mark style="color:orange;">Note: when allocating a function to a functional element, all the function children are also allocated to this functional element</mark>. This will allow to allocate these function children to the functional element children if any.
+{% hint style="info" %}
+When allocating a function to a functional element, all the function children are also allocated to this functional element. This allows to allocate these function children to the functional element children if any.
+{% endhint %}
 
 ### Allocation to functional element state
 
@@ -356,7 +388,11 @@ JARVIS4SE allows to allocate a function named \<function name> to a state named 
 <state name> allocates <function name>
 ```
 
-<mark style="color:orange;">Note: when allocating a function to a state, if the function is allocated to a functional element, then the state is allocated to this functional element</mark>. Reversewise, when allocating a function to a state, if the state is allocated to a functional element, then the function is allocated to this functional element.
+{% hint style="info" %}
+When allocating a function to a state, if the function is allocated to a functional element, then the state is allocated to this functional element.&#x20;
+
+Reversewise, when allocating a function to a state, if the state is allocated to a functional element, then the function is allocated to this functional element.
+{% endhint %}
 
 ## Data allocation
 

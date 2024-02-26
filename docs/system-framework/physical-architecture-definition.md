@@ -23,7 +23,9 @@ The <attribute name> of <physical interface name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the physical interface.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
 
 ### Interaction visualization
 
@@ -50,7 +52,9 @@ The <attribute name> of <physical element name> is <attribute value>
 
 The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the physical element.
 
-<mark style="color:orange;">Note: the first command is only required when the attribute does not exist.</mark>
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
 
 ### Physical interface exposure
 
@@ -87,7 +91,9 @@ JARVIS4SE allows to decompose a physical element named _\<physical element name>
 <physical element name> is composed of <physical subelement 1 name>, <physical subelement 2 name>
 ```
 
-<mark style="color:orange;">Note: the physical subelements must be created before as physical elements</mark>. Please refer to chapter [#physical-element-creation](physical-architecture-definition.md#physical-element-creation "mention")
+{% hint style="info" %}
+The physical subelements must be created before as physical elements. Please refer to chapter [#physical-element-creation](physical-architecture-definition.md#physical-element-creation "mention")
+{% endhint %}
 
 ### Decomposition visualization
 
