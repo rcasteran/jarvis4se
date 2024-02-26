@@ -413,7 +413,7 @@ Data is allocated to the functional interface only if one of its consumer and on
 JARVIS4SE allows to indicate that a functional element named \<functional element name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
-<functional element name> allocates <requirement name>
+<functional element name> satisfies <requirement name>
 ```
 
 ### Requirement satisfied by a functional interface
@@ -421,7 +421,7 @@ JARVIS4SE allows to indicate that a functional element named \<functional elemen
 JARVIS4SE allows to indicate that a functional interface named \<functional interface name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
-<functional interface name> allocates <requirement name>
+<functional interface name> satisfies <requirement name>
 ```
 
 ## Functional architecture chain
