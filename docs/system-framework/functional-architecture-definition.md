@@ -76,7 +76,7 @@ Below an example of a context visualization for a functional element E which exp
 show context E
 </code></pre>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The interface I is not shown until it allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
@@ -117,7 +117,7 @@ E is composed of E1, E2
 show decomposition E
 ```
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The interfaces I and I1 are not shown until they allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
@@ -240,7 +240,7 @@ The destination of T_S0_S1 is S1
 show context S0
 ```
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 ### Chain visualization
 
@@ -279,7 +279,7 @@ Condition for T_S1_S2 is: BUS_COMMUNICATION_STATUS == BUS_COMMUNICATION_ON
 show chain S1, S2
 ```
 
-<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Functional element state decomposition
 
@@ -364,7 +364,7 @@ E allocates SE, S0, S1, S2, SF
 show state E
 </code></pre>
 
-<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Function allocation
 
@@ -379,6 +379,21 @@ JARVIS4SE allows to allocate a function named \<function name> to a functional e
 {% hint style="info" %}
 When allocating a function to a functional element, all the function children are also allocated to this functional element. This allows to allocate these function children to the functional element children if any.
 {% endhint %}
+
+Below an example of the allocation of a function F to the previous functional element E:
+
+```
+F is a function
+x is a data
+y is a data
+F consumes x
+F produces y
+E allocates F
+
+show decomposition E
+```
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ### Allocation to functional element state
 
@@ -406,6 +421,23 @@ JARVIS4SE allows to allocate a data named \<data name> to a functional interface
 Data is allocated to the functional interface only if one of its consumer and one of its producer are allocated to a functional element exposing the functional interface. Please refer to [#function-allocation](functional-architecture-definition.md#function-allocation "mention")
 {% endhint %}
 
+Below an example of the allocation of the data x, consumed by the previous function F allocated to the functional element E, to the interface I which is exposed by the functional element EE1 with a function F1 which produces the data x:
+
+```
+EE1 is a functional element
+F1 is a function
+EE1 allocates F1
+
+EE1 exposes I
+F1 produces x
+
+I allocates x
+
+show context E
+```
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
 ## Requirement satisfaction
 
 ### Requirement satisfied by a functional element
@@ -428,9 +460,34 @@ JARVIS4SE allows to indicate that a functional interface named \<functional inte
 
 ### Chain visualization
 
+JARVIS4SE allows to visualize a chain of functional element named _\<function element i name>,_ linked together by the data produced/consumed by the functions allocated to them, through the following command:
 
+```
+show chain <functional element 1 name>, <functional element 2 name>
+```
+
+Below an example of a chain visualization with the previous functional element E and EE1:
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ### Sequence visualization
 
-(including interactions for a given interface)
+JARVIS4SE allows to  visualize a chain of functional elements named _\<function element i name>,_ linked together by the data produced/consumed by the functions allocated to them, as a sequence of functional elements, through the following command:
 
+```
+show sequence <functional element 1 name>, <functional element 2 name>
+```
+
+Below an example of a sequence visualization with the previous E and EE1 functional elements:
+
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+JARVIS4SE allows to visualize also a chain of functional elements that expose a functional interface named _\<functional interface name>_ as a sequence of functional elements throught the following command:
+
+```
+show sequence <functional interface name>
+```
+
+Below an example of a sequence visualization for the interface I between the previous E and EE1 functional elements:
+
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>

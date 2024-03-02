@@ -93,7 +93,7 @@ F produces y
 show context F
 ```
 
-![](<../../.gitbook/assets/image (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (1) (1) (1) (1).png>)
 
 ## Function decomposition
 
@@ -131,7 +131,7 @@ F is composed of F1, F2
 show decomposition F
 ```
 
-![](<../../.gitbook/assets/image (3).png>)
+![](<../../.gitbook/assets/image (3) (1).png>)
 
 ## Activity allocation
 
@@ -169,7 +169,7 @@ Below an example of a chain visualization with the previous F1 and F2 subfunctio
 show chain F1, F2
 ```
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Sequence visualization
 
@@ -185,4 +185,4 @@ Below an example of a sequence visualization with the previous F1 and F2 subfunc
 show sequence F1, F2
 ```
 
-![](<../../.gitbook/assets/image (3) (1).png>)
+![](<../../.gitbook/assets/image (3) (1) (1).png>)
