@@ -438,6 +438,12 @@ show context E
 
 <figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
+{% hint style="info" %}
+Please note that JARVIS4SE will warn you in case one functional element exposing the interface has a functional element child that exposes it, suggesting you to allocate the related function to this child.
+{% endhint %}
+
+In the previous example, JARVIS4SE will warn you that functional element E1 is also exposing the interface I, suggesting you to allocate the function F to it.
+
 ## Requirement satisfaction
 
 ### Requirement satisfied by a functional element
@@ -491,3 +497,9 @@ show sequence <functional interface name>
 Below an example of a sequence visualization for the interface I between the previous E and EE1 functional elements:
 
 <figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+
+{% hint style="info" %}
+Please note that JARVIS4SE will warn you in case one functional element exposing the interface has a functional element child that exposes it, suggesting you to allocate the related function to this child.
+{% endhint %}
+
+In the previous example, JARVIS4SE will warn you that functional element E has a child that is also exposing the interface I, suggesting you to allocate the function F to it.
