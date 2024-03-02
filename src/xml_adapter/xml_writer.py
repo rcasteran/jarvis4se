@@ -696,8 +696,10 @@ class XmlWriter3SE:
                             allocated_tag = self.get_allocation_tag(allocated_obj)
 
                         tag = obj_tag.find(allocated_tag + 'List')
-                        _allocated_obj_tag = etree.SubElement(
-                            tag, allocated_tag, {'id': str(allocated_obj.id)})
+                        if tag is None:
+                            tag = etree.SubElement(obj_tag, allocated_tag + 'List')
+
+                        _allocated_obj_tag = etree.SubElement(tag, allocated_tag, {'id': str(allocated_obj.id)})
 
             self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
