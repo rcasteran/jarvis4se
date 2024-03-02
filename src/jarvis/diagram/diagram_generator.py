@@ -637,12 +637,20 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
     if fun_inter:
         data_list_fun_inter = query_object_list.get_fun_intf_data(fun_inter, None, **kwargs)['data']
         for elem in data_list_fun_inter:
-            fun_elem_cons = question_answer.check_get_object(
-                elem['Last consumer Functional element(s)'].pop(),
-                **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-            fun_elem_prod = question_answer.check_get_object(
-                elem['Last producer Functional element(s)'].pop(),
-                **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+            if elem['Last consumer Functional element(s)']:
+                fun_elem_cons = question_answer.check_get_object(
+                    elem['Last consumer Functional element(s)'].pop(),
+                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+            else:
+                fun_elem_cons = []
+
+            if elem['Last producer Functional element(s)']:
+                fun_elem_prod = question_answer.check_get_object(
+                    elem['Last producer Functional element(s)'].pop(),
+                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+            else:
+                fun_elem_prod = []
+
             if fun_elem_cons and fun_elem_prod:
                 new_consumer_list.append([elem['Data'], fun_elem_cons])
                 new_producer_list.append([elem['Data'], fun_elem_prod])

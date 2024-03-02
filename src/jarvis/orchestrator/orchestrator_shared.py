@@ -967,18 +967,26 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
         if any(a == fun_inter.id for a in fun_elem.exposed_interface_list):
             fun_elem_exposes.add(fun_elem)
 
-    cons_list = False
-    prod_list = False
+    is_consumer = False
+    is_producer = False
     for function in function_list:
         for fun_elem in fun_elem_exposes:
             if any(a == function.id for a in fun_elem.allocated_function_list):
                 fun_data = [data.name, function]
                 if any(a == fun_data for a in xml_consumer_function_list):
-                    cons_list = True
+                    is_consumer = True
                 if any(a == fun_data for a in xml_producer_function_list):
-                    prod_list = True
+                    is_producer = True
+                if is_consumer or is_producer:
+                    for child in fun_elem.child_list:
+                        if child in fun_elem_exposes and \
+                                not any(a == function.id for a in child.allocated_function_list):
+                            Logger.set_warning(__name__,
+                                               f'Child {child.name} of Functional element {fun_elem.name} exposes also '
+                                               f'the Functional interface {fun_inter.name}. Please consider to '
+                                               f'allocate the Function {function.name} to it.')
 
-    return [cons_list, prod_list]
+    return [is_consumer, is_producer]
 
 
 def add_allocation(allocation_dict, **kwargs):

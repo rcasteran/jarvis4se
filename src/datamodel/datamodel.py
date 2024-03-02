@@ -1096,7 +1096,7 @@ class FunctionalInterface:
 
         rep += util.str_allocated_req(self)
 
-        # No display of allocated data list
+        rep += util.str_allocated_data(self)
 
         return rep
 

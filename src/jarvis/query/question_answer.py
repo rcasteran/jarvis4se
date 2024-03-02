@@ -5,6 +5,7 @@ import pandas as pd
 
 # Modules
 import datamodel
+from tools import Logger
 
 
 xml_str_lists = ['xml_function_list',
@@ -142,7 +143,7 @@ def get_fun_elem_function_state_allocation(wanted_object, xml_function_list, xml
     return allocation_list
 
 
-def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
+def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_elem_exposing_list, **kwargs):
     """For a data, find last producer and consumer if they are allocated to last fun_elem
     exposing the functional interface asked"""
     data_dict = {'Data': data.name,
@@ -150,6 +151,7 @@ def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
                  'Last consumer Functional element(s)': [],
                  'Last producer Function(s)': [],
                  'Last producer Functional element(s)': []}
+
     for prod in kwargs['xml_producer_function_list']:
         if prod[0] == data.name and \
                 check_latest(prod[1], kwargs['xml_function_list']) == prod[1].name:
@@ -161,13 +163,30 @@ def get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs):
                     cons_fun_elem_list = get_allocation_object(cons[1], kwargs['xml_fun_elem_list'])
                     if cons_fun_elem_list:
                         for fun_elem in cons_fun_elem_list:
-                            if fun_elem.name in last_fun_elem_exposing:
+                            if fun_elem.name in last_fun_elem_exposing_list:
                                 cons_last_fun_elem = fun_elem
+                            elif fun_elem.name in fun_elem_exposing_list:
+                                cons_last_fun_elem = fun_elem
+                                Logger.set_warning(__name__,
+                                                   f'Functional element {fun_elem.name} has a child exposing the '
+                                                   f'Functional interface {fun_intf.name}. Please consider to '
+                                                   f'allocate the Function {cons[1].name} to it.')
+                            # Else do nothing
+                    # Else do nothing
+
                     prod_fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
                     if prod_fun_elem_list:
                         for fun_elem in prod_fun_elem_list:
-                            if fun_elem.name in last_fun_elem_exposing:
+                            if fun_elem.name in last_fun_elem_exposing_list:
                                 prod_last_fun_elem = fun_elem
+                            elif fun_elem.name in fun_elem_exposing_list:
+                                cons_last_fun_elem = fun_elem
+                                Logger.set_warning(__name__,
+                                                   f'Functional element {fun_elem.name} has a child exposing the '
+                                                   f'Functional interface {fun_intf.name}. Please consider to '
+                                                   f'allocate the Function {prod[1].name} to it.')
+                            # Else do nothing
+                    # Else do nothing
 
                 if not cons_last_fun_elem == prod_last_fun_elem:
                     if not any(c == prod[1].name for c in data_dict['Last producer Function(s)']):

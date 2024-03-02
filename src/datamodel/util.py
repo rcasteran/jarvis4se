@@ -110,3 +110,24 @@ def str_allocated_req(obj):
         rep = f'"{obj.name}" has no allocated requirement.\n'
 
     return rep
+
+
+def str_allocated_data(obj):
+    """@ingroup datamodel
+    @anchor str_allocated_req
+    Return a string representation of the allocated data list of a class instance
+    @param[in] obj class instance
+    @return string
+    """
+    if len(obj.allocated_data_list) > 1:
+        rep = f'"{obj.name}" has {len(obj.allocated_data_list)} allocated data:\n'
+        for item in obj.allocated_data_list:
+            rep += f' - data with identifier {item}\n'
+    elif len(obj.allocated_data_list) == 1:
+        rep = f'"{obj.name}" has one allocated data:\n'
+        for item in obj.allocated_data_list:
+            rep += f' - data with identifier {item}\n'
+    else:
+        rep = f'"{obj.name}" has no allocated data.\n'
+
+    return rep

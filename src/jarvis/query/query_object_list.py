@@ -244,20 +244,31 @@ def get_fun_intf_data(wanted_object, _, **kwargs):
     if not fun_elem_exposing:
         Logger.set_warning(__name__, f"Not any functional element exposing {wanted_object.name}")
     else:
-        last_fun_elem_exposing = [question_answer.check_latest(j, fun_elem_exposing) for j in fun_elem_exposing
-                                  if question_answer.check_latest(j, fun_elem_exposing)]
+        last_fun_elem_name_exposing_list = [question_answer.check_latest(j, fun_elem_exposing)
+                                            for j in fun_elem_exposing
+                                            if question_answer.check_latest(j, fun_elem_exposing)]
+
+        fun_elem_name_exposing_list = [i.name for i in fun_elem_exposing]
 
         for allocated_id in wanted_object.allocated_data_list:
             for data in kwargs['xml_data_list']:
                 if allocated_id == data.id:
-                    data_list.append(question_answer.get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
+                    data_list.append(question_answer.get_latest_obj_interface(wanted_object,
+                                                                              data,
+                                                                              last_fun_elem_name_exposing_list,
+                                                                              fun_elem_name_exposing_list,
+                                                                              **kwargs))
 
         if wanted_object.derived:
             for allocated_id in wanted_object.derived.allocated_data_list:
                 for data in kwargs['xml_data_list']:
                     if allocated_id == data.id:
                         data_list.append(
-                            question_answer.get_latest_obj_interface(data, last_fun_elem_exposing, **kwargs))
+                            question_answer.get_latest_obj_interface(wanted_object,
+                                                                     data,
+                                                                     last_fun_elem_name_exposing_list,
+                                                                     fun_elem_name_exposing_list,
+                                                                     **kwargs))
 
         if data_list:
             data_dict = {'title': f"Data list for {wanted_object.name}:",
