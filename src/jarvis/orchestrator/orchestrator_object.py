@@ -7,6 +7,7 @@ import re
 # Modules
 import datamodel
 from jarvis import util
+from jarvis.orchestrator import orchestrator_viewpoint_requirement
 from jarvis.query import question_answer
 from tools import Logger
 
@@ -141,6 +142,10 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
         for object_base_type, object_instance_list in enumerate(object_instance_per_base_type_list):
             if object_instance_list:
                 object_instance_list.write_instance(**kwargs)
+
+                # Check if any requirement related to the objects
+                check_object_instance_list_requirement(object_instance_list, **kwargs)
+
                 check = 1
 
     return check
@@ -275,3 +280,36 @@ def check_object_relationship(object_src, object_dest, **kwargs):
         print("Not supported")
 
     return is_relationship
+
+
+def check_object_instance_list_requirement(object_instance_list, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    output_xml = kwargs['output_xml']
+
+    for obj in object_instance_list:
+        for xml_requirement in xml_requirement_list:
+            req_subject_object = orchestrator_viewpoint_requirement.retrieve_req_subject_object(
+                xml_requirement.description, **kwargs)
+            req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
+                xml_requirement.description, **kwargs)
+
+            if req_subject_object is not None:
+                if obj == req_subject_object:
+                    obj.add_allocated_requirement(xml_requirement)
+                    output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                    Logger.set_info(__name__,
+                                    f"Requirement {xml_requirement.name} is satisfied by "
+                                    f"{obj.name}")
+            # Else do nothing
+
+            if len(req_object_object_list) > 0:
+                for req_object_object in req_object_object_list:
+                    if obj == req_object_object:
+                        obj.add_allocated_requirement(xml_requirement)
+                        output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                        Logger.set_info(__name__,
+                                        f"Requirement {xml_requirement.name} is satisfied by "
+                                        f"{obj.name}")
+            # Else do nothing

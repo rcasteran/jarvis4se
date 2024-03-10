@@ -29,32 +29,7 @@ def check_add_requirement(p_str_list, **kwargs):
     requirement_list = []
 
     for p_str in p_str_list:
-        # Detect if...then pattern before the requirement subject
-        pattern_if = re.compile(r'if (.*?), then ([^.|\n]*)', re.IGNORECASE).split(p_str[0])
-        # Detect when pattern before the requirement subject
-        pattern_when = re.compile(r'when (.*?), ([^.|\n]*)', re.IGNORECASE).split(p_str[0])
-
-        req_object = p_str[1]
-
-        req_conditional = ''
-        req_temporal = ''
-        if len(pattern_if) > 1 and len(pattern_when) > 1:
-            req_conditional = pattern_if[1]
-            req_subject = pattern_if[2]
-            req_temporal = pattern_when[1]
-        elif len(pattern_if) > 1:
-            req_conditional = pattern_if[1]
-            req_subject = pattern_if[2]
-        elif len(pattern_when) > 1:
-            req_temporal = pattern_when[1]
-            req_subject = pattern_when[2]
-        else:
-            req_subject = p_str[0]
-
-        Logger.set_debug(__name__, f"Requirement subject: {req_subject}")
-        Logger.set_debug(__name__, f"Requirement object: {req_object}")
-        Logger.set_debug(__name__, f"Requirement is conditional: {req_conditional}")
-        Logger.set_debug(__name__, f"Requirement is temporal: {req_temporal}")
+        req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(p_str[0], p_str[1])
 
         # Retrieve the subject in object list
         req_subject_object_list, is_error = retrieve_proper_noun(req_subject, is_subject=True, **kwargs)
@@ -70,6 +45,8 @@ def check_add_requirement(p_str_list, **kwargs):
                                           f"{p_str[0]} shall {p_str[1]}")
             else:
                 Logger.set_info(__name__, f"Requirement identified: {p_str[0]} shall {p_str[1]}")
+                Logger.set_warning(__name__,
+                                   f'Subject "{req_subject}" of the requirement is unknown')
 
             # Check if a requirement with the same description already exist
             xml_requirement_list = kwargs['xml_requirement_list']
@@ -132,6 +109,43 @@ def check_add_requirement(p_str_list, **kwargs):
         update = 0
 
     return update
+
+
+def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
+    if p_str_after_modal is None:
+        pattern_shall = re.compile(r'([^. |\n][^.|\n]*) shall ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+        p_str_before_modal = pattern_shall[1]
+        p_str_after_modal = pattern_shall[2]
+    # Else do nothing
+
+    # Detect if...then pattern before the requirement subject
+    pattern_if = re.compile(r'if (.*?), then ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+    # Detect when pattern before the requirement subject
+    pattern_when = re.compile(r'when (.*?), ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+
+    req_object = p_str_after_modal
+
+    req_conditional = ''
+    req_temporal = ''
+    if len(pattern_if) > 1 and len(pattern_when) > 1:
+        req_conditional = pattern_if[1]
+        req_subject = pattern_if[2]
+        req_temporal = pattern_when[1]
+    elif len(pattern_if) > 1:
+        req_conditional = pattern_if[1]
+        req_subject = pattern_if[2]
+    elif len(pattern_when) > 1:
+        req_temporal = pattern_when[1]
+        req_subject = pattern_when[2]
+    else:
+        req_subject = p_str_before_modal
+
+    Logger.set_debug(__name__, f"Requirement subject: {req_subject}")
+    Logger.set_debug(__name__, f"Requirement object: {req_object}")
+    Logger.set_debug(__name__, f"Requirement is conditional: {req_conditional}")
+    Logger.set_debug(__name__, f"Requirement is temporal: {req_temporal}")
+
+    return req_subject, req_object, req_conditional, req_temporal
 
 
 def add_requirement(requirement_list, **kwargs):
@@ -371,3 +385,30 @@ def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
             break
 
     return req_string_object_list, is_error
+
+
+def retrieve_req_subject_object(req_str, **kwargs):
+    req_subject_object = None
+
+    req_subject, _, _, _ = detect_req_pattern(req_str)
+
+    # Retrieve the subject in object list
+    req_subject_object_list, _ = retrieve_proper_noun(req_subject, is_subject=True, **kwargs)
+
+    for obj in req_subject_object_list:
+        if obj:
+            req_subject_object = obj
+
+    return req_subject_object
+
+
+def retrieve_req_object_object_list(req_str, **kwargs):
+    _, req_object, _, _ = detect_req_pattern(req_str)
+
+    req_object_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
+
+    for req_object_object in req_object_object_list.copy():
+        if req_object_object is None:
+            req_object_object_list.remove(req_object_object)
+
+    return req_object_object_list

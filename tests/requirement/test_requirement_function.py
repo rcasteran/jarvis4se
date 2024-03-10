@@ -108,8 +108,8 @@ def test_simple_function_allocation_manual_requirement_function(capsys, monkeypa
     # result is a text about requirement allocation
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
-                f'Requirement {req_name} is satisfied by Function F1\n',
-                f'{file_name}.xml updated']
+                f'Requirement {req_name} already satisfied by Function F1\n',
+                f'No update for {file_name}.xml']
 
     test_lib.remove_xml_file(file_name)
 
