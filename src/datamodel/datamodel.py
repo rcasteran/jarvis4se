@@ -916,12 +916,16 @@ class Attribute:
         
         @var described_item_list
         described item list
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
         self.type = p_type
         self.described_item_list = set()
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -963,6 +967,14 @@ class Attribute:
         """
         self.described_item_list.add(p_item)
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
     def __str__(self):
         """Return a string representation of the class instance
         @param[in] self this class instance
@@ -977,6 +989,8 @@ class Attribute:
             rep += f'"{self.name}" alias is {self.alias}.\n'
 
         # No display of described item list
+
+        rep += util.str_allocated_req(self)
 
         return rep
 

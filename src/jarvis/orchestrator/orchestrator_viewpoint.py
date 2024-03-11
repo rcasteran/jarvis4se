@@ -6,7 +6,6 @@ Jarvis module
 # Modules
 import datamodel
 from . import orchestrator_shared
-from . import orchestrator_viewpoint_requirement
 from jarvis.query import question_answer
 from jarvis import util
 from tools import Logger
@@ -162,92 +161,6 @@ def add_attribute(attribute_str_list, **kwargs):
         xml_attribute_list.add(attribute)
         Logger.set_info(__name__,
                         attribute.name + " is an attribute")
-    return 1
-
-
-def check_add_object_attribute(described_attribute_list, **xml_dict_sets):
-    """
-    Check if each string in described_attribute_list are corresponding to an actual object and
-    attribute, create new [Attribute, (Object, value)] objects list.
-    Send lists to add_object_attribute() to write them within xml and then returns update_list
-    from it.
-
-        Parameters:
-            described_attribute_list ([str]) : Lists of string from jarvis cell
-            xml_attribute_list ([Attribute]) : Attribute's list from xml
-
-        Returns:
-            update ([0/1]) : 1 if update, else 0
-    """
-    new_described_attribute_list = []
-    for elem in described_attribute_list:
-        obj_to_set = question_answer.check_get_object(
-            elem[1],
-            **{'xml_function_list': xml_dict_sets['xml_function_list'],
-               'xml_fun_elem_list': xml_dict_sets['xml_fun_elem_list'],
-               'xml_fun_inter_list': xml_dict_sets['xml_fun_inter_list'],
-               'xml_phy_elem_list': xml_dict_sets['xml_phy_elem_list'],
-               'xml_phy_inter_list': xml_dict_sets['xml_phy_inter_list'],
-               })
-        attribute_wanted = question_answer.check_get_object(
-            elem[0],
-            **{'xml_attribute_list': xml_dict_sets['xml_attribute_list'],
-               })
-        if obj_to_set is None and attribute_wanted is None:
-            print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
-                  "- Function\n"
-                  "- Functional element\n"
-                  "- Functional interface\n"
-                  "- Physical element\n"
-                  "- Physical interface\n")
-            continue
-        if None in (obj_to_set, attribute_wanted):
-            print("{} does not exist".format(
-                [elem[i] for i in range(2)
-                 if [attribute_wanted, obj_to_set][i] is None]
-                .pop()
-            ))
-            continue
-        is_specified = False
-        for described_item in attribute_wanted.described_item_list:
-            if described_item[0] == obj_to_set.id:
-                is_specified = True
-                if described_item[1] != str(elem[2]):
-                    Logger.set_warning(__name__,
-                                       f"Attribute {attribute_wanted.name} already specified for {obj_to_set.name} "
-                                       f"with value {described_item[1]}")
-                # Else do nothing, attribute already set to this value
-
-        if not is_specified:
-            new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
-
-    update = add_object_attribute(new_described_attribute_list, xml_dict_sets['output_xml'])
-
-    return update
-
-
-def add_object_attribute(new_obj_attribute_list, output_xml):
-    """
-    Check if input list is not empty, write in xml for each element and return update list if some
-    updates has been made
-
-        Parameters:
-            new_obj_attribute_list ([Attribute, (Object, value)]) : New described attributes
-            output_xml (XmlWriter3SE object) : XML's file object
-
-        Returns:
-            1 if update, else 0
-    """
-    if not new_obj_attribute_list:
-        return 0
-
-    output_xml.write_attribute_described_item(new_obj_attribute_list)
-    # Warn the user once added within xml
-    for described_attribute in new_obj_attribute_list:
-        described_attribute[0].add_described_item(described_attribute[1])
-        Logger.set_info(__name__,
-                        f"Attribute {described_attribute[0].name} for {described_attribute[1][0].name} "
-                        f"with value {described_attribute[1][1]}")
     return 1
 
 

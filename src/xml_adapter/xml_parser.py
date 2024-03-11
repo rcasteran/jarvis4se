@@ -425,6 +425,15 @@ class XmlParser3SE:
                                            f"view [{attribute.id}, {attribute.name}]"
                                            f" with the value : {xml_described_item.get('value')}")
 
+            # Looking for allocated requirements and add them to the functional interface
+            xml_allocated_requirement_list = xml_attribute.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                attribute.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"attribute [{attribute.id}, {attribute.name}]")
+
         return attribute_list
 
     def parse_functional_interface_list(self):

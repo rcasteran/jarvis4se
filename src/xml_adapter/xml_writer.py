@@ -428,6 +428,8 @@ class XmlWriter3SE:
 
                 _described_item_list_tag = etree.SubElement(attribute_tag, "describedItemList")
 
+                _allocated_req_list_tag = etree.SubElement(attribute_tag, "allocatedRequirementList")
+
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_attribute_described_item(self, attribute_item_list):

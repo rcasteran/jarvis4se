@@ -163,7 +163,7 @@ def get_base_type_recursively(obj_type):
     return base_type
 
 
-def check_object_relationship(object_src, object_dest, **kwargs):
+def check_object_relationship(object_src, object_dest, context, **kwargs):
     is_relationship = False
 
     if isinstance(object_src.type, datamodel.BaseType):
@@ -212,7 +212,29 @@ def check_object_relationship(object_src, object_dest, **kwargs):
             else:
                 print("Data for Functional interface")
         elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-            print("Attribute case")
+            # Check if value of the attribute is in relationship context
+            is_value_defined = False
+            for described_object, value in object_dest.described_item_list:
+                if described_object == object_src:
+                    is_value_defined = True
+                    if value in context:
+                        Logger.set_info(__name__,
+                                        f"{object_dest_type} {object_dest.name} of "
+                                        f"{object_src_type} {object_src.name} has a value {value}")
+                        is_relationship = True
+                        break
+                    # Else do nothing
+
+            if not is_relationship:
+                if not is_value_defined:
+                    Logger.set_warning(__name__,
+                                       f"Value of {object_dest_type} {object_dest.name} is not defined for "
+                                       f"{object_src_type} {object_src.name}")
+                else:
+                    Logger.set_warning(__name__,
+                                       f"Value of {object_dest_type} {object_dest.name} is different from the one "
+                                       f"given for {object_src_type} {object_src.name}")
+            # Else do nothing
         else:
             # Warn about improper relationship between source type and destination type
             print("Not supported")

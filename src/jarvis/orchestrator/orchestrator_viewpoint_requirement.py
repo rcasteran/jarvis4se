@@ -52,10 +52,16 @@ def check_add_requirement(p_str_list, **kwargs):
             xml_requirement_list = kwargs['xml_requirement_list']
             sequence_ratio_list = {}
             for xml_requirement in xml_requirement_list:
-                sequence = difflib.SequenceMatcher(None, xml_requirement.description,
-                                                   f"{p_str[0]} shall {p_str[1]}")
-                if sequence.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
-                    sequence_ratio_list[xml_requirement.name] = sequence.ratio()
+                sequence_subject = difflib.SequenceMatcher(None,
+                                                           detect_req_pattern(xml_requirement.description)[0],
+                                                           detect_req_pattern(p_str[0], 'dummy')[0])
+                sequence_object = difflib.SequenceMatcher(None,
+                                                          detect_req_pattern(xml_requirement.description)[1],
+                                                          detect_req_pattern('dummy', p_str[1])[1])
+
+                if sequence_subject.ratio() == 1 and sequence_object.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
+                    sequence_ratio_list[xml_requirement.name] = sequence_object.ratio()
+                # Else do nothing
 
             if sequence_ratio_list:
                 similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
@@ -64,18 +70,36 @@ def check_add_requirement(p_str_list, **kwargs):
                                 f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
                 # Check requirement object content
-                req_object_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
+                req_allocated_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
                 if req_subject_object:
-                    for req_object_object in req_object_object_list.copy():
+                    for req_object_object in req_allocated_object_list.copy():
                         if req_object_object:
-                            if not orchestrator_object.check_object_relationship(req_subject_object, req_object_object,
+                            if not orchestrator_object.check_object_relationship(req_subject_object,
+                                                                                 req_object_object,
+                                                                                 req_object,
                                                                                  **kwargs):
                                 # No relationship found in the datamodel between requirement subject and requirement
                                 # object. Remove it from the list.
-                                req_object_object_list.remove(req_object_object)
+                                req_allocated_object_list.remove(req_object_object)
                             # Else do nothing
                         else:
-                            req_object_object_list.remove(req_object_object)
+                            req_allocated_object_list.remove(req_object_object)
+
+                # Check requirement condition if any
+                if len(req_conditional) > 0:
+                    req_conditional_object_list, _ = retrieve_proper_noun(req_conditional, **kwargs)
+                    if req_subject_object:
+                        for req_conditional_object in req_conditional_object_list.copy():
+                            if req_conditional_object:
+                                if orchestrator_object.check_object_relationship(req_subject_object,
+                                                                                 req_conditional_object,
+                                                                                 req_conditional,
+                                                                                 **kwargs):
+                                    # Relationship found in the datamodel between requirement subject and requirement
+                                    # object. Add it to the allocated object list.
+                                    req_allocated_object_list.append(req_conditional_object)
+                                # Else do nothing
+                            # Else do nothing
 
                 answer = input(f"Please give a requirement summary: ")
                 if len(answer) > 0:
@@ -88,7 +112,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object, req_object_object_list])
+                                                         existing_object, req_subject_object, req_allocated_object_list])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
@@ -96,10 +120,10 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object, req_object_object_list])
+                                                         existing_object, req_subject_object, req_allocated_object_list])
                     else:
                         requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
-                                                 req_subject_object, req_object_object_list])
+                                                 req_subject_object, req_allocated_object_list])
                 else:
                     Logger.set_error(__name__, "No summary entered for identified requirement")
 
