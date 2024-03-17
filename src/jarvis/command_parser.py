@@ -8,8 +8,10 @@ import requests
 from IPython.display import display, HTML, Markdown
 
 # Modules
+from csv_adapter import CsvWriter3SE, CsvParser3SE
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
-    orchestrator_viewpoint_attribute, orchestrator_viewpoint_requirement, orchestrator_object
+    orchestrator_viewpoint_attribute, orchestrator_viewpoint_requirement, orchestrator_object, \
+    orchestrator_viewpoint_type, orchestrator_dictionary
 from jarvis.query import question_answer, query_object_list
 from jarvis.diagram import diagram_generator
 from jarvis.handler import handler_question
@@ -23,10 +25,10 @@ class CmdParser:
     def __init__(self, generator):
         self.command_list = [
             (r"under ([^.|\n]*)", self.matched_under),
-            (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint.check_set_extends),
+            (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint_type.check_add_type_extension),
             (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
             (r"([^. |\n][^.|\n]*) is an ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
-            (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint.add_attribute),
+            (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint_attribute.add_attribute),
             (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", orchestrator_shared.check_add_inheritance),
             (r"The alias of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_alias),
             (r"consider ([^.|\n]*)", orchestrator_viewpoint.check_get_consider),
@@ -59,7 +61,8 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"show ([^.|\n]*)", self.matched_show),
             (r"(.*?)\?", self.matched_question_mark),
-            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list)
+            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
+            (r"import ([^.|\n]*)", CmdParser.matched_import)
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -193,3 +196,27 @@ class CmdParser:
                 display(HTML(question_answer.get_pandas_table(i)))
 
         return None
+
+    @staticmethod
+    def matched_import(p_str_list, **kwargs):
+        """@ingroup jarvis
+        @anchor matched_import
+        Get "import" declaration for importing objects from a csv filename
+
+        @param[in] p_str_list : list of input strings
+        @param[in] kwargs : jarvis data structure
+        @return xml updated (1) or not (0)
+        """
+        update = 0
+        csv_name = p_str_list[0]
+        if os.path.isfile(f"{csv_name}.csv"):
+            csv_parser = CsvParser3SE()
+            csv_dict = csv_parser.parse_csv(f"{csv_name}.csv")
+            Logger.set_info(__name__, f"{csv_name}.csv parsed")
+            update = orchestrator_dictionary.update_dictionaries(csv_dict, **kwargs)
+        else:
+            Logger.set_error(__name__,
+                             f"File {csv_name}.csv does not exist")
+
+        return update
+

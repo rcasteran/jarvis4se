@@ -1,8 +1,8 @@
 from setuptools import setup
 
-setup(name='plantuml_adapter',
+setup(name='csv_adapter',
       version='0.1',
-      description='3SE plantuml adapter',
+      description='3SE csv adapter',
       url='',
       author='',
       author_email='',

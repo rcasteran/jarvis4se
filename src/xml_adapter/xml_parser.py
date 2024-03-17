@@ -12,7 +12,7 @@ from tools import Logger
 class XmlParser3SE:
     """@ingroup xml_adapter
     @anchor XmlParser3SE
-    3SE XML parser
+    3SE xml parser
     """
 
     def __init__(self):
@@ -139,7 +139,8 @@ class XmlParser3SE:
         xml_function_list = self.root.iter('function')
         for xml_function in xml_function_list:
             # Instantiate functions and add them to a list
-            function = datamodel.Function(p_id=xml_function.get('id'), p_name=xml_function.get('name'),
+            function = datamodel.Function(p_id=xml_function.get('id'),
+                                          p_name=xml_function.get('name'),
                                           p_alias=xml_function.get('alias'),
                                           p_type=xml_function.get('type'),
                                           p_derived=xml_function.get('derived'))
@@ -420,10 +421,10 @@ class XmlParser3SE:
             for xml_described_item in xml_described_item_list:
                 attribute.add_described_item((xml_described_item.get("id"),
                                               xml_described_item.get("value")))
-                Logger.set_debug(__name__, f"Element [{xml_described_item.get('id')}]"
-                                           f" is described by "
-                                           f"view [{attribute.id}, {attribute.name}]"
-                                           f" with the value : {xml_described_item.get('value')}")
+                Logger.set_debug(__name__, f"Element [{xml_described_item.get('id')}] "
+                                           f"is described by "
+                                           f"attribute [{attribute.id}, {attribute.name}] "
+                                           f"with the value : {xml_described_item.get('value')}")
 
             # Looking for allocated requirements and add them to the functional interface
             xml_allocated_requirement_list = xml_attribute.iter('allocatedRequirement')

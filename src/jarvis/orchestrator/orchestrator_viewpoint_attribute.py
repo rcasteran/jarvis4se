@@ -4,9 +4,52 @@ Jarvis module
 # Libraries
 
 # Modules
+import datamodel
 from jarvis.orchestrator import orchestrator_viewpoint_requirement
 from jarvis.query import question_answer
+from jarvis import util
 from tools import Logger
+
+
+def add_attribute(attribute_str_list, **kwargs):
+    """
+    Check if each string in xml_attribute_list is not already corresponding to an actual object's
+    name/alias, create new Attribute() object, instantiate it, write it within XML and then returns
+    update_list.
+
+        Parameters:
+            attribute_str_list ([str]) : Lists of string from jarvis cell
+            xml_attribute_list ([Attribute]) : Attribute list from xml parsing
+            output_xml (XmlWriter3SE object) : XML's file object
+
+        Returns:
+            1 if update, else 0
+    """
+    xml_attribute_list = kwargs['xml_attribute_list']
+    output_xml = kwargs['output_xml']
+
+    new_attribute_list = []
+    # Create attribute names list already in xml
+    xml_attribute_name_list = question_answer.get_objects_names(xml_attribute_list)
+    # Filter attribute_list, keeping only the the ones not already in the xml
+    for attribute_name in attribute_str_list:
+        if attribute_name not in xml_attribute_name_list:
+            new_attribute = datamodel.Attribute()
+            new_attribute.set_name(str(attribute_name))
+            # Generate and set unique identifier of length 10 integers
+            new_attribute.set_id(util.get_unique_id())
+            # alias is 'none' by default
+            new_attribute_list.append(new_attribute)
+
+    if not new_attribute_list:
+        return 0
+
+    output_xml.write_attribute(new_attribute_list)
+    for attribute in new_attribute_list:
+        xml_attribute_list.add(attribute)
+        Logger.set_info(__name__,
+                        attribute.name + " is an attribute")
+    return 1
 
 
 def check_add_object_attribute(described_attribute_list, **kwargs):
