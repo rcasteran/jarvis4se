@@ -3,6 +3,7 @@ Module for 3SE csv parsing and writing
 """
 
 # Libraries
+import math
 import uuid
 
 # Modules
@@ -86,15 +87,22 @@ def update_derived_object(element_list):
 
 
 def check_uuid4(p_uuid4):
+    uuid_obj = p_uuid4
     try:
-        identifier = uuid.UUID(p_uuid4, version=4)
+        identifier_length = int(math.log10(int(p_uuid4)))+1
+        if identifier_length != 10:
+            Logger.set_warning(__name__,
+                               f'Identifier "{p_uuid4}" is not a valid uuid4 (length of {identifier_length} digits) '
+                               f'and will be replaced')
+            identifier = uuid.uuid4()
+            uuid_obj = str(identifier.int)[:10]
+        # Else do nothing
     except ValueError:
         if p_uuid4 is not None:
             Logger.set_warning(__name__,
                                f'Identifier "{p_uuid4}" is not a valid uuid4 and will be replaced')
 
         identifier = uuid.uuid4()
-
-    uuid_obj = str(identifier.int)[:10]
+        uuid_obj = str(identifier.int)[:10]
 
     return uuid_obj

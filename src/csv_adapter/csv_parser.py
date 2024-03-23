@@ -507,9 +507,7 @@ class CsvParser3SE:
                 requirement_list.add(requirement)
 
                 # Looking for requirement description
-                csv_description_text_list = row[util.CSV_DESCRIPTION_LIST_IDX].split("|")
-                for csv_description_text in csv_description_text_list:
-                    requirement.set_description(csv_description_text)
+                requirement.set_description(row[util.CSV_DESCRIPTION_LIST_IDX])
 
                 # Looking for requirement child
                 csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
@@ -580,7 +578,7 @@ class CsvParser3SE:
                 if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_DATA:
                     if row[util.CSV_ID_IDX] == object_data.id:
                         # looking for all elements with tag "predecessor"
-                        csv_predecessor_id_list = row[util.CSV_PREDECESSOR_LIST_IDX]
+                        csv_predecessor_id_list = row[util.CSV_PREDECESSOR_LIST_IDX].split("|")
                         for csv_predecessor_id in csv_predecessor_id_list:
                             for data in data_list:
                                 if csv_predecessor_id == data.id:

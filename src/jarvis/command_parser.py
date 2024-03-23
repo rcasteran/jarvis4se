@@ -62,7 +62,9 @@ class CmdParser:
             (r"show ([^.|\n]*)", self.matched_show),
             (r"(.*?)\?", self.matched_question_mark),
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
-            (r"import ([^.|\n]*)", CmdParser.matched_import)
+            (r"import ([^.|\n]*)", CmdParser.matched_import),
+            (r"export ([^.|\n]*)", CmdParser.matched_export)
+
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -220,3 +222,18 @@ class CmdParser:
 
         return update
 
+    @staticmethod
+    def matched_export(p_str_list, **kwargs):
+        """@ingroup jarvis
+        @anchor matched_import
+        Get "export" declaration for exporting objects to a csv filename
+
+        @param[in] p_str_list : list of input strings
+        @param[in] kwargs : jarvis data structure
+        @return None (no xml update, no info displayed)
+        """
+        csv_name = p_str_list[0]
+        csv_writer = CsvWriter3SE(f"{csv_name}.csv")
+        csv_writer.write_file(**kwargs)
+
+        return None
