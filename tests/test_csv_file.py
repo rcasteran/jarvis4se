@@ -27,7 +27,9 @@ def test_simple_function_csv(input_test_simple_function):
     """
     file_name = "test_simple_function_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_simple_function}\n"
+                         f"{input_test_simple_function}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}")
 
     function_list = csv_parser.parse_csv(file_name + ".csv")['csv_function_list']
@@ -53,10 +55,14 @@ def test_instantiated_attribute_csv(input_test_fun_elem_with_attribute):
     file_name = "test_instantiated_attribute_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_attribute[0]}\n")
+
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_fun_elem_with_attribute[1]}\n")
+
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_with_attribute[2]}\n"
+                         f"{input_test_fun_elem_with_attribute[2]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"                         
                          f"export {file_name}\n")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")
@@ -95,7 +101,9 @@ def test_extended_attribute_csv(input_test_extended_attribute):
     """
     file_name = "test_extended_attribute_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_extended_attribute}\n"
+                         f"{input_test_extended_attribute}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}\n")
 
     attribute_list = csv_parser.parse_csv(file_name + ".csv")['csv_attribute_list']
@@ -126,7 +134,9 @@ def test_functional_interface_with_attribute_csv(input_test_functional_interface
     """
     file_name = "test_functional_interface_with_attribute_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_functional_interface_with_attribute}\n"
+                         f"{input_test_functional_interface_with_attribute}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")
@@ -162,7 +172,9 @@ def test_fun_elem_exposes_interface_csv(input_test_fun_elem_exposes_interface):
     """
     file_name = "test_fun_elem_exposes_interface_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_fun_elem_exposes_interface}\n"
+                         f"{input_test_fun_elem_exposes_interface}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}\n")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")
@@ -206,7 +218,9 @@ def test_function_output_auto_csv(input_test_function_output_auto_decomposition)
     file_name = "test_function_output_auto_csv"
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_function_output_auto_decomposition[0]}\n"
-                         f"{input_test_function_output_auto_decomposition[1]}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}\n")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")
@@ -246,7 +260,9 @@ def test_function_output_auto_splitted_csv(input_test_function_output_auto_decom
                          f"{input_test_function_output_auto_decomposition[0]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_function_output_auto_decomposition[1]}\n"
+                         f"{input_test_function_output_auto_decomposition[1]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}\n")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")
@@ -290,7 +306,9 @@ def test_function_output_auto_external_csv(input_test_function_output_auto_decom
                          f"{input_test_function_output_auto_decomposition[1]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_test_function_output_auto_decomposition[2]}\n"
+                         f"{input_test_function_output_auto_decomposition[2]}\n")
+
+    jarvis4se.jarvis("", f"with {file_name}\n"
                          f"export {file_name}\n")
 
     obj_dict = csv_parser.parse_csv(file_name + ".csv")

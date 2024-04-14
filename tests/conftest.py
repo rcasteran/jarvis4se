@@ -743,16 +743,13 @@ def input_test_fun_elem_with_attribute():
         Fun elem is a functional element
         F1 is allocated to Fun elem
         ========================================
-        with fun_elem_context_with_attribute
         A is an attribute
         B is an attribute. C is an attribute
         ========================================
-        with fun_elem_context_with_attribute
         The A of F1 is 4,2
         The C of F1 is pink
         The B of Fun elem is 8,5.
         The A of Fun elem is 100
-        show context Fun elem
     """
     first_part = "\n".join(["F1 is a function",
                             "Fun elem is a functional element",

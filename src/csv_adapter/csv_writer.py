@@ -444,7 +444,7 @@ class CsvWriter3SE:
         for attribute in attribute_list:
             described_element_list = ''
             for described_element in attribute.described_item_list:
-                described_element_list += described_element[0].id + util.CSV_MEMBER_ATTRIBUTE_SPLIT \
+                described_element_list += described_element[0] + util.CSV_MEMBER_ATTRIBUTE_SPLIT \
                                           + described_element[1] + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
