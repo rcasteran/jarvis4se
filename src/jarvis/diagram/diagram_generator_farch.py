@@ -150,7 +150,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
                                 xml_producer_function_list, xml_fun_elem_list, xml_attribute_list,
                                 xml_data_list, xml_fun_inter_list, diagram_level=None):
     """@ingroup diagram
-    @anchor show_fun_elem_context
+    @anchor show_fun_elem_decomposition
     Creates lists with desired objects for functional element decomposition, send them to plantuml_adapter.py
     and returns plantuml text
     @param[in] fun_elem_str: name of the functional element

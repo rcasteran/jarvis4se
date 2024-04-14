@@ -114,7 +114,7 @@ def str_allocated_req(obj):
 
 def str_allocated_data(obj):
     """@ingroup datamodel
-    @anchor str_allocated_req
+    @anchor str_allocated_data
     Return a string representation of the allocated data list of a class instance
     @param[in] obj class instance
     @return string

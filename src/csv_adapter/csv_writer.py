@@ -13,8 +13,8 @@ from tools import Logger
 
 class CsvWriter3SE:
     """@ingroup csv_adapter
-    @anchor CsvParser3SE
-    3SE csv parser
+    @anchor CsvWriter3SE
+    3SE csv writer
     """
 
     def __init__(self, output_filename):
