@@ -35,3 +35,15 @@ def remove_xml_file(file_name):
     path = Path(file_path)
     if path:
         os.remove(path)
+
+
+def remove_csv_file(file_name):
+    """@ingroup test_lib
+    Remove the CSV file generated during the test
+
+    @return None
+    """
+    file_path = os.path.join("./", f"{file_name}.csv")
+    path = Path(file_path)
+    if path:
+        os.remove(path)

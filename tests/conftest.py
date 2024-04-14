@@ -98,7 +98,10 @@ def input_test_issue_5():
 def input_test_fun_elem_exposes_interface():
     """@ingroup test_input_cell
     @anchor input_test_fun_elem_exposes_interface
-    Defines input fixture for @ref test_fun_elem_exposes_interface_in and @ref test_fun_elem_exposes_interface_xml
+    Defines input fixture for:
+    - @ref test_fun_elem_exposes_interface_in
+    - @ref test_fun_elem_exposes_interface_xml
+    - @ref test_fun_elem_exposes_interface_csv
 
     @return input fixture
 
@@ -730,6 +733,7 @@ def input_test_fun_elem_with_attribute():
     - @ref test_attribute_declaration_in
     - @ref test_instantiated_attribute_in
     - @ref test_instantiated_attribute_xml
+    - @ref test_instantiated_attribute_csv
 
     @return input fixture
 
@@ -997,6 +1001,7 @@ def input_test_simple_function():
     Defines input fixture for:
     - @ref test_simple_function_plantuml_context
     - @ref test_simple_function_xml
+    - @ref test_simple_function_csv
     - @ref test_simple_function_handler_question
 
     @return input fixture
@@ -1013,7 +1018,9 @@ def input_test_simple_function():
 def input_test_extended_attribute():
     """@ingroup test_xml_file
     @anchor input_test_extended_attribute
-    Defines input fixture for @ref test_extended_attribute_xml
+    Defines input fixture for:
+    - @ref test_extended_attribute_xml
+    - @ref test_extended_attribute_csv
 
     @return input fixture
 
@@ -1038,7 +1045,9 @@ def input_test_extended_attribute():
 def input_test_functional_interface_with_attribute():
     """@ingroup test_xml_file
     @anchor input_test_functional_interface_with_attribute
-    Defines input fixture for @ref test_functional_interface_with_attribute_xml
+    Defines input fixture for:
+    - @ref test_functional_interface_with_attribute_xml
+    - @ref test_functional_interface_with_attribute_csv
 
     @return input fixture
 
@@ -1087,8 +1096,11 @@ def input_test_function_output_auto_decomposition():
     - @ref test_function_output_auto_external_plantuml_decomposition
     - @ref test_function_output_auto_splitted_plantuml_decomposition
     - @ref test_function_output_auto_xml
+    - @ref test_function_output_auto_csv
     - @ref test_function_output_auto_splitted_xml
+    - @ref test_function_output_auto_splitted_csv
     - @ref test_function_output_auto_external_xml
+    - @ref test_function_output_auto_external_csv
     - @ref test_function_output_auto_splitted_in
     - @ref test_function_output_auto_in
     - @ref test_function_output_auto_external_in

@@ -10,6 +10,8 @@ import uuid
 from tools import Logger
 
 # Constants
+CSV_MEMBER_SPLIT = "|"
+CSV_MEMBER_ATTRIBUTE_SPLIT = "@"
 CSV_ID_IDX = 0
 CSV_BASE_IDX = 1
 CSV_BASE_TAG_TYPE = "type"

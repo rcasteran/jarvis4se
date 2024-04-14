@@ -48,6 +48,8 @@ class CsvParser3SE:
         @param[in] input_filename : CSV file name
         @return CSV dictionary
         """
+        self.array = []
+
         try:
             # Parse the CSV file
             with open(input_filename, 'r', encoding='utf8') as file_reader:
@@ -108,7 +110,7 @@ class CsvParser3SE:
 
                 if not is_found:
                     Logger.set_error(__name__,
-                                     f"Unknown type {obj_type} found when parsing csv")
+                                     f"Unknown type {obj_type.name} found when parsing csv")
 
         return type_list
 
@@ -131,18 +133,22 @@ class CsvParser3SE:
                 function_list.add(function)
 
                 # Looking for functions with "functionalPart" i.e childs and create a list
-                csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
-                for csv_part_id in csv_part_id_list:
-                    parent_list[csv_part_id] = function.id
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = function.id
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the function
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    function.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        function.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"function [{function.id}, {function.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"function [{function.id}, {function.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -169,27 +175,33 @@ class CsvParser3SE:
                 state_list.add(state)
 
                 # Looking for states with "statePart" i.e child and create a list
-                csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
-                for csv_part_id in csv_part_id_list:
-                    parent_list[csv_part_id] = state.id
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = state.id
+                # Else do nothing
 
                 # Looking for allocated functions and add them to the state
-                csv_function_id_list = row[util.CSV_FUNCTION_LIST_IDX].split("|")
-                for csv_function_id in csv_function_id_list:
-                    state.add_allocated_function(csv_function_id)
+                if len(row[util.CSV_FUNCTION_LIST_IDX]) > 0:
+                    csv_function_id_list = row[util.CSV_FUNCTION_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_function_id in csv_function_id_list:
+                        state.add_allocated_function(csv_function_id)
 
-                    Logger.set_debug(__name__, f"Function [{csv_function_id}]"
-                                               f" is allocated to "
-                                               f"state [{state.id}, {state.name}]")
+                        Logger.set_debug(__name__, f"Function [{csv_function_id}]"
+                                                   f" is allocated to "
+                                                   f"state [{state.id}, {state.name}]")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the state
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    state.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        state.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"state [{state.id}, {state.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"state [{state.id}, {state.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -215,18 +227,22 @@ class CsvParser3SE:
                 transition_list.add(transition)
 
                 # Looking for conditions and add them to the transition
-                csv_condition_text_list = row[util.CSV_CONDITION_LIST_IDX].split("|")
-                for csv_condition_text in csv_condition_text_list:
-                    transition.add_condition(csv_condition_text)
+                if len(row[util.CSV_CONDITION_LIST_IDX]) > 0:
+                    csv_condition_text_list = row[util.CSV_CONDITION_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_condition_text in csv_condition_text_list:
+                        transition.add_condition(csv_condition_text)
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the transition
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    transition.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        transition.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"transition [{transition.id}, {transition.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"transition [{transition.id}, {transition.name}]")
+                # Else do nothing
             # Else do nothing
 
         return transition_list
@@ -248,42 +264,52 @@ class CsvParser3SE:
                 functional_element_list.add(fun_elem)
 
                 # Looking for "functionalElementPart" i.e child and create a list
-                csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
-                for csv_part_id in csv_part_id_list:
-                    parent_list[csv_part_id] = fun_elem.id
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = fun_elem.id
+                # Else do nothing
 
                 # Looking for allocated states and add them to the functional element
-                csv_state_id_list = row[util.CSV_STATE_LIST_IDX].split("|")
-                for csv_state_id in csv_state_id_list:
-                    fun_elem.add_allocated_state(csv_state_id)
-                    Logger.set_debug(__name__, f"State [{csv_state_id}]"
-                                               f" is allocated to "
-                                               f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                if len(row[util.CSV_STATE_LIST_IDX]) > 0:
+                    csv_state_id_list = row[util.CSV_STATE_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_state_id in csv_state_id_list:
+                        fun_elem.add_allocated_state(csv_state_id)
+                        Logger.set_debug(__name__, f"State [{csv_state_id}]"
+                                                   f" is allocated to "
+                                                   f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                # Else do nothing
 
                 # Looking for allocated functions and add them to the functional element
-                csv_function_id_list = row[util.CSV_FUNCTION_LIST_IDX].split("|")
-                for csv_function_id in csv_function_id_list:
-                    fun_elem.add_allocated_function(csv_function_id)
-                    Logger.set_debug(__name__, f"Function [{csv_function_id}]"
-                                               f" is allocated to "
-                                               f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                if len(row[util.CSV_FUNCTION_LIST_IDX]) > 0:
+                    csv_function_id_list = row[util.CSV_FUNCTION_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_function_id in csv_function_id_list:
+                        fun_elem.add_allocated_function(csv_function_id)
+                        Logger.set_debug(__name__, f"Function [{csv_function_id}]"
+                                                   f" is allocated to "
+                                                   f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                # Else do nothing
 
                 # Looking for exposed interface and add them to the functional element
-                csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split("|")
-                for csv_interface_id in csv_interface_id_list:
-                    fun_elem.add_exposed_interface(csv_interface_id)
-                    Logger.set_debug(__name__, f"Functional interface [{csv_interface_id}]"
-                                               f" is exposed by "
-                                               f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                if len(row[util.CSV_INTERFACE_LIST_IDX]) > 0:
+                    csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_interface_id in csv_interface_id_list:
+                        fun_elem.add_exposed_interface(csv_interface_id)
+                        Logger.set_debug(__name__, f"Functional interface [{csv_interface_id}]"
+                                                   f" is exposed by "
+                                                   f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the functional element
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    fun_elem.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        fun_elem.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"functional element [{fun_elem.id}, {fun_elem.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -309,12 +335,14 @@ class CsvParser3SE:
                 view_list.add(view)
 
                 # Looking for allocated items and add them to the view
-                csv_element_id_list = row[util.CSV_VIEW_ELEMENT_LIST_IDX].split("|")
-                for csv_element_id in csv_element_id_list:
-                    view.add_allocated_item(csv_element_id)
-                    Logger.set_debug(__name__, f"Element [{csv_element_id}]"
-                                               f" is allocated to "
-                                               f"view [{view.id}, {view.name}]")
+                if len(row[util.CSV_VIEW_ELEMENT_LIST_IDX]) > 0:
+                    csv_element_id_list = row[util.CSV_VIEW_ELEMENT_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_element_id in csv_element_id_list:
+                        view.add_allocated_item(csv_element_id)
+                        Logger.set_debug(__name__, f"Element [{csv_element_id}]"
+                                                   f" is allocated to "
+                                                   f"view [{view.id}, {view.name}]")
+                # Else do nothing
             # Else do nothing
 
         return view_list
@@ -335,24 +363,28 @@ class CsvParser3SE:
                 attribute_list.add(attribute)
 
                 # Looking for described items and add them to the attribute
-                csv_element_list = row[util.CSV_DESCRIBED_ELEMENT_LIST_IDX].split("|")
-                for csv_element in csv_element_list:
-                    csv_element_attribute = csv_element.split(",")
-                    attribute.add_described_item((csv_element_attribute[0],
-                                                  csv_element_attribute[1]))
-                    Logger.set_debug(__name__, f"Element [{csv_element_attribute[0]}] "
-                                               f"is described by "
-                                               f"attribute [{attribute.id}, {attribute.name}] "
-                                               f"with the value : {csv_element_attribute[1]}")
+                if len(row[util.CSV_DESCRIBED_ELEMENT_LIST_IDX]) > 0:
+                    csv_element_list = row[util.CSV_DESCRIBED_ELEMENT_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_element in csv_element_list:
+                        csv_element_attribute = csv_element.split(util.CSV_MEMBER_ATTRIBUTE_SPLIT)
+                        attribute.add_described_item((csv_element_attribute[0],
+                                                      csv_element_attribute[1]))
+                        Logger.set_debug(__name__, f"Element [{csv_element_attribute[0]}] "
+                                                   f"is described by "
+                                                   f"attribute [{attribute.id}, {attribute.name}] "
+                                                   f"with the value : {csv_element_attribute[1]}")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the functional interface
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    attribute.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        attribute.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"attribute [{attribute.id}, {attribute.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"attribute [{attribute.id}, {attribute.name}]")
+                # Else do nothing
             # Else do nothing
 
         return attribute_list
@@ -374,21 +406,25 @@ class CsvParser3SE:
                 functional_interface_list.add(fun_inter)
 
                 # Looking for allocated data and add them to the fun inter
-                csv_allocated_data_id_list = row[util.CSV_DATA_LIST_IDX].split("|")
-                for csv_allocated_data_id in csv_allocated_data_id_list:
-                    fun_inter.add_allocated_data(csv_allocated_data_id)
-                    Logger.set_debug(__name__, f"Data [{csv_allocated_data_id}]"
-                                               f" is allocated to "
-                                               f"functional interface [{fun_inter.id}, {fun_inter.name}]")
+                if len(row[util.CSV_DATA_LIST_IDX]) > 0:
+                    csv_allocated_data_id_list = row[util.CSV_DATA_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_data_id in csv_allocated_data_id_list:
+                        fun_inter.add_allocated_data(csv_allocated_data_id)
+                        Logger.set_debug(__name__, f"Data [{csv_allocated_data_id}]"
+                                                   f" is allocated to "
+                                                   f"functional interface [{fun_inter.id}, {fun_inter.name}]")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the functional interface
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    fun_inter.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        fun_inter.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"functional interface [{fun_inter.id}, {fun_inter.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"functional interface [{fun_inter.id}, {fun_inter.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to update derived functional elements according to their ids
@@ -414,34 +450,42 @@ class CsvParser3SE:
                 physical_element_list.add(phy_elem)
 
                 # Looking for "physicalPart" i.e child and create a list
-                csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
-                for csv_part_id in csv_part_id_list:
-                    parent_list[csv_part_id] = phy_elem.id
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = phy_elem.id
+                # Else do nothing
 
                 # Looking for allocated functions and add them to the functional element
-                csv_fun_elem_id_list = row[util.CSV_FUN_ELEM_LIST_IDX].split("|")
-                for csv_fun_elem_id in csv_fun_elem_id_list:
-                    phy_elem.add_allocated_fun_elem(csv_fun_elem_id)
-                    Logger.set_debug(__name__, f"Functional element [{csv_fun_elem_id}]"
-                                               f" is allocated to "
-                                               f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                if len(row[util.CSV_FUN_ELEM_LIST_IDX]) > 0:
+                    csv_fun_elem_id_list = row[util.CSV_FUN_ELEM_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_fun_elem_id in csv_fun_elem_id_list:
+                        phy_elem.add_allocated_fun_elem(csv_fun_elem_id)
+                        Logger.set_debug(__name__, f"Functional element [{csv_fun_elem_id}]"
+                                                   f" is allocated to "
+                                                   f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                # Else do nothing
 
                 # Looking for exposed interface and add them to the functional element
-                csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split("|")
-                for csv_interface_id in csv_interface_id_list:
-                    phy_elem.add_exposed_interface(csv_interface_id)
-                    Logger.set_debug(__name__, f"Physical interface [{csv_interface_id}]"
-                                               f" is exposed by "
-                                               f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                if len(row[util.CSV_INTERFACE_LIST_IDX]) > 0:
+                    csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_interface_id in csv_interface_id_list:
+                        phy_elem.add_exposed_interface(csv_interface_id)
+                        Logger.set_debug(__name__, f"Physical interface [{csv_interface_id}]"
+                                                   f" is exposed by "
+                                                   f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the physical element
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    phy_elem.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        phy_elem.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -468,21 +512,25 @@ class CsvParser3SE:
                 physical_interface_list.add(phy_inter)
 
                 # Looking for allocated fun_inter and add them to the phy inter
-                csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split("|")
-                for csv_interface_id in csv_interface_id_list:
-                    phy_inter.add_allocated_fun_inter(csv_interface_id)
-                    Logger.set_debug(__name__, f"Functional interface [{csv_interface_id}] "
-                                               f"is allocated to "
-                                               f"physical interface [{phy_inter.id}, {phy_inter.name}]")
+                if len(row[util.CSV_INTERFACE_LIST_IDX]) > 0:
+                    csv_interface_id_list = row[util.CSV_INTERFACE_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_interface_id in csv_interface_id_list:
+                        phy_inter.add_allocated_fun_inter(csv_interface_id)
+                        Logger.set_debug(__name__, f"Functional interface [{csv_interface_id}] "
+                                                   f"is allocated to "
+                                                   f"physical interface [{phy_inter.id}, {phy_inter.name}]")
+                # Else do nothing
 
                 # Looking for allocated requirements and add them to the physical interface
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    phy_inter.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        phy_inter.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"physical interface [{phy_inter.id}, {phy_inter.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"physical interface [{phy_inter.id}, {phy_inter.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to update derived functions according to their ids
@@ -510,9 +558,11 @@ class CsvParser3SE:
                 requirement.set_description(row[util.CSV_DESCRIPTION_LIST_IDX])
 
                 # Looking for requirement child
-                csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split("|")
-                for csv_part_id in csv_part_id_list:
-                    parent_list[csv_part_id] = requirement.id
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = requirement.id
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -537,40 +587,46 @@ class CsvParser3SE:
                 data_list.add(data)
 
                 # Looking for allocated requirements and add them to the data
-                csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
-                for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
-                    data.add_allocated_requirement(csv_allocated_requirement_id)
+                if len(row[util.CSV_REQ_LIST_IDX]) > 0:
+                    csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_requirement_id in csv_allocated_requirement_id_list:
+                        data.add_allocated_requirement(csv_allocated_requirement_id)
 
-                    Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
-                                               f" is satisfied by "
-                                               f"data [{data.id}, {data.name}]")
+                        Logger.set_debug(__name__, f"Requirement [{csv_allocated_requirement_id}]"
+                                                   f" is satisfied by "
+                                                   f"data [{data.id}, {data.name}]")
+                # Else do nothing
 
                 # looking for all elements with tag "consumer" and create a list [flow_name, consumer_function]
-                csv_consumer_list = row[util.CSV_CONSUMER_LIST_IDX].split("|")
-                for csv_consumer in csv_consumer_list:
-                    csv_consumer_attribute = csv_consumer.split(",")
-                    for function in self.csv_dict['csv_function_list']:
-                        if csv_consumer_attribute[0] == function.id:
-                            consumer_function_list.append([data.name, function])
-                            Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
-                                                       f"is consumed by "
-                                                       f"data [{function.id}, {function.name}]")
+                if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
+                    csv_consumer_list = row[util.CSV_CONSUMER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_consumer in csv_consumer_list:
+                        csv_consumer_attribute = csv_consumer.split(util.CSV_MEMBER_ATTRIBUTE_SPLIT)
+                        for function in self.csv_dict['csv_function_list']:
+                            if csv_consumer_attribute[0] == function.id:
+                                consumer_function_list.append([data.name, function])
+                                Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
+                                                           f"is consumed by "
+                                                           f"data [{function.id}, {function.name}]")
 
-                            if csv_consumer_attribute[1] != 'none':
-                                function.set_input_role(data.name)
-                            # Avoid to reset the input role once already set
-                            elif function.input_role is None:
-                                function.set_input_role(None)
+                                if csv_consumer_attribute[1] != 'none':
+                                    function.set_input_role(data.name)
+                                # Avoid to reset the input role once already set
+                                elif function.input_role is None:
+                                    function.set_input_role(None)
+                # Else do nothing
 
                 # looking for all elements with tag "producer" and create a list [flow_name, producer_function]
-                csv_producer_id_list = row[util.CSV_PRODUCER_LIST_IDX].split("|")
-                for csv_producer_id in csv_producer_id_list:
-                    for function in self.csv_dict['csv_function_list']:
-                        if csv_producer_id == function.id:
-                            producer_function_list.append([data.name, function])
-                            Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
-                                                       f"is produced by "
-                                                       f"function [{function.id}, {function.name}]")
+                if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
+                    csv_producer_id_list = row[util.CSV_PRODUCER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_producer_id in csv_producer_id_list:
+                        for function in self.csv_dict['csv_function_list']:
+                            if csv_producer_id == function.id:
+                                producer_function_list.append([data.name, function])
+                                Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
+                                                           f"is produced by "
+                                                           f"function [{function.id}, {function.name}]")
+                # Else do nothing
 
         # Loop on the data_list once created to find the predecessor and add it to list
         for object_data in data_list:
@@ -578,15 +634,17 @@ class CsvParser3SE:
                 if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_DATA:
                     if row[util.CSV_ID_IDX] == object_data.id:
                         # looking for all elements with tag "predecessor"
-                        csv_predecessor_id_list = row[util.CSV_PREDECESSOR_LIST_IDX].split("|")
-                        for csv_predecessor_id in csv_predecessor_id_list:
-                            for data in data_list:
-                                if csv_predecessor_id == data.id:
-                                    object_data.add_predecessor(data)
+                        if len(row[util.CSV_PREDECESSOR_LIST_IDX]) > 0:
+                            csv_predecessor_id_list = row[util.CSV_PREDECESSOR_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                            for csv_predecessor_id in csv_predecessor_id_list:
+                                for data in data_list:
+                                    if csv_predecessor_id == data.id:
+                                        object_data.add_predecessor(data)
 
-                                    Logger.set_debug(__name__, f"Data [{data.id, data.name}]"
-                                                               f" is predecessor of "
-                                                               f"data [{object_data.id, object_data.name}]")
+                                        Logger.set_debug(__name__, f"Data [{data.id, data.name}]"
+                                                                   f" is predecessor of "
+                                                                   f"data [{object_data.id, object_data.name}]")
+                        # Else do nothing
 
         return data_list, producer_function_list, consumer_function_list
 

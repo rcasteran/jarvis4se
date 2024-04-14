@@ -95,13 +95,13 @@ class CsvWriter3SE:
                                  'view element list'
                                  'requirement list'])
 
+                array = []
                 for i in range(0, len(xml_dictionary_list)):
                     call = self.write_list.get(i)
-                    array = []
                     array = call(array, xml_dictionary_list.get(i))
 
-                    for row in array:
-                        writer.writerow(row)
+                for row in array:
+                    writer.writerow(row)
 
             Logger.set_info(__name__, f"{self.file} created")
         except OSError:
@@ -115,7 +115,7 @@ class CsvWriter3SE:
         """
         if isinstance(obj, datamodel.BaseType):
             # Object is a basic 3SE type
-            type_str = str(obj)
+            type_str = str(obj).lower()
         else:
             type_str = obj.id
 
@@ -130,11 +130,11 @@ class CsvWriter3SE:
         for function in function_list:
             children_id_list = ''
             for function_child in function.child_list:
-                children_id_list += function_child.id + "|"
+                children_id_list += function_child.id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in function.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             if function.derived != '':
                 function_derived = function.derived.id
@@ -176,11 +176,11 @@ class CsvWriter3SE:
         for data in data_list:
             predecessor_id_list = ''
             for predecessor in data.predecessor_list:
-                predecessor_id_list += predecessor.id + '|'
+                predecessor_id_list += predecessor.id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in data.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             array.append([data.id,
                           util.CSV_BASE_TAG_DATA,
@@ -219,9 +219,19 @@ class CsvWriter3SE:
             for row in array:
                 if row[util.CSV_NAME_IDX] == consumer[0]:
                     if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
-                        row[util.CSV_CONSUMER_LIST_IDX] += "|" + consumer[1].id + "," + consumer[1].operand
+                        if consumer[1].operand is not None:
+                            row[util.CSV_CONSUMER_LIST_IDX] += util.CSV_MEMBER_SPLIT + consumer[1].id \
+                                                               + util.CSV_MEMBER_ATTRIBUTE_SPLIT + consumer[1].operand
+                        else:
+                            row[util.CSV_CONSUMER_LIST_IDX] += util.CSV_MEMBER_SPLIT + consumer[1].id \
+                                                               + util.CSV_MEMBER_ATTRIBUTE_SPLIT + "none"
                     else:
-                        row[util.CSV_CONSUMER_LIST_IDX] += consumer[1].id + "," + consumer[1].operand
+                        if consumer[1].operand is not None:
+                            row[util.CSV_CONSUMER_LIST_IDX] += consumer[1].id + util.CSV_MEMBER_ATTRIBUTE_SPLIT \
+                                                               + consumer[1].operand
+                        else:
+                            row[util.CSV_CONSUMER_LIST_IDX] += consumer[1].id + util.CSV_MEMBER_ATTRIBUTE_SPLIT \
+                                                               + "none"
                 # Else do nothing
 
         return array
@@ -237,7 +247,7 @@ class CsvWriter3SE:
             for row in array:
                 if row[util.CSV_NAME_IDX] == producer[0]:
                     if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
-                        row[util.CSV_PRODUCER_LIST_IDX] += "|" + producer[1].id
+                        row[util.CSV_PRODUCER_LIST_IDX] += util.CSV_MEMBER_SPLIT + producer[1].id
                     else:
                         row[util.CSV_PRODUCER_LIST_IDX] += producer[1].id
                 # Else do nothing
@@ -253,15 +263,15 @@ class CsvWriter3SE:
         for state in state_list:
             children_id_list = ''
             for state_child in state.child_list:
-                children_id_list += state_child.id + "|"
+                children_id_list += state_child.id + util.CSV_MEMBER_SPLIT
 
             allocated_function_id_list = ''
             for allocated_function_id in state.allocated_function_list:
-                allocated_function_id_list += allocated_function_id + '|'
+                allocated_function_id_list += allocated_function_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in state.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             array.append([state.id,
                           util.CSV_BASE_TAG_STATE,
@@ -298,11 +308,11 @@ class CsvWriter3SE:
         for transition in transition_list:
             condition_text_list = ''
             for condition_text in transition.condition_list:
-                condition_text_list += condition_text + '|'
+                condition_text_list += condition_text + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in transition.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             array.append([transition.id,
                           util.CSV_BASE_TAG_TRANSITION,
@@ -339,23 +349,23 @@ class CsvWriter3SE:
         for element in element_list:
             children_id_list = ''
             for element_child in element.child_list:
-                children_id_list += element_child.id + "|"
+                children_id_list += element_child.id + util.CSV_MEMBER_SPLIT
 
             allocated_state_id_list = ''
             for allocated_state_id in element.allocated_state_list:
-                allocated_state_id_list += allocated_state_id + '|'
+                allocated_state_id_list += allocated_state_id + util.CSV_MEMBER_SPLIT
 
             allocated_function_id_list = ''
             for allocated_function_id in element.allocated_function_list:
-                allocated_function_id_list += allocated_function_id + '|'
+                allocated_function_id_list += allocated_function_id + util.CSV_MEMBER_SPLIT
 
             exposed_interface_id_list = ''
             for exposed_interface_id in element.exposed_interface_list:
-                exposed_interface_id_list += exposed_interface_id + '|'
+                exposed_interface_id_list += exposed_interface_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in element.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             if element.derived != '':
                 element_derived = element.derived.id
@@ -397,7 +407,7 @@ class CsvWriter3SE:
         for view in view_list:
             allocated_element_id_list = ''
             for allocated_element_id in view.allocated_item_list:
-                allocated_element_id_list += allocated_element_id + '|'
+                allocated_element_id_list += allocated_element_id + util.CSV_MEMBER_SPLIT
 
             array.append([view.id,
                           util.CSV_BASE_TAG_VIEW,
@@ -434,11 +444,12 @@ class CsvWriter3SE:
         for attribute in attribute_list:
             described_element_list = ''
             for described_element in attribute.described_item_list:
-                described_element_list += described_element[0] + ',' + described_element[1] + '|'
+                described_element_list += described_element[0].id + util.CSV_MEMBER_ATTRIBUTE_SPLIT \
+                                          + described_element[1] + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in attribute.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             array.append([attribute.id,
                           util.CSV_BASE_TAG_ATTRIBUTE,
@@ -475,11 +486,11 @@ class CsvWriter3SE:
         for interface in interface_list:
             allocated_data_id_list = ''
             for allocated_data_id in interface.allocated_data_list:
-                allocated_data_id_list += allocated_data_id + '|'
+                allocated_data_id_list += allocated_data_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in interface.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             if interface.derived != '':
                 interface_derived = interface.derived.id
@@ -521,19 +532,19 @@ class CsvWriter3SE:
         for element in element_list:
             children_id_list = ''
             for element_child in element.child_list:
-                children_id_list += element_child.id + "|"
+                children_id_list += element_child.id + util.CSV_MEMBER_SPLIT
 
             allocated_fun_elem_id_list = ''
             for allocated_fun_elem_id in element.allocated_fun_elem_list:
-                allocated_fun_elem_id_list += allocated_fun_elem_id + '|'
+                allocated_fun_elem_id_list += allocated_fun_elem_id + util.CSV_MEMBER_SPLIT
 
             exposed_interface_id_list = ''
             for exposed_interface_id in element.exposed_interface_list:
-                exposed_interface_id_list += exposed_interface_id + '|'
+                exposed_interface_id_list += exposed_interface_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in element.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             if element.derived != '':
                 element_derived = element.derived.id
@@ -575,11 +586,11 @@ class CsvWriter3SE:
         for interface in interface_list:
             allocated_fun_intf_id_list = ''
             for allocated_fun_intf_id in interface.allocated_fun_inter_list:
-                allocated_fun_intf_id_list += allocated_fun_intf_id + '|'
+                allocated_fun_intf_id_list += allocated_fun_intf_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in interface.allocated_req_list:
-                allocated_requirement_id_list += allocated_requirement_id + '|'
+                allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
             if interface.derived != '':
                 interface_derived = interface.derived.id
@@ -654,7 +665,7 @@ class CsvWriter3SE:
         for requirement in requirement_list:
             children_id_list = ''
             for requirement_child in requirement.child_list:
-                children_id_list += requirement_child.id + "|"
+                children_id_list += requirement_child.id + util.CSV_MEMBER_SPLIT
 
             array.append([requirement.id,
                           util.CSV_BASE_TAG_REQ,
