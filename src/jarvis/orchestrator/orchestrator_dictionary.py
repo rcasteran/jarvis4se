@@ -64,19 +64,35 @@ def update_dictionaries(p_csv_dict, **kwargs):
         for csv_obj in csv_obj_dict:
             is_obj_id = False
             for xml_obj in xml_obj_dict:
-                if xml_obj.id == csv_obj.id:
-                    is_obj_id = True
-                    Logger.set_info(__name__,
-                                    f'Object "{xml_obj.name}" has the same identifier than "{csv_obj.name}"')
-                    break
-                # Else do nothing
+                if i in [1, 2]:
+                    if xml_obj[0] == csv_obj[0] and xml_obj[1].id == csv_obj[1].id:
+                        is_obj_id = True
+                        Logger.set_info(__name__,
+                                        f'Relationship "{xml_obj}" is the same than "{csv_obj}"')
+                else:
+                    if xml_obj.id == csv_obj.id:
+                        is_obj_id = True
+                        Logger.set_info(__name__,
+                                        f'Object "{xml_obj.name}" has the same identifier than "{csv_obj.name}"')
+                        break
+                    # Else do nothing
 
             if not is_obj_id:
-                xml_obj_dict.add(csv_obj)
+                if i in [1, 2]:
+                    xml_obj_dict.append(csv_obj)
+                else:
+                    xml_obj_dict.add(csv_obj)
+
                 call = output_xml_write_list.get(i)
                 call([csv_obj])
-                Logger.set_info(__name__,
-                                f'Object "{csv_obj.name}" added')
+
+                if i in [1, 2]:
+                    Logger.set_info(__name__,
+                                    f'Relationship {csv_obj} added')
+                else:
+                    Logger.set_info(__name__,
+                                    f'Object "{csv_obj.name}" added')
+
                 update = 1
             # Else do nothing
 

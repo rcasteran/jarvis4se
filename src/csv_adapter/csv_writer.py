@@ -136,7 +136,7 @@ class CsvWriter3SE:
             for allocated_requirement_id in function.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
-            if function.derived != '':
+            if function.derived is not None:
                 function_derived = function.derived.id
             else:
                 function_derived = ''
@@ -367,7 +367,7 @@ class CsvWriter3SE:
             for allocated_requirement_id in element.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
-            if element.derived != '':
+            if element.derived is not None:
                 element_derived = element.derived.id
             else:
                 element_derived = ''
@@ -492,7 +492,7 @@ class CsvWriter3SE:
             for allocated_requirement_id in interface.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
-            if interface.derived != '':
+            if interface.derived is not None:
                 interface_derived = interface.derived.id
             else:
                 interface_derived = ''
@@ -546,7 +546,7 @@ class CsvWriter3SE:
             for allocated_requirement_id in element.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
-            if element.derived != '':
+            if element.derived is not None:
                 element_derived = element.derived.id
             else:
                 element_derived = ''
@@ -592,7 +592,7 @@ class CsvWriter3SE:
             for allocated_requirement_id in interface.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
-            if interface.derived != '':
+            if interface.derived is not None:
                 interface_derived = interface.derived.id
             else:
                 interface_derived = ''

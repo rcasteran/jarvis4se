@@ -93,12 +93,12 @@ class CsvParser3SE:
                 type_obj = datamodel.Type(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
                                           p_name=row[util.CSV_NAME_IDX],
                                           p_alias=row[util.CSV_ALIAS_IDX],
-                                          p_base=row[util.CSV_BASE_IDX])
+                                          p_base=row[util.CSV_EXTENSION_IDX])
                 type_list.add(type_obj)
 
         # Update base type depending if it is a 3SE base type or if it is a custom one
         for obj_type in type_list:
-            if any(obj_type.base in a for a in [str(i) for i in datamodel.BaseType]):
+            if any(obj_type.base in a.lower() for a in [str(i) for i in datamodel.BaseType]):
                 obj_type.base = datamodel.BaseType[obj_type.base.upper().replace(" ", "_")]
             else:
                 is_found = False
@@ -123,11 +123,18 @@ class CsvParser3SE:
         for row in self.array:
             if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_FUNCTION:
                 # Instantiate functions and add them to a list
-                function = datamodel.Function(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
-                                              p_name=row[util.CSV_NAME_IDX],
-                                              p_alias=row[util.CSV_ALIAS_IDX],
-                                              p_type=row[util.CSV_EXTENSION_IDX],
-                                              p_derived=row[util.CSV_DERIVED_IDX])
+                if len(row[util.CSV_DERIVED_IDX]) > 0:
+                    function = datamodel.Function(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                  p_name=row[util.CSV_NAME_IDX],
+                                                  p_alias=row[util.CSV_ALIAS_IDX],
+                                                  p_type=row[util.CSV_EXTENSION_IDX],
+                                                  p_derived=row[util.CSV_DERIVED_IDX])
+                else:
+                    function = datamodel.Function(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                  p_name=row[util.CSV_NAME_IDX],
+                                                  p_alias=row[util.CSV_ALIAS_IDX],
+                                                  p_type=row[util.CSV_EXTENSION_IDX])
+
                 function.set_operand()
 
                 function_list.add(function)
@@ -256,11 +263,18 @@ class CsvParser3SE:
         for row in self.array:
             if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_FUN_ELEM:
                 # Instantiate functional element and add them to a list
-                fun_elem = datamodel.FunctionalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
-                                                       p_name=row[util.CSV_NAME_IDX],
-                                                       p_alias=row[util.CSV_ALIAS_IDX],
-                                                       p_type=row[util.CSV_EXTENSION_IDX],
-                                                       p_derived=row[util.CSV_DERIVED_IDX])
+                if len(row[util.CSV_DERIVED_IDX]) > 0:
+                    fun_elem = datamodel.FunctionalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                           p_name=row[util.CSV_NAME_IDX],
+                                                           p_alias=row[util.CSV_ALIAS_IDX],
+                                                           p_type=row[util.CSV_EXTENSION_IDX],
+                                                           p_derived=row[util.CSV_DERIVED_IDX])
+                else:
+                    fun_elem = datamodel.FunctionalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                           p_name=row[util.CSV_NAME_IDX],
+                                                           p_alias=row[util.CSV_ALIAS_IDX],
+                                                           p_type=row[util.CSV_EXTENSION_IDX])
+
                 functional_element_list.add(fun_elem)
 
                 # Looking for "functionalElementPart" i.e child and create a list
@@ -397,11 +411,17 @@ class CsvParser3SE:
         for row in self.array:
             if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_FUN_INTF:
                 # Instantiate fun_inter and add them to a list
-                fun_inter = datamodel.FunctionalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
-                                                          p_name=row[util.CSV_NAME_IDX],
-                                                          p_alias=row[util.CSV_ALIAS_IDX],
-                                                          p_type=row[util.CSV_EXTENSION_IDX],
-                                                          p_derived=row[util.CSV_DERIVED_IDX])
+                if len(row[util.CSV_DERIVED_IDX]) > 0:
+                    fun_inter = datamodel.FunctionalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                              p_name=row[util.CSV_NAME_IDX],
+                                                              p_alias=row[util.CSV_ALIAS_IDX],
+                                                              p_type=row[util.CSV_EXTENSION_IDX],
+                                                              p_derived=row[util.CSV_DERIVED_IDX])
+                else:
+                    fun_inter = datamodel.FunctionalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                              p_name=row[util.CSV_NAME_IDX],
+                                                              p_alias=row[util.CSV_ALIAS_IDX],
+                                                              p_type=row[util.CSV_EXTENSION_IDX])
 
                 functional_interface_list.add(fun_inter)
 
@@ -442,11 +462,18 @@ class CsvParser3SE:
         for row in self.array:
             if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_PHY_ELEM:
                 # Instantiate functional element and add them to a list
-                phy_elem = datamodel.PhysicalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
-                                                     p_name=row[util.CSV_NAME_IDX],
-                                                     p_alias=row[util.CSV_ALIAS_IDX],
-                                                     p_type=row[util.CSV_EXTENSION_IDX],
-                                                     p_derived=row[util.CSV_DERIVED_IDX])
+                if len(row[util.CSV_DERIVED_IDX]) > 0:
+                    phy_elem = datamodel.PhysicalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                         p_name=row[util.CSV_NAME_IDX],
+                                                         p_alias=row[util.CSV_ALIAS_IDX],
+                                                         p_type=row[util.CSV_EXTENSION_IDX],
+                                                         p_derived=row[util.CSV_DERIVED_IDX])
+                else:
+                    phy_elem = datamodel.PhysicalElement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                         p_name=row[util.CSV_NAME_IDX],
+                                                         p_alias=row[util.CSV_ALIAS_IDX],
+                                                         p_type=row[util.CSV_EXTENSION_IDX])
+
                 physical_element_list.add(phy_elem)
 
                 # Looking for "physicalPart" i.e child and create a list
@@ -504,11 +531,18 @@ class CsvParser3SE:
         for row in self.array:
             if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_PHY_INTF:
                 # Instantiate phy_inter and add them to a list
-                phy_inter = datamodel.PhysicalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
-                                                        p_name=row[util.CSV_NAME_IDX],
-                                                        p_alias=row[util.CSV_ALIAS_IDX],
-                                                        p_type=row[util.CSV_EXTENSION_IDX],
-                                                        p_derived=row[util.CSV_DERIVED_IDX])
+                if len(row[util.CSV_DERIVED_IDX]) > 0:
+                    phy_inter = datamodel.PhysicalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                            p_name=row[util.CSV_NAME_IDX],
+                                                            p_alias=row[util.CSV_ALIAS_IDX],
+                                                            p_type=row[util.CSV_EXTENSION_IDX],
+                                                            p_derived=row[util.CSV_DERIVED_IDX])
+                else:
+                    phy_inter = datamodel.PhysicalInterface(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                            p_name=row[util.CSV_NAME_IDX],
+                                                            p_alias=row[util.CSV_ALIAS_IDX],
+                                                            p_type=row[util.CSV_EXTENSION_IDX])
+
                 physical_interface_list.add(phy_inter)
 
                 # Looking for allocated fun_inter and add them to the phy inter

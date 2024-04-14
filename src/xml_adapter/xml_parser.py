@@ -139,11 +139,17 @@ class XmlParser3SE:
         xml_function_list = self.root.iter('function')
         for xml_function in xml_function_list:
             # Instantiate functions and add them to a list
-            function = datamodel.Function(p_id=xml_function.get('id'),
-                                          p_name=xml_function.get('name'),
-                                          p_alias=xml_function.get('alias'),
-                                          p_type=xml_function.get('type'),
-                                          p_derived=xml_function.get('derived'))
+            if len(xml_function.get('derived')) > 0:
+                function = datamodel.Function(p_id=xml_function.get('id'),
+                                              p_name=xml_function.get('name'),
+                                              p_alias=xml_function.get('alias'),
+                                              p_type=xml_function.get('type'),
+                                              p_derived=xml_function.get('derived'))
+            else:
+                function = datamodel.Function(p_id=xml_function.get('id'),
+                                              p_name=xml_function.get('name'),
+                                              p_alias=xml_function.get('alias'),
+                                              p_type=xml_function.get('type'))
             function.set_operand()
 
             function_list.add(function)
@@ -324,11 +330,17 @@ class XmlParser3SE:
         xml_functional_element_list = self.root.iter('functionalElement')
         for xml_func_elem in xml_functional_element_list:
             # Instantiate functional element and add them to a list
-            fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
-                                                   p_name=xml_func_elem.get('name'),
-                                                   p_alias=xml_func_elem.get('alias'),
-                                                   p_type=xml_func_elem.get('type'),
-                                                   p_derived=xml_func_elem.get('derived'))
+            if len(xml_func_elem.get('derived')) > 0:
+                fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
+                                                       p_name=xml_func_elem.get('name'),
+                                                       p_alias=xml_func_elem.get('alias'),
+                                                       p_type=xml_func_elem.get('type'),
+                                                       p_derived=xml_func_elem.get('derived'))
+            else:
+                fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
+                                                       p_name=xml_func_elem.get('name'),
+                                                       p_alias=xml_func_elem.get('alias'),
+                                                       p_type=xml_func_elem.get('type'))
             functional_element_list.add(fun_elem)
 
             # Looking for "functionalElementPart" i.e child and create a list
@@ -445,11 +457,17 @@ class XmlParser3SE:
         xml_fun_inter_list = self.root.iter('functionalInterface')
         for xml_fun_inter in xml_fun_inter_list:
             # Instantiate fun_inter and add them to a list
-            fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
-                                                      p_name=xml_fun_inter.get('name'),
-                                                      p_alias=xml_fun_inter.get('alias'),
-                                                      p_type=xml_fun_inter.get('type'),
-                                                      p_derived=xml_fun_inter.get('derived'))
+            if len(xml_fun_inter.get('derived')) > 0:
+                fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
+                                                          p_name=xml_fun_inter.get('name'),
+                                                          p_alias=xml_fun_inter.get('alias'),
+                                                          p_type=xml_fun_inter.get('type'),
+                                                          p_derived=xml_fun_inter.get('derived'))
+            else:
+                fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
+                                                          p_name=xml_fun_inter.get('name'),
+                                                          p_alias=xml_fun_inter.get('alias'),
+                                                          p_type=xml_fun_inter.get('type'))
 
             functional_interface_list.add(fun_inter)
 
@@ -484,11 +502,18 @@ class XmlParser3SE:
         xml_physical_element_list = self.root.iter('physicalElement')
         for xml_phy_elem in xml_physical_element_list:
             # Instantiate functional element and add them to a list
-            phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
-                                                 p_name=xml_phy_elem.get('name'),
-                                                 p_alias=xml_phy_elem.get('alias'),
-                                                 p_type=xml_phy_elem.get('type'),
-                                                 p_derived=xml_phy_elem.get('derived'))
+            if len(xml_phy_elem.get('derived')) > 0:
+                phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
+                                                     p_name=xml_phy_elem.get('name'),
+                                                     p_alias=xml_phy_elem.get('alias'),
+                                                     p_type=xml_phy_elem.get('type'),
+                                                     p_derived=xml_phy_elem.get('derived'))
+            else:
+                phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
+                                                     p_name=xml_phy_elem.get('name'),
+                                                     p_alias=xml_phy_elem.get('alias'),
+                                                     p_type=xml_phy_elem.get('type'))
+
             physical_element_list.add(phy_elem)
 
             # Looking for "physicalPart" i.e child and create a list
@@ -537,11 +562,18 @@ class XmlParser3SE:
         xml_phy_inter_list = self.root.iter('physicalInterface')
         for xml_phy_inter in xml_phy_inter_list:
             # Instantiate phy_inter and add them to a list
-            phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
-                                                    p_name=xml_phy_inter.get('name'),
-                                                    p_alias=xml_phy_inter.get('alias'),
-                                                    p_type=xml_phy_inter.get('type'),
-                                                    p_derived=xml_phy_inter.get('derived'))
+            if len(xml_phy_inter.get('derived')) > 0:
+                phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
+                                                        p_name=xml_phy_inter.get('name'),
+                                                        p_alias=xml_phy_inter.get('alias'),
+                                                        p_type=xml_phy_inter.get('type'),
+                                                        p_derived=xml_phy_inter.get('derived'))
+            else:
+                phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
+                                                        p_name=xml_phy_inter.get('name'),
+                                                        p_alias=xml_phy_inter.get('alias'),
+                                                        p_type=xml_phy_inter.get('type'))
+
             physical_interface_list.add(phy_inter)
 
             # Looking for allocated fun_inter and add them to the phy inter

@@ -103,7 +103,7 @@ class Function:
     """
     
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTION, p_parent=None,
-                 p_role=None, p_operand=None, p_derived=''):
+                 p_role=None, p_operand=None, p_derived=None):
         """
         @var id
         unique identifier
@@ -244,8 +244,8 @@ class Function:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if self.derived:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+        if self.derived is not None:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
 
         if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
@@ -630,7 +630,7 @@ class FunctionalElement:
     """
     
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_ELEMENT,
-                 p_parent=None, p_derived=''):
+                 p_parent=None, p_derived=None):
         """
         @var id
         unique identifier
@@ -791,8 +791,8 @@ class FunctionalElement:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if self.derived:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+        if self.derived is not None:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
 
         if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
@@ -1005,7 +1005,7 @@ class FunctionalInterface:
     """
     
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.FUNCTIONAL_INTERFACE,
-                 p_derived=''):
+                 p_derived=None):
         """
         @var id
         unique identifier
@@ -1102,8 +1102,8 @@ class FunctionalInterface:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if self.derived:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+        if self.derived is not None:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
 
         if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
@@ -1124,7 +1124,7 @@ class PhysicalElement:
     """
     
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_ELEMENT,
-                 p_parent=None, p_derived=''):
+                 p_parent=None, p_derived=None):
         """
         @var id
         unique identifier
@@ -1257,8 +1257,8 @@ class PhysicalElement:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if self.derived:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+        if self.derived is not None:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
 
         if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'
@@ -1284,7 +1284,7 @@ class PhysicalInterface:
     """
     
     def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.PHYSICAL_INTERFACE,
-                 p_derived=''):
+                 p_derived=None):
         """
         @var id
         unique identifier
@@ -1381,8 +1381,8 @@ class PhysicalInterface:
         else:
             rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
 
-        if self.derived:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived}.\n'
+        if self.derived is not None:
+            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
 
         if self.alias:
             rep += f'"{self.name}" alias is {self.alias}.\n'

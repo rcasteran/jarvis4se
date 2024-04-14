@@ -79,12 +79,17 @@ class XmlWriter3SE:
 
         for function_list_tag in root.findall(".//functionList"):
             for function in function_list:
+                if function.derived is not None:
+                    derived_elem_id = function.derived.id
+                else:
+                    derived_elem_id = ''
+                
                 function_tag = etree.SubElement(function_list_tag, "function",
                                                 {'id': function.id,
                                                  'name': function.name,
                                                  'type': self.check_object_type(function.type),
                                                  'alias': function.alias,
-                                                 'derived': function.derived})
+                                                 'derived': derived_elem_id})
 
                 _functional_part_list_tag = etree.SubElement(function_tag, "functionPartList")
 
@@ -340,13 +345,19 @@ class XmlWriter3SE:
 
         for functional_element_list_tag in root.findall(".//functionalElementList"):
             for functional_element in functional_element_list:
+                derived_elem_id = ''
+                if functional_element.derived is not None:
+                    derived_elem_id = functional_element.derived.id
+                else:
+                    derived_elem_id = ''
+                
                 functional_element_tag = etree.SubElement(
                     functional_element_list_tag, "functionalElement",
                     {'id': functional_element.id,
                      'name': functional_element.name,
                      'type': self.check_object_type(functional_element.type),
                      'alias': functional_element.alias,
-                     'derived': functional_element.derived})
+                     'derived': derived_elem_id})
 
                 _fun_elem_part_list_tag = etree.SubElement(functional_element_tag, "functionalElementPartList")
 
@@ -462,13 +473,18 @@ class XmlWriter3SE:
 
         for fun_interface_list_tag in root.findall(".//functionalInterfaceList"):
             for fun_interface in functional_interface_list:
+                if fun_interface.derived is not None:
+                    derived_elem_id = fun_interface.derived.id
+                else:
+                    derived_elem_id = ''
+                
                 fun_interface_tag = etree.SubElement(fun_interface_list_tag,
                                                      "functionalInterface",
                                                      {'id': fun_interface.id,
                                                       'name': fun_interface.name,
                                                       'type': self.check_object_type(fun_interface.type),
                                                       'alias': fun_interface.alias,
-                                                      'derived': fun_interface.derived})
+                                                      'derived': derived_elem_id})
 
                 _allocated_data_list_tag = etree.SubElement(fun_interface_tag, "allocatedDataList")
 
@@ -489,13 +505,18 @@ class XmlWriter3SE:
 
         for physical_element_list_tag in root.findall(".//physicalElementList"):
             for physical_element in physical_element_list:
+                if physical_element.derived is not None:
+                    derived_elem_id = physical_element.derived.id
+                else:
+                    derived_elem_id = ''
+                
                 physical_element_tag = etree.SubElement(
                     physical_element_list_tag, "physicalElement",
                     {'id': physical_element.id,
                      'name': physical_element.name,
                      'type': self.check_object_type(physical_element.type),
                      'alias': physical_element.alias,
-                     'derived': physical_element.derived})
+                     'derived': derived_elem_id})
 
                 _phy_elem_part_list_tag = etree.SubElement(physical_element_tag, "physicalElementPartList")
 
@@ -520,13 +541,18 @@ class XmlWriter3SE:
 
         for phy_interface_list_tag in root.findall(".//physicalInterfaceList"):
             for phy_interface in physical_interface_list:
+                if phy_interface.derived is not None:
+                    derived_elem_id = phy_interface.derived.id
+                else:
+                    derived_elem_id = ''
+                
                 phy_interface_tag = etree.SubElement(phy_interface_list_tag,
                                                      "physicalInterface",
                                                      {'id': phy_interface.id,
                                                       'name': phy_interface.name,
                                                       'type': self.check_object_type(phy_interface.type),
                                                       'alias': phy_interface.alias,
-                                                      'derived': phy_interface.derived})
+                                                      'derived': derived_elem_id})
 
                 _allocated_fun_inter_list_tag = etree.SubElement(phy_interface_tag, "allocatedFunctionalInterfaceList")
 
