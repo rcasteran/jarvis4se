@@ -10,9 +10,9 @@ from tools import Logger
 def update_dictionaries(p_csv_dict, **kwargs):
     csv_dictionary_list = {
         0: p_csv_dict['csv_function_list'],
-        1: p_csv_dict['csv_consumer_function_list'],
-        2: p_csv_dict['csv_producer_function_list'],
-        3: p_csv_dict['csv_data_list'],
+        1: p_csv_dict['csv_data_list'],
+        2: p_csv_dict['csv_consumer_function_list'],
+        3: p_csv_dict['csv_producer_function_list'],
         4: p_csv_dict['csv_state_list'],
         5: p_csv_dict['csv_transition_list'],
         6: p_csv_dict['csv_fun_elem_list'],
@@ -26,9 +26,9 @@ def update_dictionaries(p_csv_dict, **kwargs):
     }
     xml_dictionary_list = {
         0: kwargs['xml_function_list'],
-        1: kwargs['xml_consumer_function_list'],
-        2: kwargs['xml_producer_function_list'],
-        3: kwargs['xml_data_list'],
+        1: kwargs['xml_data_list'],
+        2: kwargs['xml_consumer_function_list'],
+        3: kwargs['xml_producer_function_list'],
         4: kwargs['xml_state_list'],
         5: kwargs['xml_transition_list'],
         6: kwargs['xml_fun_elem_list'],
@@ -42,9 +42,9 @@ def update_dictionaries(p_csv_dict, **kwargs):
     }
     output_xml_write_list = {
         0: kwargs['output_xml'].write_function,
-        1: kwargs['output_xml'].write_data_consumer,
-        2: kwargs['output_xml'].write_data_producer,
-        3: kwargs['output_xml'].write_data,
+        1: kwargs['output_xml'].write_data,
+        2: kwargs['output_xml'].write_data_consumer,
+        3: kwargs['output_xml'].write_data_producer,
         4: kwargs['output_xml'].write_state,
         5: kwargs['output_xml'].write_transition,
         6: kwargs['output_xml'].write_functional_element,
@@ -64,7 +64,7 @@ def update_dictionaries(p_csv_dict, **kwargs):
         for csv_obj in csv_obj_dict:
             is_obj_id = False
             for xml_obj in xml_obj_dict:
-                if i in [1, 2]:
+                if i in [2, 3]:
                     if xml_obj[0] == csv_obj[0] and xml_obj[1].id == csv_obj[1].id:
                         is_obj_id = True
                         Logger.set_info(__name__,
@@ -78,7 +78,7 @@ def update_dictionaries(p_csv_dict, **kwargs):
                     # Else do nothing
 
             if not is_obj_id:
-                if i in [1, 2]:
+                if i in [2, 3]:
                     xml_obj_dict.append(csv_obj)
                 else:
                     xml_obj_dict.add(csv_obj)
@@ -86,7 +86,7 @@ def update_dictionaries(p_csv_dict, **kwargs):
                 call = output_xml_write_list.get(i)
                 call([csv_obj])
 
-                if i in [1, 2]:
+                if i in [2, 3]:
                     Logger.set_info(__name__,
                                     f'Relationship {csv_obj} added')
                 else:

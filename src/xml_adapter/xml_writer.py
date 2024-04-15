@@ -91,9 +91,17 @@ class XmlWriter3SE:
                                                  'alias': function.alias,
                                                  'derived': derived_elem_id})
 
-                _functional_part_list_tag = etree.SubElement(function_tag, "functionPartList")
+                functional_part_list_tag = etree.SubElement(function_tag, "functionPartList")
+                for child in function.child_list:
+                    _obj_element_part_tag = etree.SubElement(functional_part_list_tag,
+                                                             'functionPart',
+                                                             {'id': child.id})
 
-                _allocated_req_list_tag = etree.SubElement(function_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(function_tag, "allocatedRequirementList")
+                for allocated_req in function.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req.id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -115,13 +123,23 @@ class XmlWriter3SE:
                                              'type': self.check_object_type(data.type),
                                              'id': data.id})
 
-            _consumer_list_tag = etree.SubElement(data_tag, "consumerList")
+                # Consumer list is handled in a separate dictionary
+                _consumer_list_tag = etree.SubElement(data_tag, "consumerList")
 
-            _producer_list_tag = etree.SubElement(data_tag, "producerList")
+                # Producer list is handled in a separate dictionary
+                _producer_list_tag = etree.SubElement(data_tag, "producerList")
 
-            _predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
+                predecessor_list_tag = etree.SubElement(data_tag, "predecessorList")
+                for predecessor in data.predecessor_list:
+                    _predecessor_tag = etree.SubElement(predecessor_list_tag,
+                                                        "predecessor",
+                                                        {'id': predecessor.id})
 
-            _allocated_req_list_tag = etree.SubElement(data_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(data_tag, "allocatedRequirementList")
+                for allocated_req_id in data.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -252,11 +270,23 @@ class XmlWriter3SE:
                                               'type': self.check_object_type(state.type),
                                               'alias': state.alias})
 
-                _state_part_list_tag = etree.SubElement(state_tag, "statePartList")
+                state_part_list_tag = etree.SubElement(state_tag, "statePartList")
+                for child in state.child_list:
+                    _obj_element_part_tag = etree.SubElement(state_part_list_tag,
+                                                             'statePart',
+                                                             {'id': child.id})
 
-                _allocated_function_list_tag = etree.SubElement(state_tag, "allocatedFunctionList")
+                allocated_function_list_tag = etree.SubElement(state_tag, "allocatedFunctionList")
+                for allocated_function_id in state.allocated_function_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_function_list_tag,
+                                                          'allocatedFunction',
+                                                          {'id': str(allocated_function_id)})
 
-                _allocated_req_list_tag = etree.SubElement(state_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(state_tag, "allocatedRequirementList")
+                for allocated_req_id in state.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -281,9 +311,17 @@ class XmlWriter3SE:
                                                    'source': str(transition.source),
                                                    'destination': str(transition.destination)})
 
-                _transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
+                transition_part_list_tag = etree.SubElement(transition_tag, "conditionList")
+                for condition in transition.condition_list:
+                    _state_part_tag = etree.SubElement(transition_part_list_tag,
+                                                       "condition",
+                                                       {'text': str(condition)})
 
-                _allocated_req_list_tag = etree.SubElement(transition_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(transition_tag, "allocatedRequirementList")
+                for allocated_req_id in transition.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -359,15 +397,35 @@ class XmlWriter3SE:
                      'alias': functional_element.alias,
                      'derived': derived_elem_id})
 
-                _fun_elem_part_list_tag = etree.SubElement(functional_element_tag, "functionalElementPartList")
+                fun_elem_part_list_tag = etree.SubElement(functional_element_tag, "functionalElementPartList")
+                for child in functional_element.child_list:
+                    _obj_element_part_tag = etree.SubElement(fun_elem_part_list_tag,
+                                                             'functionalElementPart',
+                                                             {'id': child.id})
 
-                _allocated_state_list_tag = etree.SubElement(functional_element_tag, "allocatedStateList")
+                allocated_state_list_tag = etree.SubElement(functional_element_tag, "allocatedStateList")
+                for allocated_state_id in functional_element.allocated_state_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_state_list_tag,
+                                                          'allocatedState',
+                                                          {'id': str(allocated_state_id)})
 
-                _allocated_function_list_tag = etree.SubElement(functional_element_tag, "allocatedFunctionList")
+                allocated_function_list_tag = etree.SubElement(functional_element_tag, "allocatedFunctionList")
+                for allocated_function_id in functional_element.allocated_function_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_function_list_tag,
+                                                          'allocatedFunction',
+                                                          {'id': str(allocated_function_id)})
 
-                _exposed_interface_list_tag = etree.SubElement(functional_element_tag, "exposedInterfaceList")
+                exposed_interface_list_tag = etree.SubElement(functional_element_tag, "exposedInterfaceList")
+                for exposed_interface_id in functional_element.exposed_interface_list:
+                    _exposed_interface_tag = etree.SubElement(exposed_interface_list_tag,
+                                                              'exposedInterface',
+                                                              {'id': str(exposed_interface_id)})
 
-                _allocated_req_list_tag = etree.SubElement(functional_element_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(functional_element_tag, "allocatedRequirementList")
+                for allocated_req_id in functional_element.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -389,7 +447,7 @@ class XmlWriter3SE:
                     if xml_element.get('id') == element.id:
                         tag = xml_element.find('exposedInterfaceList')
                         _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
-                                                                  {'id': inter.id})
+                                                                  {'id': str(inter.id)})
 
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -410,11 +468,17 @@ class XmlWriter3SE:
                     type_str = str(view.type)
                 else:
                     type_str = view.type.id
+
                 view_tag = etree.SubElement(view_list_tag, "view",
                                             {'id': view.id,
                                              'name': view.name,
                                              'type': type_str})
-                _allocated_item_list_tag = etree.SubElement(view_tag, "allocatedItemList")
+
+                allocated_item_list_tag = etree.SubElement(view_tag, "allocatedItemList")
+                for allocated_item_id in view.allocated_item_list:
+                    _allocated_item_tag = etree.SubElement(allocated_item_list_tag,
+                                                           'allocatedItem',
+                                                           {'id': str(allocated_item_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -437,9 +501,17 @@ class XmlWriter3SE:
                                                   'type': self.check_object_type(attribute.type),
                                                   'alias': attribute.alias})
 
-                _described_item_list_tag = etree.SubElement(attribute_tag, "describedItemList")
+                described_item_list_tag = etree.SubElement(attribute_tag, "describedItemList")
+                for described_item in attribute.described_item_list:
+                    _allocated_item_tag = etree.SubElement(described_item_list_tag,
+                                                           "describedItem",
+                                                           {'id': described_item[0], 'value': described_item[1]})
 
-                _allocated_req_list_tag = etree.SubElement(attribute_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(attribute_tag, "allocatedRequirementList")
+                for allocated_req_id in attribute.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -486,9 +558,17 @@ class XmlWriter3SE:
                                                       'alias': fun_interface.alias,
                                                       'derived': derived_elem_id})
 
-                _allocated_data_list_tag = etree.SubElement(fun_interface_tag, "allocatedDataList")
+                allocated_data_list_tag = etree.SubElement(fun_interface_tag, "allocatedDataList")
+                for allocated_data_id in fun_interface.allocated_data_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_data_list_tag,
+                                                          'allocatedData',
+                                                          {'id': str(allocated_data_id)})
 
-                _allocated_req_list_tag = etree.SubElement(fun_interface_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(fun_interface_tag, "allocatedRequirementList")
+                for allocated_req_id in fun_interface.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -518,13 +598,29 @@ class XmlWriter3SE:
                      'alias': physical_element.alias,
                      'derived': derived_elem_id})
 
-                _phy_elem_part_list_tag = etree.SubElement(physical_element_tag, "physicalElementPartList")
+                phy_elem_part_list_tag = etree.SubElement(physical_element_tag, "physicalElementPartList")
+                for child in physical_element.child_list:
+                    _obj_element_part_tag = etree.SubElement(phy_elem_part_list_tag,
+                                                             'physicalElementPart',
+                                                             {'id': child.id})
 
-                _allocated_fun_elem_list_tag = etree.SubElement(physical_element_tag, "allocatedFunctionalElementList")
+                allocated_fun_elem_list_tag = etree.SubElement(physical_element_tag, "allocatedFunctionalElementList")
+                for allocated_fun_elem_id in physical_element.allocated_fun_elem_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_fun_elem_list_tag,
+                                                          'allocatedFunctionalElement',
+                                                          {'id': str(allocated_fun_elem_id)})
 
-                _exposed_interface_list_tag = etree.SubElement(physical_element_tag, "exposedInterfaceList")
+                exposed_interface_list_tag = etree.SubElement(physical_element_tag, "exposedInterfaceList")
+                for exposed_interface_id in physical_element.exposed_interface_list:
+                    _exposed_interface_tag = etree.SubElement(exposed_interface_list_tag,
+                                                              'exposedInterface',
+                                                              {'id': str(exposed_interface_id)})
 
-                _allocated_req_list_tag = etree.SubElement(physical_element_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(physical_element_tag, "allocatedRequirementList")
+                for allocated_req_id in physical_element.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
@@ -554,9 +650,17 @@ class XmlWriter3SE:
                                                       'alias': phy_interface.alias,
                                                       'derived': derived_elem_id})
 
-                _allocated_fun_inter_list_tag = etree.SubElement(phy_interface_tag, "allocatedFunctionalInterfaceList")
+                allocated_fun_inter_list_tag = etree.SubElement(phy_interface_tag, "allocatedFunctionalInterfaceList")
+                for allocated_fun_inter_id in phy_interface.allocated_fun_inter_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_fun_inter_list_tag,
+                                                          'allocatedFunctionalInterface',
+                                                          {'id': str(allocated_fun_inter_id)})
 
-                _allocated_req_list_tag = etree.SubElement(phy_interface_tag, "allocatedRequirementList")
+                allocated_req_list_tag = etree.SubElement(phy_interface_tag, "allocatedRequirementList")
+                for allocated_req_id in phy_interface.allocated_req_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                                                          'allocatedRequirement',
+                                                          {'id': str(allocated_req_id)})
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
