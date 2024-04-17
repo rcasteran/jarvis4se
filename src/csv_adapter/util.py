@@ -92,12 +92,17 @@ def check_uuid4(p_uuid4):
     uuid_obj = p_uuid4
     try:
         identifier_length = int(math.log10(int(p_uuid4)))+1
-        if identifier_length != 10:
+        if identifier_length > 10:
             Logger.set_warning(__name__,
                                f'Identifier "{p_uuid4}" is not a valid uuid4 (length of {identifier_length} digits) '
                                f'and will be replaced')
             identifier = uuid.uuid4()
             uuid_obj = str(identifier.int)[:10]
+        elif identifier_length < 10:
+            uuid_obj_str = str(uuid_obj)
+            for i in range(identifier_length, 10):
+                uuid_obj_str = uuid_obj_str + '0'
+            uuid_obj = uuid_obj_str
         # Else do nothing
     except ValueError:
         if p_uuid4 is not None:

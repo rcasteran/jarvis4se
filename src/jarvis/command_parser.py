@@ -62,7 +62,8 @@ class CmdParser:
             (r"show ([^.|\n]*)", self.matched_show),
             (r"(.*?)\?", self.matched_question_mark),
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
-            (r"import ([^.|\n]*)", CmdParser.matched_import),
+            (r"import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
+            (r"import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
             (r"export ([^.|\n]*)", CmdParser.matched_export)
 
         ]
@@ -210,10 +211,21 @@ class CmdParser:
         @return xml updated (1) or not (0)
         """
         update = 0
-        csv_name = p_str_list[0]
+
+        if len(p_str_list) > 1:
+            csv_name = p_str_list[0][0]
+        else:
+            csv_name = p_str_list[0]
+
         if os.path.isfile(f"{csv_name}.csv"):
             csv_parser = CsvParser3SE()
-            csv_dict = csv_parser.parse_csv(f"{csv_name}.csv")
+            if len(p_str_list) > 1:
+                data_column = int(p_str_list[0][1])
+                csv_dict = csv_parser.parse_csv(f"{csv_name}.csv",
+                                                data_column)
+            else:
+                csv_dict = csv_parser.parse_csv(f"{csv_name}.csv")
+
             Logger.set_info(__name__, f"{csv_name}.csv parsed")
             update = orchestrator_dictionary.update_dictionaries(csv_dict, **kwargs)
         else:
