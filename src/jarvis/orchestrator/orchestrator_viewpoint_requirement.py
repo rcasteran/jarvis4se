@@ -10,6 +10,7 @@ import difflib
 import datamodel
 from . import orchestrator_object
 from tools import Logger
+from jarvis.handler import handler_question
 from jarvis.query import question_answer
 from jarvis import util
 
@@ -26,13 +27,21 @@ PRONOUN_PERSONAL_TAG = "PRP"
 
 
 def check_add_requirement(p_str_list, **kwargs):
+    """@ingroup jarvis
+    @anchor check_add_requirement
+    Check list of requirement declarations before adding them to jarvis data structure
+
+    @param[in] p_str_list : list of requirements declaration
+    @param[in] kwargs : jarvis data structure
+    @return jarvis data structure updated (1) or not (0)
+    """
     requirement_list = []
 
     for p_str in p_str_list:
         req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(p_str[0], p_str[1])
 
         # Retrieve the subject in object list
-        req_subject_object_list, is_error = retrieve_proper_noun(req_subject, is_subject=True, **kwargs)
+        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
 
         if not is_error:
             req_subject_object = None
@@ -70,7 +79,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                 f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
                 # Check requirement object content
-                req_allocated_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
+                req_allocated_object_list, _ = retrieve_req_proper_noun_object(req_object, **kwargs)
                 if req_subject_object:
                     for req_object_object in req_allocated_object_list.copy():
                         if req_object_object:
@@ -87,7 +96,7 @@ def check_add_requirement(p_str_list, **kwargs):
 
                 # Check requirement condition if any
                 if len(req_conditional) > 0:
-                    req_conditional_object_list, _ = retrieve_proper_noun(req_conditional, **kwargs)
+                    req_conditional_object_list, _ = retrieve_req_proper_noun_object(req_conditional, **kwargs)
                     if req_subject_object:
                         for req_conditional_object in req_conditional_object_list.copy():
                             if req_conditional_object:
@@ -101,7 +110,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                 # Else do nothing
                             # Else do nothing
 
-                answer = input(f"Please give a requirement summary: ")
+                answer = handler_question.question_to_user(f"Please give a requirement summary: ")
                 if len(answer) > 0:
                     existing_object = question_answer.check_get_object(answer, **kwargs)
                     if existing_object:
@@ -136,6 +145,15 @@ def check_add_requirement(p_str_list, **kwargs):
 
 
 def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
+    """@ingroup jarvis
+    @anchor detect_req_pattern
+    Detect requirement pattern in requirement declaration
+
+    @param[in] p_str_before_modal : full requirement declaration (p_str_after_modal=None) or requirement declaration
+    before the modal "shall" (p_str_after_modal!=None)
+    @param[in] p_str_after_modal : requirement declaration after the modal "shall"
+    @return requirement subject, requirement object, requirement condition, requirement temporality
+    """
     if p_str_after_modal is None:
         pattern_shall = re.compile(r'([^. |\n][^.|\n]*) shall ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
         p_str_before_modal = pattern_shall[1]
@@ -172,7 +190,15 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     return req_subject, req_object, req_conditional, req_temporal
 
 
-def add_requirement(requirement_list, **kwargs):
+def add_requirement(p_requirement_list, **kwargs):
+    """@ingroup jarvis
+    @anchor add_requirement
+    Add requirement list to jarvis data structure
+
+    @param[in] p_requirement_list : list of requirements
+    @param[in] kwargs : jarvis data structure
+    @return jarvis data structure updated (1) or not (0)
+    """
     xml_requirement_list = kwargs['xml_requirement_list']
     output_xml = kwargs['output_xml']
 
@@ -183,7 +209,7 @@ def add_requirement(requirement_list, **kwargs):
     # Create requirement names list already in xml
     xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
     # Filter attribute_list, keeping only the ones not already in the xml
-    for requirement_item in requirement_list:
+    for requirement_item in p_requirement_list:
         if requirement_item[0] not in xml_requirement_name_list:
             new_requirement = datamodel.Requirement()
             new_requirement.set_name(str(requirement_item[0]))
@@ -235,6 +261,14 @@ def add_requirement(requirement_list, **kwargs):
 
 
 def check_add_allocation(p_str_list, **kwargs):
+    """@ingroup jarvis
+    @anchor check_add_allocation
+    Check list of requirement allocation declaration and add them to jarvis data structure
+
+    @param[in] p_str_list : list of requirement allocation declaration
+    @param[in] kwargs : jarvis data structure
+    @return jarvis data structure updated (1) or not (0)
+    """
     allocation_list = []
     cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_allocation_str_list:
@@ -295,13 +329,22 @@ def check_add_allocation(p_str_list, **kwargs):
 
 
 def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
+    """@ingroup jarvis
+    @anchor update_requirement_link
+    Update the requirement link in jarvis data structure according to object parent it has been allocated to
+
+    @param[in] p_allocated_parent : object parent the requirement has been allocated to
+    @param[in] p_requirement : requirement under consideration
+    @param[in] kwargs : jarvis data structure
+    @return jarvis data structure updated (1) or not (0)
+    """
     sequence_ratio_list = {}
     sequence_req_list = {}
     for req in p_allocated_parent.allocated_req_list:
         for xml_req in kwargs['xml_requirement_list']:
             if xml_req.id == req.id:
-                parent_req_object = get_requirement_object(xml_req.description.split("shall")[1])
-                req_object = get_requirement_object(p_requirement.description.split("shall")[1])
+                parent_req_object = retrieve_requirement_object(xml_req.description.split("shall")[1])
+                req_object = retrieve_requirement_object(p_requirement.description.split("shall")[1])
                 sequence = difflib.SequenceMatcher(None, parent_req_object, req_object)
                 Logger.set_debug(__name__, f"{parent_req_object} from requirement {xml_req.id} compared with "
                                            f"{req_object} from requirement {p_requirement.id} - confidence factor: "
@@ -327,7 +370,14 @@ def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
                                   f"{similar_requirement_name}")
 
 
-def get_requirement_object(p_requirement_object_str):
+def retrieve_requirement_object(p_requirement_object_str):
+    """@ingroup jarvis
+    @anchor retrieve_requirement_object
+    Retrieve requirement object from requirement description
+
+    @param[in] p_requirement_object_str : requirement description
+    @return requirement object
+    """
     req_object = ''
     token_list = nltk.word_tokenize(p_requirement_object_str)
     tag_list = nltk.pos_tag(token_list)
@@ -342,6 +392,14 @@ def get_requirement_object(p_requirement_object_str):
 
 
 def check_add_derived(p_str_list, **kwargs):
+    """@ingroup jarvis
+    @anchor check_add_derived
+    Check list of requirement derivation link requests and add them to jarvis data structure
+
+    @param[in] p_str_list : list of requirement derivation link requests
+    @param[in] kwargs : jarvis data structure
+    @return jarvis data structure updated (1) or not (0)
+    """
     derived_list = []
     cleaned_derived_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_derived_str_list:
@@ -381,12 +439,22 @@ def check_add_derived(p_str_list, **kwargs):
     return update
 
 
-def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
+def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
+    """@ingroup jarvis
+    @anchor retrieve_req_proper_noun_object
+    Retrieve list of objects named as proper nouns found in requirement description
+
+    @param[in] p_req_str : requirement description
+    @param[in] p_is_subject : indicate if list of objects named as proper nouns concern the requirement subject
+    only (TRUE) or not (FALSE)
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
     req_string_object_list = []
     is_error = False
 
     is_previous_proper_noun_singular_tag = False
-    token_list = nltk.word_tokenize(req_string)
+    token_list = nltk.word_tokenize(p_req_str)
     tag_list = nltk.pos_tag(token_list)
     for tag in tag_list:
         if tag[1] == PROPER_NOUN_SINGULAR_TAG or tag[1] == PRONOUN_PERSONAL_TAG:
@@ -402,7 +470,7 @@ def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
             is_previous_proper_noun_singular_tag = False
         elif tag[1] == DETERMINER_TAG or tag[1] == ADJECTIVE_TAG:
             is_previous_proper_noun_singular_tag = False
-        elif tag[1] != DETERMINER_TAG and is_subject:
+        elif tag[1] != DETERMINER_TAG and p_is_subject:
             Logger.set_error(__name__,
                              f"Requirement bad formatted: {tag[0]} is not a determiner nor an adjective nor a noun")
             is_error = True
@@ -411,13 +479,21 @@ def retrieve_proper_noun(req_string, is_subject=False, **kwargs):
     return req_string_object_list, is_error
 
 
-def retrieve_req_subject_object(req_str, **kwargs):
+def retrieve_req_subject_object(p_req_str, **kwargs):
+    """@ingroup jarvis
+    @anchor retrieve_req_subject_object
+    Retrieve list of objects named as proper nouns found for requirement subject
+
+    @param[in] p_req_str : requirement description
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
     req_subject_object = None
 
-    req_subject, _, _, _ = detect_req_pattern(req_str)
+    req_subject, _, _, _ = detect_req_pattern(p_req_str)
 
     # Retrieve the subject in object list
-    req_subject_object_list, _ = retrieve_proper_noun(req_subject, is_subject=True, **kwargs)
+    req_subject_object_list, _ = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
 
     for obj in req_subject_object_list:
         if obj:
@@ -426,13 +502,55 @@ def retrieve_req_subject_object(req_str, **kwargs):
     return req_subject_object
 
 
-def retrieve_req_object_object_list(req_str, **kwargs):
-    _, req_object, _, _ = detect_req_pattern(req_str)
+def retrieve_req_object_object_list(p_req_str, **kwargs):
+    """@ingroup jarvis
+    @anchor retrieve_req_object_object_list
+    Retrieve list of objects named as proper nouns found for requirement object
 
-    req_object_object_list, _ = retrieve_proper_noun(req_object, **kwargs)
+    @param[in] p_req_str : requirement description
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
+    _, req_object, _, _ = detect_req_pattern(p_req_str)
+
+    req_object_object_list, _ = retrieve_req_proper_noun_object(req_object, **kwargs)
 
     for req_object_object in req_object_object_list.copy():
         if req_object_object is None:
             req_object_object_list.remove(req_object_object)
 
     return req_object_object_list
+
+
+def analyze_requirement(**kwargs):
+    """@ingroup jarvis
+    @anchor analyze_requirement
+    Analyze requirements against jarvis data structure
+
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
+    update = 0
+    xml_requirement_list = kwargs['xml_requirement_list']
+    output_xml = kwargs['output_xml']
+
+    for xml_requirement in xml_requirement_list:
+        # Check if the requirement subject is known
+        req_subject_object = retrieve_req_subject_object(xml_requirement.description)
+
+        if req_subject_object is None:
+            # Ask user to create the object in the jarvis data structure
+            answer = handler_question.question_to_user(f"Do you want to create an object for the subject of "
+                                                       f"the requirement: {xml_requirement.description} "
+                                                       f"(id: {xml_requirement.id}) ? (Y/N)")
+
+            if answer == "y":
+                print("TODO")
+            elif answer == "q":
+                break
+            else:
+                Logger.set_warning(__name__,
+                                   f"Subject of requirement: {xml_requirement.description} (id: {xml_requirement.id}) "
+                                   f"is not defined in the system analysis")
+
+    return update
