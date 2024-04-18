@@ -212,14 +212,14 @@ class CmdParser:
         """
         update = 0
 
-        if len(p_str_list) > 1:
+        if '(' in str(p_str_list):
             csv_name = p_str_list[0][0]
         else:
             csv_name = p_str_list[0]
 
         if os.path.isfile(f"{csv_name}.csv"):
             csv_parser = CsvParser3SE()
-            if len(p_str_list) > 1:
+            if '(' in str(p_str_list):
                 data_column = int(p_str_list[0][1])
                 csv_dict = csv_parser.parse_csv(f"{csv_name}.csv",
                                                 data_column)
