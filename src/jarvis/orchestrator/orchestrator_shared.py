@@ -720,7 +720,7 @@ def check_new_alias(object_to_set, alias_str):
         object_to_set.set_alias(alias_str)
         return 0
 
-    base_type = orchestrator_object.get_base_type_recursively(object_to_set.type)
+    base_type = orchestrator_object.retrieve_base_type_recursively(object_to_set.type)
     if isinstance(base_type, datamodel.BaseType):
         # Data() and View() do not have aliases attributes
         if base_type.value not in (0, 9):

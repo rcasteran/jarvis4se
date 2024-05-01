@@ -187,7 +187,7 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     Logger.set_debug(__name__, f"Requirement is conditional: {req_conditional}")
     Logger.set_debug(__name__, f"Requirement is temporal: {req_temporal}")
 
-    return req_subject, req_object, req_conditional, req_temporal
+    return req_subject.strip(), req_object.strip(), req_conditional.strip(), req_temporal.strip()
 
 
 def add_requirement(p_requirement_list, **kwargs):
@@ -457,26 +457,41 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     token_list = nltk.word_tokenize(p_req_str)
     tag_list = nltk.pos_tag(token_list)
     for tag in tag_list:
-        if tag[1] == PROPER_NOUN_SINGULAR_TAG or tag[1] == PRONOUN_PERSONAL_TAG:
-            # sign '=' is tagged as PROPER_NOUN_SINGULAR_TAG
-            if tag[0] != '=':
-                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
-                is_previous_proper_noun_singular_tag = True
-        elif tag[1] == NOUN_SINGULAR_TAG or tag[1] == NOUN_PLURAL_TAG:
-            if not is_previous_proper_noun_singular_tag:
-                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
-            # Else dismiss the noun
-
-            is_previous_proper_noun_singular_tag = False
-        elif tag[1] == DETERMINER_TAG or tag[1] == ADJECTIVE_TAG:
-            is_previous_proper_noun_singular_tag = False
-        elif tag[1] != DETERMINER_TAG and p_is_subject:
-            Logger.set_error(__name__,
-                             f"Requirement bad formatted: {tag[0]} is not a determiner nor an adjective nor a noun")
-            is_error = True
+        is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
+            check_proper_noun_tag(tag, p_is_subject, is_previous_proper_noun_singular_tag))
+        if is_error:
             break
+        elif is_proper_noun:
+            req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
 
     return req_string_object_list, is_error
+
+
+def check_proper_noun_tag(p_tag, p_is_subject, is_previous_proper_noun_singular_tag, p_is_silent=False):
+    is_proper_noun = False
+    is_error = False
+
+    if p_tag[1] == PROPER_NOUN_SINGULAR_TAG or p_tag[1] == PRONOUN_PERSONAL_TAG:
+        # sign '=' is tagged as PROPER_NOUN_SINGULAR_TAG
+        if p_tag[0] != '=':
+            is_proper_noun = True
+            is_previous_proper_noun_singular_tag = True
+        # Else do nothing
+    elif p_tag[1] == NOUN_SINGULAR_TAG or p_tag[1] == NOUN_PLURAL_TAG:
+        is_proper_noun = not is_previous_proper_noun_singular_tag
+        is_previous_proper_noun_singular_tag = False
+    elif p_tag[1] == DETERMINER_TAG or p_tag[1] == ADJECTIVE_TAG:
+        is_previous_proper_noun_singular_tag = False
+    elif p_tag[1] != DETERMINER_TAG and p_is_subject:
+        if not p_is_silent:
+            Logger.set_error(__name__,
+                             f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '
+                             f'nor a noun (tagged as "{p_tag[1]}")')
+            is_error = True
+        # Else do nothing
+    # Else do nothing
+
+    return is_proper_noun, is_error, is_previous_proper_noun_singular_tag
 
 
 def retrieve_req_subject_object(p_req_str, **kwargs):
@@ -532,6 +547,7 @@ def analyze_requirement(**kwargs):
     """
     update = 0
     xml_requirement_list = kwargs['xml_requirement_list']
+    xml_type_list = kwargs['xml_type_list']
     output_xml = kwargs['output_xml']
 
     for xml_requirement in xml_requirement_list:
@@ -545,12 +561,60 @@ def analyze_requirement(**kwargs):
                                                        f"(id: {xml_requirement.id}) ? (Y/N)")
 
             if answer == "y":
-                print("TODO")
+                req_subject, _, _, _ = detect_req_pattern(xml_requirement.description)
+                # Check if data type is in the requirement subject
+                req_subject_type = None
+                req_subject_name = None
+                token_list = nltk.word_tokenize(req_subject)
+                tag_list = nltk.pos_tag(token_list)
+                is_previous_proper_noun_singular_tag = False
+                for tag in tag_list:
+                    is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
+                        check_proper_noun_tag(tag, True, is_previous_proper_noun_singular_tag, True))
+                    if is_error:
+                        break
+                    elif is_proper_noun:
+                        req_subject_name = tag[0]
+
+                    specific_type, base_type = orchestrator_object.retrieve_type(tag[0], True, **kwargs)
+                    if specific_type is not None:
+                        req_subject_type = specific_type
+                    elif base_type is not None:
+                        req_subject_type = base_type
+
+                if req_subject_type is None:
+                    req_subject_type = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')
+                # Else do nothing
+
+                # TODO create_specific_obj_by_type
+                req_subject_object = orchestrator_object.check_add_specific_obj_by_type(
+                    [[req_subject_name, req_subject_type]],
+                    **kwargs)
+
+                update = 1
             elif answer == "q":
                 break
             else:
                 Logger.set_warning(__name__,
                                    f"Subject of requirement: {xml_requirement.description} (id: {xml_requirement.id}) "
                                    f"is not defined in the system analysis")
+        # Else do nothing
+
+        if xml_requirement.id not in req_subject_object.allocated_requirement_list:
+            req_subject_object.add_allocated_requirement(xml_requirement)
+            output_xml.write_object_allocation([req_subject_object, xml_requirement])
+
+            Logger.set_info(__name__,
+                            f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
+                            f"{req_subject_object.__class__.__name__} {req_subject_object.name}")
+
+            # Check for potential req parent in allocated obj parent
+            if hasattr(req_subject_object, 'parent'):
+                if req_subject_object.parent:
+                    if hasattr(req_subject_object.parent, 'allocated_req_list'):
+                        update_requirement_link(req_subject_object.parent, xml_requirement, **kwargs)
+
+            update = 1
+        # Else do nothing
 
     return update
