@@ -134,3 +134,6 @@ dmypy.json
 
 # Doxygen
 /doxygen
+
+# Batch files
+*.bat
