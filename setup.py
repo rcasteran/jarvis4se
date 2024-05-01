@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 # jarvis4se version
-VERSION = "1.3.5"
+VERSION = "1.4.0"
 
 
 def readme():
@@ -18,8 +18,8 @@ setup(
     description="Jarvis 4 Systems Engineers",
     long_description=readme(),
     url="https://github.com/rcasteran/jarvis4se",
-    author="Justin ANCELOT",
-    author_email="not2behere@gmx.fr",
+    author="Regis CASTERAN",
+    author_email="casteranregis@gmail.com",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
