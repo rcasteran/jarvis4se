@@ -167,10 +167,14 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                                 cons_last_fun_elem = fun_elem
                             elif fun_elem.name in fun_elem_exposing_list:
                                 cons_last_fun_elem = fun_elem
-                                Logger.set_warning(__name__,
-                                                   f'Functional element {fun_elem.name} has a child exposing the '
-                                                   f'Functional interface {fun_intf.name}. Please consider to '
-                                                   f'allocate the Function {cons[1].name} to it.')
+                                if not check_child_fun_elem_exposing_recursively(0,
+                                                                                 fun_elem,
+                                                                                 last_fun_elem_exposing_list):
+                                    Logger.set_warning(__name__,
+                                                       f'Functional element {fun_elem.name} has a child exposing the '
+                                                       f'Functional interface {fun_intf.name}. Please consider to '
+                                                       f'allocate the Function {cons[1].name} to it.')
+                                # Else do nothing
                             # Else do nothing
                     # Else do nothing
 
@@ -181,10 +185,14 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                                 prod_last_fun_elem = fun_elem
                             elif fun_elem.name in fun_elem_exposing_list:
                                 cons_last_fun_elem = fun_elem
-                                Logger.set_warning(__name__,
-                                                   f'Functional element {fun_elem.name} has a child exposing the '
-                                                   f'Functional interface {fun_intf.name}. Please consider to '
-                                                   f'allocate the Function {prod[1].name} to it.')
+                                if not check_child_fun_elem_exposing_recursively(0,
+                                                                                 fun_elem,
+                                                                                 last_fun_elem_exposing_list):
+                                    Logger.set_warning(__name__,
+                                                       f'Functional element {fun_elem.name} has a child exposing the '
+                                                       f'Functional interface {fun_intf.name}. Please consider to '
+                                                       f'allocate the Function {prod[1].name} to it.')
+                                # Else do nothing
                             # Else do nothing
                     # Else do nothing
 
@@ -213,6 +221,18 @@ def check_latest(wanted_object, check_list):
         check_child = [c for c in wanted_object.child_list]
         if not any(j in check_child for j in check_list):
             return wanted_object.name
+
+
+def check_child_fun_elem_exposing_recursively(p_nb_last_fun_elem_exposing, p_fun_elem, p_last_fun_elem_exposing_list):
+    if p_fun_elem.child_list:
+        for child in p_fun_elem.child_list:
+            if child.name in p_last_fun_elem_exposing_list:
+                p_nb_last_fun_elem_exposing = p_nb_last_fun_elem_exposing + 1
+            # Else do nothing
+            check_child_fun_elem_exposing_recursively(p_nb_last_fun_elem_exposing, child, p_last_fun_elem_exposing_list)
+    # Else do nothing
+
+    return p_nb_last_fun_elem_exposing
 
 
 def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmerged=False,
