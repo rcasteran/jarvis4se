@@ -4,6 +4,7 @@ Module for 3SE csv parsing and writing
 
 # Libraries
 import csv
+import re
 
 # Modules
 import datamodel
@@ -43,42 +44,55 @@ class CsvParser3SE:
 
         self.array = []
 
-    def parse_csv(self, input_filename):
+    def parse_csv(self, p_input_filename, p_data_column=0):
         """Parse the CSV file and returns the CSV dictionary
-        @param[in] input_filename : CSV file name
+        @param[in] p_input_filename : CSV file name
+        @param[in] p_data_column : CSV column number where requirements are defined
         @return CSV dictionary
         """
         self.array = []
 
         try:
             # Parse the CSV file
-            with open(input_filename, 'r', encoding='utf8') as file_reader:
+            with open(p_input_filename, 'r', encoding='utf8') as file_reader:
                 reader = csv.reader(file_reader, delimiter=";", quoting=csv.QUOTE_NONE)
 
                 for row in reader:
                     self.array.append(row)
 
-            # First retrieve extended types
-            self.csv_dict['csv_type_list'] = self.parse_type_list()
-            self.csv_dict['csv_function_list'] = self.parse_function_list()
-            self.csv_dict['csv_state_list'] = self.parse_state_list()
-            self.csv_dict['csv_transition_list'] = self.parse_transition_list()
-            self.csv_dict['csv_fun_elem_list'] = self.parse_functional_element_list()
-            self.csv_dict['csv_view_list'] = self.parse_view_list()
-            self.csv_dict['csv_attribute_list'] = self.parse_attribute_list()
-            self.csv_dict['csv_fun_inter_list'] = self.parse_functional_interface_list()
-            self.csv_dict['csv_phy_elem_list'] = self.parse_physical_element_list()
-            self.csv_dict['csv_phy_inter_list'] = self.parse_physical_interface_list()
-            self.csv_dict['csv_requirement_list'] = self.parse_requirement_list()
+            if p_data_column > 1:
+                # CSV file is not a 3SE CSV format
+                # It contains only requirement in the given data_column with:
+                # - column 0 contains the requirement id
+                # - column 1 contains the requirement title
+                self.csv_dict['csv_requirement_list'] = self.parse_requirement_list(p_data_column)
+            elif p_data_column == 0:
+                # CSV file is a 3SE CSV format
+                # First retrieve extended types
+                self.csv_dict['csv_type_list'] = self.parse_type_list()
+                self.csv_dict['csv_function_list'] = self.parse_function_list()
+                self.csv_dict['csv_state_list'] = self.parse_state_list()
+                self.csv_dict['csv_transition_list'] = self.parse_transition_list()
+                self.csv_dict['csv_fun_elem_list'] = self.parse_functional_element_list()
+                self.csv_dict['csv_view_list'] = self.parse_view_list()
+                self.csv_dict['csv_attribute_list'] = self.parse_attribute_list()
+                self.csv_dict['csv_fun_inter_list'] = self.parse_functional_interface_list()
+                self.csv_dict['csv_phy_elem_list'] = self.parse_physical_element_list()
+                self.csv_dict['csv_phy_inter_list'] = self.parse_physical_interface_list()
+                self.csv_dict['csv_requirement_list'] = self.parse_requirement_list()
 
-            # Then create data(and set predecessors), consumers, producers lists
-            self.csv_dict['csv_data_list'], self.csv_dict['csv_producer_function_list'], self.csv_dict[
-                'csv_consumer_function_list'] = self.parse_data_list()
+                # Then create data(and set predecessors), consumers, producers lists
+                self.csv_dict['csv_data_list'], self.csv_dict['csv_producer_function_list'], self.csv_dict[
+                    'csv_consumer_function_list'] = self.parse_data_list()
 
-            # Finally update object types
-            self.update_object_type()
+                # Finally update object types
+                self.update_object_type()
+            else:
+                Logger.set_error(__name__,
+                                 f"Importing requirements from a CSV file requires that first column "
+                                 f"contains the requirement id and the second one the requirement title")
         except OSError:
-            Logger.set_error(__name__, f"Unable to read CSV file:{input_filename}")
+            Logger.set_error(__name__, f"Unable to read CSV file: {p_input_filename}")
 
         return self.csv_dict
 
@@ -572,15 +586,31 @@ class CsvParser3SE:
 
         return physical_interface_list
 
-    def parse_requirement_list(self):
+    def parse_requirement_list(self, p_data_column=0):
         """Parse CSV requirement list
+        @param[in] p_data_column : CSV column number where requirements are defined
         @return requirement list
         """
         requirement_list = set()
         parent_list = {}
         for row in self.array:
-            if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_REQ:
-                # Instantiate Attribute and add them to a list
+            if p_data_column > 0:
+                if len(row) > p_data_column:
+                    if len(re.compile(r'([^. |\n][^.|\n]*) shall ([^.|\n]*)', re.IGNORECASE).split(row[p_data_column])) > 1:
+                        # Instantiate Requirement and add them to a list
+                        requirement = datamodel.Requirement(p_id=util.check_uuid4(row[0]),
+                                                            p_name=row[1])
+
+                        requirement_list.add(requirement)
+
+                        # Looking for requirement description
+                        requirement.set_description(row[p_data_column])
+                    else:
+                        Logger.set_warning(__name__,
+                                       f"Following description is not a requirement: {row[p_data_column]}")
+                # Else do nothing
+            elif row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_REQ:
+                # Instantiate Requirement and add them to a list
                 requirement = datamodel.Requirement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
                                                     p_name=row[util.CSV_NAME_IDX],
                                                     p_alias=row[util.CSV_ALIAS_IDX],
