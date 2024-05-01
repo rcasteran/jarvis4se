@@ -6,6 +6,7 @@ Jarvis module
 # Modules
 import datamodel
 from . import orchestrator_object
+from jarvis.handler import handler_question
 from jarvis.query import question_answer
 from jarvis import util
 from tools import Logger
@@ -719,7 +720,7 @@ def check_new_alias(object_to_set, alias_str):
         object_to_set.set_alias(alias_str)
         return 0
 
-    base_type = orchestrator_object.get_base_type_recursively(object_to_set.type)
+    base_type = orchestrator_object.retrieve_base_type_recursively(object_to_set.type)
     if isinstance(base_type, datamodel.BaseType):
         # Data() and View() do not have aliases attributes
         if base_type.value not in (0, 9):
@@ -1097,8 +1098,9 @@ def check_parent_allocation(elem, **kwargs):
             if object_parent.id in fun_elem_parent.allocated_function_list:
                 check = True
         if not check:
-            answer = input(f"Do you also want to allocate parents(i.e. {object_parent.name} "
-                           f"to {fun_elem_parent.name}) ?(Y/N)")
+            answer = handler_question.question_to_user(f"Do you also want to allocate parents "
+                                                       f"(i.e. {object_parent.name} "
+                                                       f"to {fun_elem_parent.name}) ? (Y/N)")
             if answer.lower() == "y":
                 if isinstance(elem[1], datamodel.State):
                     fun_elem_parent.add_allocated_state(object_parent.id)

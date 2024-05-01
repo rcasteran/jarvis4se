@@ -64,8 +64,8 @@ class CmdParser:
             (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
             (r"import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
             (r"import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
-            (r"export ([^.|\n]*)", CmdParser.matched_export)
-
+            (r"export ([^.|\n]*)", CmdParser.matched_export),
+            (r"analyze ([^.|\n]*)", CmdParser.matched_analyze)
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -249,3 +249,23 @@ class CmdParser:
         csv_writer.write_file(**kwargs)
 
         return None
+
+    @staticmethod
+    def matched_analyze(p_str_list, **kwargs):
+        """@ingroup jarvis
+        @anchor matched_export
+        Get "export" declaration for exporting objects to a csv filename
+
+        @param[in] p_str_list : list of input strings
+        @param[in] kwargs : jarvis data structure
+        @return None (no xml update, no info displayed)
+        """
+        update = 0
+
+        if p_str_list[0] == "requirements":
+            update = orchestrator_viewpoint_requirement.analyze_requirement(**kwargs)
+        else:
+            Logger.set_error(__name__,
+                             f"Analysis of {p_str_list[0]} is not supported")
+
+        return update

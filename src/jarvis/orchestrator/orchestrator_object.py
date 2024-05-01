@@ -102,40 +102,24 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
 
     for elem in obj_type_str_list:
         if "?" not in elem[1]:
-            spec_obj_type = None
-            if elem[1].capitalize() in [str(i) for i in datamodel.BaseType]:
-                base_type = next((i for i in [str(i) for i in datamodel.BaseType]
-                                  if i == elem[1].capitalize()))
-            else:
-                spec_obj_type = question_answer.check_get_object(elem[1],
-                                                                 **{'xml_type_list': kwargs['xml_type_list']})
-                if not spec_obj_type:
-                    Logger.set_error(__name__,
-                                     f"No valid type found for {elem[1]}")
-                    continue
-                base_type = get_base_type_recursively(spec_obj_type)
-            if base_type is None:
-                Logger.set_error(__name__,
-                                 f"No valid base type found for {elem[1]}")
-                continue
-
+            specific_type, base_type = retrieve_type(elem[1], **kwargs)
             existing_object = question_answer.check_get_object(elem[0], **kwargs)
+
             if existing_object:
                 if isinstance(existing_object.type, datamodel.BaseType):
                     Logger.set_info(__name__, f"{existing_object.type} with the name {elem[0]} already exists")
                 else:
                     Logger.set_info(__name__, f"{existing_object.type.name} with the name {elem[0]} already exists")
-                continue
-
-            new_object = ObjectInstance(elem[0], base_type, spec_obj_type, **kwargs)
-            if isinstance(new_object.get_instance().type, datamodel.BaseType):
-                Logger.set_info(__name__,
-                                f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")
             else:
-                Logger.set_info(__name__,
-                                f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
+                new_object = ObjectInstance(elem[0], base_type, specific_type, **kwargs)
+                if isinstance(new_object.get_instance().type, datamodel.BaseType):
+                    Logger.set_info(__name__,
+                                    f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")
+                else:
+                    Logger.set_info(__name__,
+                                    f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
 
-            object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
+                object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
 
     check = 0
     if any(object_instance_per_base_type_list):
@@ -151,14 +135,39 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     return check
 
 
-def get_base_type_recursively(obj_type):
+def retrieve_type(p_type_str, p_is_silent=False, **kwargs):
+    specific_type = None
+    base_type = None
+
+    if p_type_str.capitalize() in [str(i) for i in datamodel.BaseType]:
+        base_type = next((i for i in [str(i) for i in datamodel.BaseType]
+                          if i == p_type_str.capitalize()))
+    else:
+        specific_type = question_answer.check_get_object(p_type_str,
+                                                         **{'xml_type_list': kwargs['xml_type_list']})
+        if specific_type is None:
+            if not p_is_silent:
+                Logger.set_error(__name__,
+                                 f"No valid type found for {p_type_str}")
+            # Else do nothing
+        else:
+            base_type = retrieve_base_type_recursively(specific_type)
+
+            if base_type is None and not p_is_silent:
+                Logger.set_error(__name__, f"No valid base type found for {p_type_str}")
+            # Else do nothing
+
+    return specific_type, base_type
+
+
+def retrieve_base_type_recursively(obj_type):
     """Checks type: if it's a BaseType or its base else recursively return """
     if isinstance(obj_type, datamodel.BaseType):
         base_type = obj_type
     elif obj_type.base in [str(i) for i in datamodel.BaseType]:
         base_type = obj_type.base
     else:
-        base_type = get_base_type_recursively(obj_type.base)
+        base_type = retrieve_base_type_recursively(obj_type.base)
 
     return base_type
 
