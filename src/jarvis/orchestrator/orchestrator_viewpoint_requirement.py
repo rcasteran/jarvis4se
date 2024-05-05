@@ -459,6 +459,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     for tag in tag_list:
         is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
             check_proper_noun_tag(tag, p_is_subject, is_previous_proper_noun_singular_tag))
+        
         if is_error:
             break
         elif is_proper_noun:
@@ -547,12 +548,11 @@ def analyze_requirement(**kwargs):
     """
     update = 0
     xml_requirement_list = kwargs['xml_requirement_list']
-    xml_type_list = kwargs['xml_type_list']
     output_xml = kwargs['output_xml']
 
     for xml_requirement in xml_requirement_list:
         # Check if the requirement subject is known
-        req_subject_object = retrieve_req_subject_object(xml_requirement.description)
+        req_subject_object = retrieve_req_subject_object(xml_requirement.description, **kwargs)
 
         if req_subject_object is None:
             # Ask user to create the object in the jarvis data structure
@@ -586,12 +586,13 @@ def analyze_requirement(**kwargs):
                     req_subject_type = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')
                 # Else do nothing
 
-                # TODO create_specific_obj_by_type
-                req_subject_object = orchestrator_object.check_add_specific_obj_by_type(
+                # Create_specific_obj_by_type
+                update = orchestrator_object.check_add_specific_obj_by_type(
                     [[req_subject_name, req_subject_type]],
                     **kwargs)
-
-                update = 1
+                
+                req_subject_object = question_answer.check_get_object(req_subject_name, **kwargs)
+                
             elif answer == "q":
                 break
             else:
@@ -600,21 +601,24 @@ def analyze_requirement(**kwargs):
                                    f"is not defined in the system analysis")
         # Else do nothing
 
-        if xml_requirement.id not in req_subject_object.allocated_requirement_list:
-            req_subject_object.add_allocated_requirement(xml_requirement)
-            output_xml.write_object_allocation([req_subject_object, xml_requirement])
+        # Check if user does not abort (answer == "q")
+        if req_subject_object is not None:
+            if xml_requirement.id not in req_subject_object.allocated_req_list:
+                req_subject_object.add_allocated_requirement(xml_requirement)
+                output_xml.write_object_allocation([[req_subject_object, xml_requirement]])
 
-            Logger.set_info(__name__,
-                            f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
-                            f"{req_subject_object.__class__.__name__} {req_subject_object.name}")
+                Logger.set_info(__name__,
+                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
+                                f"{req_subject_object.__class__.__name__} {req_subject_object.name}")
 
-            # Check for potential req parent in allocated obj parent
-            if hasattr(req_subject_object, 'parent'):
-                if req_subject_object.parent:
-                    if hasattr(req_subject_object.parent, 'allocated_req_list'):
-                        update_requirement_link(req_subject_object.parent, xml_requirement, **kwargs)
+                # Check for potential req parent in allocated obj parent
+                if hasattr(req_subject_object, 'parent'):
+                    if req_subject_object.parent:
+                        if hasattr(req_subject_object.parent, 'allocated_req_list'):
+                            update_requirement_link(req_subject_object.parent, xml_requirement, **kwargs)
 
-            update = 1
+                update = 1
+            # Else do nothing
         # Else do nothing
 
     return update
