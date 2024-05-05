@@ -110,7 +110,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                     Logger.set_info(__name__, f"{existing_object.type} with the name {elem[0]} already exists")
                 else:
                     Logger.set_info(__name__, f"{existing_object.type.name} with the name {elem[0]} already exists")
-            else:
+            elif base_type is not None:
                 new_object = ObjectInstance(elem[0], base_type, specific_type, **kwargs)
                 if isinstance(new_object.get_instance().type, datamodel.BaseType):
                     Logger.set_info(__name__,
@@ -120,6 +120,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                                     f"{new_object.get_instance().name} is a {new_object.get_instance().type.name}")
 
                 object_instance_per_base_type_list[new_object.base_type_idx].append(new_object.get_instance())
+            # Else do nothing
 
     check = 0
     if any(object_instance_per_base_type_list):

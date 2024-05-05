@@ -61,57 +61,44 @@ def check_add_requirement(p_str_list, **kwargs):
             xml_requirement_list = kwargs['xml_requirement_list']
             sequence_ratio_list = {}
             for xml_requirement in xml_requirement_list:
-                sequence_subject = difflib.SequenceMatcher(None,
-                                                           detect_req_pattern(xml_requirement.description)[0],
-                                                           detect_req_pattern(p_str[0], 'dummy')[0])
-                sequence_object = difflib.SequenceMatcher(None,
-                                                          detect_req_pattern(xml_requirement.description)[1],
-                                                          detect_req_pattern('dummy', p_str[1])[1])
+                xml_requirement_subject, xml_requirement_object, xml_requirement_conditional, \
+                    xml_requirement_temporal = detect_req_pattern(xml_requirement.description)
 
-                if sequence_subject.ratio() == 1 and sequence_object.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
-                    sequence_ratio_list[xml_requirement.name] = sequence_object.ratio()
+                sequence_subject = difflib.SequenceMatcher(None,
+                                                           xml_requirement_subject,
+                                                           req_subject)
+                sequence_object = difflib.SequenceMatcher(None,
+                                                          xml_requirement_object,
+                                                          req_object)
+                sequence_conditional = difflib.SequenceMatcher(None,
+                                                               xml_requirement_conditional,
+                                                               req_conditional)
+                sequence_temporal = difflib.SequenceMatcher(None,
+                                                            xml_requirement_temporal,
+                                                            req_temporal)
+
+                if sequence_subject.ratio() == 1 \
+                        and sequence_object.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
+                        and sequence_conditional.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
+                        and sequence_temporal.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
+                    sequence_ratio_list[xml_requirement.name] = max(sequence_object.ratio(),
+                                                                    sequence_conditional.ratio(),
+                                                                    sequence_temporal.ratio())
                 # Else do nothing
 
+            req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                                                                       req_object,
+                                                                       req_conditional,
+                                                                       req_temporal,
+                                                                       **kwargs)
             if sequence_ratio_list:
                 similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
                 Logger.set_info(__name__,
                                 f"Requirement {similar_requirement_name} has the same "
                                 f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
             else:
-                # Check requirement object content
-                req_allocated_object_list, _ = retrieve_req_proper_noun_object(req_object, **kwargs)
-                if req_subject_object:
-                    for req_object_object in req_allocated_object_list.copy():
-                        if req_object_object:
-                            if not orchestrator_object.check_object_relationship(req_subject_object,
-                                                                                 req_object_object,
-                                                                                 req_object,
-                                                                                 **kwargs):
-                                # No relationship found in the datamodel between requirement subject and requirement
-                                # object. Remove it from the list.
-                                req_allocated_object_list.remove(req_object_object)
-                            # Else do nothing
-                        else:
-                            req_allocated_object_list.remove(req_object_object)
-
-                # Check requirement condition if any
-                if len(req_conditional) > 0:
-                    req_conditional_object_list, _ = retrieve_req_proper_noun_object(req_conditional, **kwargs)
-                    if req_subject_object:
-                        for req_conditional_object in req_conditional_object_list.copy():
-                            if req_conditional_object:
-                                if orchestrator_object.check_object_relationship(req_subject_object,
-                                                                                 req_conditional_object,
-                                                                                 req_conditional,
-                                                                                 **kwargs):
-                                    # Relationship found in the datamodel between requirement subject and requirement
-                                    # object. Add it to the allocated object list.
-                                    req_allocated_object_list.append(req_conditional_object)
-                                # Else do nothing
-                            # Else do nothing
-
                 answer = handler_question.question_to_user(f"Please give a requirement summary: ")
-                if len(answer) > 0:
+                if len(answer) > 0 and answer != "q":
                     existing_object = question_answer.check_get_object(answer, **kwargs)
                     if existing_object:
                         if isinstance(existing_object.type, datamodel.BaseType):
@@ -121,7 +108,8 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object, req_allocated_object_list])
+                                                         existing_object, req_subject_object,
+                                                         req_allocated_object_list])
                         else:
                             if str(existing_object.type.name) != "Requirement":
                                 Logger.set_error(__name__,
@@ -129,7 +117,8 @@ def check_add_requirement(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object, req_allocated_object_list])
+                                                         existing_object, req_subject_object,
+                                                         req_allocated_object_list])
                     else:
                         requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
                                                  req_subject_object, req_allocated_object_list])
@@ -190,6 +179,69 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     return req_subject.strip(), req_object.strip(), req_conditional.strip(), req_temporal.strip()
 
 
+def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
+    """@ingroup jarvis
+    @anchor check_requirement_relationship
+    Check requirement relationship between the object related to the requirement subject and the potential objects
+    related to requirement object, conditional or temporal parts
+
+    @param[in] p_req_subject_object : object related to the requirement subject
+    @param[in] p_req_object : requirement object string
+    @param[in] req_conditional : requirement conditional string
+    @param[in] req_temporal : requirement temporal string
+    @return list of objects in relation with the object related to the requirement subject
+    """
+    # Check requirement object content
+    req_object_list, _ = retrieve_req_proper_noun_object(p_req_object, **kwargs)
+    if p_req_subject_object:
+        for req_object_object in req_object_list.copy():
+            if req_object_object:
+                if not orchestrator_object.check_object_relationship(p_req_subject_object,
+                                                                     req_object_object,
+                                                                     p_req_object,
+                                                                     **kwargs):
+                    # No relationship found in the datamodel between requirement subject and requirement
+                    # object. Remove it from the list.
+                    req_object_list.remove(req_object_object)
+                # Else do nothing
+            else:
+                req_object_list.remove(req_object_object)
+
+    # Check requirement conditional part if any
+    if len(p_req_conditional) > 0:
+        req_conditional_object_list, _ = retrieve_req_proper_noun_object(p_req_conditional, **kwargs)
+        if p_req_subject_object:
+            for req_conditional_object in req_conditional_object_list.copy():
+                if req_conditional_object:
+                    if orchestrator_object.check_object_relationship(p_req_subject_object,
+                                                                     req_conditional_object,
+                                                                     p_req_conditional,
+                                                                     **kwargs):
+                        # Relationship found in the datamodel between requirement subject and requirement
+                        # object. Add it to the allocated object list.
+                        req_object_list.append(req_conditional_object)
+                    # Else do nothing
+                # Else do nothing
+
+    # Check requirement temporal part if any
+    if len(p_req_temporal) > 0:
+        req_temporal_object_list, _ = retrieve_req_proper_noun_object(p_req_temporal, **kwargs)
+        if p_req_subject_object:
+            for req_temporal_object in req_temporal_object_list.copy():
+                if req_temporal_object:
+                    if orchestrator_object.check_object_relationship(p_req_subject_object,
+                                                                     req_temporal_object,
+                                                                     p_req_temporal,
+                                                                     **kwargs):
+                        # Relationship found in the datamodel between requirement subject and requirement
+                        # object. Add it to the allocated object list.
+                        req_object_list.append(req_temporal_object)
+                    # Else do nothing
+                # Else do nothing
+
+    return req_object_list
+
+
 def add_requirement(p_requirement_list, **kwargs):
     """@ingroup jarvis
     @anchor add_requirement
@@ -225,7 +277,7 @@ def add_requirement(p_requirement_list, **kwargs):
                 new_allocation_list.append([requirement_item[3], new_requirement])
             # Else do nothing
 
-            # Test if allocated object is identified in the requirement object
+            # Test if allocated object is identified in the requirement object or conditional part or temporal part
             if requirement_item[4]:
                 for item in requirement_item[4]:
                     if item:
@@ -453,22 +505,36 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     req_string_object_list = []
     is_error = False
 
-    is_previous_proper_noun_singular_tag = False
-    token_list = nltk.word_tokenize(p_req_str)
-    tag_list = nltk.pos_tag(token_list)
-    for tag in tag_list:
-        is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
-            check_proper_noun_tag(tag, p_is_subject, is_previous_proper_noun_singular_tag))
-        
-        if is_error:
-            break
-        elif is_proper_noun:
-            req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+    # Try to retrieve the subject object as a whole
+    req_string_object = question_answer.check_get_object(p_req_str, **kwargs)
+
+    if req_string_object is None:
+        is_previous_proper_noun_singular_tag = False
+        token_list = nltk.word_tokenize(p_req_str)
+        tag_list = nltk.pos_tag(token_list)
+        index = 0
+        for tag in tag_list:
+            if index < len(tag_list)-1:
+                next_tag = tag_list[index+1]
+            else:
+                next_tag = None
+
+            is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
+                check_proper_noun_tag(tag, next_tag, p_is_subject, is_previous_proper_noun_singular_tag))
+
+            if is_error:
+                break
+            elif is_proper_noun:
+                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+
+            index = index+1
+    else:
+        req_string_object_list.append(req_string_object)
 
     return req_string_object_list, is_error
 
 
-def check_proper_noun_tag(p_tag, p_is_subject, is_previous_proper_noun_singular_tag, p_is_silent=False):
+def check_proper_noun_tag(p_tag, p_next_tag, p_is_subject, is_previous_proper_noun_singular_tag, p_is_silent=False):
     is_proper_noun = False
     is_error = False
 
@@ -481,8 +547,13 @@ def check_proper_noun_tag(p_tag, p_is_subject, is_previous_proper_noun_singular_
     elif p_tag[1] == NOUN_SINGULAR_TAG or p_tag[1] == NOUN_PLURAL_TAG:
         is_proper_noun = not is_previous_proper_noun_singular_tag
         is_previous_proper_noun_singular_tag = False
-    elif p_tag[1] == DETERMINER_TAG or p_tag[1] == ADJECTIVE_TAG:
+    elif p_tag[1] == ADJECTIVE_TAG:
         is_previous_proper_noun_singular_tag = False
+    elif p_tag[1] == DETERMINER_TAG:
+        is_previous_proper_noun_singular_tag = False
+        if p_tag[0] == 'a' and p_next_tag[1] != NOUN_SINGULAR_TAG:
+            # case of 'a' used as a noun
+            is_proper_noun = True
     elif p_tag[1] != DETERMINER_TAG and p_is_subject:
         if not p_is_silent:
             Logger.set_error(__name__,
@@ -568,9 +639,16 @@ def analyze_requirement(**kwargs):
                 token_list = nltk.word_tokenize(req_subject)
                 tag_list = nltk.pos_tag(token_list)
                 is_previous_proper_noun_singular_tag = False
+                index = 0
                 for tag in tag_list:
+                    if index < len(tag_list) - 1:
+                        next_tag = tag_list[index + 1]
+                    else:
+                        next_tag = None
+
                     is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
-                        check_proper_noun_tag(tag, True, is_previous_proper_noun_singular_tag, True))
+                        check_proper_noun_tag(tag, next_tag, True, is_previous_proper_noun_singular_tag, True))
+
                     if is_error:
                         break
                     elif is_proper_noun:
@@ -581,6 +659,8 @@ def analyze_requirement(**kwargs):
                         req_subject_type = specific_type
                     elif base_type is not None:
                         req_subject_type = base_type
+
+                    index = index + 1
 
                 if req_subject_type is None:
                     req_subject_type = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')

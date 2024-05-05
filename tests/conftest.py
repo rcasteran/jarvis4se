@@ -805,7 +805,9 @@ def input_test_issue_9():
         Fun_elem is a functional element
         ========================================
         under test_view
-        consider F1. consider toto. consider a, Fun_elem
+        consider F1.
+        consider toto.
+        consider a, Fun_elem
         consider tata.
         consider F1, F2, F3, F4
     """
@@ -819,7 +821,9 @@ def input_test_issue_9():
                             ""])
 
     second_part = "\n".join(["under test_view",
-                             "consider F1. consider toto. consider a, Fun_elem",
+                             "consider F1.",
+                             "consider toto.",
+                             "consider a, Fun_elem",
                              "consider tata.",
                              "consider F1, F2, F3, F4",
                              ""])
@@ -1336,9 +1340,9 @@ def input_test_issue_86():
                       ""])
 
 @pytest.fixture
-def input_single_requirement():
+def input_test_single_requirement():
     """@ingroup test_requirement
-    @anchor input_single_requirement
+    @anchor input_test_single_requirement
     Defines input fixture for:
     - @ref test_simple_requirement_function
     - @ref test_simple_function_allocation_requirement_function
@@ -1367,7 +1371,7 @@ def input_single_requirement():
 
 def input_requirement_decomposition():
     """@ingroup test_requirement
-    @anchor input_single_requirement
+    @anchor input_test_single_requirement
     Defines input fixture for test_function_decomposition_requirement_allocation
 
     @return input fixture

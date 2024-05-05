@@ -24,14 +24,14 @@ from tools import Logger
 class CmdParser:
     def __init__(self, generator):
         self.command_list = [
-            (r"under ([^.|\n]*)", self.matched_under),
+            (r"^under ([^.|\n]*)", self.matched_under),
             (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint_type.check_add_type_extension),
             (r"([^. |\n][^.|\n]*) is a ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
             (r"([^. |\n][^.|\n]*) is an ((?!attribute)[^.|\n]*)", orchestrator_object.check_add_specific_obj_by_type),
             (r"([^. |\n][^.|\n]*) is an attribute", orchestrator_viewpoint_attribute.add_attribute),
             (r"([^. |\n][^.|\n]*) inherits from ([^.|\n]*)", orchestrator_shared.check_add_inheritance),
             (r"The alias of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_alias),
-            (r"consider ([^.|\n]*)", orchestrator_viewpoint.check_get_consider),
+            (r"^consider ([^.|\n]*)", orchestrator_viewpoint.check_get_consider),
             (r"([^. |\n][^.|\n]*) is composed of ([^.|\n]*)", orchestrator_shared.check_add_child),
             (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)", orchestrator_shared.check_add_child),
             (r"([^. |\n][^.|\n]*) compose ([^.|\n]*)", orchestrator_shared.check_add_child),
@@ -44,7 +44,7 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
             (r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
             (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", orchestrator_shared.check_add_allocation),
-            (r"delete ([^.|\n]*)", orchestrator_shared.check_and_delete_object),
+            (r"^delete ([^.|\n]*)", orchestrator_shared.check_and_delete_object),
             (r"The type of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_type),
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
             (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
@@ -59,13 +59,13 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
             (r"([^. |\n][^.|\n]*) derives from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
-            (r"show ([^.|\n]*)", self.matched_show),
-            (r"(.*?)\?", self.matched_question_mark),
-            (r"list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
-            (r"import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
-            (r"import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
-            (r"export ([^.|\n]*)", CmdParser.matched_export),
-            (r"analyze ([^.|\n]*)", CmdParser.matched_analyze)
+            (r"^show ([^.|\n]*)", self.matched_show),
+            (r"^(.*?)\?", self.matched_question_mark),
+            (r"^list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
+            (r"^import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
+            (r"^import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
+            (r"^export ([^.|\n]*)", CmdParser.matched_export),
+            (r"^analyze ([^.|\n]*)", CmdParser.matched_analyze)
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -119,16 +119,12 @@ class CmdParser:
 
         return update_list
 
-    def matched_under(self, chain_name_str, **kwargs):
+    @staticmethod
+    def matched_under(p_str_list, **kwargs):
         """Get "under" declaration"""
-        out = []
+        update = orchestrator_viewpoint.add_view(p_str_list, **kwargs)
 
-        for chain, rest in zip(chain_name_str[::2], chain_name_str[1::2]):
-            chain = chain.replace("under ", "")
-            out.append(orchestrator_viewpoint.add_view(chain, **kwargs))
-            self.lookup_table(rest, **kwargs)
-
-        return 1 in out
+        return update
 
     def matched_show(self, diagram_name_str, **kwargs):
         """Get "show" declaration"""

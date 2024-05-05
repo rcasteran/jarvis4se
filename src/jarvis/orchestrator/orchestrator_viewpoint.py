@@ -11,14 +11,14 @@ from jarvis import util
 from tools import Logger
 
 
-def add_view(view_name_str, **kwargs):
+def add_view(p_str_list, **kwargs):
     """
         Check if each string in view_name_str is not already corresponding to an actual
         object's name, create new View() object, instantiate it, write it within XML and
         then returns update_list.
 
             Parameters:
-                view_name_str ([str]) : Lists of string from jarvis cell
+                p_str_list ([str]) : Lists of string from jarvis cell
                 xml_view_list ([Function]) : view list from xml parsing
                 output_xml (XmlWriter3SE object) : XML's file object
 
@@ -33,22 +33,23 @@ def add_view(view_name_str, **kwargs):
     # Create a list with all view names already in the xml
     xml_view_name_list = question_answer.get_objects_names(xml_view_list)
 
-    # Loop on the list and create set for functions
-    if view_name_str not in xml_view_name_list:
-        # Instantiate view class
-        view = datamodel.View(name=view_name_str, uid=util.get_unique_id())
-        # Add view to new set() and existing set() from xml
-        xml_view_list.add(view)
-        view_list.append(view)
+    for p_str in p_str_list:
+        # Loop on the list and create set for functions
+        if p_str not in xml_view_name_list:
+            # Instantiate view class
+            view = datamodel.View(name=p_str, uid=util.get_unique_id())
+            # Add view to new set() and existing set() from xml
+            xml_view_list.add(view)
+            view_list.append(view)
 
-    activate_view(view_name_str, xml_view_list)
+        activate_view(p_str, xml_view_list)
 
-    if view_list:
-        output_xml.write_view(view_list)
-        for view in view_list:
-            Logger.set_info(__name__,
-                            view.name + " is a view")
-        update = 1
+        if view_list:
+            output_xml.write_view(view_list)
+            for view in view_list:
+                Logger.set_info(__name__,
+                                view.name + " is a view")
+            update = 1
 
     return update
 

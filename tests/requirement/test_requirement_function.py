@@ -13,7 +13,7 @@ import test_lib
 jarvis4se = test_lib.get_jarvis4se()[0]
 
 
-def test_simple_requirement_function(capsys, monkeypatch, input_single_requirement):
+def test_simple_requirement_function(capsys, monkeypatch, input_test_single_requirement):
     """@ingroup test_requirement
     @anchor test_simple_requirement_function
     Test single requirement input
@@ -23,13 +23,13 @@ def test_simple_requirement_function(capsys, monkeypatch, input_single_requireme
     @return None
 
     **Jarvis4se equivalent:**
-    @ref input_single_requirement
+    @ref input_test_single_requirement
     """
     req_name = "F1 behavior"
     monkeypatch.setattr('builtins.input', lambda _: req_name)
     file_name = "test_simple_requirement_function"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[1]}\n")
+                         f"{input_test_single_requirement[1]}\n")
 
     # result is a text about requirement creation
     captured = capsys.readouterr()
@@ -45,7 +45,7 @@ def test_simple_requirement_function(capsys, monkeypatch, input_single_requireme
     assert all(i in captured.out for i in expected)
 
 
-def test_simple_function_allocation_requirement_function(capsys, monkeypatch, input_single_requirement):
+def test_simple_function_allocation_requirement_function(capsys, monkeypatch, input_test_single_requirement):
     """@ingroup test_requirement
     @anchor test_simple_function_allocation_requirement_function
     Test single requirement input and allocation to an already existing function
@@ -55,16 +55,16 @@ def test_simple_function_allocation_requirement_function(capsys, monkeypatch, in
     @return None
 
     **Jarvis4se equivalent:**
-    @ref input_single_requirement
+    @ref input_test_single_requirement
     """
     req_name = "F1 behavior"
     monkeypatch.setattr('builtins.input', lambda _: req_name)
     file_name = "test_simple_function_allocation_requirement_function"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[0]}\n")
+                         f"{input_test_single_requirement[0]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[1]}\n")
+                         f"{input_test_single_requirement[1]}\n")
 
     # result is a text about requirement creation
     captured = capsys.readouterr()
@@ -81,7 +81,7 @@ def test_simple_function_allocation_requirement_function(capsys, monkeypatch, in
     assert all(i in captured.out for i in expected)
 
 
-def test_simple_function_allocation_manual_requirement_function(capsys, monkeypatch, input_single_requirement):
+def test_simple_function_allocation_manual_requirement_function(capsys, monkeypatch, input_test_single_requirement):
     """@ingroup test_requirement
     @anchor test_simple_function_allocation_manual_requirement_function
     Test single requirement input and allocation to an already existing function
@@ -91,19 +91,19 @@ def test_simple_function_allocation_manual_requirement_function(capsys, monkeypa
     @return None
 
     **Jarvis4se equivalent:**
-    @ref input_single_requirement
+    @ref input_test_single_requirement
     """
     req_name = "F1 behavior"
     monkeypatch.setattr('builtins.input', lambda _: req_name)
     file_name = "test_simple_function_allocation_manual_requirement_function"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[1]}\n")
+                         f"{input_test_single_requirement[1]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[0]}\n")
+                         f"{input_test_single_requirement[0]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         f"{input_single_requirement[2]}\n")
+                         f"{input_test_single_requirement[2]}\n")
 
     # result is a text about requirement allocation
     captured = capsys.readouterr()
