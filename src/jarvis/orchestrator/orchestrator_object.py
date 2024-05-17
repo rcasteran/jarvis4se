@@ -179,12 +179,12 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
     if isinstance(object_src.type, datamodel.BaseType):
         object_src_type = object_src.type
     else:
-        object_src_type = object_src.type.name
+        _, object_src_type = retrieve_type(object_src.type.name, True, **kwargs)
 
     if isinstance(object_dest.type, datamodel.BaseType):
         object_dest_type = object_dest.type
     else:
-        object_dest_type = object_dest.type.name
+        _, object_dest_type = retrieve_type(object_dest.type.name, True, **kwargs)
 
     if object_src_type == datamodel.BaseType.FUNCTION or object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
         # Relationship with DATA, ATTRIBUTE
@@ -245,24 +245,43 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
                                        f"Value of {object_dest_type} {object_dest.name} is different from the one "
                                        f"given for {object_src_type} {object_src.name}")
             # Else do nothing
-        else:
-            # Warn about improper relationship between source type and destination type
-            print("Not supported")
+        # Else do nothing
     elif object_src_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
         # Relationship with FUNCTION, FUNCTIONAL_INTERFACE, STATE, ATTRIBUTE
-        print(f"Relationship detected between {object_src_type}: {object_src.name} and "
-              f"{object_dest_type}: {object_dest.name}")
+        Logger.set_debug(__name__,
+                         f"Relationship detected in requirement between {object_src_type} {object_src.name} and "
+                         f"{object_dest_type} {object_dest.name}")
         if object_dest_type == datamodel.BaseType.FUNCTION:
-            print("Function case")
+            if object_dest.id in object_src.allocated_function_list:
+                Logger.set_info(__name__,
+                                f"{object_src_type} {object_src.name} allocates "
+                                f"{object_dest_type} {object_dest.name}")
+                is_relationship = True
+            else:
+                Logger.set_warning(__name__,
+                                   f"{object_dest_type} {object_dest.name} is not allocated to "
+                                   f"{object_src_type} {object_src.name}")
         elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+            # TODO: relationship between fun_elem and fun_intf
+            print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+                  f"{object_dest_type}: {object_dest.name}")
             print("Functional interface case")
         elif object_dest_type == datamodel.BaseType.STATE:
-            print("State case")
+            if object_dest.id in object_src.allocated_state_list:
+                Logger.set_info(__name__,
+                                f"{object_src_type} {object_src.name} allocates "
+                                f"{object_dest_type} {object_dest.name}")
+                is_relationship = True
+            else:
+                Logger.set_warning(__name__,
+                                   f"{object_dest_type} {object_dest.name} is not allocated to "
+                                   f"{object_src_type} {object_src.name}")
         elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+            # TODO: relationship between fun_elem and attribute
+            print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+                  f"{object_dest_type}: {object_dest.name}")
             print("Attribute case")
-        else:
-            # Warn about improper relationship between source type and destination type
-            print("Not supported")
+        # Else do nothing
     elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
         # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
         print(f"Relationship detected between {object_src_type}: {object_src.name} and "
@@ -324,24 +343,62 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                 xml_requirement.description, **kwargs)
             req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
                 xml_requirement.description, **kwargs)
+            req_condition_object_list = orchestrator_viewpoint_requirement.retrieve_req_condition_object_list(
+                xml_requirement.description, **kwargs)
+            req_temporal_object_list = orchestrator_viewpoint_requirement.retrieve_req_temporal_object_list(
+                xml_requirement.description, **kwargs)
 
             if req_subject_object is not None:
                 if obj == req_subject_object:
-                    obj.add_allocated_requirement(xml_requirement)
-                    output_xml.write_object_allocation([[obj, xml_requirement]])
-
-                    Logger.set_info(__name__,
-                                    f"Requirement {xml_requirement.name} is satisfied by "
-                                    f"{obj.name}")
-            # Else do nothing
-
-            if len(req_object_object_list) > 0:
-                for req_object_object in req_object_object_list:
-                    if obj == req_object_object:
-                        obj.add_allocated_requirement(xml_requirement)
+                    if xml_requirement.id not in obj.allocated_req_list:
+                        obj.add_allocated_requirement(xml_requirement.id)
                         output_xml.write_object_allocation([[obj, xml_requirement]])
 
                         Logger.set_info(__name__,
                                         f"Requirement {xml_requirement.name} is satisfied by "
                                         f"{obj.name}")
+                    # Else do nothing
+                # Else do nothing
+            # Else do nothing
+
+            if len(req_object_object_list) > 0:
+                for req_object_object in req_object_object_list:
+                    if obj == req_object_object:
+                        if xml_requirement.id not in obj.allocated_req_list:
+                            obj.add_allocated_requirement(xml_requirement.id)
+                            output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                            Logger.set_info(__name__,
+                                            f"Requirement {xml_requirement.name} is satisfied by "
+                                            f"{obj.name}")
+                        # Else do nothing
+                    # Else do nothing
+            # Else do nothing
+
+            if len(req_condition_object_list) > 0:
+                for req_condition_object in req_condition_object_list:
+                    if obj == req_condition_object and obj != req_subject_object:
+                        if xml_requirement.id not in obj.allocated_req_list:
+                            obj.add_allocated_requirement(xml_requirement.id)
+                            output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                            Logger.set_info(__name__,
+                                            f"Requirement {xml_requirement.name} is satisfied by "
+                                            f"{obj.name}")
+                        # Else do nothing
+                    # Else do nothing
+            # Else do nothing
+
+            if len(req_temporal_object_list) > 0:
+                for req_temporal_object in req_temporal_object_list:
+                    if obj == req_temporal_object and obj != req_subject_object:
+                        if xml_requirement.id not in obj.allocated_req_list:
+                            obj.add_allocated_requirement(xml_requirement.id)
+                            output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                            Logger.set_info(__name__,
+                                            f"Requirement {xml_requirement.name} is satisfied by "
+                                            f"{obj.name}")
+                        # Else do nothing
+                    # Else do nothing
             # Else do nothing

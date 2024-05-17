@@ -1012,6 +1012,9 @@ def add_allocation(allocation_dict, **kwargs):
                     Logger.set_info(__name__,
                                     f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
                                     f"{elem[0].__class__.__name__} {elem[0].name}")
+
+                    orchestrator_object.check_object_instance_list_requirement([elem[0], elem[1]], **kwargs)
+
                     if k == 1:
                         # Allocation of [State, Function]
                         # Need to remove previous allocation if any

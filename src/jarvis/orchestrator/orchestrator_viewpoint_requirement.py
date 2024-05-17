@@ -15,7 +15,7 @@ from jarvis.query import question_answer
 from jarvis import util
 
 # Constants
-REQUIREMENT_CONFIDENCE_RATIO = 0.78
+REQUIREMENT_CONFIDENCE_RATIO = 0.95
 NOUN_SINGULAR_TAG = "NN"
 NOUN_PLURAL_TAG = "NNS"
 PROPER_NOUN_SINGULAR_TAG = "NNP"
@@ -273,7 +273,7 @@ def add_requirement(p_requirement_list, **kwargs):
 
             # Test if allocated object is identified in the requirement subject
             if requirement_item[3]:
-                requirement_item[3].add_allocated_requirement(new_requirement)
+                requirement_item[3].add_allocated_requirement(new_requirement.id)
                 new_allocation_list.append([requirement_item[3], new_requirement])
             # Else do nothing
 
@@ -281,7 +281,7 @@ def add_requirement(p_requirement_list, **kwargs):
             if requirement_item[4]:
                 for item in requirement_item[4]:
                     if item:
-                        item.add_allocated_requirement(new_requirement)
+                        item.add_allocated_requirement(new_requirement.id)
                         new_allocation_list.append([item, new_requirement])
         else:
             Logger.set_info(__name__, requirement_item[0] + " already exists")
@@ -352,7 +352,7 @@ def check_add_allocation(p_str_list, **kwargs):
             Logger.set_error(__name__, f"Requirement {elem[1]} not found")
         else:
             if not any(allocated_req_id == req_obj.id for allocated_req_id in alloc_obj.allocated_req_list):
-                alloc_obj.add_allocated_requirement(req_obj)
+                alloc_obj.add_allocated_requirement(req_obj.id)
                 allocation_list.append([alloc_obj, req_obj])
 
                 # Check for potential req parent in allocated obj parent
@@ -609,6 +609,46 @@ def retrieve_req_object_object_list(p_req_str, **kwargs):
     return req_object_object_list
 
 
+def retrieve_req_condition_object_list(p_req_str, **kwargs):
+    """@ingroup jarvis
+    @anchor retrieve_req_condition_object_list
+    Retrieve list of objects named as proper nouns found for requirement condition
+
+    @param[in] p_req_str : requirement description
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
+    _, _, req_condition, _ = detect_req_pattern(p_req_str)
+
+    req_object_object_list, _ = retrieve_req_proper_noun_object(req_condition, **kwargs)
+
+    for req_object_object in req_object_object_list.copy():
+        if req_object_object is None:
+            req_object_object_list.remove(req_object_object)
+
+    return req_object_object_list
+
+
+def retrieve_req_temporal_object_list(p_req_str, **kwargs):
+    """@ingroup jarvis
+    @anchor retrieve_req_temporal_object_list
+    Retrieve list of objects named as proper nouns found for requirement temporal condition
+
+    @param[in] p_req_str : requirement description
+    @param[in] kwargs : jarvis data structure
+    @return list of objects
+    """
+    _, _, _, req_temporal = detect_req_pattern(p_req_str)
+
+    req_object_object_list, _ = retrieve_req_proper_noun_object(req_temporal, **kwargs)
+
+    for req_object_object in req_object_object_list.copy():
+        if req_object_object is None:
+            req_object_object_list.remove(req_object_object)
+
+    return req_object_object_list
+
+
 def analyze_requirement(**kwargs):
     """@ingroup jarvis
     @anchor analyze_requirement
@@ -684,7 +724,7 @@ def analyze_requirement(**kwargs):
         # Check if user does not abort (answer == "q")
         if req_subject_object is not None:
             if xml_requirement.id not in req_subject_object.allocated_req_list:
-                req_subject_object.add_allocated_requirement(xml_requirement)
+                req_subject_object.add_allocated_requirement(xml_requirement.id)
                 output_xml.write_object_allocation([[req_subject_object, xml_requirement]])
 
                 Logger.set_info(__name__,

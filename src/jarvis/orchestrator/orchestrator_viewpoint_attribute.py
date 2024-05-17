@@ -159,7 +159,7 @@ def add_attribute_requirement(attribute, **kwargs):
         if req_subject_object is not None and len(req_object_object_list) > 0:
             for req_object_object in req_object_object_list:
                 if attribute[0].name == req_object_object.name and attribute[1][0].name == req_subject_object.name:
-                    attribute[0].add_allocated_requirement(xml_requirement)
+                    attribute[0].add_allocated_requirement(xml_requirement.id)
                     output_xml.write_object_allocation([[attribute[0], xml_requirement]])
 
                     Logger.set_info(__name__,
