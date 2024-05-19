@@ -87,9 +87,9 @@ def test_issue_5_xml(input_test_issue_5):
            len(obj_dict['xml_producer_function_list']) == 4
 
     for cons in obj_dict['xml_consumer_function_list']:
-        result_cons.add((cons[0], cons[1].name))
+        result_cons.add((cons[0].name, cons[1].name))
     for prod in obj_dict['xml_producer_function_list']:
-        result_prod.add((prod[0], prod[1].name))
+        result_prod.add((prod[0].name, prod[1].name))
     for fun in obj_dict['xml_function_list']:
         if fun.child_list:
             for child in fun.child_list:

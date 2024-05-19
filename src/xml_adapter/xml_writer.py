@@ -144,7 +144,7 @@ class XmlWriter3SE:
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_consumer(self, consumer_list):
-        """Write consumers by list [data_name, function]
+        """Write consumers by list [data, function]
         @param[in] consumer_list : list of consumers
         @return None
         """
@@ -152,13 +152,13 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         for consumer in consumer_list:
-            for xml_element in root.findall(".//dataList/data[@name='" + str(consumer[0]) + "']"):
+            for xml_element in root.findall(".//dataList/data[@name='" + str(consumer[0].name) + "']"):
                 if xml_element.find('consumerList') is None:
                     etree.SubElement(xml_element, 'consumerList')
                     if xml_element.find('producerList') is None:
                         etree.SubElement(xml_element, 'producerList')
 
-            for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(consumer[0])
+            for consumer_list_tag in root.findall(".//dataList/data[@name='" + str(consumer[0].name)
                                                   + "']/consumerList"):
                 if not consumer[1].operand:
                     _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
@@ -170,7 +170,7 @@ class XmlWriter3SE:
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_producer(self, producer_list):
-        """Write producers by list [data_name, function]
+        """Write producers by list [data, function]
         @param[in] producer_list : list of producers
         @return None
         """
@@ -178,13 +178,13 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         for producer in producer_list:
-            for xml_element in root.findall(".//dataList/data[@name='" + str(producer[0]) + "']"):
+            for xml_element in root.findall(".//dataList/data[@name='" + str(producer[0].name) + "']"):
                 if xml_element.find('producerList') is None:
                     if xml_element.find('consumerList') is None:
                         etree.SubElement(xml_element, 'consumerList')
                     etree.SubElement(xml_element, 'producerList')
 
-            for producer_list_tag in root.findall(".//dataList/data[@name='" + str(producer[0])
+            for producer_list_tag in root.findall(".//dataList/data[@name='" + str(producer[0].name)
                                                   + "']/producerList"):
                 _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': producer[1].id})
 
@@ -239,7 +239,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         for tag in root.findall(
-                ".//data[@name='" + flow_function[0] + "']/" + relationship_type + "List/" + relationship_type +
+                ".//data[@name='" + flow_function[0].name + "']/" + relationship_type + "List/" + relationship_type +
                 "[@id='" + flow_function[1].id + "']"):
             tag.getparent().remove(tag)
 

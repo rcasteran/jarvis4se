@@ -206,8 +206,8 @@ class XmlParser3SE:
             for xml_consumer in xml_consumer_list:
                 for function in self.xml_dict['xml_function_list']:
                     if xml_consumer.get('id') == function.id:
-                        consumer_function_list.append([xml_data.get('name'), function])
-                        Logger.set_debug(__name__, f"Data [{xml_data.get('id')}, {xml_data.get('name')}]"
+                        consumer_function_list.append([data, function])
+                        Logger.set_debug(__name__, f"Data [{data.id}, {data.name}]"
                                                    f" is consumed by "
                                                    f"data [{function.id}, {function.name}]")
 
@@ -222,8 +222,8 @@ class XmlParser3SE:
             for xml_producer in xml_producer_list:
                 for function in self.xml_dict['xml_function_list']:
                     if xml_producer.get('id') == function.id:
-                        producer_function_list.append([xml_data.get('name'), function])
-                        Logger.set_debug(__name__, f"Data [{xml_data.get('id')}, {xml_data.get('name')}]"
+                        producer_function_list.append([data, function])
+                        Logger.set_debug(__name__, f"Data [{data.id}, {data.name}]"
                                                    f" is produced by "
                                                    f"function [{function.id}, {function.name}]")
 

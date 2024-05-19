@@ -153,7 +153,7 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                  'Last producer Functional element(s)': []}
 
     for prod in kwargs['xml_producer_function_list']:
-        if prod[0] == data.name and \
+        if prod[0] == data and \
                 check_latest(prod[1], kwargs['xml_function_list']) == prod[1].name:
             for cons in kwargs['xml_consumer_function_list']:
                 cons_last_fun_elem = None
@@ -249,42 +249,43 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
     Returns:
         input or output list
     """
+    in_or_out_list = []
+
     object_type = get_object_type(wanted_object)
     if object_type == "Functional element":
-        in_or_out_list = []
-        allocated_fun_list = set()
-        for fun in wanted_object.allocated_function_list:
-            for xml_fun in kwargs['xml_function_list']:
-                if fun == xml_fun.id:
-                    allocated_fun_list.add(xml_fun)
-        for func in allocated_fun_list:
-            current_fun_list = get_input_or_output_fun_and_fun_elem(func, direction, True, **kwargs)
-            for sub in current_fun_list:
-                if sub and sub[1] not in [f.name for f in allocated_fun_list]:
-                    in_or_out_list.append(sub)
-        if unmerged:
-            return in_or_out_list
-        return merge_list_per_cons_prod(in_or_out_list)
-    # For Function()
-    if direction == 'output':
-        in_or_out_list = get_in_out_function(wanted_object,
-                                            kwargs['xml_producer_function_list'],
-                                            kwargs['xml_consumer_function_list'])
-    else:
-        in_or_out_list = get_in_out_function(wanted_object,
-                                            kwargs['xml_consumer_function_list'],
-                                            kwargs['xml_producer_function_list'])
-    if unmerged:
-        return in_or_out_list
+        allocated_function_list = set()
+        for allocated_function in wanted_object.allocated_function_list:
+            for xml_function in kwargs['xml_function_list']:
+                if allocated_function == xml_function.id:
+                    allocated_function_list.add(xml_function)
 
-    return merge_list_per_cons_prod(in_or_out_list)
+        for function in allocated_function_list:
+            function_in_or_out_list = get_input_or_output_fun_and_fun_elem(function, direction, True, **kwargs)
+            for function_in_or_out in function_in_or_out_list:
+                if function_in_or_out and function_in_or_out[1] not in [f.name for f in allocated_function_list]:
+                    in_or_out_list.append(function_in_or_out)
+    elif object_type == "function":
+        if direction == 'output':
+            in_or_out_list = get_in_out_function(wanted_object,
+                                                 kwargs['xml_producer_function_list'],
+                                                 kwargs['xml_consumer_function_list'])
+        else:
+            in_or_out_list = get_in_out_function(wanted_object,
+                                                 kwargs['xml_consumer_function_list'],
+                                                 kwargs['xml_producer_function_list'])
+
+    if in_or_out_list and not unmerged:
+        in_or_out_list = merge_list_per_cons_prod(in_or_out_list)
+    # Else do nothing
+
+    return in_or_out_list
 
 
 def merge_list_per_cons_prod(input_list):
     """
-    Sorts data's name in alphabetical order and merges list by producer or consumer
+    Sorts data_name in alphabetical order according to their name and merges list by producer or consumer
     Args:
-        input_list ([Data_name, funcion_name]): List of consumer/producer with data per Function
+        input_list ([data_name, function_name]): List of consumer/producer with data_name per Function
 
     Returns:
         Sorted + merged list
@@ -292,14 +293,14 @@ def merge_list_per_cons_prod(input_list):
     input_list = sorted(input_list)
     output_list = []
     empty_dict = {}
-    for data, obj_name in input_list:
-        if data not in empty_dict:
-            output_list.append([data, obj_name])
-            empty_dict[data] = len(empty_dict)
+    for data_name, obj_name in input_list:
+        if data_name not in empty_dict:
+            output_list.append([data_name, obj_name])
+            empty_dict[data_name] = len(empty_dict)
         else:
             if obj_name:
-                if obj_name not in output_list[empty_dict[data]][1]:
-                    output_list[empty_dict[data]][1] += '\\n' + obj_name
+                if obj_name not in output_list[empty_dict[data_name]][1]:
+                    output_list[empty_dict[data_name]][1] += '\\n' + obj_name
 
     return output_list
 
@@ -320,7 +321,7 @@ def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_rela
         return output_list
     for data in flow_list:
         if not any(data in s for s in opposite_wanted_relationship):
-            output_list.append([data, None])
+            output_list.append([data.name, None])
         else:
             for elem in opposite_wanted_relationship:
                 check = True
@@ -329,7 +330,7 @@ def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_rela
                         if [elem[0], child] in opposite_wanted_relationship:
                             check = False
                     if check:
-                        output_list.append([elem[0], elem[1].name])
+                        output_list.append([elem[0].name, elem[1].name])
 
     return output_list
 

@@ -973,7 +973,7 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
     for function in function_list:
         for fun_elem in fun_elem_exposes:
             if any(a == function.id for a in fun_elem.allocated_function_list):
-                fun_data = [data.name, function]
+                fun_data = [data, function]
                 if any(a == fun_data for a in xml_consumer_function_list):
                     is_consumer = True
                 if any(a == fun_data for a in xml_producer_function_list):

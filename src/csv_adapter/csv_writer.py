@@ -217,7 +217,7 @@ class CsvWriter3SE:
         """
         for consumer in consumer_list:
             for row in array:
-                if row[util.CSV_NAME_IDX] == consumer[0]:
+                if row[util.CSV_NAME_IDX] == consumer[0].name:
                     if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
                         if consumer[1].operand is not None:
                             row[util.CSV_CONSUMER_LIST_IDX] += util.CSV_MEMBER_SPLIT + consumer[1].id \
@@ -245,7 +245,7 @@ class CsvWriter3SE:
         """
         for producer in producer_list:
             for row in array:
-                if row[util.CSV_NAME_IDX] == producer[0]:
+                if row[util.CSV_NAME_IDX] == producer[0].name:
                     if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
                         row[util.CSV_PRODUCER_LIST_IDX] += util.CSV_MEMBER_SPLIT + producer[1].id
                     else:

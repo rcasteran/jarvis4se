@@ -12,10 +12,10 @@ def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list
     new_flow_list = []
 
     for func in function_list:
-        # Flow = [Data_name, Function]
+        # Flow = [Data, Function]
         for flow in xml_flow_list:
             if func in flow and flow not in new_flow_list:
-                # Oppo = [Data_name, Function]
+                # Oppo = [Data, Function]
                 for oppo in xml_opposite_flow_list:
                     if oppo[0] == flow[0] and oppo[1] in function_list:
                         new_flow_list.append(flow)
@@ -403,14 +403,14 @@ def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_con
 
     else:
         for cons in xml_consumer_function_list:
-            if any(item.name == cons[0] for item in new_data_list) and \
+            if any(item == cons[0] for item in new_data_list) and \
                     any(item == cons[1] for item in function_list):
                 new_consumer_list.append(cons)
                 if cons[1] not in new_function_list:
                     new_function_list.append(cons[1])
 
         for prod in xml_producer_function_list:
-            if any(item.name == prod[0] for item in new_data_list) and \
+            if any(item == prod[0] for item in new_data_list) and \
                     any(item == prod[1] for item in function_list):
                 new_producer_list.append(prod)
                 if prod[1] not in new_function_list:

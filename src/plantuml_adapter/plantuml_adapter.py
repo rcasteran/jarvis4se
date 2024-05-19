@@ -881,16 +881,16 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
     output_list = []
 
     for producer_flow, producer_function in producer_function_list:
-        Logger.set_debug(__name__, f'Producer flow: {producer_flow}; '
+        Logger.set_debug(__name__, f'Producer flow: {producer_flow.name}; '
                                    f'function: {producer_function.id}, {producer_function.name}')
         if not producer_function.child_list or not parent_child_dict:
             for cons_flow, consumer_function in consumer_function_list:
-                Logger.set_debug(__name__, f'Consumer flow: {cons_flow}; '
+                Logger.set_debug(__name__, f'Consumer flow: {cons_flow.name}; '
                                            f'function: {consumer_function.id}, {consumer_function.name}')
                 if (not consumer_function.child_list or not parent_child_dict) and cons_flow == producer_flow:
                     output_list.append(
                         [producer_function.name.lower(), consumer_function.name.lower(),
-                         producer_flow])
+                         producer_flow.name])
 
     if concatenate:
         output_list = concatenate_flows(output_list)
@@ -909,7 +909,6 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
     """
     flow_consumer_name_list = []
     flow_child_consumer_list = []
-    temp_input_list = []
     output_list = []
 
     for flow, cons in consumer_function_list:
@@ -920,17 +919,9 @@ def get_output_flows(consumer_function_list, producer_function_list, concatenate
                 if [flow, child] in consumer_function_list:
                     flow_child_consumer_list.append(flow_child)
 
-    for consumer_flow, consumer_function in consumer_function_list:
-        if len(consumer_function.child_list) > 0:
-            if len(flow_child_consumer_list) > 0:
-                if not any(consumer_flow in sublist for sublist in flow_child_consumer_list):
-                    temp_input_list.append([consumer_function.name.lower(), consumer_flow])
-            if len(flow_child_consumer_list) == 0:
-                temp_input_list.append([consumer_function.name.lower(), consumer_flow])
-
     for producer_flow, producer_function in producer_function_list:
         if not any(producer_flow in sublist for sublist in flow_consumer_name_list):
-            output_list.append([None, producer_function.name.lower(), producer_flow])
+            output_list.append([None, producer_function.name.lower(), producer_flow.name])
 
     if concatenate:
         output_list = concatenate_flows(output_list)
@@ -961,17 +952,9 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
                 if [flow, child] in producer_function_list:
                     flow_child_producer_list.append(flow_child)
 
-    for producer_flow, producer_function in producer_function_list:
-        if len(producer_function.child_list) > 0:
-            if len(flow_child_producer_list) > 0:
-                if not any(producer_flow in sublist for sublist in flow_child_producer_list):
-                    temp_input_list.append([producer_function.name.lower(), producer_flow])
-            if len(flow_child_producer_list) == 0:
-                temp_input_list.append([producer_function.name.lower(), producer_flow])
-
     for cons_flow, consumer_fun in consumer_function_list:
         if not any(cons_flow in sublist for sublist in flow_producer_name_list):
-            output_list.append([None, consumer_fun.name.lower(), cons_flow])
+            output_list.append([None, consumer_fun.name.lower(), cons_flow.name])
 
     if concatenate:
         output_list = concatenate_flows(output_list)

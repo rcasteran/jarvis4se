@@ -668,7 +668,7 @@ class CsvParser3SE:
                         csv_consumer_attribute = csv_consumer.split(util.CSV_MEMBER_ATTRIBUTE_SPLIT)
                         for function in self.csv_dict['csv_function_list']:
                             if csv_consumer_attribute[0] == function.id:
-                                consumer_function_list.append([data.name, function])
+                                consumer_function_list.append([data, function])
                                 Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
                                                            f"is consumed by "
                                                            f"data [{function.id}, {function.name}]")
@@ -686,7 +686,7 @@ class CsvParser3SE:
                     for csv_producer_id in csv_producer_id_list:
                         for function in self.csv_dict['csv_function_list']:
                             if csv_producer_id == function.id:
-                                producer_function_list.append([data.name, function])
+                                producer_function_list.append([data, function])
                                 Logger.set_debug(__name__, f"Data [{data.id}, {data.name}] "
                                                            f"is produced by "
                                                            f"function [{function.id}, {function.name}]")

@@ -366,9 +366,9 @@ def case_sequence_diagram(**kwargs):
 
                     if len(xml_data_list) != len(kwargs['xml_data_list']):
                         xml_cons = [i for i in kwargs['xml_consumer_function_list']
-                                    if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                                    if any(a == i[0] for a in [d for d in xml_data_list])]
                         xml_prod = [i for i in kwargs['xml_producer_function_list']
-                                    if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                                    if any(a == i[0] for a in [d for d in xml_data_list])]
                     else:
                         xml_cons = kwargs['xml_consumer_function_list']
                         xml_prod = kwargs['xml_producer_function_list']
@@ -382,10 +382,10 @@ def case_sequence_diagram(**kwargs):
                     if len(xml_data_list) != len(kwargs['xml_data_list']):
                         kwargs['xml_consumer_function_list'] = \
                             [i for i in kwargs['xml_consumer_function_list']
-                             if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                             if any(a == i[0] for a in [d for d in xml_data_list])]
                         kwargs['xml_producer_function_list'] = \
                             [i for i in kwargs['xml_producer_function_list']
-                             if any(a == i[0] for a in [d.name for d in xml_data_list])]
+                             if any(a == i[0] for a in [d for d in xml_data_list])]
                     kwargs['xml_data_list'] = xml_data_list
                     plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
 
@@ -598,7 +598,7 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
     # (Re)Filter data_list with only produced(same data in consumed since paired) and functions
     # asked for sequence i.e. new_function_list used in get_cons_or_prod_paired()
     # => TBC/TBT
-    new_data_list = {s for s in xml_data_list if any(s.name in j for j in new_producer_list)}
+    new_data_list = {s for s in xml_data_list if any(s in j for j in new_producer_list)}
 
     for new_data in new_data_list:
         for pred in new_data.predecessor_list.copy():
@@ -637,10 +637,14 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
     if fun_inter:
         data_list_fun_inter = query_object_list.get_fun_intf_data(fun_inter, None, **kwargs)['data']
         for elem in data_list_fun_inter:
+            fun_elem_data = None
             if elem['Last consumer Functional element(s)']:
                 fun_elem_cons = question_answer.check_get_object(
                     elem['Last consumer Functional element(s)'].pop(),
                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+                fun_elem_data = question_answer.check_get_object(
+                    elem['Data'],
+                    **{'xml_data_list': kwargs['xml_data_list']})
             else:
                 fun_elem_cons = []
 
@@ -648,14 +652,18 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
                 fun_elem_prod = question_answer.check_get_object(
                     elem['Last producer Functional element(s)'].pop(),
                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+                fun_elem_data = question_answer.check_get_object(
+                    elem['Data'],
+                    **{'xml_data_list': kwargs['xml_data_list']})
             else:
                 fun_elem_prod = []
 
             if fun_elem_cons and fun_elem_prod:
-                new_consumer_list.append([elem['Data'], fun_elem_cons])
-                new_producer_list.append([elem['Data'], fun_elem_prod])
+                new_consumer_list.append([fun_elem_data, fun_elem_cons])
+                new_producer_list.append([fun_elem_data, fun_elem_prod])
                 new_fun_elem_list.add(fun_elem_cons)
                 new_fun_elem_list.add(fun_elem_prod)
+            # Else do nothing
 
     if new_consumer_list and new_producer_list:
         plantuml_text = plantuml_adapter.get_sequence_diagram(new_fun_elem_list,

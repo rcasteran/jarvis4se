@@ -247,10 +247,10 @@ def test_function_output_auto_xml(input_test_function_output_auto_decomposition)
     result_consumer_list = set()
     result_producer_list = set()
     for flow_cons_list in obj_dict['xml_consumer_function_list']:
-        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+        result_consumer_list.add((flow_cons_list[0].name, flow_cons_list[1].name))
 
     for flow_prod_list in obj_dict['xml_producer_function_list']:
-        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+        result_producer_list.add((flow_prod_list[0].name, flow_prod_list[1].name))
 
     assert result_consumer_list == expected_consumer_list
     assert result_producer_list == expected_producer_list
@@ -286,10 +286,10 @@ def test_function_output_auto_splitted_xml(input_test_function_output_auto_decom
     result_consumer_list = set()
     result_producer_list = set()
     for flow_cons_list in obj_dict['xml_consumer_function_list']:
-        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+        result_consumer_list.add((flow_cons_list[0].name, flow_cons_list[1].name))
 
     for flow_prod_list in obj_dict['xml_producer_function_list']:
-        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+        result_producer_list.add((flow_prod_list[0].name, flow_prod_list[1].name))
 
     assert result_consumer_list == expected_consumer_list
     assert result_producer_list == expected_producer_list
@@ -328,10 +328,10 @@ def test_function_output_auto_external_xml(input_test_function_output_auto_decom
     result_consumer_list = set()
     result_producer_list = set()
     for flow_cons_list in obj_dict['xml_consumer_function_list']:
-        result_consumer_list.add((flow_cons_list[0], flow_cons_list[1].name))
+        result_consumer_list.add((flow_cons_list[0].name, flow_cons_list[1].name))
 
     for flow_prod_list in obj_dict['xml_producer_function_list']:
-        result_producer_list.add((flow_prod_list[0], flow_prod_list[1].name))
+        result_producer_list.add((flow_prod_list[0].name, flow_prod_list[1].name))
 
     assert result_consumer_list == expected_consumer_list
     assert result_producer_list == expected_producer_list
