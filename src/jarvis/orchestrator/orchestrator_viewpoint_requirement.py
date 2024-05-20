@@ -24,6 +24,9 @@ ADJECTIVE_TAG = "JJ"
 SUBORDINATE_TAG = "IN"
 COORDINATE_TAG = "CC"
 PRONOUN_PERSONAL_TAG = "PRP"
+VERB_TAG = "VB"
+VERB_PAST_TAG = "VBN"
+TO_TAG = "TO"
 
 
 def check_add_requirement(p_str_list, **kwargs):
@@ -510,31 +513,48 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
     if req_string_object is None:
         is_previous_proper_noun_singular_tag = False
+        is_function_name = False
+        function_name_str = ''
         token_list = nltk.word_tokenize(p_req_str)
         tag_list = nltk.pos_tag(token_list)
         index = 0
         for tag in tag_list:
+            previous_tag_list = []
+            if index > 0:
+                for i in range(0, index):
+                    previous_tag_list.append(tag_list[i])
+            # Else do nothing
+
+            next_tag_list = []
             if index < len(tag_list)-1:
-                next_tag = tag_list[index+1]
-            else:
-                next_tag = None
+                for i in range(index+1, len(tag_list)):
+                    next_tag_list.append(tag_list[i])
+            # Else do nothing
 
-            is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
-                check_proper_noun_tag(tag, next_tag, p_is_subject, is_previous_proper_noun_singular_tag))
-
+            is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error = (
+                check_proper_noun_tag(tag, previous_tag_list, next_tag_list, p_is_subject,
+                                      is_previous_proper_noun_singular_tag, is_function_name))
             if is_error:
                 break
             elif is_proper_noun:
                 req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+            elif is_function_name:
+                function_name_str = function_name_str + ' ' + tag[0]
+            # Else do nothing
 
             index = index+1
+
+        if len(function_name_str) > 0:
+            req_string_object_list.append(question_answer.check_get_object(function_name_str[1:], **kwargs))
+        # Else do nothing
     else:
         req_string_object_list.append(req_string_object)
 
     return req_string_object_list, is_error
 
 
-def check_proper_noun_tag(p_tag, p_next_tag, p_is_subject, is_previous_proper_noun_singular_tag, p_is_silent=False):
+def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subject,
+                          is_previous_proper_noun_singular_tag, is_function_name, p_is_silent=False):
     is_proper_noun = False
     is_error = False
 
@@ -545,16 +565,56 @@ def check_proper_noun_tag(p_tag, p_next_tag, p_is_subject, is_previous_proper_no
             is_previous_proper_noun_singular_tag = True
         # Else do nothing
     elif p_tag[1] == NOUN_SINGULAR_TAG or p_tag[1] == NOUN_PLURAL_TAG:
-        is_proper_noun = not is_previous_proper_noun_singular_tag
-        is_previous_proper_noun_singular_tag = False
+        if not is_function_name:
+            is_proper_noun = not is_previous_proper_noun_singular_tag
+            is_previous_proper_noun_singular_tag = False
+        # Else do nothing
     elif p_tag[1] == ADJECTIVE_TAG:
         is_previous_proper_noun_singular_tag = False
     elif p_tag[1] == DETERMINER_TAG:
         is_previous_proper_noun_singular_tag = False
-        if p_tag[0] == 'a' and p_next_tag[1] != NOUN_SINGULAR_TAG:
-            # case of 'a' used as a noun
+        if p_tag[0] == 'a':
+            if p_next_tag_list:
+                if p_next_tag_list[0][1] != NOUN_SINGULAR_TAG:
+                    # case of 'a' used as a noun
+                    is_proper_noun = True
+                # Else do nothing
+            else:
+                # case of 'a' used as a noun
+                is_proper_noun = True
+    elif p_tag[1] == TO_TAG and not is_function_name:
+        if p_previous_tag_list:
+            if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_previous_tag_list[-1][1] == NOUN_PLURAL_TAG:
+                if len(p_previous_tag_list) > 1:
+                    if p_previous_tag_list[-2][1] != VERB_TAG and p_previous_tag_list[-2][1] != VERB_PAST_TAG:
+                        is_function_name = True
+                    # Else do nothing
+                else:
+                    is_function_name = True
+            else:
+                is_function_name = False
+        # Else do nothing
+    elif p_tag[1] == VERB_TAG:
+        if len(p_tag[0]) > 1:
+            if p_previous_tag_list:
+                if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_tag[-1][1] == NOUN_PLURAL_TAG:
+                    is_function_name = False
+                elif p_previous_tag_list[-1][1] == TO_TAG and not is_function_name:
+                    # Could be a proper noun
+                    is_previous_proper_noun_singular_tag = False
+                    is_proper_noun = True
+                elif p_previous_tag_list[-1][1] != TO_TAG and not p_is_silent:
+                    Logger.set_error(__name__,
+                                     f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '
+                                     f'nor a noun (tagged as "{p_tag[1]}")')
+                    is_error = True
+                # Else do nothing
+            # Else do nothing
+        else:
+            # Case of a single letter, so it is a proper noun instead of a verb
+            is_previous_proper_noun_singular_tag = False
             is_proper_noun = True
-    elif p_tag[1] != DETERMINER_TAG and p_is_subject:
+    elif p_tag[1] != DETERMINER_TAG and not is_function_name and p_is_subject:
         if not p_is_silent:
             Logger.set_error(__name__,
                              f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '
@@ -563,7 +623,7 @@ def check_proper_noun_tag(p_tag, p_next_tag, p_is_subject, is_previous_proper_no
         # Else do nothing
     # Else do nothing
 
-    return is_proper_noun, is_error, is_previous_proper_noun_singular_tag
+    return is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error
 
 
 def retrieve_req_subject_object(p_req_str, **kwargs):
@@ -679,28 +739,50 @@ def analyze_requirement(**kwargs):
                 token_list = nltk.word_tokenize(req_subject)
                 tag_list = nltk.pos_tag(token_list)
                 is_previous_proper_noun_singular_tag = False
+                is_function_name = False
+                function_name_str = ''
                 index = 0
                 for tag in tag_list:
-                    if index < len(tag_list) - 1:
-                        next_tag = tag_list[index + 1]
-                    else:
-                        next_tag = None
+                    previous_tag_list = []
+                    if index > 0:
+                        for i in range(0, index):
+                            previous_tag_list.append(tag_list[i])
+                    # Else do nothing
 
-                    is_proper_noun, is_error, is_previous_proper_noun_singular_tag = (
-                        check_proper_noun_tag(tag, next_tag, True, is_previous_proper_noun_singular_tag, True))
+                    next_tag_list = []
+                    if index < len(tag_list):
+                        for i in range(index + 1, len(tag_list) - 1):
+                            next_tag_list.append(tag_list[i])
+                    # Else do nothing
+
+                    is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error =\
+                        (check_proper_noun_tag(tag, previous_tag_list, next_tag_list, True,
+                                               is_previous_proper_noun_singular_tag, is_function_name, True))
 
                     if is_error:
                         break
                     elif is_proper_noun:
                         req_subject_name = tag[0]
 
-                    specific_type, base_type = orchestrator_object.retrieve_type(tag[0], True, **kwargs)
+                        specific_type, base_type = orchestrator_object.retrieve_type(req_subject_name, True, **kwargs)
+                        if specific_type is not None:
+                            req_subject_type = specific_type
+                        elif base_type is not None:
+                            req_subject_type = base_type
+                    elif is_function_name:
+                        function_name_str = function_name_str + ' ' + tag[0]
+
+                    index = index + 1
+
+                if len(function_name_str) > 0:
+                    req_subject_name = function_name_str[1:]
+
+                    specific_type, base_type = orchestrator_object.retrieve_type(req_subject_name, True, **kwargs)
                     if specific_type is not None:
                         req_subject_type = specific_type
                     elif base_type is not None:
                         req_subject_type = base_type
-
-                    index = index + 1
+                # Else do nothing
 
                 if req_subject_type is None:
                     req_subject_type = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')

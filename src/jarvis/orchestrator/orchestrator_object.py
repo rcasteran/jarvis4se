@@ -281,6 +281,11 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
             print(f"Relationship detected between {object_src_type}: {object_src.name} and "
                   f"{object_dest_type}: {object_dest.name}")
             print("Attribute case")
+        elif object_dest_type == datamodel.BaseType.DATA:
+            # TODO: relationship between fun_elem and data
+            print(f"Relationship detected between {object_src_type}: {object_src.name} and "
+                  f"{object_dest_type}: {object_dest.name}")
+            print("Data case")
         # Else do nothing
     elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
         # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE

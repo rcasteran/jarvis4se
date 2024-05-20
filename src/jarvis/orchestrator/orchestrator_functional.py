@@ -219,7 +219,7 @@ def add_consumer_function(new_consumer_list, **kwargs):
     # Warn the user once added within xml
     for consumer in new_consumer_list:
         xml_consumer_function_list.append(consumer)
-        orchestrator_object.check_object_instance_list_requirement([consumer], **kwargs)
+        orchestrator_object.check_object_instance_list_requirement(consumer, **kwargs)
 
         Logger.set_info(__name__,
                         f"{consumer[1].name} consumes {consumer[0].name}")
@@ -452,7 +452,7 @@ def add_producer_function(new_producer_list, **kwargs):
     # Warn the user once added within xml
     for producer in new_producer_list:
         xml_producer_function_list.append(producer)
-        orchestrator_object.check_object_instance_list_requirement([producer], **kwargs)
+        orchestrator_object.check_object_instance_list_requirement(producer, **kwargs)
 
         Logger.set_info(__name__,
                         f"{producer[1].name} produces {producer[0].name}")
