@@ -7,5 +7,5 @@ setup(name='csv_adapter',
       author='',
       author_email='',
       license='MIT',
-      packages=['plantuml_adapter'],
+      packages=['csv_adapter'],
       zip_safe=False)

@@ -282,10 +282,21 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
                   f"{object_dest_type}: {object_dest.name}")
             print("Attribute case")
         elif object_dest_type == datamodel.BaseType.DATA:
-            # TODO: relationship between fun_elem and data
-            print(f"Relationship detected between {object_src_type}: {object_src.name} and "
-                  f"{object_dest_type}: {object_dest.name}")
-            print("Data case")
+            for allocated_fun_id in object_src.allocated_function_list:
+                for xml_function in kwargs['xml_function_list']:
+                    if allocated_fun_id == xml_function.id:
+                        if ([object_dest, xml_function] in kwargs['xml_consumer_function_list'] or
+                                [object_dest, xml_function] in kwargs['xml_producer_function_list']):
+                            is_relationship = True
+                            break
+                        # Else do nothing
+                    # Else do nothing
+
+            if not is_relationship:
+                Logger.set_warning(__name__,
+                                   f"{object_src_type} {object_src.name} has no allocated function "
+                                   f"producing or consuming {object_dest_type} {object_dest.name}")
+            # Else do nothing
         # Else do nothing
     elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
         # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
