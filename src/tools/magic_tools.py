@@ -35,9 +35,17 @@ class MagicTools(Magics):
         """Magic line that get Jarvis dependencies versions
         @return None
         """
-        pkg = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas', 'requests']
-        pkg_ver =  "\n".join(['=='.join(tups) for tups in zip(pkg, map(version, pkg))])
-        print(pkg_ver, "\npython=={}".format(py_ver[:6]))
+        package_list = ['ipython', 'lxml', 'notebook', 'plantuml', 'jarvis4se', 'pandas', 'requests', 'nltk', 'PyZMQ',
+                        'OMPython']
+        package_version_list = ""
+        for package in package_list:
+            try:
+                package_version = version(package)
+            except ModuleNotFoundError:
+                package_version = "Not found"
+            package_version_list = package_version_list + f'\n{package}=={package_version}'
+
+        print(package_version_list, "\npython=={}".format(py_ver[:6]))
 
     @cell_magic
     def diagram(self, _, cell):
