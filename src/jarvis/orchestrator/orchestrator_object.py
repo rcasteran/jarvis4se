@@ -197,7 +197,7 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
                 xml_producer_function_list = kwargs['xml_producer_function_list']
 
                 for xml_consumer_function in xml_consumer_function_list:
-                    if xml_consumer_function[0] == object_dest.name and xml_consumer_function[1] == object_src:
+                    if xml_consumer_function[0] == object_dest and xml_consumer_function[1] == object_src:
                         Logger.set_info(__name__,
                                         f"{object_src_type} {object_src.name} consumes "
                                         f"{object_dest_type} {object_dest.name}")
@@ -206,7 +206,7 @@ def check_object_relationship(object_src, object_dest, context, **kwargs):
 
                 if not is_relationship:
                     for xml_producer_function in xml_producer_function_list:
-                        if xml_producer_function[0] == object_dest.name and xml_producer_function[1] == object_src:
+                        if xml_producer_function[0] == object_dest and xml_producer_function[1] == object_src:
                             Logger.set_info(__name__,
                                             f"{object_src_type} {object_src.name} produces "
                                             f"{object_dest_type} {object_dest.name}")

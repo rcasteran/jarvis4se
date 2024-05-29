@@ -5,7 +5,7 @@ Jarvis module
 
 # Modules
 import datamodel
-from . import orchestrator_shared, orchestrator_object
+from . import orchestrator_shared, orchestrator_object, orchestrator_viewpoint_requirement
 from jarvis.query import question_answer
 from jarvis import util
 from tools import Logger
@@ -476,9 +476,8 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
     xml_transition_list = kwargs['xml_transition_list']
-    output_xml = kwargs['output_xml']
-
     condition_list = []
+
     # Create a list with all transition names/aliases already in the xml
     xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
     for transition_str, condition_str in trans_condition_str_list:
@@ -498,12 +497,36 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
                                         f'Condition "{condition_str.lstrip(" ")}" already exists '
                                         f'for transition {transition_str}')
 
-    update = add_transition_condition(condition_list, output_xml)
+    check_condition_list_requirement(condition_list, **kwargs)
+    update = add_transition_condition(condition_list, **kwargs)
 
     return update
 
 
-def add_transition_condition(condition_list, output_xml):
+def check_condition_list_requirement(p_condition_list, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    output_xml = kwargs['output_xml']
+
+    for condition in p_condition_list:
+        for xml_requirement in xml_requirement_list:
+            _, _, _, xml_requirement_temporal = \
+                orchestrator_viewpoint_requirement.detect_req_pattern(xml_requirement.description)
+
+            if len(xml_requirement_temporal) > 0:
+                if xml_requirement_temporal in condition[1]:
+                    if xml_requirement.id not in condition[0].allocated_req_list:
+                        condition[0].add_allocated_requirement(xml_requirement.id)
+                        output_xml.write_object_allocation([[condition[0], xml_requirement]])
+
+                        Logger.set_info(__name__,
+                                        f"Requirement {xml_requirement.name} is satisfied by "
+                                        f"{condition[0].name}")
+                    # Else do nothing
+                # Else do nothing
+            # Else do nothing
+
+
+def add_transition_condition(condition_list, **kwargs):
     """
     Check if input list is not empty, write in xml for each list and return update list if some
     updates has been made
@@ -515,15 +538,20 @@ def add_transition_condition(condition_list, output_xml):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    if not condition_list:
-        return 0
+    output_xml = kwargs['output_xml']
+    update = 0
 
-    output_xml.write_transition_condition(condition_list)
-    for elem in condition_list:
-        elem[0].add_condition(elem[1])
-        Logger.set_info(__name__,
-                        f"Condition for {elem[0].name} : {elem[1]}")
-    return 1
+    if condition_list:
+        output_xml.write_transition_condition(condition_list)
+
+        for elem in condition_list:
+            elem[0].add_condition(elem[1])
+            Logger.set_info(__name__,
+                            f"Condition for {elem[0].name} : {elem[1]}")
+
+        update = 1
+
+    return update
 
 
 def check_add_src_dest(src_dest_str, **kwargs):
