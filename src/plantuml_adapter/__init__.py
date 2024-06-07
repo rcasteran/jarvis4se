@@ -11,7 +11,7 @@ Defines the different functions and classes used by Jarvis to call Plantuml as a
 - function to construct the PlantUml text and url for the context diagram for functional elements:
 @ref get_fun_elem_context_diagram
 - class to handle local PlantUml PicoWeb Server: @ref PlantUmlPicoServer
-- class to encode PlantUml text and get server url as .svg : @ref PlantUmlGen
+- class to encode PlantUml text and get server url as .svg : @ref PlantUmlConnector
 - class to encode PlantUml text for state diagram : @ref StateDiagram
 - class to encode PlantUml text for sequence diagram : @ref SequenceDiagram
 - class to encode PlantUml text for object diagram : @ref ObjDiagram
@@ -22,5 +22,5 @@ from .plantuml_adapter import get_sequence_diagram
 from .plantuml_adapter import get_state_machine_diagram
 from .plantuml_adapter import get_fun_elem_decomposition
 from .plantuml_adapter import get_fun_elem_context_diagram
-from .util import PlantUmlPicoServer
-from .util import PlantUmlGen
+from .plantuml_connector import PlantUmlPicoServer
+from .plantuml_connector import PlantUmlConnector

@@ -19,7 +19,7 @@ class MagicTools(Magics):
     Magic call for IPython interface
     """
 
-    def __init__(self, shell, generator):
+    def __init__(self, shell, generator, simulator):
         """
         @var generator
         Jarvis diagram generator
@@ -28,6 +28,7 @@ class MagicTools(Magics):
         # You must call the parent constructor
         super().__init__(shell)
         self.generator = generator
+        self.simulator = simulator
 
     @staticmethod
     @line_magic

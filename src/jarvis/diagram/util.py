@@ -443,3 +443,16 @@ def get_fun_elem_function_list(function, function_list, fun_elem):
             function_list.add(function)
     else:
         function_list.add(function)
+
+
+def get_transition_list(p_state_list, p_transition_list):
+    """Get transitions if state(s) from state_list are source/destination"""
+    transition_list = set()
+    for state in p_state_list:
+        for transition in p_transition_list:
+            if state.id == transition.source:
+                transition_list.add(transition)
+            if state.id == transition.destination:
+                transition_list.add(transition)
+
+    return transition_list

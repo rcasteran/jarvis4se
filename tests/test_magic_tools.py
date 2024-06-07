@@ -10,7 +10,7 @@ import test_lib
 # Initialisation of Jarvis
 jarvis4se_all = test_lib.get_jarvis4se()
 generator = jarvis4se_all[1]
-jarvis4se_tool = jarvis4se_all[2]
+jarvis4se_tool = jarvis4se_all[3]
 
 
 def test_retrieve_pkg_version_tool(capsys):

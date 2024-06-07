@@ -15,14 +15,15 @@ def get_jarvis4se():
     """@ingroup test_lib
     Start an ipython session, init parser and jarvis4se magic call
 
-    @return jarvis4se magic call, jarvis4se diagram generator, jarvis4se magic tool
+    @return jarvis4se magic call, jarvis4se diagram generator, jarvis4se diagram simulator, jarvis4se magic tool
     """
     ip = get_ipython()
-    generator_jarvis = jarvis.PlantUmlGen()
-    parser = jarvis.command_parser.CmdParser(generator_jarvis)
+    generator_jarvis = jarvis.PlantUmlConnector()
+    simulator_jarvis = jarvis.OpenModelicaConnector()
+    parser = jarvis.command_parser.CmdParser(generator_jarvis, simulator_jarvis)
     my_magic_jarvis = jarvis.MagicJarvis(ip, parser)
-    my_magic_tool = jarvis.MagicTools(ip, generator_jarvis)
-    return my_magic_jarvis, generator_jarvis, my_magic_tool
+    my_magic_tool = jarvis.MagicTools(ip, generator_jarvis, simulator_jarvis)
+    return my_magic_jarvis, generator_jarvis, simulator_jarvis, my_magic_tool
 
 
 def remove_xml_file(file_name):

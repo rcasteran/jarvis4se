@@ -14,6 +14,7 @@ from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, or
     orchestrator_viewpoint_type, orchestrator_dictionary
 from jarvis.query import question_answer, query_object_list
 from jarvis.diagram import diagram_generator
+from jarvis.simulation import simulation_generator
 from jarvis.handler import handler_question
 from jarvis import util
 from tools import get_hyperlink
@@ -22,7 +23,7 @@ from tools import Logger
 
 
 class CmdParser:
-    def __init__(self, generator):
+    def __init__(self, generator, simulator):
         self.command_list = [
             (r"^under ([^.|\n]*)", self.matched_under),
             (r"([^. |\n][^.|\n]*) extends ([^.|\n]*)", orchestrator_viewpoint_type.check_add_type_extension),
@@ -65,7 +66,9 @@ class CmdParser:
             (r"^import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
             (r"^import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
             (r"^export ([^.|\n]*)", CmdParser.matched_export),
-            (r"^analyze ([^.|\n]*)", CmdParser.matched_analyze)
+            (r"^analyze ([^.|\n]*)", CmdParser.matched_analyze),
+            (r"^simulate ([^.|\n]*)", self.matched_simulate),
+            (r"^plot ([^.|\n]*)", self.matched_plot)
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -83,6 +86,8 @@ class CmdParser:
         ]
 
         self.generator = generator
+
+        self.simulator = simulator
 
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
@@ -157,6 +162,43 @@ class CmdParser:
             print("Overview :")
             display(Markdown(f'![figure]({url})'))
 
+        return None
+
+    def matched_simulate(self, simulation_name_str, **kwargs):
+        wanted_simulation_str = simulation_name_str[0].strip()
+        regex = r"(state|function)\s(.*)"
+        specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
+
+        if specific_simulation_str:
+            out = simulation_generator.filter_simulate_command(specific_simulation_str.group(1),
+                                                               specific_simulation_str.group(2),
+                                                               **kwargs)
+
+            if out:
+                # TODO Config.is_simulation_file
+                if not os.path.isdir("simulations"):
+                    os.makedirs("simulations")
+                # Else do nothing
+
+                current_file_path = str('./simulations/' + specific_simulation_str.group(2) + '.mo')
+                try:
+                    with open(current_file_path, "wb") as file_writer:
+                        print(out)
+                        file_writer.write(out.encode("utf-8"))
+
+                    #TODO Command with stopTime
+                    self.simulator.simulate(specific_simulation_str.group(2), current_file_path, 10)
+                except EnvironmentError as ex:
+                    Logger.set_error(__name__,
+                                     f"Unable to write the simulation file {current_file_path}: {str(ex)}")
+        else:
+            Logger.set_warning(__name__,
+                               f"Jarvis does not understand the command {simulation_name_str}")
+
+        return None
+
+    def matched_plot(self, plot_name_str, **kwargs):
+        self.simulator.plot(plot_name_str)
         return None
 
     def matched_question_mark(self, p_str_list, **kwargs):

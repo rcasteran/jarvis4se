@@ -481,42 +481,28 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
     new_fun_elem_list = set()
 
     main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
-    if not main_fun_elem:
-        # TODO error message
-        return None
+    if main_fun_elem:
+        if main_fun_elem.allocated_state_list:
+            new_fun_elem_list.add(main_fun_elem)
 
-    if not main_fun_elem.allocated_state_list:
+            new_state_list = {s for s in xml_state_list if s.id in main_fun_elem.allocated_state_list}
+
+            new_transition_list = util.get_transition_list(new_state_list, xml_transition_list)
+
+            plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
+                                                                       new_transition_list,
+                                                                       xml_fun_elem_list)
+
+            Logger.set_info(__name__,
+                            f"State Machine Diagram for {fun_elem_str} generated")
+        else:
+            Logger.set_error(__name__,
+                             f"No state allocated to {main_fun_elem.name} (no display)")
+    else:
         Logger.set_error(__name__,
-                         f"No state allocated to {main_fun_elem.name} (no display)")
-        return None
-
-    new_fun_elem_list.add(main_fun_elem)
-
-    new_state_list = {s for s in xml_state_list if s.id in main_fun_elem.allocated_state_list}
-
-    new_transition_list = get_transitions(new_state_list, xml_transition_list)
-
-    plantuml_text = plantuml_adapter.get_state_machine_diagram(new_state_list,
-                                                               new_transition_list,
-                                                               xml_fun_elem_list)
-
-    Logger.set_info(__name__,
-                    f"State Machine Diagram for {fun_elem_str} generated")
+                         f"Element {fun_elem_str} is not a functional element (no display)")
 
     return plantuml_text
-
-
-def get_transitions(state_list, xml_transition_list):
-    """Get transitions if state(s) from state_list are source/destination"""
-    new_transition_list = set()
-    for new_state in state_list:
-        for transition in xml_transition_list:
-            if new_state.id == transition.source:
-                new_transition_list.add(transition)
-            if new_state.id == transition.destination:
-                new_transition_list.add(transition)
-
-    return new_transition_list
 
 
 def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
