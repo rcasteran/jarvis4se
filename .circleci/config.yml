@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: cimg/python:3.8.4
+      # image: cimg/python:3.8.4
       - image: openmodelica:v1.22.4-ompython
 
     working_directory: ~/project
