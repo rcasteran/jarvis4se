@@ -16,7 +16,7 @@ jobs:
           name: install dependencies
           command: |
             sudo apt-get update
-            sudo apt install python3.10-venv
+            sudo apt install python3-venv
             python3 -m venv venv
             . venv/bin/activate
             pip install -e .
