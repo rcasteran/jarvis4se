@@ -21,6 +21,7 @@ jobs:
             . venv/bin/activate
             pip install -e .
             pip install -r requirements.txt
+            pip install -U https://github.com/OpenModelica/OMPython/archive/master.zip
       # Step 3: run linter and tests
       - run:
           name: run tests
