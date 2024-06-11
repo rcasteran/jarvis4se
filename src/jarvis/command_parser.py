@@ -165,40 +165,48 @@ class CmdParser:
         return None
 
     def matched_simulate(self, simulation_name_str, **kwargs):
-        wanted_simulation_str = simulation_name_str[0].strip()
-        regex = r"(state|function)\s(.*)"
-        specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
+        if Config.is_open_modelica:
+            wanted_simulation_str = simulation_name_str[0].strip()
+            regex = r"(state|function)\s(.*)"
+            specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
 
-        if specific_simulation_str:
-            out = simulation_generator.filter_simulate_command(specific_simulation_str.group(1),
-                                                               specific_simulation_str.group(2),
-                                                               **kwargs)
+            if specific_simulation_str:
+                out = simulation_generator.filter_simulate_command(specific_simulation_str.group(1),
+                                                                   specific_simulation_str.group(2),
+                                                                   **kwargs)
 
-            if out:
-                # TODO Config.is_simulation_file
-                if not os.path.isdir("simulations"):
-                    os.makedirs("simulations")
-                # Else do nothing
+                if out:
+                    # TODO Config.is_simulation_file
+                    if not os.path.isdir("simulations"):
+                        os.makedirs("simulations")
+                    # Else do nothing
 
-                current_file_path = str('./simulations/' + specific_simulation_str.group(2) + '.mo')
-                try:
-                    with open(current_file_path, "wb") as file_writer:
-                        print(out)
-                        file_writer.write(out.encode("utf-8"))
+                    current_file_path = str('./simulations/' + specific_simulation_str.group(2) + '.mo')
+                    try:
+                        with open(current_file_path, "wb") as file_writer:
+                            print(out)
+                            file_writer.write(out.encode("utf-8"))
 
-                    #TODO Command with stopTime
-                    self.simulator.simulate(specific_simulation_str.group(2), current_file_path, 10)
-                except EnvironmentError as ex:
-                    Logger.set_error(__name__,
-                                     f"Unable to write the simulation file {current_file_path}: {str(ex)}")
+                        #TODO Command with stopTime
+                        self.simulator.simulate(specific_simulation_str.group(2), current_file_path, 10)
+                    except EnvironmentError as ex:
+                        Logger.set_error(__name__,
+                                         f"Unable to write the simulation file {current_file_path}: {str(ex)}")
+            else:
+                Logger.set_warning(__name__,
+                                   f"Jarvis does not understand the command {simulation_name_str}")
         else:
-            Logger.set_warning(__name__,
-                               f"Jarvis does not understand the command {simulation_name_str}")
+            Logger.set_error(__name__,
+                             "Open modelica simulation is not activated")
 
         return None
 
     def matched_plot(self, plot_name_str, **kwargs):
-        self.simulator.plot(plot_name_str)
+        if Config.is_open_modelica:
+            self.simulator.plot(plot_name_str)
+        else:
+            Logger.set_error(__name__,
+                             "Open modelica simulation is not activated")
         return None
 
     def matched_question_mark(self, p_str_list, **kwargs):

@@ -17,6 +17,7 @@ class Config:
 
     is_log_file = False
     is_diagram_file = False
+    is_open_modelica = False
     verbose_level = 1
 
     @classmethod
@@ -43,6 +44,11 @@ class Config:
                                     cls.is_diagram_file = True
                                     # Logger depends from Config. Thus simple print
                                     print("Diagram file storage activated")
+                            elif lines[0].strip() == 'open_modelica':
+                                if 'True' == lines[1].strip() or '1' == lines[1].strip():
+                                    cls.is_open_modelica = True
+                                    # Logger depends from Config. Thus simple print
+                                    print("Open Modelica simulation activated")
                             elif lines[0].strip() == 'verbose':
                                 if lines[1].strip().isnumeric():
                                     cls.verbose_level = int(lines[1].strip())

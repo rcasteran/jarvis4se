@@ -9,6 +9,7 @@ from IPython import get_ipython
 
 # Modules
 import jarvis
+from tools import Config
 
 
 def get_jarvis4se():
@@ -18,8 +19,12 @@ def get_jarvis4se():
     @return jarvis4se magic call, jarvis4se diagram generator, jarvis4se diagram simulator, jarvis4se magic tool
     """
     ip = get_ipython()
+    Config.read()
     generator_jarvis = jarvis.PlantUmlConnector()
-    simulator_jarvis = jarvis.OpenModelicaConnector()
+    if jarvis.Config.is_open_modelica:
+        simulator_jarvis = jarvis.OpenModelicaConnector()
+    else:
+        simulator_jarvis = None
     parser = jarvis.command_parser.CmdParser(generator_jarvis, simulator_jarvis)
     my_magic_jarvis = jarvis.MagicJarvis(ip, parser)
     my_magic_tool = jarvis.MagicTools(ip, generator_jarvis, simulator_jarvis)

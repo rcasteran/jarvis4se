@@ -16,7 +16,10 @@ def load_ipython_extension(ipython):
     clean_folders()
     Config.read()
     generator = PlantUmlConnector()
-    simulator = OpenModelicaConnector()
+    if Config.is_open_modelica:
+        simulator = OpenModelicaConnector()
+    else:
+        simulator = None
     parser = command_parser.CmdParser(generator, simulator)
     jarvis4se = MagicJarvis(ipython, parser)
     tools = MagicTools(ipython, generator, simulator)

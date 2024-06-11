@@ -11,6 +11,7 @@ from jarvis.command_parser import CmdParser
 from plantuml_adapter import PlantUmlConnector
 from open_modelica_adapter import OpenModelicaConnector
 from xml_adapter import XmlWriter3SE, XmlParser3SE
+from tools import Config
 
 
 def main():
@@ -22,8 +23,12 @@ def main():
     is_exit = False
 
     # Initialize jarvis4se
+    Config.read()
     generator = PlantUmlConnector()
-    simulator = OpenModelicaConnector()
+    if Config.is_open_modelica:
+        simulator = OpenModelicaConnector()
+    else:
+        simulator = None
     parser = CmdParser(generator, simulator)
 
     # Initialize xml_parser i.e. empty obj_dict that will contain objet's lists
