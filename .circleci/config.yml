@@ -3,8 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      # image: cimg/python:3.8.4
-      - image: openmodelica/openmodelica:v1.22.4-ompython
+      - image: cimg/python:3.8.4
 
     working_directory: ~/project
 
@@ -15,18 +14,14 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apt-get update -y
-            apt-get install python3-venv -y
             python3 -m venv venv
             . venv/bin/activate
             pip install -e .
             pip install -r requirements.txt
-            pip install -U https://github.com/OpenModelica/OMPython/archive/master.zip
       # Step 3: run linter and tests
       - run:
           name: run tests
           command: |
-            su - root
             . venv/bin/activate
             mkdir test-results
             pytest --junitxml=test-results/junit.xml
