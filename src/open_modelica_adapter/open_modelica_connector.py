@@ -13,8 +13,10 @@ class OpenModelicaConnector(OMCSessionZMQ):
         super().__init__()
 
     def simulate(self, p_om_name, p_om_file, p_stop_time):
-        if self.sendExpression(f'loadFile({p_om_file})'):
+        if self.sendExpression(f'loadFile("{p_om_file}")'):
+            Logger.set_info(__name__, f'Simulation model loaded...')
             if self.sendExpression(f'instantiateModel({p_om_name})'):
+                Logger.set_info(__name__, f'Simulation model instantiated...')
                 result = self.sendExpression(f'simulate({p_om_name}, stopTime={p_stop_time})')
                 if 'LOG_SUCCESS' in result['messages']:
                     Logger.set_info(__name__,
@@ -30,10 +32,10 @@ class OpenModelicaConnector(OMCSessionZMQ):
                              f'Model load failed. Please check the model: {p_om_name}')
 
     def plot(self, p_var_list):
-        if self.sendExpression('plot({' + p_var_list + '})'):
-            Logger.set_info(__name__, f'Variables "{p_var_list}" displayed')
+        if self.sendExpression('plot({' + p_var_list[0] + '})'):
+            Logger.set_info(__name__, f'Variables "{p_var_list[0]}" displayed')
         else:
-            Logger.set_error(__name__,f'Variables "{p_var_list}" not displayed')
+            Logger.set_error(__name__, f'Variables "{p_var_list[0]}" not displayed')
 
 
 

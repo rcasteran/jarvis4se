@@ -31,3 +31,4 @@ from .datamodel import TypeWithChildListPhysicalElementIndex
 from .datamodel import TypeWithChildListRequirementIndex
 from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel
+from .datamodel import ImplementationAttributeLabel

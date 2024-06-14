@@ -71,6 +71,8 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
         obj_to_set = question_answer.check_get_object(
             elem[1],
             **{'xml_function_list': kwargs['xml_function_list'],
+               'xml_data_list': kwargs['xml_data_list'],
+               'xml_transition_list': kwargs['xml_transition_list'],
                'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
                'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
                'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
@@ -80,33 +82,28 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
             elem[0],
             **{'xml_attribute_list': kwargs['xml_attribute_list'],
                })
-        if obj_to_set is None and attribute_wanted is None:
+        if obj_to_set is None or attribute_wanted is None:
             print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
                   "- Function\n"
+                  "- Data\n"
+                  "- Transition\n"
                   "- Functional element\n"
                   "- Functional interface\n"
                   "- Physical element\n"
                   "- Physical interface\n")
-            continue
-        if None in (obj_to_set, attribute_wanted):
-            print("{} does not exist".format(
-                [elem[i] for i in range(2)
-                 if [attribute_wanted, obj_to_set][i] is None]
-                .pop()
-            ))
-            continue
-        is_specified = False
-        for described_item in attribute_wanted.described_item_list:
-            if described_item[0] == obj_to_set.id:
-                is_specified = True
-                if described_item[1] != str(elem[2]):
-                    Logger.set_warning(__name__,
-                                       f"Attribute {attribute_wanted.name} already specified for {obj_to_set.name} "
-                                       f"with value {described_item[1]}")
-                # Else do nothing, attribute already set to this value
+        else:
+            is_specified = False
+            for described_item in attribute_wanted.described_item_list:
+                if described_item[0] == obj_to_set.id:
+                    is_specified = True
+                    if described_item[1] != str(elem[2]):
+                        Logger.set_warning(__name__,
+                                           f"Attribute {attribute_wanted.name} already specified for {obj_to_set.name} "
+                                           f"with value {described_item[1]}")
+                    # Else do nothing, attribute already set to this value
 
-        if not is_specified:
-            new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
+            if not is_specified:
+                new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
 
     update = add_object_attribute(new_described_attribute_list, **kwargs)
 

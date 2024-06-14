@@ -135,9 +135,6 @@ class Function:
 
         @var allocated_req_list
         allocated requirement list
-
-        @var modelica_algorithm
-        modelica algorithm
         """
 
         self.id = p_id
@@ -150,7 +147,6 @@ class Function:
         self.operand = p_operand
         self.derived = p_derived
         self.allocated_req_list = set()
-        self.modelica_algorithm = ''
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -291,16 +287,12 @@ class Data:
 
         @var allocated_req_list
         allocated requirement list
-
-        @var modelica_type
-        modelica type
         """
         self.id = p_id
         self.name = p_name
         self.type = p_type
         self.predecessor_list = set()
         self.allocated_req_list = set()
-        self.modelica_type = ''
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -534,9 +526,6 @@ class Transition:
 
         @var allocated_req_list
         allocated requirement list
-
-        @var modelica_algorithm
-        modelica algorithm
         """
         self.id = p_id
         self.name = p_name
@@ -546,7 +535,6 @@ class Transition:
         self.destination = p_destination
         self.condition_list = set()
         self.allocated_req_list = set()
-        self.modelica_algorithm = ''
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1611,3 +1599,4 @@ TypeWithChildListPhysicalElementIndex = 3
 TypeWithChildListRequirementIndex = 4
 EntryStateLabel = 'entry'
 ExitStateLabel = 'exit'
+ImplementationAttributeLabel = 'implementation'

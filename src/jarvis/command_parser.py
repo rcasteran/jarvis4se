@@ -176,7 +176,6 @@ class CmdParser:
                                                                    **kwargs)
 
                 if out:
-                    # TODO Config.is_simulation_file
                     if not os.path.isdir("simulations"):
                         os.makedirs("simulations")
                     # Else do nothing
@@ -184,7 +183,6 @@ class CmdParser:
                     current_file_path = str('./simulations/' + specific_simulation_str.group(2) + '.mo')
                     try:
                         with open(current_file_path, "wb") as file_writer:
-                            print(out)
                             file_writer.write(out.encode("utf-8"))
 
                         #TODO Command with stopTime
