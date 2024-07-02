@@ -1599,4 +1599,5 @@ TypeWithChildListPhysicalElementIndex = 3
 TypeWithChildListRequirementIndex = 4
 EntryStateLabel = 'entry'
 ExitStateLabel = 'exit'
-ImplementationAttributeLabel = 'implementation'
+DesignAttributeLabel = 'design'
+InitialValueAttributeLabel = "initial value"

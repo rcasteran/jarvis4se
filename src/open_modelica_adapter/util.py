@@ -6,6 +6,7 @@ Open modelica adapter module
 # Modules
 import datamodel
 from jarvis.query import question_answer
+from tools import Logger
 
 
 class StateModel:
@@ -52,7 +53,7 @@ class StateModel:
         self.global_data_list = []
 
     def create_data(self, p_data, p_initial_value, **kwargs):
-        data_attribute = question_answer.check_get_object(datamodel.ImplementationAttributeLabel,
+        data_attribute = question_answer.check_get_object(datamodel.DesignAttributeLabel,
                                                           **{'xml_attribute_list': kwargs['xml_attribute_list']})
         if p_data not in self.global_data_list:
             if data_attribute:
@@ -86,33 +87,52 @@ class StateModel:
 
         # Update algorithm
         self.string_algorithm = self.string_algorithm + f'if state == state.{p_state.name} then\n'
-        for allocated_function_id in p_state.allocated_function_list:
-            for xml_function in xml_function_list:
-                if xml_function.id == allocated_function_id:
-                    data_attribute = question_answer.check_get_object(datamodel.ImplementationAttributeLabel,
-                                                                      **{'xml_attribute_list': kwargs[
-                                                                          'xml_attribute_list']})
-                    if data_attribute:
-                        for described_item in data_attribute.described_item_list:
-                            if described_item[0] == xml_function.id:
-                                self.string_algorithm = self.string_algorithm + described_item[1] + ';\n'
+        state_function_list = sort_state_function_list(p_state.allocated_function_list, **kwargs)
+        for state_function in state_function_list:
+            design_attribute = question_answer.check_get_object(datamodel.DesignAttributeLabel,
+                                                                **{'xml_attribute_list': kwargs[
+                                                                    'xml_attribute_list']})
+            if design_attribute:
+                for described_item in design_attribute.described_item_list:
+                    if described_item[0] == state_function.id:
+                        self.string_algorithm = self.string_algorithm + described_item[1] + ';\n'
+                        break
+                    # Else do nothing
+            else:
+                self.string_algorithm = self.string_algorithm + ';\n'
+
+            for xml_producer_function in xml_producer_function_list:
+                if xml_producer_function[1].id == state_function.id:
+                    initial_value_attribute = question_answer.check_get_object(
+                        datamodel.InitialValueAttributeLabel,
+                        **{'xml_attribute_list': kwargs[
+                            'xml_attribute_list']})
+                    is_initial_value = False
+                    if initial_value_attribute:
+                        for described_item in initial_value_attribute.described_item_list:
+                            if described_item[0] == xml_producer_function[0].id:
+                                is_initial_value = True
+                                self.create_data(xml_producer_function[0], described_item[1], **kwargs)
                                 break
                             # Else do nothing
-                    else:
-                        self.string_algorithm = self.string_algorithm + ';\n'
 
-                    for xml_producer_function in xml_producer_function_list:
-                        if xml_producer_function[1].id == allocated_function_id:
-                            self.create_data(xml_producer_function[0], 0, **kwargs)
-                        # Else do nothing
+                        if not is_initial_value:
+                            Logger.set_error(__name__,
+                                             f'No attribute "initial value" found for the data '
+                                             f'"{xml_producer_function[0]}"')
+                    else:
+                        Logger.set_error(__name__,
+                                         f'No attribute "initial value" found for the data '
+                                         f'"{xml_producer_function[0]}"')
                 # Else do nothing
+
         self.string_algorithm = self.string_algorithm + f'end if;\n'
 
     def create_transition(self, p_transition, **kwargs):
         xml_state_list = kwargs['xml_state_list']
         for xml_state in xml_state_list:
             if xml_state.id == p_transition.destination:
-                data_attribute = question_answer.check_get_object(datamodel.ImplementationAttributeLabel,
+                data_attribute = question_answer.check_get_object(datamodel.DesignAttributeLabel,
                                                                   **{'xml_attribute_list': kwargs[
                                                                       'xml_attribute_list']})
                 if data_attribute:
@@ -139,3 +159,63 @@ class StateModel:
             + self.string_equation \
             + self.string_algorithm \
             + self.string_end
+
+
+def sort_state_function_list(p_function_id_list, **kwargs):
+    xml_function_list = kwargs['xml_function_list']
+    xml_producer_function_list = kwargs['xml_producer_function_list']
+    state_function_list = []
+
+    for function_id in p_function_id_list:
+        for xml_function in xml_function_list:
+            if xml_function.id == function_id:
+                state_function_list.append(xml_function)
+            # Else do nothing
+
+    if len(state_function_list) > 1:
+        state_producer_function_list = []
+        for state_function in state_function_list:
+            for xml_producer_function in xml_producer_function_list:
+                if xml_producer_function[1].id == state_function.id:
+                    state_producer_function_list.append([xml_producer_function[0], xml_producer_function[1]])
+                # Else do nothing
+
+        sorted_state_producer_function_dict = dict()
+        last_index = 0
+        for state_producer_function in state_producer_function_list:
+            if state_producer_function not in sorted_state_producer_function_dict.values():
+                last_index = last_index + 1
+                current_index = last_index
+                sorted_state_producer_function_dict[current_index] = state_producer_function
+            else:
+                current_index = list(sorted_state_producer_function_dict.keys())[
+                    list(sorted_state_producer_function_dict.values()).index(state_producer_function)]
+
+            for predecessor in state_producer_function[0].predecessor_list:
+                for predecessor_producer_function in state_producer_function_list:
+                    if predecessor_producer_function[0] == predecessor:
+                        if [predecessor_producer_function[0], predecessor_producer_function[1]] not in \
+                                sorted_state_producer_function_dict.values():
+                            current_index = current_index + 1
+                            if last_index > current_index:
+                                for i in range(0, last_index - current_index):
+                                    sorted_state_producer_function_dict[last_index - i + 1] = \
+                                        sorted_state_producer_function_dict[last_index - i]
+                                last_index = last_index + 1
+                            else:
+                                last_index = current_index
+                            sorted_state_producer_function_dict[current_index] = [state_producer_function[0],
+                                                                                  state_producer_function[1]]
+                            sorted_state_producer_function_dict[current_index - 1] = [predecessor_producer_function[0],
+                                                                                      predecessor_producer_function[1]]
+                        # Else do nothing
+                    # Else do nothing
+
+        # Reconstruct ordered state function list
+        sorted_state_producer_function_dict = sorted(sorted_state_producer_function_dict.items())
+        state_function_list = []
+        for key, value in sorted_state_producer_function_dict:
+            state_function_list.append(value[1])
+    # Else do nothing
+
+    return state_function_list
