@@ -26,9 +26,45 @@ From a methodological point of view:
 
 ## Requirement creation
 
-### Requirement definition
+### Definition
 
-### Requirement attributes
+JARVIS4SE allows to define a new requirement named _\<requirement name>_ through the following command:
+
+```
+<requirement name> is a requirement
+```
+
+### Attributes
+
+JARVIS4SE allows to define an attribute named _\<attribute name>_ for a requirement named _\<requirement name>_ through the following commands:
+
+```
+<attribute name> is an attribute
+The <attribute name> of <requirement name> is <attribute value>
+```
+
+The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the requirement.
+
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
+
+### Description definition
+
+JARVIS4SE allows to define the description _\<requirement\_description>_ of a requirement named _\<requirement name>_ through the following command:
+
+```
+The description of <requirement_name> is <requirement_description>
+```
+
+{% hint style="info" %}
+The description of a requirement is handled as an attribute of the requirement named "description".\
+Therefore using this command multiple times for the same transition will only keep the latest description value.
+{% endhint %}
+
+{% hint style="info" %}
+The description of a requirement must be a sentence containing the modal "shall".
+{% endhint %}
 
 ## Requirement decomposition
 
