@@ -143,10 +143,20 @@ JARVIS4SE allows to allocate an activity named \<activity name> to a function na
 
 ## Requirement satisfaction
 
+### Requirement satisfied by a function
+
 JARVIS4SE allows to indicate that a function named \<function name> satisfies a requirement named \<requirement name> through the following command:
 
 ```
 <function name> satisfies <requirement name>
+```
+
+### Requirement satisfied by a data
+
+JARVIS4SE allows to indicate that a data named \<data name> satisfies a requirement named \<requirement name> through the following command:
+
+```
+<data name> satisfies <requirement name>
 ```
 
 ## Functional chain
