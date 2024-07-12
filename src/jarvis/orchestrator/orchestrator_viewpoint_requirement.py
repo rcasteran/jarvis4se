@@ -176,8 +176,8 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
 
     Logger.set_debug(__name__, f"Requirement subject: {req_subject}")
     Logger.set_debug(__name__, f"Requirement object: {req_object}")
-    Logger.set_debug(__name__, f"Requirement is conditional: {req_conditional}")
-    Logger.set_debug(__name__, f"Requirement is temporal: {req_temporal}")
+    Logger.set_debug(__name__, f"Requirement conditional: {req_conditional}")
+    Logger.set_debug(__name__, f"Requirement temporal: {req_temporal}")
 
     return req_subject.strip(), req_object.strip(), req_conditional.strip(), req_temporal.strip()
 
@@ -513,6 +513,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
     if req_string_object is None:
         is_previous_proper_noun_singular_tag = False
+        is_previous_function_name = False
         is_function_name = False
         function_name_str = ''
         token_list = nltk.word_tokenize(p_req_str)
@@ -531,20 +532,39 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
                     next_tag_list.append(tag_list[i])
             # Else do nothing
 
+            Logger.set_debug(__name__, f'tag: {tag}')
+
             is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error = (
                 check_proper_noun_tag(tag, previous_tag_list, next_tag_list, p_is_subject,
                                       is_previous_proper_noun_singular_tag, is_function_name))
+
+            Logger.set_debug(__name__, f'previous_tag_list: {previous_tag_list}')
+            Logger.set_debug(__name__, f'next_tag_list: {next_tag_list}')
+            Logger.set_debug(__name__, f'is_proper_noun: {is_proper_noun}')
+            Logger.set_debug(__name__, f'is_previous_proper_noun_singular_tag: {is_previous_proper_noun_singular_tag}')
+            Logger.set_debug(__name__, f'is_function_name: {is_function_name}')
+            Logger.set_debug(__name__, f'is_error: {is_error}')
+
             if is_error:
                 break
             elif is_proper_noun:
                 req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
             elif is_function_name:
+                is_previous_function_name = True
                 function_name_str = function_name_str + ' ' + tag[0]
             # Else do nothing
 
-            index = index+1
+            if not is_function_name and is_previous_function_name:
+                Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
+                req_string_object_list.append(question_answer.check_get_object(function_name_str[1:], **kwargs))
+                function_name_str = ''
+                is_previous_function_name = False
 
-        if len(function_name_str) > 0:
+            index = index+1
+        # Else do nothing
+
+        if is_function_name:
+            Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
             req_string_object_list.append(question_answer.check_get_object(function_name_str[1:], **kwargs))
         # Else do nothing
     else:
@@ -614,7 +634,10 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
             # Case of a single letter, so it is a proper noun instead of a verb
             is_previous_proper_noun_singular_tag = False
             is_proper_noun = True
-    elif p_tag[1] != DETERMINER_TAG and not is_function_name and p_is_subject:
+    elif is_function_name:
+        Logger.set_debug(__name__, f'Unknown tag {p_tag} detected in function name')
+        is_function_name = False
+    elif p_is_subject:
         if not p_is_silent:
             Logger.set_error(__name__,
                              f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '

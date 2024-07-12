@@ -67,7 +67,7 @@ class CmdParser:
             (r"^import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
             (r"^export ([^.|\n]*)", CmdParser.matched_export),
             (r"^analyze ([^.|\n]*)", CmdParser.matched_analyze),
-            (r"^simulate ([^.|\n]*)", self.matched_simulate),
+            (r"^simulate ([^.|\n]*) between ([^.|\n]*) and ([^.|\n]*)", self.matched_simulate),
             (r"^plot ([^.|\n]*)", self.matched_plot)
         ]
 
@@ -164,35 +164,47 @@ class CmdParser:
 
         return None
 
-    def matched_simulate(self, simulation_name_str, **kwargs):
+    def matched_simulate(self, simulation_str_list, **kwargs):
         if Config.is_open_modelica:
-            wanted_simulation_str = simulation_name_str[0].strip()
-            regex = r"(state|function)\s(.*)"
-            specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
+            if len(simulation_str_list[0]) == 3:
+                wanted_simulation_str = simulation_str_list[0][0].strip()
+                regex = r"(state|function)\s(.*)"
+                specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
 
-            if specific_simulation_str:
-                out = simulation_generator.filter_simulate_command(specific_simulation_str.group(1),
-                                                                   specific_simulation_str.group(2),
-                                                                   **kwargs)
+                if specific_simulation_str:
+                    out = simulation_generator.filter_simulate_command(specific_simulation_str.group(1),
+                                                                       specific_simulation_str.group(2),
+                                                                       **kwargs)
 
-                if out:
-                    if not os.path.isdir("simulations"):
-                        os.makedirs("simulations")
-                    # Else do nothing
+                    if out:
+                        if not os.path.isdir("simulations"):
+                            os.makedirs("simulations")
+                        # Else do nothing
 
-                    current_file_path = str('./simulations/' + specific_simulation_str.group(2) + '.mo')
-                    try:
-                        with open(current_file_path, "wb") as file_writer:
-                            file_writer.write(out.encode("utf-8"))
+                        current_file_path = str(os.getcwd().replace('\\', '/') + '/simulations')
+                        current_file_name = str(specific_simulation_str.group(2) + '.mo')
+                        try:
+                            with open(current_file_path + '/' + current_file_name, "wb") as file_writer:
+                                file_writer.write(out.encode("utf-8"))
 
-                        #TODO Command with stopTime
-                        self.simulator.simulate(specific_simulation_str.group(2), current_file_path, 10)
-                    except EnvironmentError as ex:
-                        Logger.set_error(__name__,
-                                         f"Unable to write the simulation file {current_file_path}: {str(ex)}")
+                            start_time = int(simulation_str_list[0][1])
+                            stop_time = int(simulation_str_list[0][2])
+                            self.simulator.simulate(specific_simulation_str.group(2), current_file_path,
+                                                    current_file_name,
+                                                    start_time, stop_time)
+                        except EnvironmentError as ex:
+                            Logger.set_error(__name__,
+                                             f"Unable to write the simulation file {current_file_name}: {str(ex)}")
+                        except ValueError:
+                            Logger.set_error(__name__,
+                                             f'{simulation_str_list[0][1]} and/or {simulation_str_list[0][2]} '
+                                             f'are/is not an integer')
+                else:
+                    Logger.set_error(__name__, f"Jarvis does not understand the command with the "
+                                               f"following parameters {simulation_str_list}")
             else:
-                Logger.set_warning(__name__,
-                                   f"Jarvis does not understand the command {simulation_name_str}")
+                Logger.set_error(__name__, f"Jarvis does not understand the command with the "
+                                           f"following parameters {simulation_str_list}")
         else:
             Logger.set_error(__name__,
                              "Open modelica simulation is not activated")
