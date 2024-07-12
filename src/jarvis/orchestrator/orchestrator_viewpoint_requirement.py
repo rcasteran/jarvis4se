@@ -41,92 +41,74 @@ def check_add_requirement(p_str_list, **kwargs):
     requirement_list = []
 
     for p_str in p_str_list:
-        req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(p_str[0], p_str[1])
+        if not p_str[0].startswith("The description of "):
+            req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(p_str[0], p_str[1])
 
-        # Retrieve the subject in object list
-        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
+            # Retrieve the subject in object list
+            req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
 
-        if not is_error:
-            req_subject_object = None
-            for obj in req_subject_object_list:
-                if obj:
-                    req_subject_object = obj
+            if not is_error:
+                req_subject_object = None
+                for obj in req_subject_object_list:
+                    if obj:
+                        req_subject_object = obj
 
-            if req_subject_object:
-                Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
-                                          f"{p_str[0]} shall {p_str[1]}")
-            else:
-                Logger.set_info(__name__, f"Requirement identified: {p_str[0]} shall {p_str[1]}")
-                Logger.set_warning(__name__,
-                                   f'Subject "{req_subject}" of the requirement is unknown')
-
-            # Check if a requirement with the same description already exist
-            xml_requirement_list = kwargs['xml_requirement_list']
-            sequence_ratio_list = {}
-            for xml_requirement in xml_requirement_list:
-                xml_requirement_subject, xml_requirement_object, xml_requirement_conditional, \
-                    xml_requirement_temporal = detect_req_pattern(xml_requirement.description)
-
-                sequence_subject = difflib.SequenceMatcher(None,
-                                                           xml_requirement_subject,
-                                                           req_subject)
-                sequence_object = difflib.SequenceMatcher(None,
-                                                          xml_requirement_object,
-                                                          req_object)
-                sequence_conditional = difflib.SequenceMatcher(None,
-                                                               xml_requirement_conditional,
-                                                               req_conditional)
-                sequence_temporal = difflib.SequenceMatcher(None,
-                                                            xml_requirement_temporal,
-                                                            req_temporal)
-
-                if sequence_subject.ratio() == 1 \
-                        and sequence_object.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
-                        and sequence_conditional.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
-                        and sequence_temporal.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
-                    sequence_ratio_list[xml_requirement.name] = max(sequence_object.ratio(),
-                                                                    sequence_conditional.ratio(),
-                                                                    sequence_temporal.ratio())
-                # Else do nothing
-
-            req_allocated_object_list = check_requirement_relationship(req_subject_object,
-                                                                       req_object,
-                                                                       req_conditional,
-                                                                       req_temporal,
-                                                                       **kwargs)
-            if sequence_ratio_list:
-                similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
-                Logger.set_info(__name__,
-                                f"Requirement {similar_requirement_name} has the same "
-                                f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
-            else:
-                answer = handler_question.question_to_user(f"Please give a requirement summary: ")
-                if len(answer) > 0 and answer != "q":
-                    existing_object = question_answer.check_get_object(answer, **kwargs)
-                    if existing_object:
-                        if isinstance(existing_object.type, datamodel.BaseType):
-                            if str(existing_object.type) != "Requirement":
-                                Logger.set_error(__name__,
-                                                 f"{existing_object.type} with the name "
-                                                 f"{answer} already exists")
-                            else:
-                                requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object,
-                                                         req_allocated_object_list])
-                        else:
-                            if str(existing_object.type.name) != "Requirement":
-                                Logger.set_error(__name__,
-                                                 f"{existing_object.type.name} with the name "
-                                                 f"{answer} already exists")
-                            else:
-                                requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                         existing_object, req_subject_object,
-                                                         req_allocated_object_list])
-                    else:
-                        requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
-                                                 req_subject_object, req_allocated_object_list])
+                if req_subject_object:
+                    Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
+                                              f"{p_str[0]} shall {p_str[1]}")
                 else:
-                    Logger.set_error(__name__, "No summary entered for identified requirement")
+                    Logger.set_info(__name__, f"Requirement identified: {p_str[0]} shall {p_str[1]}")
+                    Logger.set_warning(__name__,
+                                       f'Subject "{req_subject}" of the requirement is unknown')
+
+                # Check if a requirement with the same description already exist
+                sequence_ratio_list = evaluate_description_similarities(req_subject,
+                                                                        req_object,
+                                                                        req_conditional,
+                                                                        req_temporal,
+                                                                        **kwargs)
+
+                if sequence_ratio_list:
+                    similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+                    Logger.set_info(__name__,
+                                    f"Requirement {similar_requirement_name} has the same "
+                                    f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
+                else:
+                    req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                                                                               req_object,
+                                                                               req_conditional,
+                                                                               req_temporal,
+                                                                               **kwargs)
+
+                    answer = handler_question.question_to_user(f"Please give a requirement name: ")
+                    if len(answer) > 0 and answer != "q":
+                        existing_object = question_answer.check_get_object(answer, **kwargs)
+                        if existing_object:
+                            if isinstance(existing_object.type, datamodel.BaseType):
+                                if str(existing_object.type) != "Requirement":
+                                    Logger.set_error(__name__,
+                                                     f"{existing_object.type} with the name "
+                                                     f"{answer} already exists")
+                                else:
+                                    requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
+                                                             existing_object, req_subject_object,
+                                                             req_allocated_object_list])
+                            else:
+                                if str(existing_object.type.name) != "Requirement":
+                                    Logger.set_error(__name__,
+                                                     f"{existing_object.type.name} with the name "
+                                                     f"{answer} already exists")
+                                else:
+                                    requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
+                                                             existing_object, req_subject_object,
+                                                             req_allocated_object_list])
+                        else:
+                            requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
+                                                     req_subject_object, req_allocated_object_list])
+                    else:
+                        Logger.set_error(__name__, "No name entered for identified requirement")
+            # Else do nothing
+        # Else do nothing
 
     if requirement_list:
         update = add_requirement(requirement_list, **kwargs)
@@ -134,6 +116,110 @@ def check_add_requirement(p_str_list, **kwargs):
         update = 0
 
     return update
+
+
+def check_add_description(p_description_str_list, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    description_list = []
+
+    # Create a list with all transition names/aliases already in the xml
+    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
+    for requirement_str, description_str in p_description_str_list:
+        if 'shall' in description_str:
+            if any(requirement_str in s for s in xml_requirement_name_list):
+                for requirement in xml_requirement_list:
+                    if requirement_str == requirement.name or requirement_str == requirement.alias:
+                        req_subject, req_object, req_conditional, req_temporal = \
+                            detect_req_pattern(description_str.lstrip(' '))
+
+                        # Retrieve the subject in object list
+                        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True,
+                                                                                            **kwargs)
+
+                        if not is_error:
+                            req_subject_object = None
+                            for obj in req_subject_object_list:
+                                if obj:
+                                    req_subject_object = obj
+
+                            if req_subject_object:
+                                Logger.set_info(__name__, f"Requirement {requirement.name} is about "
+                                                          f"{req_subject_object.name}")
+                            else:
+                                Logger.set_warning(__name__,
+                                                   f'Subject "{req_subject}" of the requirement {requirement.name} '
+                                                   f'is unknown')
+
+                            # Check if a requirement with the same description already exist
+                            sequence_ratio_list = evaluate_description_similarities(req_subject,
+                                                                                    req_object,
+                                                                                    req_conditional,
+                                                                                    req_temporal,
+                                                                                    **kwargs)
+
+                            if sequence_ratio_list:
+                                similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+                                Logger.set_info(__name__,
+                                                f"Requirement {similar_requirement_name} has the same "
+                                                f"description (confidence factor: "
+                                                f"{sequence_ratio_list[similar_requirement_name]})")
+                            else:
+                                req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                                                                                           req_object,
+                                                                                           req_conditional,
+                                                                                           req_temporal,
+                                                                                           **kwargs)
+                                description_list.append([requirement, description_str.lstrip(' '),
+                                                         req_subject_object,
+                                                         req_allocated_object_list])
+                            # Else do nothing
+                        # Else do nothing
+                    # Else do nothing
+            else:
+                Logger.set_error(__name__,
+                                 f"The requirement {requirement_str} does not exist")
+        else:
+            Logger.set_error(__name__,
+                             f"Description bad formatted: {description_str}")
+
+    update = add_requirement_description(description_list, **kwargs)
+
+    return update
+
+
+def evaluate_description_similarities(p_req_subject, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
+    xml_requirement_list = kwargs['xml_requirement_list']
+    sequence_ratio_list = {}
+
+    for xml_requirement in xml_requirement_list:
+        if xml_requirement.description:
+            xml_requirement_subject, xml_requirement_object, xml_requirement_conditional, \
+                xml_requirement_temporal = detect_req_pattern(xml_requirement.description)
+
+            sequence_subject = difflib.SequenceMatcher(None,
+                                                       xml_requirement_subject,
+                                                       p_req_subject)
+            sequence_object = difflib.SequenceMatcher(None,
+                                                      xml_requirement_object,
+                                                      p_req_object)
+            sequence_conditional = difflib.SequenceMatcher(None,
+                                                           xml_requirement_conditional,
+                                                           p_req_conditional)
+            sequence_temporal = difflib.SequenceMatcher(None,
+                                                        xml_requirement_temporal,
+                                                        p_req_temporal)
+
+            if sequence_subject.ratio() == 1 \
+                    and sequence_object.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
+                    and sequence_conditional.ratio() > REQUIREMENT_CONFIDENCE_RATIO \
+                    and sequence_temporal.ratio() > REQUIREMENT_CONFIDENCE_RATIO:
+                sequence_ratio_list[xml_requirement.name] = max(sequence_object.ratio(),
+                                                                sequence_conditional.ratio(),
+                                                                sequence_temporal.ratio())
+            # Else do nothing
+        # Else do nothing
+
+    return sequence_ratio_list
 
 
 def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
@@ -309,6 +395,56 @@ def add_requirement(p_requirement_list, **kwargs):
                 if elem[0].parent:
                     if hasattr(elem[0].parent, 'allocated_req_list'):
                         update_requirement_link(elem[0].parent, elem[1], **kwargs)
+                    # Else do nothing
+                # Else do nothing
+            # Else do nothing
+
+        update = 1
+
+    return update
+
+
+def add_requirement_description(p_description_list, **kwargs):
+    output_xml = kwargs['output_xml']
+    update = 0
+
+    for description_item in p_description_list:
+        new_allocation_list = []
+        # Test if allocated object is identified in the requirement subject
+        if description_item[2]:
+            description_item[2].add_allocated_requirement(description_item[0].id)
+            new_allocation_list.append([description_item[2], description_item[0]])
+        # Else do nothing
+
+        # Test if allocated object is identified in the requirement object or conditional part or temporal part
+        if description_item[3]:
+            for item in description_item[3]:
+                if item:
+                    item.add_allocated_requirement(description_item[0].id)
+                    new_allocation_list.append([item, description_item[0]])
+                # Else do nothing
+        # Else do nothing
+
+        output_xml.write_requirement_description([[description_item[0], description_item[1]]])
+        Logger.set_info(__name__,
+                        f"{description_item[0].name} description is {description_item[1]}")
+
+        if new_allocation_list:
+            output_xml.write_object_allocation(new_allocation_list)
+
+            for elem in new_allocation_list:
+                Logger.set_info(__name__,
+                                f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
+                                f"{elem[0].__class__.__name__} {elem[0].name}")
+
+                # Check for potential req parent in allocated obj parent
+                if hasattr(elem[0], 'parent'):
+                    if elem[0].parent:
+                        if hasattr(elem[0].parent, 'allocated_req_list'):
+                            update_requirement_link(elem[0].parent, elem[1], **kwargs)
+                        # Else do nothing
+                    # Else do nothing
+                # Else do nothing
 
         update = 1
 

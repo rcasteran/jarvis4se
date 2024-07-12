@@ -13,7 +13,7 @@ from tools import Logger
 
 
 class ObjectInstanceList(list):
-    nb_object_instance_base_type = 8
+    nb_object_instance_base_type = 9
 
     def __init__(self, p_base_type_idx):
         super().__init__()
@@ -31,6 +31,7 @@ class ObjectInstanceList(list):
             5: kwargs['output_xml'].write_physical_interface,
             6: kwargs['output_xml'].write_state,
             7: kwargs['output_xml'].write_transition,
+            8: kwargs['output_xml'].write_requirement
         }
         call = object_write_routine_list.get(self.base_type_idx)
         call(self)
@@ -46,6 +47,7 @@ class ObjectInstance:
         5: datamodel.PhysicalInterface,
         6: datamodel.State,
         7: datamodel.Transition,
+        8: datamodel.Requirement
     }
 
     def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
@@ -76,6 +78,7 @@ class ObjectInstance:
             5: kwargs['xml_phy_inter_list'].add,
             6: kwargs['xml_state_list'].add,
             7: kwargs['xml_transition_list'].add,
+            8: kwargs['xml_requirement_list'].add,
         }
         call = object_dictionary_list.get(self.base_type_idx)
         call(self.object_instance)
@@ -355,66 +358,68 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
 
     for obj in object_instance_list:
         for xml_requirement in xml_requirement_list:
-            req_subject_object = orchestrator_viewpoint_requirement.retrieve_req_subject_object(
-                xml_requirement.description, **kwargs)
-            req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
-                xml_requirement.description, **kwargs)
-            req_condition_object_list = orchestrator_viewpoint_requirement.retrieve_req_condition_object_list(
-                xml_requirement.description, **kwargs)
-            req_temporal_object_list = orchestrator_viewpoint_requirement.retrieve_req_temporal_object_list(
-                xml_requirement.description, **kwargs)
+            if xml_requirement.description:
+                req_subject_object = orchestrator_viewpoint_requirement.retrieve_req_subject_object(
+                    xml_requirement.description, **kwargs)
+                req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
+                    xml_requirement.description, **kwargs)
+                req_condition_object_list = orchestrator_viewpoint_requirement.retrieve_req_condition_object_list(
+                    xml_requirement.description, **kwargs)
+                req_temporal_object_list = orchestrator_viewpoint_requirement.retrieve_req_temporal_object_list(
+                    xml_requirement.description, **kwargs)
 
-            if req_subject_object is not None:
-                if obj == req_subject_object:
-                    if xml_requirement.id not in obj.allocated_req_list:
-                        obj.add_allocated_requirement(xml_requirement.id)
-                        output_xml.write_object_allocation([[obj, xml_requirement]])
+                if req_subject_object is not None:
+                    if obj == req_subject_object:
+                        if xml_requirement.id not in obj.allocated_req_list:
+                            obj.add_allocated_requirement(xml_requirement.id)
+                            output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                        Logger.set_info(__name__,
-                                        f"Requirement {xml_requirement.name} is satisfied by "
-                                        f"{obj.name}")
+                            Logger.set_info(__name__,
+                                            f"Requirement {xml_requirement.name} is satisfied by "
+                                            f"{obj.name}")
+                        # Else do nothing
                     # Else do nothing
                 # Else do nothing
-            # Else do nothing
 
-            if len(req_object_object_list) > 0:
-                for req_object_object in req_object_object_list:
-                    if obj == req_object_object:
-                        if xml_requirement.id not in obj.allocated_req_list:
-                            obj.add_allocated_requirement(xml_requirement.id)
-                            output_xml.write_object_allocation([[obj, xml_requirement]])
+                if len(req_object_object_list) > 0:
+                    for req_object_object in req_object_object_list:
+                        if obj == req_object_object:
+                            if xml_requirement.id not in obj.allocated_req_list:
+                                obj.add_allocated_requirement(xml_requirement.id)
+                                output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                            Logger.set_info(__name__,
-                                            f"Requirement {xml_requirement.name} is satisfied by "
-                                            f"{obj.name}")
+                                Logger.set_info(__name__,
+                                                f"Requirement {xml_requirement.name} is satisfied by "
+                                                f"{obj.name}")
+                            # Else do nothing
                         # Else do nothing
-                    # Else do nothing
-            # Else do nothing
+                # Else do nothing
 
-            if len(req_condition_object_list) > 0:
-                for req_condition_object in req_condition_object_list:
-                    if obj == req_condition_object and obj != req_subject_object:
-                        if xml_requirement.id not in obj.allocated_req_list:
-                            obj.add_allocated_requirement(xml_requirement.id)
-                            output_xml.write_object_allocation([[obj, xml_requirement]])
+                if len(req_condition_object_list) > 0:
+                    for req_condition_object in req_condition_object_list:
+                        if obj == req_condition_object and obj != req_subject_object:
+                            if xml_requirement.id not in obj.allocated_req_list:
+                                obj.add_allocated_requirement(xml_requirement.id)
+                                output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                            Logger.set_info(__name__,
-                                            f"Requirement {xml_requirement.name} is satisfied by "
-                                            f"{obj.name}")
+                                Logger.set_info(__name__,
+                                                f"Requirement {xml_requirement.name} is satisfied by "
+                                                f"{obj.name}")
+                            # Else do nothing
                         # Else do nothing
-                    # Else do nothing
-            # Else do nothing
+                # Else do nothing
 
-            if len(req_temporal_object_list) > 0:
-                for req_temporal_object in req_temporal_object_list:
-                    if obj == req_temporal_object and obj != req_subject_object:
-                        if xml_requirement.id not in obj.allocated_req_list:
-                            obj.add_allocated_requirement(xml_requirement.id)
-                            output_xml.write_object_allocation([[obj, xml_requirement]])
+                if len(req_temporal_object_list) > 0:
+                    for req_temporal_object in req_temporal_object_list:
+                        if obj == req_temporal_object and obj != req_subject_object:
+                            if xml_requirement.id not in obj.allocated_req_list:
+                                obj.add_allocated_requirement(xml_requirement.id)
+                                output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                            Logger.set_info(__name__,
-                                            f"Requirement {xml_requirement.name} is satisfied by "
-                                            f"{obj.name}")
+                                Logger.set_info(__name__,
+                                                f"Requirement {xml_requirement.name} is satisfied by "
+                                                f"{obj.name}")
+                            # Else do nothing
                         # Else do nothing
-                    # Else do nothing
+                # Else do nothing
             # Else do nothing

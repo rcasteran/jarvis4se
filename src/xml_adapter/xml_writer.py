@@ -907,3 +907,19 @@ class XmlWriter3SE:
 
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
+    def write_requirement_description(self, p_description_list):
+        """Write requirement description from list [requirement, description]
+        @param[in] object_allocated_object_list : list of requirement description
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for requirement_tag in root.findall(".//requirement"):
+            for req, description_req in p_description_list:
+                if requirement_tag.get('id') == req.id:
+                    tag = requirement_tag.find('description')
+                    tag.text = description_req
+                # Else do nothing
+
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

@@ -24,9 +24,9 @@ class BaseType(Enum):
     PHYSICAL_INTERFACE = 5
     STATE = 6
     TRANSITION = 7
-    ATTRIBUTE = 8
-    VIEW = 9
-    REQUIREMENT = 10
+    REQUIREMENT = 8
+    ATTRIBUTE = 9
+    VIEW = 10
 
     def __str__(self):
         """ Get the string representation for an enum value
