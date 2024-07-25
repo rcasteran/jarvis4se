@@ -448,3 +448,15 @@ def get_pandas_table(data_dict):
         .set_properties(**{'white-space': 'nowrap'})
 
     return data_frame.to_html().replace("\\n", "<br>")
+
+
+def get_transition_between_states(p_object_src, p_object_dest, **kwargs):
+    transition_object = None
+
+    for transition in kwargs['xml_transition_list']:
+        if p_object_src.id == transition.source and p_object_dest.id == transition.destination:
+            transition_object = transition
+            break
+        # Else do nothing
+
+    return transition_object

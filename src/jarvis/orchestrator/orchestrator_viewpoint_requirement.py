@@ -281,6 +281,7 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
     @return list of objects in relation with the object related to the requirement subject
     """
     # Check requirement object content
+    implicit_object_list = []
     req_object_list, _ = retrieve_req_proper_noun_object(p_req_object, **kwargs)
     if p_req_subject_object:
         for req_object_object in req_object_list.copy():
@@ -292,9 +293,23 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
                     # No relationship found in the datamodel between requirement subject and requirement
                     # object. Remove it from the list.
                     req_object_list.remove(req_object_object)
-                # Else do nothing
+                else:
+                    implicit_object = orchestrator_object.retrieve_implicit_object_relationship(p_req_subject_object,
+                                                                                                req_object_object,
+                                                                                                p_req_object,
+                                                                                                req_object_list,
+                                                                                                'transition',
+                                                                                                **kwargs)
+                    if implicit_object:
+                        if implicit_object not in implicit_object_list:
+                            implicit_object_list.append(implicit_object)
+                        # Else do nothing
+                    # Else do nothing
             else:
                 req_object_list.remove(req_object_object)
+
+        for implicit_object in implicit_object_list:
+            req_object_list.append(implicit_object)
 
     # Check requirement conditional part if any
     if len(p_req_conditional) > 0:
