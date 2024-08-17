@@ -12,10 +12,9 @@ from csv_adapter import CsvWriter3SE, CsvParser3SE
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
     orchestrator_viewpoint_attribute, orchestrator_viewpoint_requirement, orchestrator_object, \
     orchestrator_viewpoint_type, orchestrator_dictionary
-from jarvis.query import question_answer, query_object_list
 from jarvis.diagram import diagram_generator
 from jarvis.simulation import simulation_generator
-from jarvis.handler import handler_question
+from jarvis.handler import handler_question, handler_list
 from jarvis import util
 from tools import get_hyperlink
 from tools import Config
@@ -250,10 +249,10 @@ class CmdParser:
         @param[in] kwargs : jarvis data structure
         @return None (no xml update, no info displayed)
         """
-        out = query_object_list.get_object_list(p_str_list, **kwargs)
+        out = handler_list.list_object(p_str_list, **kwargs)
         if out:
             for i in out:
-                display(HTML(question_answer.get_pandas_table(i)))
+                display(HTML(util.get_pandas_table(i)))
 
         return None
 

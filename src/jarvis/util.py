@@ -5,6 +5,8 @@ Jarvis module
 # Libraries
 import re
 import uuid
+import pandas as pd
+
 
 # Modules
 from tools import Logger
@@ -106,3 +108,27 @@ def get_unique_id():
     """
     identifier = uuid.uuid4()
     return str(identifier.int)[:10]
+
+
+def get_pandas_table(data_dict):
+    """Returns pandas data frame called from command_parser.matched_list()
+    with data_dict as list of ..."""
+    if 'columns' in data_dict.keys():
+        data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'])
+    else:
+        data_frame = pd.DataFrame(data_dict['data'])
+    data_frame = data_frame.T
+    if 'Data' in data_dict['title'] or 'Transition' in data_dict['title']:
+        if 'Data' in data_dict['title']:
+            first = 1
+            last = 5
+        else:
+            first = 3
+            last = 4
+        for idx in range(first, last):
+            data_frame.iloc[idx] = data_frame.iloc[idx].str.join("\\n")
+    data_frame = data_frame.style \
+        .set_caption(data_dict['title']) \
+        .set_properties(**{'white-space': 'nowrap'})
+
+    return data_frame.to_html().replace("\\n", "<br>")

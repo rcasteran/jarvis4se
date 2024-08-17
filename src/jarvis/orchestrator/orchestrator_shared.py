@@ -5,9 +5,14 @@ Jarvis module
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import orchestrator_object
 from jarvis.handler import handler_question
-from jarvis.query import question_answer
+from jarvis.query import query_object, question_answer
 from jarvis import util
 from tools import Logger
 
@@ -31,8 +36,8 @@ def check_add_child(parent_child_name_str_list, **kwargs):
 
     cleaned_parent_child_list_str = util.cut_tuple_list(parent_child_name_str_list)
     for elem in cleaned_parent_child_list_str:
-        parent_object = question_answer.check_get_object(elem[0], **kwargs)
-        child_object = question_answer.check_get_object(elem[1], **kwargs)
+        parent_object = query_object.query_object_by_name(elem[0], **kwargs)
+        child_object = query_object.query_object_by_name(elem[1], **kwargs)
         if parent_object is not None and child_object is not None:
             check_pair = None
             for idx, obj_type in enumerate(datamodel.TypeWithChildList):
@@ -76,7 +81,7 @@ def add_child(parent_child_lists, **kwargs):
     """
     update = 0
     if any(parent_child_lists):
-        xml_fun_elem_list = kwargs['xml_fun_elem_list']
+        xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
         output_xml = kwargs['output_xml']
         for object_type in range(len(datamodel.TypeWithChildList)):
             if parent_child_lists[object_type]:
@@ -94,8 +99,8 @@ def add_child(parent_child_lists, **kwargs):
 
                         if object_type == datamodel.TypeWithChildListFunctionIndex:
                             # Considering function allocation
-                            xml_consumer_function_list = kwargs['xml_consumer_function_list']
-                            xml_producer_function_list = kwargs['xml_producer_function_list']
+                            xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                            xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
 
                             for (flow, function) in xml_consumer_function_list:
                                 if obj[1].id == function.id and [flow, obj[0]] not in xml_consumer_function_list:
@@ -180,7 +185,7 @@ def check_and_delete_object(delete_str_list, **kwargs):
     to_be_deleted_obj_lists = [[] for _ in range(10)]
     # Check if the wanted to delete object exists and can be deleted
     for obj_str in delete_str_list:
-        object_to_del = question_answer.check_get_object(obj_str, **kwargs)
+        object_to_del = query_object.query_object_by_name(obj_str, **kwargs)
         if object_to_del is None:
             Logger.set_error(__name__,
                              f"{obj_str} does not exist")
@@ -306,31 +311,31 @@ def check_function(object_to_del, **kwargs):
         Logger.set_info(__name__,
                         f"{object_to_del.name} has composition relationship(s)")
 
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_state_list'])
-    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_6_STATE_LIST])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = check_object_not_in_prod_cons(object_to_del,
-                                                  kwargs['xml_consumer_function_list'],
-                                                  kwargs['xml_producer_function_list'])
+                                                  kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                  kwargs[XML_DICT_KEY_13_FUN_PROD_LIST])
     if not check_list[3]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has production/consumption relationship(s)")
 
-    check_list[4] = check_object_no_attribute(object_to_del, kwargs['xml_attribute_list'])
+    check_list[4] = check_object_no_attribute(object_to_del, kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
     if not check_list[4]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has attribute(s) set")
 
-    check_list[5] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
+    check_list[5] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_10_VIEW_LIST])
     if not check_list[5]:
         Logger.set_info(__name__, f"{object_to_del.name} has chain relationship(s)")
 
     if all(check_list):
         check = True
-        kwargs['xml_function_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_1_FUNCTION_LIST].remove(object_to_del)
     return check
 
 
@@ -339,25 +344,25 @@ def check_data(object_to_del, **kwargs):
     check = False
     check_list = [False] * 3
     check_list[0] = check_object_not_in_prod_cons(object_to_del.name,
-                                                  kwargs['xml_consumer_function_list'],
-                                                  kwargs['xml_producer_function_list'])
+                                                  kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                  kwargs[XML_DICT_KEY_13_FUN_PROD_LIST])
     if not check_list[0]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has production/consumption relationship(s)")
 
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_view_list'])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_10_VIEW_LIST])
     if not check_list[1]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has chain relationship(s)")
 
-    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_inter_list'])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
     if not check_list[2]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
 
     if all(check_list):
         check = True
-        kwargs['xml_data_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_0_DATA_LIST].remove(object_to_del)
     return check
 
 
@@ -372,19 +377,19 @@ def check_state(object_to_del, **kwargs):
                         f"{object_to_del.name} has composition relationship(s)")
 
     check_list[1] = not object_to_del.allocated_function_list
-    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = not any(object_to_del.id in (trans.source, trans.destination)
-                            for trans in kwargs['xml_transition_list'])
+                            for trans in kwargs[XML_DICT_KEY_7_TRANSITION_LIST])
     if not check_list[3]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has transition relationship(s)")
     if all(check_list):
         check = True
-        kwargs['xml_state_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_6_STATE_LIST].remove(object_to_del)
     return check
 
 
@@ -400,7 +405,7 @@ def check_transition(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_transition_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_7_TRANSITION_LIST].remove(object_to_del)
     return check
 
 
@@ -416,7 +421,7 @@ def check_fun_elem(object_to_del, **kwargs):
 
     check_list[1] = (not object_to_del.allocated_function_list and
                      not object_to_del.allocated_state_list)
-    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST])
     if not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
@@ -428,7 +433,7 @@ def check_fun_elem(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_fun_elem_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST].remove(object_to_del)
 
     return check
 
@@ -445,7 +450,7 @@ def check_chain(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_view_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_10_VIEW_LIST].remove(object_to_del)
 
     return check
 
@@ -462,7 +467,7 @@ def check_attribute(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_attribute_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST].remove(object_to_del)
 
     return check
 
@@ -473,15 +478,15 @@ def check_fun_inter(object_to_del, **kwargs):
     check_list = [False] * 3
 
     check_list[0] = not object_to_del.allocated_data_list
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_fun_elem_list'])
-    check_list[2] = check_object_not_allocated(object_to_del, kwargs['xml_phy_inter_list'])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+    check_list[2] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_5_PHY_INTF_LIST])
     if not check_list[0] or not check_list[1] or not check_list[2]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
 
     if all(check_list):
         check = True
-        kwargs['xml_fun_inter_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_3_FUN_INTF_LIST].remove(object_to_del)
 
     return check
 
@@ -508,7 +513,7 @@ def check_phy_elem(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs['xml_phy_elem_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST].remove(object_to_del)
 
     return check
 
@@ -523,14 +528,14 @@ def check_phy_inter(object_to_del, **kwargs):
         Logger.set_info(__name__,
                         f"{object_to_del.name} has allocation relationship(s)")
 
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs['xml_phy_elem_list'])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST])
     if not check_list[1]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has interface relationship(s)")
 
     if all(check_list):
         check = True
-        kwargs['xml_phy_inter_list'].remove(object_to_del)
+        kwargs[XML_DICT_KEY_5_PHY_INTF_LIST].remove(object_to_del)
 
     return check
 
@@ -576,14 +581,14 @@ def check_set_object_type(type_str_list, **kwargs):
     object_type_lists = [[] for _ in range(10)]
     # Check if the wanted object exists and the type can be set
     for object_str, type_name in type_str_list:
-        object_to_set = question_answer.check_get_object(object_str, **kwargs)
+        object_to_set = query_object.query_object_by_name(object_str, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
                              f"{object_str} does not exist")
             continue
         if object_to_set.type == type_name:
             continue
-        check, basetype_idx = check_new_type(object_to_set, type_name, kwargs['xml_type_list'])
+        check, basetype_idx = check_new_type(object_to_set, type_name, kwargs[XML_DICT_KEY_11_TYPE_LIST])
         if check:
             object_type_lists[basetype_idx].append(object_to_set)
 
@@ -595,30 +600,30 @@ def check_set_object_type(type_str_list, **kwargs):
 def check_new_type(object_to_set, type_name, xml_type_list):
     """Check if type in specity object's type list and if changed"""
     check = False
-    basetype_idx = None
+    base_type_idx = None
     obj_base_type = get_basetype_and_idx(object_to_set)
     # print(specific_obj_type_list, list_idx)
     if obj_base_type and type_name != object_to_set.type:
         if type_name.capitalize().replace("_", " ") in [str(i) for i in datamodel.BaseType]:
-            basetype_idx = obj_base_type.value
+            base_type_idx = obj_base_type.value
             check = True
             object_to_set.set_type(obj_base_type)
-        elif any(t == type_name for t in question_answer.get_objects_names(xml_type_list)):
-            obj_type = question_answer.check_get_object(type_name, **{'xml_type_list': xml_type_list})
+        elif any(t == type_name for t in query_object.query_object_name_in_list(xml_type_list)):
+            obj_type = query_object.query_object_by_name(type_name, **{XML_DICT_KEY_11_TYPE_LIST: xml_type_list})
             check = check_type_recursively(obj_type)
             if not check:
                 Logger.set_info(__name__,
                                 f"{obj_type.name} is not base type: "
                                 f"{str(obj_base_type)}")
             else:
-                basetype_idx = obj_base_type.value
+                base_type_idx = obj_base_type.value
                 object_to_set.set_type(obj_type)
         else:
             Logger.set_error(__name__,
                              f"The type {type_name} does not exist, available types are "
                              f": {', '.join([str(i) for i in datamodel.BaseType])}.")
 
-    return check, basetype_idx
+    return check, base_type_idx
 
 
 def check_type_recursively(obj_type):
@@ -691,7 +696,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
     object_lists = [[] for _ in range(9)]
     # Check if the wanted to object exists and the type can be set
     for object_to_set_alias, alias_str in alias_str_list:
-        object_to_set = question_answer.check_get_object(object_to_set_alias, **kwargs)
+        object_to_set = query_object.query_object_by_name(object_to_set_alias, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
                              f"{object_to_set_alias} does not exist")
@@ -780,20 +785,20 @@ def check_add_allocation(allocation_str_list, **kwargs):
     }
     cleaned_allocation_str_list = util.cut_tuple_list(allocation_str_list)
     for elem in cleaned_allocation_str_list:
-        alloc_obj = question_answer.check_get_object(elem[0],
-                                                     **{'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                                        'xml_state_list': kwargs['xml_state_list'],
-                                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+        alloc_obj = query_object.query_object_by_name(elem[0],
+                                                      **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                     XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                     XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                     XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                     XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                     })
+        obj_to_alloc = query_object.query_object_by_name(elem[1],
+                                                         **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                        XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                        XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                        XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                        XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                         })
-        obj_to_alloc = question_answer.check_get_object(elem[1],
-                                                        **{'xml_function_list': kwargs['xml_function_list'],
-                                                           'xml_state_list': kwargs['xml_state_list'],
-                                                           'xml_data_list': kwargs['xml_data_list'],
-                                                           'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                                           'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                                           })
         check_obj = check_allocation_objects_types(alloc_obj, obj_to_alloc, elem)
         if not check_obj:
             continue
@@ -850,7 +855,7 @@ def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
     if isinstance(alloc_obj, datamodel.FunctionalElement):
         if isinstance(obj_to_alloc, (datamodel.Function, datamodel.State)):
             check = True
-            pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs['xml_fun_elem_list'])
+            pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
             if pair:
                 new_alloc = [0, pair]
         else:
@@ -858,7 +863,7 @@ def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
     elif isinstance(alloc_obj, datamodel.State):
         if isinstance(obj_to_alloc, datamodel.Function):
             check = True
-            pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs['xml_state_list'])
+            pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_6_STATE_LIST])
             if pair:
                 new_alloc = [1, pair]
         else:
@@ -925,14 +930,14 @@ def check_state_allocation(state, function, state_list):
 def check_fun_inter_allocation(fun_inter, data, **kwargs):
     """Check allocation rules for fun_inter then returns objects if check"""
     out = None
-    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs['xml_fun_inter_list'])
+    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
     if check_allocation_fun_inter is None:
         check_fe = check_fun_elem_data_consumption(
             data, fun_inter,
-            kwargs['xml_fun_elem_list'],
-            kwargs['xml_function_list'],
-            kwargs['xml_consumer_function_list'],
-            kwargs['xml_producer_function_list'])
+            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            kwargs[XML_DICT_KEY_13_FUN_PROD_LIST])
         if all(i for i in check_fe):
             out = [fun_inter, data]
             fun_inter.add_allocated_data(data.id)
@@ -1018,8 +1023,8 @@ def add_allocation(allocation_dict, **kwargs):
                     if k == 1:
                         # Allocation of [State, Function]
                         # Need to remove previous allocation if any
-                        xml_fun_elem_list = kwargs['xml_fun_elem_list']
-                        xml_state_list = kwargs['xml_state_list']
+                        xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
+                        xml_state_list = kwargs[XML_DICT_KEY_6_STATE_LIST]
                         for xml_state in xml_state_list:
                             if xml_state.id != elem[0].id:
                                 if elem[1].id in xml_state.allocated_function_list:
@@ -1138,7 +1143,7 @@ def allocate_all_children_in_element(elem, **kwargs):
     else:
         if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
             # Remove previous allocation if any
-            xml_fun_elem_list = kwargs['xml_fun_elem_list']
+            xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
             for xml_fun_elem in xml_fun_elem_list:
                 if elem[1].id in xml_fun_elem.allocated_state_list:
                     xml_fun_elem.remove_allocated_state(elem[1].id)
@@ -1151,7 +1156,7 @@ def allocate_all_children_in_element(elem, **kwargs):
             add_allocation({5: [elem]}, **kwargs)
         elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
             # Remove previous allocation if any
-            xml_fun_elem_list = kwargs['xml_fun_elem_list']
+            xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
             for xml_fun_elem in xml_fun_elem_list:
                 if elem[1].id in xml_fun_elem.allocated_function_list:
                     xml_fun_elem.remove_allocated_function(elem[1].id)
@@ -1213,21 +1218,21 @@ def check_add_inheritance(inherit_str_list, **kwargs):
     new_list = []
     for elem in inherit_str_list:
         # elem_0: inheriting object
-        elem_0 = question_answer.check_get_object(elem[0],
-                                                  **{'xml_function_list': kwargs['xml_function_list'],
-                                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                                     })
+        elem_0 = query_object.query_object_by_name(elem[0],
+                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                  XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                  XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                  XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                  XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                  })
         # elem_1: object to inherit from
-        elem_1 = question_answer.check_get_object(elem[1],
-                                                  **{'xml_function_list': kwargs['xml_function_list'],
-                                                     'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                                     'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                                     'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                                     'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                                     })
+        elem_1 = query_object.query_object_by_name(elem[1],
+                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                  XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                  XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                  XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                  XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                  })
         if not elem_0 or not elem_1:
             if not elem_0 and not elem_1:
                 print_wrong_object_inheritance(elem[0], elem[1])

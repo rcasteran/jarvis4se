@@ -4,57 +4,62 @@ Jarvis module
 # Libraries
 
 # Modules
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from tools import Logger
 
 
 def update_dictionaries(p_csv_dict, **kwargs):
     csv_dictionary_list = {
-        0: p_csv_dict['csv_function_list'],
-        1: p_csv_dict['csv_data_list'],
-        2: p_csv_dict['csv_consumer_function_list'],
-        3: p_csv_dict['csv_producer_function_list'],
-        4: p_csv_dict['csv_state_list'],
-        5: p_csv_dict['csv_transition_list'],
-        6: p_csv_dict['csv_fun_elem_list'],
-        7: p_csv_dict['csv_view_list'],
-        8: p_csv_dict['csv_attribute_list'],
-        9: p_csv_dict['csv_fun_inter_list'],
-        10: p_csv_dict['csv_phy_elem_list'],
-        11: p_csv_dict['csv_phy_inter_list'],
-        12: p_csv_dict['csv_type_list'],
-        13: p_csv_dict['csv_requirement_list']
+        0: p_csv_dict['csv_data_list'],
+        1: p_csv_dict['csv_function_list'],
+        2: p_csv_dict['csv_fun_elem_list'],
+        3: p_csv_dict['csv_fun_inter_list'],
+        4: p_csv_dict['csv_phy_elem_list'],
+        5: p_csv_dict['csv_phy_inter_list'],
+        6: p_csv_dict['csv_state_list'],
+        7: p_csv_dict['csv_transition_list'],
+        8: p_csv_dict['csv_requirement_list'],
+        9: p_csv_dict['csv_attribute_list'],
+        10: p_csv_dict['csv_view_list'],
+        11: p_csv_dict['csv_type_list'],
+        12: p_csv_dict['csv_consumer_function_list'],
+        13: p_csv_dict['csv_producer_function_list']
     }
     xml_dictionary_list = {
-        0: kwargs['xml_function_list'],
-        1: kwargs['xml_data_list'],
-        2: kwargs['xml_consumer_function_list'],
-        3: kwargs['xml_producer_function_list'],
-        4: kwargs['xml_state_list'],
-        5: kwargs['xml_transition_list'],
-        6: kwargs['xml_fun_elem_list'],
-        7: kwargs['xml_view_list'],
-        8: kwargs['xml_attribute_list'],
-        9: kwargs['xml_fun_inter_list'],
-        10: kwargs['xml_phy_elem_list'],
-        11: kwargs['xml_phy_inter_list'],
-        12: kwargs['xml_type_list'],
-        13: kwargs['xml_requirement_list']
+        0: kwargs[XML_DICT_KEY_0_DATA_LIST],
+        1: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+        2: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+        3: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+        4: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+        5: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+        6: kwargs[XML_DICT_KEY_6_STATE_LIST],
+        7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+        8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
+        9: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+        10: kwargs[XML_DICT_KEY_10_VIEW_LIST],
+        11: kwargs[XML_DICT_KEY_11_TYPE_LIST],
+        12: kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+        13: kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
     }
     output_xml_write_list = {
-        0: kwargs['output_xml'].write_function,
-        1: kwargs['output_xml'].write_data,
-        2: kwargs['output_xml'].write_data_consumer,
-        3: kwargs['output_xml'].write_data_producer,
-        4: kwargs['output_xml'].write_state,
-        5: kwargs['output_xml'].write_transition,
-        6: kwargs['output_xml'].write_functional_element,
-        7: kwargs['output_xml'].write_view,
-        8: kwargs['output_xml'].write_attribute,
-        9: kwargs['output_xml'].write_functional_interface,
-        10: kwargs['output_xml'].write_physical_element,
-        11: kwargs['output_xml'].write_physical_interface,
-        12: kwargs['output_xml'].write_type_element,
-        13: kwargs['output_xml'].write_requirement
+        0: kwargs['output_xml'].write_data,
+        1: kwargs['output_xml'].write_function,
+        2: kwargs['output_xml'].write_functional_element,
+        3: kwargs['output_xml'].write_functional_interface,
+        4: kwargs['output_xml'].write_physical_element,
+        5: kwargs['output_xml'].write_physical_interface,
+        6: kwargs['output_xml'].write_state,
+        7: kwargs['output_xml'].write_transition,
+        8: kwargs['output_xml'].write_requirement,
+        9: kwargs['output_xml'].write_attribute,
+        10: kwargs['output_xml'].write_view,
+        11: kwargs['output_xml'].write_type_element,
+        12: kwargs['output_xml'].write_data_consumer,
+        13: kwargs['output_xml'].write_data_producer
     }
 
     update = 0

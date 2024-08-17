@@ -4,7 +4,12 @@ Jarvis module
 # Libraries
 
 # Modules
-from jarvis.query import question_answer
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.query import query_object, question_answer
 from tools import Logger
 
 
@@ -37,7 +42,7 @@ def question_object_info(p_object_str, **kwargs):
     @return list of objects
     """
     object_str = p_object_str[0].strip()
-    wanted_object = question_answer.check_get_object(object_str, **kwargs)
+    wanted_object = query_object.query_object_by_name(object_str, **kwargs)
 
     if wanted_object:
         return str(wanted_object)
@@ -54,25 +59,17 @@ def question_object_allocation(p_object_str, **kwargs):
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
-    # TODO To be reworked and extended (currently limited to function and state allocation
-    object_info = ""
+    # TODO To be reworked
     p_object_str = p_object_str[0].strip()
-    xml_function_name_list = question_answer.get_objects_names(kwargs['xml_function_list'])
-    xml_state_name_list = question_answer.get_objects_names(kwargs['xml_state_list'])
-    whole_objects_name_list = [*xml_function_name_list, *xml_state_name_list]
-    if not any(s == p_object_str for s in whole_objects_name_list):
-        Logger.set_warning(__name__,
-                           f"{p_object_str} is not a function nor a state")
+    wanted_object = query_object.query_object_by_name(p_object_str, **kwargs)
+    if wanted_object:
+        allocation_list = question_answer.get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+        if allocation_list:
+            object_info = f'"{wanted_object.name}" is allocated to ' \
+                           + ", ".join([elem.name for elem in allocation_list])
+        else:
+            object_info = f'"{wanted_object.name}" is not allocated'
     else:
-        result_function = any(s == p_object_str for s in xml_function_name_list)
-        resul_state = any(s == p_object_str for s in xml_state_name_list)
-        result = [result_function, False, resul_state,  False, False]
-        wanted_object = question_answer.match_object(p_object_str, result, **kwargs)
-        if wanted_object:
-            allocation_list = question_answer.get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
-            if allocation_list:
-                object_info += f'"{wanted_object.name}" is allocated to ' \
-                               + ", ".join([elem.name for elem in allocation_list])
-                return object_info
+        object_info = f'"{p_object_str}" is unknown'
 
-    return
+    return object_info

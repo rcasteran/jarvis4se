@@ -7,7 +7,12 @@ import re
 # Modules
 import plantuml_adapter
 from datamodel import FunctionalElement
-from jarvis.query import question_answer, query_object_list
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.query import query_object, question_answer
 from jarvis.orchestrator import orchestrator_shared
 from jarvis import util as jarvis_util
 from . import diagram_generator_chain
@@ -15,6 +20,7 @@ from . import diagram_generator_farch
 from . import diagram_generator_fana
 from . import util
 from tools import Logger
+
 
 
 def filter_show_command(diagram_name_str, **kwargs):
@@ -60,13 +66,13 @@ def case_function_diagram(**kwargs):
     """Case for 'show function <functional_element>'"""
     plantuml_string = None
 
-    if kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_fun_elem_list']):
+    if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         plantuml_string = diagram_generator_farch.show_fun_elem_function(kwargs['diagram_object_str'],
-                                                                         kwargs['xml_fun_elem_list'],
-                                                                         kwargs['xml_function_list'],
-                                                                         kwargs['xml_consumer_function_list'],
-                                                                         kwargs['xml_producer_function_list'],
-                                                                         kwargs['xml_attribute_list'])
+                                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                         kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                                         kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                         kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
 
     else:
         Logger.set_warning(__name__,
@@ -79,53 +85,53 @@ def case_context_diagram(**kwargs):
     """Case for 'show context <functional_element>/<function>'"""
     plantuml_string = None
 
-    if kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_function_list']):
-        child_inheritance = orchestrator_shared.childs_inheritance(kwargs['xml_function_list'])
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
-                                                                          kwargs['xml_function_list'])
+    if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
+        child_inheritance = orchestrator_shared.childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
 
         plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
-                                                                       kwargs['xml_function_list'],
-                                                                       kwargs['xml_consumer_function_list'],
-                                                                       kwargs['xml_producer_function_list'],
-                                                                       kwargs['xml_data_list'],
-                                                                       kwargs['xml_attribute_list'],
-                                                                       kwargs['xml_type_list'])
+                                                                       kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                       kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                                       kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                       kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                       kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                       kwargs[XML_DICT_KEY_11_TYPE_LIST])
 
-        orchestrator_shared.reset_childs_inheritance(kwargs['xml_function_list'], derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+        orchestrator_shared.reset_childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST], derived_child_id=child_inheritance[2])
+        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
 
-    elif kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_state_list']):
+    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST]):
         plantuml_string = show_states_chain([kwargs['diagram_object_str']],
-                                            kwargs['xml_state_list'],
-                                            kwargs['xml_transition_list'])
+                                            kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                            kwargs[XML_DICT_KEY_7_TRANSITION_LIST])
 
-    elif kwargs['diagram_object_str'] in question_answer.get_objects_names(kwargs['xml_fun_elem_list']):
-        child_inheritance = orchestrator_shared.childs_inheritance(kwargs['xml_function_list'],
-                                                                   kwargs['xml_fun_elem_list'],
+    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
+        child_inheritance = orchestrator_shared.childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                   kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                                    level=None)
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
-                                                                          kwargs['xml_function_list'],
-                                                                          kwargs['xml_fun_elem_list'],
-                                                                          kwargs['xml_fun_inter_list'])
-        func_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_elem_list'],
-                                                                            kwargs['xml_function_list'])
-        fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_inter_list'],
-                                                                                 kwargs['xml_data_list'])
+        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                          kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
+        func_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+        fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                                                 kwargs[XML_DICT_KEY_0_DATA_LIST])
 
         plantuml_string = diagram_generator_farch.show_fun_elem_context(kwargs['diagram_object_str'],
-                                                                        kwargs['xml_fun_elem_list'],
-                                                                        kwargs['xml_function_list'],
-                                                                        kwargs['xml_consumer_function_list'],
-                                                                        kwargs['xml_producer_function_list'],
-                                                                        kwargs['xml_attribute_list'],
-                                                                        kwargs['xml_fun_inter_list'],
-                                                                        kwargs['xml_data_list'])
+                                                                        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                        kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                        kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                                        kwargs[XML_DICT_KEY_0_DATA_LIST])
 
-        orchestrator_shared.reset_childs_inheritance(kwargs['xml_function_list'],
-                                                     kwargs['xml_fun_elem_list'],
+        orchestrator_shared.reset_childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                     kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                      derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
         orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
         orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
     else:
@@ -158,71 +164,71 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    v_inheritance = orchestrator_shared.view_inheritance(kwargs['xml_view_list'],
-                                                         kwargs['xml_function_list'],
-                                                         kwargs['xml_fun_elem_list'])
+    v_inheritance = orchestrator_shared.view_inheritance(kwargs[XML_DICT_KEY_10_VIEW_LIST],
+                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
 
     # Check view if activated and filter allocated item
     function_list = util.get_object_list_from_view(diagram_object_str,
-                                                   kwargs['xml_function_list'],
-                                                   kwargs['xml_view_list'])
+                                                   kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                   kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
     if len(function_list) > 0:
         _, consumer_list, producer_list = \
-            util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
-                                                        kwargs['xml_view_list'],
-                                                        kwargs['xml_consumer_function_list'],
-                                                        kwargs['xml_producer_function_list'],
+            util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                        kwargs[XML_DICT_KEY_10_VIEW_LIST],
+                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
                                                         function_list)
     else:
         consumer_list = []
         producer_list = []
 
-    if diagram_object_str in question_answer.get_objects_names(kwargs['xml_function_list']):
+    if diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
         child_inheritance = orchestrator_shared.childs_inheritance(function_list, level=diagram_level)
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
+        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                                                                           function_list)
 
         plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_object_str,
                                                                              function_list,
                                                                              consumer_list,
                                                                              producer_list,
-                                                                             kwargs['xml_attribute_list'],
-                                                                             kwargs['xml_type_list'],
+                                                                             kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                             kwargs[XML_DICT_KEY_11_TYPE_LIST],
                                                                              diagram_level=diagram_level)
 
         orchestrator_shared.reset_childs_inheritance(function_list, derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
-    elif diagram_object_str in question_answer.get_objects_names(kwargs['xml_fun_elem_list']):
+        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
+    elif diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         fun_elem_list = util.get_object_list_from_view(diagram_object_str,
-                                                       kwargs['xml_fun_elem_list'],
-                                                       kwargs['xml_view_list'])
+                                                       kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                       kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
         if len(fun_elem_list) > 0:
             child_inheritance = orchestrator_shared.childs_inheritance(function_list, fun_elem_list,
                                                                        level=diagram_level)
-            attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs['xml_attribute_list'],
+            attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                                                                               function_list,
                                                                               fun_elem_list,
-                                                                              kwargs['xml_fun_inter_list'])
+                                                                              kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
             func_alloc_inheritance = orchestrator_shared.allocation_inheritance(fun_elem_list, function_list)
-            fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs['xml_fun_inter_list'],
-                                                                                     kwargs['xml_data_list'])
+            fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                                                     kwargs[XML_DICT_KEY_0_DATA_LIST])
 
             plantuml_string = diagram_generator_farch.show_fun_elem_decomposition(diagram_object_str,
                                                                                   function_list,
                                                                                   consumer_list,
                                                                                   producer_list,
                                                                                   fun_elem_list,
-                                                                                  kwargs['xml_attribute_list'],
-                                                                                  kwargs['xml_data_list'],
-                                                                                  kwargs['xml_fun_inter_list'],
+                                                                                  kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                                  kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                                  kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                                                   diagram_level)
 
             orchestrator_shared.reset_childs_inheritance(function_list,
                                                          fun_elem_list,
                                                          derived_child_id=child_inheritance[2])
-            orchestrator_shared.reset_attribute_inheritance(kwargs['xml_attribute_list'], attribute_inheritance)
+            orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
             orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
             orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
     else:
@@ -230,7 +236,7 @@ def case_decomposition_diagram(**kwargs):
                            f"Jarvis does not know the object {diagram_object_str}"
                            f"(i.e. it is not a function, nor a functional element)")
 
-    orchestrator_shared.reset_view_inheritance(kwargs['xml_view_list'], v_inheritance)
+    orchestrator_shared.reset_view_inheritance(kwargs[XML_DICT_KEY_10_VIEW_LIST], v_inheritance)
 
     return plantuml_string
 
@@ -242,51 +248,51 @@ def case_chain_diagram(**kwargs):
     object_list_str = jarvis_util.cut_string(kwargs['diagram_object_str'])
 
     if len(object_list_str) > 0:
-        xml_function_name_list = question_answer.get_objects_names(kwargs['xml_function_list'])
+        xml_function_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
         result_function = all(t in xml_function_name_list for t in object_list_str)
 
-        xml_state_name_list = question_answer.get_objects_names(kwargs['xml_state_list'])
+        xml_state_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST])
         result_state = all(t in xml_state_name_list for t in object_list_str)
 
-        xml_fun_elem_name_list = question_answer.get_objects_names(kwargs['xml_fun_elem_list'])
+        xml_fun_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
         result_fun_elem = all(t in xml_fun_elem_name_list for t in object_list_str)
 
         if result_function:
             function_list = util.get_object_list_from_view(object_list_str,
-                                                           kwargs['xml_function_list'],
-                                                           kwargs['xml_view_list'])
+                                                           kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                           kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(function_list) > 0:
                 _, consumer_list, producer_list = \
-                    util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
-                                                                kwargs['xml_view_list'],
+                    util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                kwargs[XML_DICT_KEY_10_VIEW_LIST],
                                                                 kwargs[
-                                                                    'xml_consumer_function_list'],
+                                                                    XML_DICT_KEY_12_FUN_CONS_LIST],
                                                                 kwargs[
-                                                                    'xml_producer_function_list'],
+                                                                    XML_DICT_KEY_13_FUN_PROD_LIST],
                                                                 function_list)
 
                 plantuml_string = diagram_generator_chain.show_function_chain(object_list_str,
                                                                               function_list,
                                                                               consumer_list,
                                                                               producer_list,
-                                                                              kwargs['xml_type_list'],
-                                                                              kwargs['xml_attribute_list'])
+                                                                              kwargs[XML_DICT_KEY_11_TYPE_LIST],
+                                                                              kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
             else:
                 Logger.set_warning(__name__,
                                    f"Nothing to display for the selected view")
         elif result_fun_elem:
             fun_elem_list_from_view = util.get_object_list_from_view(object_list_str,
-                                                                     kwargs['xml_fun_elem_list'],
-                                                                     kwargs['xml_view_list'])
+                                                                     kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                     kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(fun_elem_list_from_view) > 0:
                 fun_elem_list = set()
                 function_list = set()
 
                 function_list_from_view = util.get_object_list_from_view(object_list_str,
-                                                                         kwargs['xml_function_list'],
-                                                                         kwargs['xml_view_list'])
+                                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                         kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
                 for i in object_list_str:
                     for fun_elem in fun_elem_list_from_view:
@@ -295,7 +301,7 @@ def case_chain_diagram(**kwargs):
 
                             if len(fun_elem.allocated_function_list) > 0:
                                 for allocated_function_id in fun_elem.allocated_function_list:
-                                    for function in kwargs['xml_function_list']:
+                                    for function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
                                         if function.id == allocated_function_id and function in function_list_from_view:
                                             util.get_fun_elem_function_list(function, function_list, fun_elem)
                             else:
@@ -303,12 +309,12 @@ def case_chain_diagram(**kwargs):
                                                 f"No function allocated to {fun_elem.name} (no display)")
 
                 new_function_list, consumer_list, producer_list = \
-                    util.get_cons_prod_from_view_allocated_data(kwargs['xml_data_list'],
-                                                                kwargs['xml_view_list'],
+                    util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                kwargs[XML_DICT_KEY_10_VIEW_LIST],
                                                                 kwargs[
-                                                                    'xml_consumer_function_list'],
+                                                                    XML_DICT_KEY_12_FUN_CONS_LIST],
                                                                 kwargs[
-                                                                    'xml_producer_function_list'],
+                                                                    XML_DICT_KEY_13_FUN_PROD_LIST],
                                                                 function_list)
 
                 plantuml_string = diagram_generator_chain.show_fun_elem_chain(object_list_str,
@@ -316,19 +322,19 @@ def case_chain_diagram(**kwargs):
                                                                               consumer_list,
                                                                               producer_list,
                                                                               fun_elem_list,
-                                                                              kwargs['xml_type_list'],
-                                                                              kwargs['xml_attribute_list'])
+                                                                              kwargs[XML_DICT_KEY_11_TYPE_LIST],
+                                                                              kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
             else:
                 Logger.set_warning(__name__,
                                    f"Nothing to display for the selected view")
         elif result_state:
             state_list = util.get_object_list_from_view(object_list_str,
-                                                        kwargs['xml_state_list'],
-                                                        kwargs['xml_view_list'])
+                                                        kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                        kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(state_list) > 0:
-                transition_list = util.filter_allocated_item_from_view(kwargs['xml_transition_list'],
-                                                                       kwargs['xml_view_list'])
+                transition_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+                                                                       kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
                 plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
             else:
@@ -352,41 +358,41 @@ def case_sequence_diagram(**kwargs):
     object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
         if len(object_list_str) == 1 and \
-                any(s == object_list_str[0] for s in question_answer.get_objects_names(kwargs['xml_fun_inter_list'])):
+                any(s == object_list_str[0] for s in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])):
             plantuml_string = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
             # Check view if activated and filter allocated item,
             # if not activated then no item filtered
             # if not any item under view return string
-            xml_data_list = util.filter_allocated_item_from_view(kwargs['xml_data_list'],
-                                                                 kwargs['xml_view_list'])
+            xml_data_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                 kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(xml_data_list) > 0:
-                if all(i in question_answer.get_objects_names(kwargs['xml_function_list']) for i in object_list_str):
+                if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) for i in object_list_str):
 
-                    if len(xml_data_list) != len(kwargs['xml_data_list']):
-                        xml_cons = [i for i in kwargs['xml_consumer_function_list']
+                    if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
+                        xml_cons = [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
-                        xml_prod = [i for i in kwargs['xml_producer_function_list']
+                        xml_prod = [i for i in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
                     else:
-                        xml_cons = kwargs['xml_consumer_function_list']
-                        xml_prod = kwargs['xml_producer_function_list']
+                        xml_cons = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                        xml_prod = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
                     plantuml_string = show_functions_sequence(object_list_str,
-                                                              kwargs['xml_function_list'],
+                                                              kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                               xml_cons,
                                                               xml_prod,
                                                               xml_data_list)
 
-                elif all(i in question_answer.get_objects_names(kwargs['xml_fun_elem_list']) for i in object_list_str):
-                    if len(xml_data_list) != len(kwargs['xml_data_list']):
-                        kwargs['xml_consumer_function_list'] = \
-                            [i for i in kwargs['xml_consumer_function_list']
+                elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]) for i in object_list_str):
+                    if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
+                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
                              if any(a == i[0] for a in [d for d in xml_data_list])]
-                        kwargs['xml_producer_function_list'] = \
-                            [i for i in kwargs['xml_producer_function_list']
+                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
                              if any(a == i[0] for a in [d for d in xml_data_list])]
-                    kwargs['xml_data_list'] = xml_data_list
+                    kwargs[XML_DICT_KEY_0_DATA_LIST] = xml_data_list
                     plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
 
                 else:
@@ -403,12 +409,12 @@ def case_sequence_diagram(**kwargs):
 def case_state_diagram(**kwargs):
     """Case for 'show state <functional_element>'"""
     plantuml_string = None
-    xml_fun_elem_name_list = question_answer.get_objects_names(kwargs['xml_fun_elem_list'])
+    xml_fun_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
     if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
         plantuml_string = show_fun_elem_state_machine(kwargs['diagram_object_str'],
-                                                      kwargs['xml_state_list'],
-                                                      kwargs['xml_transition_list'],
-                                                      kwargs['xml_fun_elem_list'])
+                                                      kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                      kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+                                                      kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
     else:
         Logger.set_error(__name__,
                          f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
@@ -419,14 +425,14 @@ def case_state_diagram(**kwargs):
 def case_state_sequence_diagram(**kwargs):
     """Case for 'show state sequence <state>'"""
     plantuml_string = None
-    xml_state_name_list = question_answer.get_objects_names(kwargs['xml_state_list'])
+    xml_state_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST])
     if kwargs['diagram_object_str'] in xml_state_name_list:
         plantuml_string = show_state_allocated_function(kwargs['diagram_object_str'],
-                                                        kwargs['xml_state_list'],
-                                                        kwargs['xml_function_list'],
-                                                        kwargs['xml_consumer_function_list'],
-                                                        kwargs['xml_producer_function_list'],
-                                                        kwargs['xml_data_list'])
+                                                        kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                        kwargs[XML_DICT_KEY_0_DATA_LIST])
     else:
         Logger.set_error(__name__,
                          f"Jarvis does not know the State {kwargs['diagram_object_str']}")
@@ -479,8 +485,9 @@ def show_fun_elem_state_machine(fun_elem_str, xml_state_list, xml_transition_lis
     """Creates lists with desired objects for <functional_element> state, send them to
     plantuml_adapter.py then returns plantuml_text"""
     new_fun_elem_list = set()
+    plantuml_text = None
 
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
+    main_fun_elem = query_object.query_object_by_name(fun_elem_str, **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
     if main_fun_elem:
         if main_fun_elem.allocated_state_list:
             new_fun_elem_list.add(main_fun_elem)
@@ -568,7 +575,7 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
     new_function_list = set()
 
     for i in function_list_str:
-        fun = question_answer.check_get_object(i, **{'xml_function_list': xml_function_list})
+        fun = query_object.query_object_by_name(i, **{XML_DICT_KEY_1_FUNCTION_LIST: xml_function_list})
         if not fun:
             continue
         fun.child_list.clear()
@@ -617,30 +624,30 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
     new_consumer_list = []
     new_producer_list = []
     new_fun_elem_list = set()
-    fun_inter = question_answer.check_get_object(
-        fun_inter_str, **{'xml_fun_inter_list': kwargs['xml_fun_inter_list']})
+    fun_inter = query_object.query_object_by_name(
+        fun_inter_str, **{XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]})
 
     if fun_inter:
-        data_list_fun_inter = query_object_list.get_fun_intf_data(fun_inter, None, **kwargs)['data']
+        data_list_fun_inter = question_answer.get_fun_intf_data(fun_inter, None, **kwargs)['data']
         for elem in data_list_fun_inter:
             fun_elem_data = None
             if elem['Last consumer Functional element(s)']:
-                fun_elem_cons = question_answer.check_get_object(
+                fun_elem_cons = query_object.query_object_by_name(
                     elem['Last consumer Functional element(s)'].pop(),
-                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-                fun_elem_data = question_answer.check_get_object(
+                    **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]})
+                fun_elem_data = query_object.query_object_by_name(
                     elem['Data'],
-                    **{'xml_data_list': kwargs['xml_data_list']})
+                    **{XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST]})
             else:
                 fun_elem_cons = []
 
             if elem['Last producer Functional element(s)']:
-                fun_elem_prod = question_answer.check_get_object(
+                fun_elem_prod = query_object.query_object_by_name(
                     elem['Last producer Functional element(s)'].pop(),
-                    **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
-                fun_elem_data = question_answer.check_get_object(
+                    **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]})
+                fun_elem_data = query_object.query_object_by_name(
                     elem['Data'],
-                    **{'xml_data_list': kwargs['xml_data_list']})
+                    **{XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST]})
             else:
                 fun_elem_prod = []
 
@@ -656,7 +663,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
                                                               new_consumer_list,
                                                               new_producer_list,
                                                               {},
-                                                              kwargs['xml_data_list'])
+                                                              kwargs[XML_DICT_KEY_0_DATA_LIST])
 
         return plantuml_text
 
@@ -680,19 +687,19 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     new_producer_list = []
 
     new_fun_elem_list = {
-        question_answer.check_get_object(i, **{'xml_fun_elem_list': kwargs['xml_fun_elem_list']})
+        query_object.query_object_by_name(i, **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]})
         for i in fun_elem_str
     }
 
     for fun_elem in new_fun_elem_list:
         temp_fun_set = question_answer.get_allocation_object(
             fun_elem,
-            kwargs['xml_function_list']
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
         )
 
         if isinstance(fun_elem.derived, FunctionalElement):
             get_derived_if_in_view = util.filter_allocated_item_from_view(
-                {fun_elem.derived}, kwargs['xml_view_list']
+                {fun_elem.derived}, kwargs[XML_DICT_KEY_10_VIEW_LIST]
             )
             # If type(list) has been returned from activated View()
             # then add it's allocated func
@@ -701,7 +708,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
             if isinstance(get_derived_if_in_view, list):
                 alloc_derived_func_set = question_answer.get_allocation_object(
                     fun_elem.derived,
-                    kwargs['xml_function_list']
+                    kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
                 )
                 # if alloc_derived_func_set is not None and temp_fun_set is not None:
                 # allocated_fun_set.update(alloc_derived_func_set)
@@ -710,12 +717,12 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
             for fun in temp_fun_set:
                 new_consumer_list.extend(
                     get_fun_elem_for_cons_prod_lists(
-                        fun_elem, fun, kwargs['xml_consumer_function_list']
+                        fun_elem, fun, kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
                     )
                 )
                 new_producer_list.extend(
                     get_fun_elem_for_cons_prod_lists(
-                        fun_elem, fun, kwargs['xml_producer_function_list']
+                        fun_elem, fun, kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
                     )
                 )
 
@@ -737,7 +744,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
                                                               new_consumer_list,
                                                               new_producer_list,
                                                               {},
-                                                              kwargs['xml_data_list'])
+                                                              kwargs[XML_DICT_KEY_0_DATA_LIST])
 
         return plantuml_text
 

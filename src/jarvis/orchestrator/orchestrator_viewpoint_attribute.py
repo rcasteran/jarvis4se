@@ -5,8 +5,13 @@ Jarvis module
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from jarvis.orchestrator import orchestrator_viewpoint_requirement
-from jarvis.query import question_answer
+from jarvis.query import query_object, question_answer
 from jarvis import util
 from tools import Logger
 
@@ -25,12 +30,12 @@ def add_attribute(attribute_str_list, **kwargs):
         Returns:
             1 if update, else 0
     """
-    xml_attribute_list = kwargs['xml_attribute_list']
+    xml_attribute_list = kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST]
     output_xml = kwargs['output_xml']
 
     new_attribute_list = []
     # Create attribute names list already in xml
-    xml_attribute_name_list = question_answer.get_objects_names(xml_attribute_list)
+    xml_attribute_name_list = query_object.query_object_name_in_list(xml_attribute_list)
     # Filter attribute_list, keeping only the the ones not already in the xml
     for attribute_name in attribute_str_list:
         if attribute_name not in xml_attribute_name_list:
@@ -68,19 +73,19 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
     """
     new_described_attribute_list = []
     for elem in described_attribute_list:
-        obj_to_set = question_answer.check_get_object(
+        obj_to_set = query_object.query_object_by_name(
             elem[1],
-            **{'xml_function_list': kwargs['xml_function_list'],
-               'xml_data_list': kwargs['xml_data_list'],
-               'xml_transition_list': kwargs['xml_transition_list'],
-               'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-               'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-               'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-               'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
+            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+               XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+               XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
                })
-        attribute_wanted = question_answer.check_get_object(
+        attribute_wanted = query_object.query_object_by_name(
             elem[0],
-            **{'xml_attribute_list': kwargs['xml_attribute_list'],
+            **{XML_DICT_KEY_9_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                })
         if obj_to_set is None or attribute_wanted is None:
             print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
@@ -143,7 +148,7 @@ def add_object_attribute(new_obj_attribute_list, **kwargs):
 
 
 def add_attribute_requirement(attribute, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     output_xml = kwargs['output_xml']
 
     for xml_requirement in xml_requirement_list:

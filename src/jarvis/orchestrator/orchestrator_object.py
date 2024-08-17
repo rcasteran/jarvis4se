@@ -6,9 +6,14 @@ import re
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from jarvis import util
 from jarvis.orchestrator import orchestrator_viewpoint_requirement
-from jarvis.query import question_answer
+from jarvis.query import query_object, question_answer
 from tools import Logger
 
 
@@ -70,15 +75,15 @@ class ObjectInstance:
         # Add object to object dictionary
         # Object dictionary list must be in the same order as object_instance_list
         object_dictionary_list = {
-            0: kwargs['xml_data_list'].add,
-            1: kwargs['xml_function_list'].add,
-            2: kwargs['xml_fun_elem_list'].add,
-            3: kwargs['xml_fun_inter_list'].add,
-            4: kwargs['xml_phy_elem_list'].add,
-            5: kwargs['xml_phy_inter_list'].add,
-            6: kwargs['xml_state_list'].add,
-            7: kwargs['xml_transition_list'].add,
-            8: kwargs['xml_requirement_list'].add,
+            0: kwargs[XML_DICT_KEY_0_DATA_LIST].add,
+            1: kwargs[XML_DICT_KEY_1_FUNCTION_LIST].add,
+            2: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST].add,
+            3: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST].add,
+            4: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST].add,
+            5: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST].add,
+            6: kwargs[XML_DICT_KEY_6_STATE_LIST].add,
+            7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST].add,
+            8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST].add,
         }
         call = object_dictionary_list.get(self.base_type_idx)
         call(self.object_instance)
@@ -106,7 +111,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     for elem in obj_type_str_list:
         if "?" not in elem[1]:
             specific_type, base_type = retrieve_type(elem[1], **kwargs)
-            existing_object = question_answer.check_get_object(elem[0], **kwargs)
+            existing_object = query_object.query_object_by_name(elem[0], **kwargs)
 
             if existing_object:
                 if isinstance(existing_object.type, datamodel.BaseType):
@@ -147,8 +152,8 @@ def retrieve_type(p_type_str, p_is_silent=False, **kwargs):
         base_type = next((i for i in [str(i) for i in datamodel.BaseType]
                           if i == p_type_str.capitalize()))
     else:
-        specific_type = question_answer.check_get_object(p_type_str,
-                                                         **{'xml_type_list': kwargs['xml_type_list']})
+        specific_type = query_object.query_object_by_name(p_type_str,
+                                                          **{XML_DICT_KEY_11_TYPE_LIST: kwargs[XML_DICT_KEY_11_TYPE_LIST]})
         if specific_type is None:
             if not p_is_silent:
                 Logger.set_error(__name__,
@@ -230,8 +235,8 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
         # Relationship with DATA, ATTRIBUTE
         if object_dest_type == datamodel.BaseType.DATA:
             if object_src_type == datamodel.BaseType.FUNCTION:
-                xml_consumer_function_list = kwargs['xml_consumer_function_list']
-                xml_producer_function_list = kwargs['xml_producer_function_list']
+                xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
 
                 for xml_consumer_function in xml_consumer_function_list:
                     if xml_consumer_function[0] == p_object_dest and xml_consumer_function[1] == p_object_src:
@@ -317,10 +322,10 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
             print("Attribute case")
         elif object_dest_type == datamodel.BaseType.DATA:
             for allocated_fun_id in p_object_src.allocated_function_list:
-                for xml_function in kwargs['xml_function_list']:
+                for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
                     if allocated_fun_id == xml_function.id:
-                        if ([p_object_dest, xml_function] in kwargs['xml_consumer_function_list'] or
-                                [p_object_dest, xml_function] in kwargs['xml_producer_function_list']):
+                        if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST] or
+                                [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]):
                             is_relationship = True
                             break
                         # Else do nothing
@@ -377,7 +382,7 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
 
 
 def check_object_instance_list_requirement(object_instance_list, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     output_xml = kwargs['output_xml']
 
     for obj in object_instance_list:

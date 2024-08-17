@@ -8,10 +8,15 @@ import difflib
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import orchestrator_object
 from tools import Logger
 from jarvis.handler import handler_question
-from jarvis.query import question_answer
+from jarvis.query import query_object, question_answer
 from jarvis import util
 
 # Constants
@@ -82,7 +87,7 @@ def check_add_requirement(p_str_list, **kwargs):
 
                     answer = handler_question.question_to_user(f"Please give a requirement name: ")
                     if len(answer) > 0 and answer != "q":
-                        existing_object = question_answer.check_get_object(answer, **kwargs)
+                        existing_object = query_object.query_object_by_name(answer, **kwargs)
                         if existing_object:
                             if isinstance(existing_object.type, datamodel.BaseType):
                                 if str(existing_object.type) != "Requirement":
@@ -119,11 +124,11 @@ def check_add_requirement(p_str_list, **kwargs):
 
 
 def check_add_description(p_description_str_list, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     description_list = []
 
     # Create a list with all transition names/aliases already in the xml
-    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
+    xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
     for requirement_str, description_str in p_description_str_list:
         if 'shall' in description_str:
             if any(requirement_str in s for s in xml_requirement_name_list):
@@ -188,7 +193,7 @@ def check_add_description(p_description_str_list, **kwargs):
 
 
 def evaluate_description_similarities(p_req_subject, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     sequence_ratio_list = {}
 
     for xml_requirement in xml_requirement_list:
@@ -355,7 +360,7 @@ def add_requirement(p_requirement_list, **kwargs):
     @param[in] kwargs : jarvis data structure
     @return jarvis data structure updated (1) or not (0)
     """
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     output_xml = kwargs['output_xml']
 
     new_requirement_list = []
@@ -363,7 +368,7 @@ def add_requirement(p_requirement_list, **kwargs):
 
     update = 0
     # Create requirement names list already in xml
-    xml_requirement_name_list = question_answer.get_objects_names(xml_requirement_list)
+    xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
     # Filter attribute_list, keeping only the ones not already in the xml
     for requirement_item in p_requirement_list:
         if requirement_item[0] not in xml_requirement_name_list:
@@ -478,18 +483,18 @@ def check_add_allocation(p_str_list, **kwargs):
     allocation_list = []
     cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_allocation_str_list:
-        alloc_obj = question_answer.check_get_object(elem[0],
-                                                     **{'xml_function_list': kwargs['xml_function_list'],
-                                                        'xml_state_list': kwargs['xml_state_list'],
-                                                        'xml_data_list': kwargs['xml_data_list'],
-                                                        'xml_transition_list': kwargs['xml_transition_list'],
-                                                        'xml_fun_elem_list': kwargs['xml_fun_elem_list'],
-                                                        'xml_fun_inter_list': kwargs['xml_fun_inter_list'],
-                                                        'xml_phy_elem_list': kwargs['xml_phy_elem_list'],
-                                                        'xml_phy_inter_list': kwargs['xml_phy_inter_list'],
-                                                        })
+        alloc_obj = query_object.query_object_by_name(elem[0],
+                                                      **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                     XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                     XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                     XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+                                                     XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                     XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                     XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                     XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                     })
 
-        req_obj = question_answer.check_get_object(elem[1], **{'xml_requirement_list': kwargs['xml_requirement_list']})
+        req_obj = query_object.query_object_by_name(elem[1], **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
 
         if not alloc_obj:
             Logger.set_error(__name__, f"Object {elem[0]} not found or cannot satisfy a requirement, "
@@ -547,7 +552,7 @@ def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
     sequence_ratio_list = {}
     sequence_req_list = {}
     for req in p_allocated_parent.allocated_req_list:
-        for xml_req in kwargs['xml_requirement_list']:
+        for xml_req in kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]:
             if xml_req.id == req.id:
                 parent_req_object = retrieve_requirement_object(xml_req.description.split("shall")[1])
                 req_object = retrieve_requirement_object(p_requirement.description.split("shall")[1])
@@ -609,11 +614,11 @@ def check_add_derived(p_str_list, **kwargs):
     derived_list = []
     cleaned_derived_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_derived_str_list:
-        derived_req_obj = question_answer.check_get_object(elem[0],
-                                                           **{'xml_requirement_list': kwargs['xml_requirement_list']})
+        derived_req_obj = query_object.query_object_by_name(elem[0],
+                                                            **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
 
-        parent_req_obj = question_answer.check_get_object(elem[1],
-                                                          **{'xml_requirement_list': kwargs['xml_requirement_list']})
+        parent_req_obj = query_object.query_object_by_name(elem[1],
+                                                           **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
 
         if not derived_req_obj:
             Logger.set_error(__name__, f"Requirement {elem[0]} not found")
@@ -660,7 +665,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     is_error = False
 
     # Try to retrieve the subject object as a whole
-    req_string_object = question_answer.check_get_object(p_req_str, **kwargs)
+    req_string_object = query_object.query_object_by_name(p_req_str, **kwargs)
 
     if req_string_object is None:
         is_previous_proper_noun_singular_tag = False
@@ -699,7 +704,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
             if is_error:
                 break
             elif is_proper_noun:
-                req_string_object_list.append(question_answer.check_get_object(tag[0], **kwargs))
+                req_string_object_list.append(query_object.query_object_by_name(tag[0], **kwargs))
             elif is_function_name:
                 is_previous_function_name = True
                 function_name_str = function_name_str + ' ' + tag[0]
@@ -707,7 +712,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
             if not is_function_name and is_previous_function_name:
                 Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-                req_string_object_list.append(question_answer.check_get_object(function_name_str[1:], **kwargs))
+                req_string_object_list.append(query_object.query_object_by_name(function_name_str[1:], **kwargs))
                 function_name_str = ''
                 is_previous_function_name = False
 
@@ -716,7 +721,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
         if is_function_name:
             Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-            req_string_object_list.append(question_answer.check_get_object(function_name_str[1:], **kwargs))
+            req_string_object_list.append(query_object.query_object_by_name(function_name_str[1:], **kwargs))
         # Else do nothing
     else:
         req_string_object_list.append(req_string_object)
@@ -892,7 +897,7 @@ def analyze_requirement(**kwargs):
     @return list of objects
     """
     update = 0
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     output_xml = kwargs['output_xml']
 
     for xml_requirement in xml_requirement_list:
@@ -967,7 +972,7 @@ def analyze_requirement(**kwargs):
                     [[req_subject_name, req_subject_type]],
                     **kwargs)
                 
-                req_subject_object = question_answer.check_get_object(req_subject_name, **kwargs)
+                req_subject_object = query_object.query_object_by_name(req_subject_name, **kwargs)
                 
             elif answer == "q":
                 break

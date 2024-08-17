@@ -7,6 +7,11 @@ import csv
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import util
 from tools import Logger
 
@@ -26,20 +31,20 @@ class CsvWriter3SE:
         Reference to the XML file to be written
         """
         self.write_list = {
-            0: self.write_function,
-            1: self.write_data,
-            2: self.write_data_consumer,
-            3: self.write_data_producer,
-            4: self.write_state,
-            5: self.write_transition,
-            6: self.write_functional_element,
-            7: self.write_view,
-            8: self.write_attribute,
-            9: self.write_functional_interface,
-            10: self.write_physical_element,
-            11: self.write_physical_interface,
-            12: self.write_type_element,
-            13: self.write_requirement
+            0: self.write_data,
+            1: self.write_function,
+            2: self.write_functional_element,
+            3: self.write_functional_interface,
+            4: self.write_physical_element,
+            5: self.write_physical_interface,
+            6: self.write_state,
+            7: self.write_transition,
+            8: self.write_requirement,
+            9: self.write_attribute,
+            10: self.write_view,
+            11: self.write_type_element,
+            12: self.write_data_consumer,
+            13: self.write_data_producer,
         }
 
         self.file = output_filename
@@ -51,20 +56,20 @@ class CsvWriter3SE:
         @return CSV dictionary
         """
         xml_dictionary_list = {
-            0: kwargs['xml_function_list'],
-            1: kwargs['xml_data_list'],
-            2: kwargs['xml_consumer_function_list'],
-            3: kwargs['xml_producer_function_list'],
-            4: kwargs['xml_state_list'],
-            5: kwargs['xml_transition_list'],
-            6: kwargs['xml_fun_elem_list'],
-            7: kwargs['xml_view_list'],
-            8: kwargs['xml_attribute_list'],
-            9: kwargs['xml_fun_inter_list'],
-            10: kwargs['xml_phy_elem_list'],
-            11: kwargs['xml_phy_inter_list'],
-            12: kwargs['xml_type_list'],
-            13: kwargs['xml_requirement_list']
+            0: kwargs[XML_DICT_KEY_0_DATA_LIST],
+            1: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            2: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            3: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+            4: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+            5: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+            6: kwargs[XML_DICT_KEY_6_STATE_LIST],
+            7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+            8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
+            9: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            10: kwargs[XML_DICT_KEY_10_VIEW_LIST],
+            11: kwargs[XML_DICT_KEY_11_TYPE_LIST],
+            12: kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            13: kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
         }
 
         try:

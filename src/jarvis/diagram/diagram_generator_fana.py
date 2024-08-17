@@ -5,7 +5,12 @@ Jarvis diagram module
 
 # Modules
 import plantuml_adapter
-from jarvis.query import question_answer
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.query import query_object, question_answer
 from . import util
 from tools import Logger
 
@@ -41,7 +46,7 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                 xml_producer_function_list, xml_attribute_list, xml_type_list,
                                 diagram_level=None):
     """Create necessary lists then returns plantuml text for decomposition of function"""
-    main_fun = question_answer.check_get_object(diagram_function_str, **{'xml_function_list': xml_function_list})
+    main_fun = query_object.query_object_by_name(diagram_function_str, **{XML_DICT_KEY_1_FUNCTION_LIST: xml_function_list})
 
     if not main_fun:
         return

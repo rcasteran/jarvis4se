@@ -5,7 +5,12 @@ Jarvis diagram module
 
 # Modules
 import plantuml_adapter
-from jarvis.query import question_answer
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.query import query_object, question_answer
 from . import util
 from tools import Logger
 
@@ -26,7 +31,7 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
     """
     plantuml_text = None
 
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
+    main_fun_elem = query_object.query_object_by_name(fun_elem_str, **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
     if not main_fun_elem:
         return plantuml_text
 
@@ -92,7 +97,7 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     """
     plantuml_text = None
 
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
+    main_fun_elem = query_object.query_object_by_name(fun_elem_str, **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
     if not main_fun_elem:
         return plantuml_text
 
@@ -165,7 +170,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
     """
     plantuml_text = None
 
-    main_fun_elem = question_answer.check_get_object(fun_elem_str, **{'xml_fun_elem_list': xml_fun_elem_list})
+    main_fun_elem = query_object.query_object_by_name(fun_elem_str, **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
     if not main_fun_elem:
         return plantuml_text
 

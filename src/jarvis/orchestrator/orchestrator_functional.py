@@ -5,8 +5,13 @@ Jarvis module
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import orchestrator_shared, orchestrator_object, orchestrator_viewpoint_requirement
-from jarvis.query import question_answer
+from jarvis.query import query_object, question_answer
 from jarvis import util
 from tools import Logger
 
@@ -26,8 +31,8 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    xml_data_list = kwargs['xml_data_list']
-    xml_view_list = kwargs['xml_view_list']
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+    xml_view_list = kwargs[XML_DICT_KEY_10_VIEW_LIST]
     output_xml = kwargs['output_xml']
 
     data_predecessor_list = []
@@ -37,7 +42,7 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
     data_predecessor_str_list = util.cut_tuple_list(data_predecessor_str_set)
 
     # Create data names list already in xml
-    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
+    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
 
     for elem in data_predecessor_str_list:
         is_elem_found = True
@@ -141,16 +146,16 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs['xml_consumer_function_list']
-    xml_producer_function_list = kwargs['xml_producer_function_list']
-    xml_function_list = kwargs['xml_function_list']
-    xml_data_list = kwargs['xml_data_list']
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
     output_xml = kwargs['output_xml']
 
     new_consumer_list = []
     # Create object names/aliases list and data's name
-    xml_function_name_list = question_answer.get_objects_names(xml_function_list)
-    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
+    xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
+    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
     # Loop to filter consumer and create a new list
     for elem in consumer_str_list:
         is_elem_found = True
@@ -212,7 +217,7 @@ def add_consumer_function(new_consumer_list, **kwargs):
     if not new_consumer_list:
         return 0
 
-    xml_consumer_function_list = kwargs['xml_consumer_function_list']
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
     output_xml = kwargs['output_xml']
     output_xml.write_data_consumer(new_consumer_list)
 
@@ -375,16 +380,16 @@ def check_add_producer_function(producer_str_list, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs['xml_consumer_function_list']
-    xml_producer_function_list = kwargs['xml_producer_function_list']
-    xml_function_list = kwargs['xml_function_list']
-    xml_data_list = kwargs['xml_data_list']
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
     output_xml = kwargs['output_xml']
 
     new_producer_list = []
     # Create object names/aliases list
-    xml_function_name_list = question_answer.get_objects_names(xml_function_list)
-    xml_data_name_list = question_answer.get_objects_names(xml_data_list)
+    xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
+    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
     # Loop to filter producer and create a new list
     for elem in producer_str_list:
         is_elem_found = True
@@ -445,7 +450,7 @@ def add_producer_function(new_producer_list, **kwargs):
     if not new_producer_list:
         return 0
 
-    xml_producer_function_list = kwargs['xml_producer_function_list']
+    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
     output_xml = kwargs['output_xml']
     output_xml.write_data_producer(new_producer_list)
 
@@ -475,11 +480,11 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_transition_list = kwargs['xml_transition_list']
+    xml_transition_list = kwargs[XML_DICT_KEY_7_TRANSITION_LIST]
     condition_list = []
 
     # Create a list with all transition names/aliases already in the xml
-    xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
+    xml_transition_name_list = query_object.query_object_name_in_list(xml_transition_list)
     for transition_str, condition_str in trans_condition_str_list:
         is_elem_found = True
         if not any(transition_str in s for s in xml_transition_name_list):
@@ -504,7 +509,7 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
 
 
 def check_condition_list_requirement(p_condition_list, **kwargs):
-    xml_requirement_list = kwargs['xml_requirement_list']
+    xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     output_xml = kwargs['output_xml']
 
     for condition in p_condition_list:
@@ -569,15 +574,15 @@ def check_add_src_dest(src_dest_str, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_transition_list = kwargs['xml_transition_list']
-    xml_state_list = kwargs['xml_state_list']
+    xml_transition_list = kwargs[XML_DICT_KEY_7_TRANSITION_LIST]
+    xml_state_list = kwargs[XML_DICT_KEY_6_STATE_LIST]
     output_xml = kwargs['output_xml']
 
     new_src_list = []
     new_dest_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_transition_name_list = question_answer.get_objects_names(xml_transition_list)
-    xml_state_name_list = question_answer.get_objects_names(xml_state_list)
+    xml_transition_name_list = query_object.query_object_name_in_list(xml_transition_list)
+    xml_state_name_list = query_object.query_object_name_in_list(xml_state_list)
 
     concatenated_lists = [*xml_transition_name_list, *xml_state_name_list]
 
@@ -702,15 +707,15 @@ def check_add_exposes(exposes_str_list, **kwargs):
         [0/1] : if update has been made
     """
     # TODO : add physical interface support (see write_element_exposed_interface())
-    xml_fun_elem_list = kwargs['xml_fun_elem_list']
-    xml_fun_inter_list = kwargs['xml_fun_inter_list']
+    xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
+    xml_fun_inter_list = kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]
     output_xml = kwargs['output_xml']
 
     output = False
     cleaned_exposes_str_list = util.cut_tuple_list(exposes_str_list)
     for exposes_str in cleaned_exposes_str_list:
-        fun_elem = question_answer.check_get_object(exposes_str[0], **{'xml_fun_elem_list': xml_fun_elem_list})
-        fun_inter = question_answer.check_get_object(exposes_str[1], **{'xml_fun_inter_list': xml_fun_inter_list})
+        fun_elem = query_object.query_object_by_name(exposes_str[0], **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
+        fun_inter = query_object.query_object_by_name(exposes_str[1], **{XML_DICT_KEY_3_FUN_INTF_LIST: xml_fun_inter_list})
 
         check_print_wrong_pair_object((exposes_str[0], fun_elem, 'Functional Element'),
                                       (exposes_str[1], fun_inter, 'Functional Interface'),

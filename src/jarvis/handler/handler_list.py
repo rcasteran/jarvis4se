@@ -2,11 +2,16 @@
 
 
 # Modules
-from . import question_answer
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.query import query_object, question_answer
 from tools import Logger
 
 
-def get_object_list(p_str_list, **kwargs):
+def list_object(p_str_list, **kwargs):
     """
     Gets lists from object_str : i.e. Input/Output/Child/Data
     Args:
@@ -18,7 +23,7 @@ def get_object_list(p_str_list, **kwargs):
     """
     answer_list = []
     for elem in p_str_list:
-        wanted_object = question_answer.check_get_object(elem[1], **kwargs)
+        wanted_object = query_object.query_object_by_name(elem[1], **kwargs)
         if wanted_object is None:
             Logger.set_error(__name__,
                              f"Object '{elem[1]}' does not exist")
@@ -61,7 +66,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
             else:
                 report_no_list_available(wanted_object, object_type, **kwargs)
     elif object_type == "Functional interface" and type_list_str == "data":
-        object_list = get_fun_intf_data(wanted_object, object_type, **kwargs)
+        object_list = question_answer.get_fun_intf_data(wanted_object, object_type, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
@@ -108,24 +113,24 @@ def get_child_list(wanted_object, object_type, **kwargs):
     child_dict = {}
     child_list = None
     if object_type == "function":
-        child_list = question_answer.get_child_name_list(wanted_object, kwargs['xml_function_list'])
+        child_list = question_answer.get_child_name_list(wanted_object, kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
         if wanted_object.derived:
             child_list += [e for e in question_answer.get_child_name_list(wanted_object.derived,
-                                                                          kwargs['xml_function_list'])]
+                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST])]
     elif object_type == "state":
-        child_list = question_answer.get_child_name_list(wanted_object, kwargs['xml_state_list'])
+        child_list = question_answer.get_child_name_list(wanted_object, kwargs[XML_DICT_KEY_6_STATE_LIST])
 
     elif object_type == "Functional element":
-        child_list = question_answer.get_child_name_list(wanted_object, kwargs['xml_fun_elem_list'])
+        child_list = question_answer.get_child_name_list(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
 
         child_list.extend(question_answer.get_fun_elem_function_state_allocation(wanted_object,
-                                                                                 kwargs['xml_function_list'],
-                                                                                 kwargs['xml_state_list']))
+                                                                                 kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                                 kwargs[XML_DICT_KEY_6_STATE_LIST]))
         if wanted_object.derived:
             child_list += [e for e in question_answer.get_child_name_list(wanted_object.derived,
-                                                                          kwargs['xml_fun_elem_list'])]
+                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])]
             child_list += [e for e in question_answer.get_fun_elem_function_state_allocation(
-                wanted_object.derived, kwargs['xml_function_list'], kwargs['xml_state_list'])]
+                wanted_object.derived, kwargs[XML_DICT_KEY_1_FUNCTION_LIST], kwargs[XML_DICT_KEY_6_STATE_LIST])]
 
     if child_list:
         child_dict = {'title': f"Child list for {wanted_object.name}:",
@@ -140,7 +145,7 @@ def get_state_function(wanted_object, _, **kwargs):
     function_dict = {}
     function_list = []
     for allocated_fun in wanted_object.allocated_function_list:
-        for fun in kwargs['xml_function_list']:
+        for fun in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
             if fun.id == allocated_fun:
                 function_list.append((fun.name, "Function allocation"))
 
@@ -156,9 +161,9 @@ def get_state_transition(wanted_object, _, **kwargs):
     """Case 'list transition State' """
     transition_dict = {}
     transition_list = []
-    for transition in kwargs['xml_transition_list']:
+    for transition in kwargs[XML_DICT_KEY_7_TRANSITION_LIST]:
         if wanted_object.id == transition.source:
-            for state in kwargs['xml_state_list']:
+            for state in kwargs[XML_DICT_KEY_6_STATE_LIST]:
                 if transition.destination == state.id:
                     transition_list.append({
                         'Transition name': transition.name,
@@ -167,7 +172,7 @@ def get_state_transition(wanted_object, _, **kwargs):
                         'Condition(s)': transition.condition_list
                     })
         elif wanted_object.id == transition.destination:
-            for state in kwargs['xml_state_list']:
+            for state in kwargs[XML_DICT_KEY_6_STATE_LIST]:
                 if transition.source == state.id:
                     transition_list.append({
                         'Transition name': transition.name,
@@ -194,14 +199,14 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
             question_answer.get_children(wanted_object.derived)[0])
 
     fun_inter_list = question_answer.get_objects_from_id_list(id_list,
-                                                              kwargs['xml_fun_inter_list'])
+                                                              kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
 
     if not fun_inter_list:
         Logger.set_warning(__name__, f"Not any exposed interface for {format(wanted_object.name)}")
     else:
         exposing_fun_elem = set()
         for interface in fun_inter_list:
-            for fun_elem in kwargs['xml_fun_elem_list']:
+            for fun_elem in kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]:
                 if fun_elem not in main_fun_elem_child_list and \
                         interface.id in fun_elem.exposed_interface_list and \
                         question_answer.check_not_family(fun_elem, wanted_object):
@@ -228,53 +233,6 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
                               'columns': ["Interface ", "Last connected functional element"]}
 
     return interface_dict
-
-
-def get_fun_intf_data(wanted_object, _, **kwargs):
-    """Case for 'list data Functional Interface' """
-    data_dict = {}
-    data_list = []
-    fun_elem_exposing = question_answer.get_allocation_object(wanted_object, kwargs['xml_fun_elem_list'])
-    if wanted_object.derived:
-        derived_fun_elem_exposing = question_answer.get_allocation_object(wanted_object.derived,
-                                                                          kwargs['xml_fun_elem_list'])
-        if derived_fun_elem_exposing and fun_elem_exposing:
-            fun_elem_exposing = fun_elem_exposing.union(derived_fun_elem_exposing)
-
-    if not fun_elem_exposing:
-        Logger.set_warning(__name__, f"Not any functional element exposing {wanted_object.name}")
-    else:
-        last_fun_elem_name_exposing_list = [question_answer.check_latest(j, fun_elem_exposing)
-                                            for j in fun_elem_exposing
-                                            if question_answer.check_latest(j, fun_elem_exposing)]
-
-        fun_elem_name_exposing_list = [i.name for i in fun_elem_exposing]
-
-        for allocated_id in wanted_object.allocated_data_list:
-            for data in kwargs['xml_data_list']:
-                if allocated_id == data.id:
-                    data_list.append(question_answer.get_latest_obj_interface(wanted_object,
-                                                                              data,
-                                                                              last_fun_elem_name_exposing_list,
-                                                                              fun_elem_name_exposing_list,
-                                                                              **kwargs))
-
-        if wanted_object.derived:
-            for allocated_id in wanted_object.derived.allocated_data_list:
-                for data in kwargs['xml_data_list']:
-                    if allocated_id == data.id:
-                        data_list.append(
-                            question_answer.get_latest_obj_interface(wanted_object,
-                                                                     data,
-                                                                     last_fun_elem_name_exposing_list,
-                                                                     fun_elem_name_exposing_list,
-                                                                     **kwargs))
-
-        if data_list:
-            data_dict = {'title': f"Data list for {wanted_object.name}:",
-                         'data': data_list}
-
-    return data_dict
 
 
 def report_no_list_available(wanted_object, object_type, _):

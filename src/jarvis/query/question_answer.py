@@ -1,77 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Libraries
-import pandas as pd
+
 
 # Modules
 import datamodel
+from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
+    XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
+    XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
+    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
+    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from tools import Logger
 
 
-xml_str_lists = ['xml_function_list',
-                 'xml_data_list',
-                 'xml_state_list',
-                 'xml_fun_elem_list',
-                 'xml_transition_list',
-                 'xml_fun_inter_list',
-                 'xml_phy_elem_list',
-                 'xml_phy_inter_list',
-                 'xml_attribute_list',
-                 'xml_view_list',
-                 'xml_type_list',
-                 'xml_requirement_list']
 
-
-def get_objects_name_lists(**kwargs):
-    """Returns lists of objects with their names depending on kwargs"""
-    whole_objects_name_list = [[] for _ in range(len(xml_str_lists))]
-    for i in range(len(xml_str_lists)):
-        if kwargs.get(xml_str_lists[i], False):
-            whole_objects_name_list[i] = get_objects_names(kwargs[xml_str_lists[i]])
-
-    return whole_objects_name_list
-
-
-def check_get_object(object_str, **kwargs):
-    """
-    Returns the desired object from object's string
-    Args:
-        object_str ([object_string]): list of object's name from cell
-        **kwargs: xml lists
-
-    Returns:
-        wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
-    """
-    whole_objects_name_list = get_objects_name_lists(**kwargs)
-    if not any(object_str in s for s in whole_objects_name_list):
-        return None
-    else:
-        result = [False] * len(xml_str_lists)
-        for i in range(len(xml_str_lists)):
-            result[i] = any(a == object_str for a in whole_objects_name_list[i])
-
-        wanted_object = match_object(object_str, result, p_xml_str_lists=xml_str_lists, **kwargs)
-        return wanted_object
-
-
-def match_object(object_str, result, p_xml_str_lists=None, **kwargs):
-    """Returns wanted_object from object_str and result matched from name lists"""
-    # Because match_object() called within match_allocated() TBC/TBT if match_allocated()
-    # still needed
-    if not p_xml_str_lists:
-        p_xml_str_lists = xml_str_lists
-    for i in range(len(p_xml_str_lists)):
-        if result[i]:
-            for obj in kwargs[p_xml_str_lists[i]]:
-                if object_str == obj.name:
-                    return obj
-                try:
-                    if object_str == obj.alias:
-                        return obj
-                except AttributeError:
-                    # To avoid error when there is no alias for the object
-                    pass
-    return None
 
 
 def get_consumes_produces_info(wanted_object, relationship_list):
@@ -152,15 +92,15 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                  'Last producer Function(s)': [],
                  'Last producer Functional element(s)': []}
 
-    for prod in kwargs['xml_producer_function_list']:
+    for prod in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]:
         if prod[0] == data and \
-                check_latest(prod[1], kwargs['xml_function_list']) == prod[1].name:
-            for cons in kwargs['xml_consumer_function_list']:
+                check_latest(prod[1], kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) == prod[1].name:
+            for cons in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]:
                 cons_last_fun_elem = None
                 prod_last_fun_elem = None
                 if cons[0] == prod[0] and \
-                        check_latest(cons[1], kwargs['xml_function_list']) == cons[1].name:
-                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs['xml_fun_elem_list'])
+                        check_latest(cons[1], kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) == cons[1].name:
+                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
                     if cons_fun_elem_list:
                         for fun_elem in cons_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
@@ -178,13 +118,13 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                             # Else do nothing
                     # Else do nothing
 
-                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs['xml_fun_elem_list'])
+                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
                     if prod_fun_elem_list:
                         for fun_elem in prod_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
                                 prod_last_fun_elem = fun_elem
                             elif fun_elem.name in fun_elem_exposing_list:
-                                cons_last_fun_elem = fun_elem
+                                prod_last_fun_elem = fun_elem
                                 if not check_child_fun_elem_exposing_recursively(0,
                                                                                  fun_elem,
                                                                                  last_fun_elem_exposing_list):
@@ -255,7 +195,7 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
     if object_type == "Functional element":
         allocated_function_list = set()
         for allocated_function in wanted_object.allocated_function_list:
-            for xml_function in kwargs['xml_function_list']:
+            for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
                 if allocated_function == xml_function.id:
                     allocated_function_list.add(xml_function)
 
@@ -267,12 +207,12 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
     elif object_type == "function":
         if direction == 'output':
             in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs['xml_producer_function_list'],
-                                                 kwargs['xml_consumer_function_list'])
+                                                 kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                 kwargs[XML_DICT_KEY_12_FUN_CONS_LIST])
         else:
             in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs['xml_consumer_function_list'],
-                                                 kwargs['xml_producer_function_list'])
+                                                 kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                 kwargs[XML_DICT_KEY_13_FUN_PROD_LIST])
 
     if in_or_out_list and not unmerged:
         in_or_out_list = merge_list_per_cons_prod(in_or_out_list)
@@ -348,23 +288,7 @@ def get_objects_from_id_list(id_list, object_list):
     return output_list
 
 
-def get_objects_names(xml_object_list):
-    """
-    Method that returns a list with all object aliases/names from object's list
 
-    """
-    object_name_list = []
-    # Create the xml [object_name (and object_alias)] list
-    for xml_object in xml_object_list:
-        object_name_list.append(xml_object.name)
-        try:
-            if len(xml_object.alias) > 0:
-                object_name_list.append(xml_object.alias)
-        except AttributeError:
-            # To avoid error when there is no alias attribute for the object
-            pass
-
-    return object_name_list
 
 
 def check_parentality(object_a, object_b):
@@ -426,37 +350,60 @@ def get_object_type(object_to_check):
     return object_type
 
 
-def get_pandas_table(data_dict):
-    """Returns pandas data frame called from command_parser.matched_list()
-    with data_dict as list of ..."""
-    if 'columns' in data_dict.keys():
-        data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'])
-    else:
-        data_frame = pd.DataFrame(data_dict['data'])
-    data_frame = data_frame.T
-    if 'Data' in data_dict['title'] or 'Transition' in data_dict['title']:
-        if 'Data' in data_dict['title']:
-            first = 1
-            last = 5
-        else:
-            first = 3
-            last = 4
-        for idx in range(first, last):
-            data_frame.iloc[idx] = data_frame.iloc[idx].str.join("\\n")
-    data_frame = data_frame.style \
-        .set_caption(data_dict['title']) \
-        .set_properties(**{'white-space': 'nowrap'})
-
-    return data_frame.to_html().replace("\\n", "<br>")
-
-
 def get_transition_between_states(p_object_src, p_object_dest, **kwargs):
     transition_object = None
 
-    for transition in kwargs['xml_transition_list']:
+    for transition in kwargs[XML_DICT_KEY_7_TRANSITION_LIST]:
         if p_object_src.id == transition.source and p_object_dest.id == transition.destination:
             transition_object = transition
             break
         # Else do nothing
 
     return transition_object
+
+
+def get_fun_intf_data(wanted_object, _, **kwargs):
+    """Case for 'list data Functional Interface' """
+    data_dict = {}
+    data_list = []
+    fun_elem_exposing = get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+    if wanted_object.derived:
+        derived_fun_elem_exposing = get_allocation_object(wanted_object.derived,
+                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+        if derived_fun_elem_exposing and fun_elem_exposing:
+            fun_elem_exposing = fun_elem_exposing.union(derived_fun_elem_exposing)
+
+    if not fun_elem_exposing:
+        Logger.set_warning(__name__, f"Not any functional element exposing {wanted_object.name}")
+    else:
+        last_fun_elem_name_exposing_list = [check_latest(j, fun_elem_exposing)
+                                            for j in fun_elem_exposing
+                                            if check_latest(j, fun_elem_exposing)]
+
+        fun_elem_name_exposing_list = [i.name for i in fun_elem_exposing]
+
+        for allocated_id in wanted_object.allocated_data_list:
+            for data in kwargs[XML_DICT_KEY_0_DATA_LIST]:
+                if allocated_id == data.id:
+                    data_list.append(get_latest_obj_interface(wanted_object,
+                                                              data,
+                                                              last_fun_elem_name_exposing_list,
+                                                              fun_elem_name_exposing_list,
+                                                              **kwargs))
+
+        if wanted_object.derived:
+            for allocated_id in wanted_object.derived.allocated_data_list:
+                for data in kwargs[XML_DICT_KEY_0_DATA_LIST]:
+                    if allocated_id == data.id:
+                        data_list.append(
+                            get_latest_obj_interface(wanted_object,
+                                                     data,
+                                                     last_fun_elem_name_exposing_list,
+                                                     fun_elem_name_exposing_list,
+                                                     **kwargs))
+
+        if data_list:
+            data_dict = {'title': f"Data list for {wanted_object.name}:",
+                         'data': data_list}
+
+    return data_dict
