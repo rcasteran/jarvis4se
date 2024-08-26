@@ -104,6 +104,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': str(allocated_req.id)})
 
+        Logger.set_debug(__name__, self.write_function.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data(self, data_list):
@@ -142,6 +143,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': str(allocated_req_id)})
 
+        Logger.set_debug(__name__, self.write_data.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_consumer(self, consumer_list):
@@ -171,6 +173,7 @@ class XmlWriter3SE:
                                                      {'id': consumer[1].id,
                                                       'role': util.normalize_xml_string(consumer[1].operand)})
 
+        Logger.set_debug(__name__, self.write_data_consumer.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_producer(self, producer_list):
@@ -194,6 +197,7 @@ class XmlWriter3SE:
                                                   + "']/producerList"):
                 _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': producer[1].id})
 
+        Logger.set_debug(__name__, self.write_data_producer.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_predecessor(self, predecessor_list):
@@ -217,6 +221,7 @@ class XmlWriter3SE:
                 _predecessor_tag = etree.SubElement(predecessor_list_tag, "predecessor",
                                                     {'id': predecessor[1].id})
 
+        Logger.set_debug(__name__, self.write_data_predecessor.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_data_relationship(self, flow_function, relationship_type):
@@ -228,6 +233,7 @@ class XmlWriter3SE:
         """
         flow_function_list = [flow_function]
 
+        Logger.set_debug(__name__, self.write_data_relationship.__name__)
         if relationship_type == "consumer":
             self.write_data_consumer(flow_function_list)
         elif relationship_type == "producer":
@@ -258,12 +264,14 @@ class XmlWriter3SE:
                                 + "']"):
             tag.getparent().remove(tag)
 
+        Logger.set_debug(__name__, self.delete_data_relationship.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write(self):
         """Write within the XML file
         @return None
         """
+        Logger.set_debug(__name__, self.write.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_state(self, state_list):
@@ -303,6 +311,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_state.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_transition(self, transition_list):
@@ -338,6 +347,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_transition.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_transition_condition(self, transition_condition_list):
@@ -355,6 +365,7 @@ class XmlWriter3SE:
                     _state_part_tag = etree.SubElement(tag, "condition",
                                                        {'text': util.normalize_xml_string(condition)})
 
+        Logger.set_debug(__name__, self.write_transition_condition.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_transition_source(self, transition_source_list):
@@ -369,6 +380,7 @@ class XmlWriter3SE:
             for state_tag in root.findall(".//transition[@id='" + transition_src[0].id + "']"):
                 state_tag.set('source', transition_src[1].id)
 
+        Logger.set_debug(__name__, self.write_transition_source.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_transition_destination(self, transition_destination_list):
@@ -383,6 +395,7 @@ class XmlWriter3SE:
             for state_tag in root.findall(".//transition[@id='" + transition_dest[0].id + "']"):
                 state_tag.set('destination', transition_dest[1].id)
 
+        Logger.set_debug(__name__, self.write_transition_destination.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_functional_element(self, functional_element_list):
@@ -441,6 +454,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_functional_element.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_element_exposed_interface(self, element_interface_list):
@@ -463,6 +477,7 @@ class XmlWriter3SE:
                         _exposed_interface_tag = etree.SubElement(tag, "exposedInterface",
                                                                   {'id': inter.id})
 
+                Logger.set_debug(__name__, self.write_element_exposed_interface.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_view(self, view_list):
@@ -494,6 +509,7 @@ class XmlWriter3SE:
                                                            'allocatedItem',
                                                            {'id': allocated_item_id})
 
+        Logger.set_debug(__name__, self.write_view.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_attribute(self, attribute_list):
@@ -528,6 +544,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_attribute.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_attribute_described_item(self, attribute_item_list):
@@ -546,6 +563,7 @@ class XmlWriter3SE:
                                                            {'id': item[0].id,
                                                             'value': util.normalize_xml_string(item[1])})
 
+        Logger.set_debug(__name__, self.write_attribute_described_item.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_functional_interface(self, functional_interface_list):
@@ -586,6 +604,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_functional_interface.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_physical_element(self, physical_element_list):
@@ -638,6 +657,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_physical_element.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_physical_interface(self, physical_interface_list):
@@ -678,6 +698,7 @@ class XmlWriter3SE:
                                                           'allocatedRequirement',
                                                           {'id': allocated_req_id})
 
+        Logger.set_debug(__name__, self.write_physical_interface.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     @staticmethod
@@ -730,6 +751,7 @@ class XmlWriter3SE:
                 for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                     obj_tag.set('alias', str(obj.alias))
 
+                Logger.set_debug(__name__, self.write_object_alias.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_object_derived(self, object_list):
@@ -746,6 +768,7 @@ class XmlWriter3SE:
                 for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                     obj_tag.set('derived', str(obj.derived.id))
 
+                Logger.set_debug(__name__, self.write_object_derived.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_object_type(self, object_list):
@@ -762,6 +785,7 @@ class XmlWriter3SE:
                 for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                     obj_tag.set('type', self.check_object_type(obj.type))
 
+                Logger.set_debug(__name__, self.write_object_type.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_object_child(self, object_child_list):
@@ -781,6 +805,7 @@ class XmlWriter3SE:
                                                                  elem_tag + 'Part',
                                                                  {'id': child.id})
 
+                Logger.set_debug(__name__, self.write_object_child.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def delete_object(self, object_list):
@@ -797,6 +822,7 @@ class XmlWriter3SE:
                 for obj_tag in root.findall(".//" + elem_tag + "[@id='" + obj.id + "']"):
                     obj_tag.getparent().remove(obj_tag)
 
+                Logger.set_debug(__name__, self.delete_object.__name__)
                 self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     @staticmethod
@@ -849,6 +875,7 @@ class XmlWriter3SE:
 
                         _allocated_obj_tag = etree.SubElement(tag, allocated_tag, {'id': allocated_obj.id})
 
+            Logger.set_debug(__name__, self.write_object_allocation.__name__)
             self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def delete_object_allocation(self, object_allocated_object_list):
@@ -874,6 +901,7 @@ class XmlWriter3SE:
                         for allocated_obj_tag in tag.findall(allocated_tag + "[@id='" + allocated_obj.id + "']"):
                             tag.remove(allocated_obj_tag)
 
+            Logger.set_debug(__name__, self.delete_object_allocation.__name__)
             self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_type_element(self, type_list):
@@ -895,6 +923,7 @@ class XmlWriter3SE:
                                               'alias': type_elem.alias,
                                               'base': self.check_object_type(type_elem.base)})
 
+        Logger.set_debug(__name__, self.write_type_element.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_requirement(self, requirement_list):
@@ -921,6 +950,7 @@ class XmlWriter3SE:
 
                 _req_part_list_tag = etree.SubElement(requirement_tag, "requirementPartList")
 
+        Logger.set_debug(__name__, self.write_requirement.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
     def write_requirement_description(self, p_description_list):
@@ -938,4 +968,5 @@ class XmlWriter3SE:
                     tag.text = util.normalize_xml_string(description_req)
                 # Else do nothing
 
+        Logger.set_debug(__name__, self.write_requirement_description.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

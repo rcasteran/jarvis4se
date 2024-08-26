@@ -187,6 +187,7 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
                 if consumer_function_name == function.name or consumer_function_name == function.alias:
                     for data in xml_data_list:
                         if data_name == data.name:
+                            is_warned, _ = check_opposite(data, xml_producer_function_list, "consumer", False)
                             if [data, function] not in xml_consumer_function_list:
                                 add_producer_consumer_flow_recursively(data,
                                                                        function,
@@ -194,7 +195,8 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
                                                                        xml_producer_function_list,
                                                                        new_consumer_list,
                                                                        output_xml,
-                                                                       "consumer")
+                                                                       "consumer",
+                                                                       is_warned)
                                 break
                         # Else do nothing
                 # Else do nothing
@@ -237,7 +239,7 @@ def add_consumer_function(new_consumer_list, **kwargs):
 
 
 def add_producer_consumer_flow_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
-                                           relationship_str):
+                                           relationship_str, is_warned):
     """
     Recursive method to add producer / consumer function for a flow.
         Parameters:
@@ -259,23 +261,16 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
         Logger.set_debug(__name__, f"[{flow.name}, {function.name}] added")
 
         # Check that parent opposite flow is present (if any)
-        is_opposite = False
-        for [opposite_flow, opposite_function] in opposite_list:
-            if opposite_flow == flow:
-                is_opposite = True
-                if opposite_function.parent is not None and opposite_function.parent != function and \
-                        opposite_function.parent != function.parent:
-                    if [opposite_flow, opposite_function.parent] not in opposite_list:
-                        add_producer_consumer_opposite(flow, opposite_function.parent, opposite_list, output_xml,
-                                                       relationship_str)
-
-        if not is_opposite:
-            if relationship_str == "consumer":
-                Logger.set_warning(__name__, f"No producer found for {flow.name}")
-            elif relationship_str == "producer":
-                Logger.set_warning(__name__, f"No consumer found for {flow.name}")
-            else:
-                Logger.set_error(__name__, f"Unsupported data relationship type: {relationship_str}")
+        is_warned, opposite_function = check_opposite(flow, opposite_list, relationship_str, is_warned)
+        if opposite_function:
+            if opposite_function.parent is not None and opposite_function.parent != function and \
+                    opposite_function.parent != function.parent:
+                if [flow, opposite_function.parent] not in opposite_list:
+                    add_producer_consumer_opposite(flow, opposite_function.parent, opposite_list, output_xml,
+                                                   relationship_str)
+                # Else do nothing
+            # Else do nothing
+        # Else do nothing
 
     if function.parent is not None:
         parent_child_list, parent_child_dict = question_answer.get_children(function.parent)
@@ -283,7 +278,8 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
         if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
             add_producer_consumer_flow_recursively(flow, function.parent, current_list, opposite_list, new_list,
                                                    output_xml,
-                                                   relationship_str)
+                                                   relationship_str,
+                                                   is_warned)
         elif [flow, function.parent] in opposite_list:
             # Check that no other function needs the flow before removing it
             ext_function_list = []
@@ -301,6 +297,28 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
                 remove_producer_consumer_opposite(flow, function.parent, opposite_list, output_xml, relationship_str)
             else:
                 Logger.set_debug(__name__, f"[{flow.name}, {function.parent.name}] still needed")
+
+
+def check_opposite(flow, opposite_list, relationship_str, is_warned):
+    # Check that parent opposite flow is present (if any)
+    opposite_flow_function = None
+    for [opposite_flow, opposite_function] in opposite_list:
+        if opposite_flow == flow:
+            opposite_flow_function = opposite_function
+            break
+        # Else do nothing
+
+    if not opposite_flow_function and not is_warned:
+        is_warned = True
+        if relationship_str == "consumer":
+            Logger.set_warning(__name__, f"No producer found for {flow.name}")
+        elif relationship_str == "producer":
+            Logger.set_warning(__name__, f"No consumer found for {flow.name}")
+        else:
+            Logger.set_error(__name__, f"Unsupported data relationship type: {relationship_str}")
+    # Else do nothing
+
+    return is_warned, opposite_flow_function
 
 
 def add_producer_consumer_opposite(flow, function, flow_function_list, output_xml, relationship_type):
@@ -425,6 +443,7 @@ def check_add_producer_function(producer_str_list, **kwargs):
                 if producer_function_name == function.name or producer_function_name == function.alias:
                     for data in xml_data_list:
                         if data_name == data.name:
+                            is_warned, _ = check_opposite(data, xml_consumer_function_list, "producer", False)
                             if [data, function] not in xml_producer_function_list:
                                 add_producer_consumer_flow_recursively(data,
                                                                        function,
@@ -432,7 +451,8 @@ def check_add_producer_function(producer_str_list, **kwargs):
                                                                        xml_consumer_function_list,
                                                                        new_producer_list,
                                                                        output_xml,
-                                                                       "producer")
+                                                                       "producer",
+                                                                       is_warned)
                                 break
                         # Else do nothing
                 # Else do nothing

@@ -144,13 +144,13 @@ class XmlParser3SE:
             # Instantiate functions and add them to a list
             if len(xml_function.get('derived')) > 0:
                 function = datamodel.Function(p_id=xml_function.get('id'),
-                                              p_name=xml_function.get('name'),
+                                              p_name=util.denormalize_xml_string(xml_function.get('name')),
                                               p_alias=xml_function.get('alias'),
                                               p_type=xml_function.get('type'),
                                               p_derived=xml_function.get('derived'))
             else:
                 function = datamodel.Function(p_id=xml_function.get('id'),
-                                              p_name=xml_function.get('name'),
+                                              p_name=util.denormalize_xml_string(xml_function.get('name')),
                                               p_alias=xml_function.get('alias'),
                                               p_type=xml_function.get('type'))
             function.set_operand()
@@ -191,7 +191,7 @@ class XmlParser3SE:
         for xml_data in xml_data_list:
             # Instantiate data and add it to a list
             data = datamodel.Data(p_id=xml_data.get('id'),
-                                  p_name=xml_data.get('name'),
+                                  p_name=util.denormalize_xml_string(xml_data.get('name')),
                                   p_type=xml_data.get('type'))
             data_list.add(data)
 
@@ -215,7 +215,7 @@ class XmlParser3SE:
                                                    f"data [{function.id}, {function.name}]")
 
                         if xml_consumer.get('role') != 'none':
-                            function.set_input_role(xml_data.get('name'))
+                            function.set_input_role(util.denormalize_xml_string(xml_data.get('name')))
                         # Avoid to reset the input role once already set
                         elif function.input_role is None:
                             function.set_input_role(None)
@@ -258,7 +258,7 @@ class XmlParser3SE:
         for xml_state in xml_state_list:
             # Instantiate states and add them to a list
             state = datamodel.State(p_id=xml_state.get('id'),
-                                    p_name=xml_state.get('name'),
+                                    p_name=util.denormalize_xml_string(xml_state.get('name')),
                                     p_alias=xml_state.get('alias'),
                                     p_type=xml_state.get('type'))
             state_list.add(state)
@@ -300,7 +300,7 @@ class XmlParser3SE:
         for xml_transition in xml_transition_list:
             # Instantiate transitions and add them to a list
             transition = datamodel.Transition(p_id=xml_transition.get('id'),
-                                              p_name=xml_transition.get('name'),
+                                              p_name=util.denormalize_xml_string(xml_transition.get('name')),
                                               p_alias=xml_transition.get('alias'),
                                               p_type=xml_transition.get('type'),
                                               p_source=xml_transition.get('source'),
@@ -335,13 +335,13 @@ class XmlParser3SE:
             # Instantiate functional element and add them to a list
             if len(xml_func_elem.get('derived')) > 0:
                 fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
-                                                       p_name=xml_func_elem.get('name'),
+                                                       p_name=util.denormalize_xml_string(xml_func_elem.get('name')),
                                                        p_alias=xml_func_elem.get('alias'),
                                                        p_type=xml_func_elem.get('type'),
                                                        p_derived=xml_func_elem.get('derived'))
             else:
                 fun_elem = datamodel.FunctionalElement(p_id=xml_func_elem.get('id'),
-                                                       p_name=xml_func_elem.get('name'),
+                                                       p_name=util.denormalize_xml_string(xml_func_elem.get('name')),
                                                        p_alias=xml_func_elem.get('alias'),
                                                        p_type=xml_func_elem.get('type'))
             functional_element_list.add(fun_elem)
@@ -401,7 +401,7 @@ class XmlParser3SE:
         for xml_view in xml_view_list:
             # Instantiate view and add them to a list
             view = datamodel.View(uid=xml_view.get('id'),
-                                  name=xml_view.get('name'),
+                                  name=util.denormalize_xml_string(xml_view.get('name')),
                                   v_type=xml_view.get('type'))
 
             view_list.add(view)
@@ -425,7 +425,7 @@ class XmlParser3SE:
         for xml_attribute in xml_attribute_list:
             # Instantiate Attribute and add them to a list
             attribute = datamodel.Attribute(p_id=xml_attribute.get('id'),
-                                            p_name=xml_attribute.get('name'),
+                                            p_name=util.denormalize_xml_string(xml_attribute.get('name')),
                                             p_alias=xml_attribute.get('alias'),
                                             p_type=xml_attribute.get('type'))
 
@@ -462,13 +462,13 @@ class XmlParser3SE:
             # Instantiate fun_inter and add them to a list
             if len(xml_fun_inter.get('derived')) > 0:
                 fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
-                                                          p_name=xml_fun_inter.get('name'),
+                                                          p_name=util.denormalize_xml_string(xml_fun_inter.get('name')),
                                                           p_alias=xml_fun_inter.get('alias'),
                                                           p_type=xml_fun_inter.get('type'),
                                                           p_derived=xml_fun_inter.get('derived'))
             else:
                 fun_inter = datamodel.FunctionalInterface(p_id=xml_fun_inter.get('id'),
-                                                          p_name=xml_fun_inter.get('name'),
+                                                          p_name=util.denormalize_xml_string(xml_fun_inter.get('name')),
                                                           p_alias=xml_fun_inter.get('alias'),
                                                           p_type=xml_fun_inter.get('type'))
 
@@ -507,13 +507,13 @@ class XmlParser3SE:
             # Instantiate functional element and add them to a list
             if len(xml_phy_elem.get('derived')) > 0:
                 phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
-                                                     p_name=xml_phy_elem.get('name'),
+                                                     p_name=util.denormalize_xml_string(xml_phy_elem.get('name')),
                                                      p_alias=xml_phy_elem.get('alias'),
                                                      p_type=xml_phy_elem.get('type'),
                                                      p_derived=xml_phy_elem.get('derived'))
             else:
                 phy_elem = datamodel.PhysicalElement(p_id=xml_phy_elem.get('id'),
-                                                     p_name=xml_phy_elem.get('name'),
+                                                     p_name=util.denormalize_xml_string(xml_phy_elem.get('name')),
                                                      p_alias=xml_phy_elem.get('alias'),
                                                      p_type=xml_phy_elem.get('type'))
 
@@ -567,13 +567,13 @@ class XmlParser3SE:
             # Instantiate phy_inter and add them to a list
             if len(xml_phy_inter.get('derived')) > 0:
                 phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
-                                                        p_name=xml_phy_inter.get('name'),
+                                                        p_name=util.denormalize_xml_string(xml_phy_inter.get('name')),
                                                         p_alias=xml_phy_inter.get('alias'),
                                                         p_type=xml_phy_inter.get('type'),
                                                         p_derived=xml_phy_inter.get('derived'))
             else:
                 phy_inter = datamodel.PhysicalInterface(p_id=xml_phy_inter.get('id'),
-                                                        p_name=xml_phy_inter.get('name'),
+                                                        p_name=util.denormalize_xml_string(xml_phy_inter.get('name')),
                                                         p_alias=xml_phy_inter.get('alias'),
                                                         p_type=xml_phy_inter.get('type'))
 
@@ -610,7 +610,7 @@ class XmlParser3SE:
         for xml_type in xml_type_list:
             # Instantiate Type and add them to a list
             type_obj = datamodel.Type(p_id=xml_type.get('id'),
-                                      p_name=xml_type.get('name'),
+                                      p_name=util.denormalize_xml_string(xml_type.get('name')),
                                       p_alias=xml_type.get('alias'),
                                       p_base=xml_type.get('base'))
             type_list.add(type_obj)
@@ -669,7 +669,7 @@ class XmlParser3SE:
         for xml_requirement in xml_requirement_list:
             # Instantiate Attribute and add them to a list
             requirement = datamodel.Requirement(p_id=xml_requirement.get('id'),
-                                                p_name=xml_requirement.get('name'),
+                                                p_name=util.denormalize_xml_string(xml_requirement.get('name')),
                                                 p_alias=xml_requirement.get('alias'),
                                                 p_type=xml_requirement.get('type'))
 

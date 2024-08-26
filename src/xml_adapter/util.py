@@ -26,4 +26,9 @@ XML_DICT_KEY_13_FUN_PROD_LIST = 'xml_producer_function_list'
 
 # Functions
 def normalize_xml_string(p_str):
-    return str(p_str).replace("&", "&amp").replace("<", "&lt").replace(">", "&gt").replace("'", "&apos")
+    # Using XML character encoding rather than escape string
+    return str(p_str).replace("&", "#38;").replace("'", "#39;").replace("<", "#60;").replace(">", "#62;")
+
+
+def denormalize_xml_string(p_str):
+    return str(p_str).replace("#38;", "&").replace("#39;", "'").replace("#60;", "<").replace("#62;", ">")
