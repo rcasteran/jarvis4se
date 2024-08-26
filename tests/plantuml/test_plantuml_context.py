@@ -206,7 +206,7 @@ def test_fun_elem_with_interfaces_plantuml_context(mocker, input_test_fun_elem_w
                 'circle f1_o\n',
                 'f1 --> f1_o  : C\n'
                 'f2 #--> f1 : B\n',
-                'fun_elem_1', ' -- ', 'fun_elem_2 ', ': fun_inter_1\n']
+                'fun_elem_1', ' -- ', 'fun_elem_2 ', ': Fun_inter_1\n']
 
     test_lib.remove_xml_file(file_name)
 

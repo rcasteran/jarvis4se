@@ -28,22 +28,29 @@ def check_add_type_extension(extends_str_list, **kwargs):
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
+    update = 0
     xml_type_list = kwargs[XML_DICT_KEY_11_TYPE_LIST]
     output_xml = kwargs['output_xml']
-
     new_type_list = []
-    # Capitalize the reference type for datamodel matching
+
+    # elem = [type_extension_name, type_to_extend_name]
     for elem in extends_str_list:
-        if any(t == elem[0] for t in query_object.query_object_name_in_list(xml_type_list)):
-            # print(f"{elem[0]} already exists")
+        type_extension_name = elem[0].replace('"', "")
+        type_to_extend_name = elem[1].replace('"', "")
+
+        if any(t == type_extension_name for t in query_object.query_object_name_in_list(xml_type_list)):
+            Logger.set_info(__name__,
+                            f'"{type_extension_name}" already exists')
             continue
-        type_to_extend = check_get_type_to_extend(elem[1], xml_type_list)
+
+        type_to_extend = check_get_type_to_extend(type_to_extend_name, xml_type_list)
         if not type_to_extend:
             Logger.set_error(__name__,
-                             f"Unable to find referenced type '{elem[1]}'")
+                             f'Unable to find referenced type "{type_to_extend_name}"')
             continue
+
         new_type = datamodel.Type()
-        new_type.set_name(elem[0])
+        new_type.set_name(type_extension_name)
         # Generate and set unique identifier of length 10 integers
         new_type.set_id(util.get_unique_id())
 
@@ -52,20 +59,21 @@ def check_add_type_extension(extends_str_list, **kwargs):
         new_type_list.append(new_type)
         xml_type_list.add(new_type)
 
-    if not new_type_list:
-        return 0
+    if new_type_list:
+        output_xml.write_type_element(new_type_list)
+        for obj_type in new_type_list:
+            if isinstance(obj_type.base, datamodel.Type):
+                base_type = obj_type.base.name
+            else:
+                base_type = obj_type.base
 
-    output_xml.write_type_element(new_type_list)
-    for obj_type in new_type_list:
-        if isinstance(obj_type.base, datamodel.Type):
-            base_type = obj_type.base.name
-        else:
-            base_type = obj_type.base
+            Logger.set_info(__name__,
+                            f"{obj_type.name} is a type extending {str(base_type)}")
 
-        Logger.set_info(__name__,
-                        f"{obj_type.name} is a type extending {str(base_type)}")
+        update = 1
+    # Else do nothing
 
-    return 1
+    return update
 
 
 def check_get_type_to_extend(type_str, xml_type_list):

@@ -30,13 +30,13 @@ def cut_tuple_list(string_tuple_list):
         if "," in child:
             child_list_str = cut_string(child)
             for elem in child_list_str:
-                output_list.append((parent, elem))
+                output_list.append((parent.replace('"', ""), elem))
         elif "," in parent:
             parent_list_str = cut_string(parent)
             for elem in parent_list_str:
-                output_list.append((elem, child))
+                output_list.append((elem, child.replace('"', "")))
         else:
-            output_list.append((parent, child))
+            output_list.append((parent.replace('"', ""), child.replace('"', "")))
 
     Logger.set_debug(__name__, f'Output: {output_list}')
 
@@ -75,7 +75,7 @@ def cut_chain_from_string_list(input_string_list):
             for split_string in cut_string(input_string):
                 output_list.append(split_string)
         else:
-            output_list.append(input_string)
+            output_list.append(input_string.replace('"', ""))
 
     return output_list
 
@@ -89,7 +89,29 @@ def cut_string(input_string):
     @param[in] input_string : input string
     @return list of strings
     """
-    split_string = re.split(r',(?![^[]*\])', input_string)
+    split_string = []
+    current_string = ''
+    is_noun = False
+    for _, character in enumerate(input_string):
+        if character == '"':
+            if is_noun:
+                split_string.append(current_string)
+                current_string = ''
+            # Else do nothing
+
+            is_noun = not is_noun
+        elif character == ',':
+            if is_noun:
+                current_string = current_string + character
+            else:
+                split_string.append(current_string)
+                current_string = ''
+        else:
+            current_string = current_string + character
+    
+    if current_string:
+        split_string.append(current_string)
+    # Else do nothing
 
     i = 0
     for elem in split_string.copy():

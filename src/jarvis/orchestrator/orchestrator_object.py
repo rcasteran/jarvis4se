@@ -108,18 +108,22 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     object_instance_per_base_type_list = [ObjectInstanceList(idx) for idx in
                                           range(ObjectInstanceList.nb_object_instance_base_type)]
 
+    # elem = [object_name, object_type]
     for elem in obj_type_str_list:
+        object_name = elem[0].replace('"', "")
+        object_type = elem[1].replace('"', "")
+
         if "?" not in elem[1]:
-            specific_type, base_type = retrieve_type(elem[1], **kwargs)
-            existing_object = query_object.query_object_by_name(elem[0], **kwargs)
+            specific_type, base_type = retrieve_type(object_type, **kwargs)
+            existing_object = query_object.query_object_by_name(object_name, **kwargs)
 
             if existing_object:
                 if isinstance(existing_object.type, datamodel.BaseType):
-                    Logger.set_info(__name__, f"{existing_object.type} with the name {elem[0]} already exists")
+                    Logger.set_info(__name__, f"{existing_object.type} with the name {object_name} already exists")
                 else:
-                    Logger.set_info(__name__, f"{existing_object.type.name} with the name {elem[0]} already exists")
+                    Logger.set_info(__name__, f"{existing_object.type.name} with the name {object_name} already exists")
             elif base_type is not None:
-                new_object = ObjectInstance(elem[0], base_type, specific_type, **kwargs)
+                new_object = ObjectInstance(object_name, base_type, specific_type, **kwargs)
                 if isinstance(new_object.get_instance().type, datamodel.BaseType):
                     Logger.set_info(__name__,
                                     f"{new_object.get_instance().name} is a {str(new_object.get_instance().type)}")

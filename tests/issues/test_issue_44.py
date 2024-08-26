@@ -39,7 +39,7 @@ def test_issue_44_plantuml_context(mocker, input_test_issue_44):
                 'component "E1" as e1 <<Functional element>>{\n',
                 'object "F1" as f1 <<Function>>\n',
                 '}\n',
-                'e1', ' -- ', 'e ', ': i_e_e1\n']
+                'e1', ' -- ', 'e ', ': I_E_E1\n']
 
     test_lib.remove_xml_file(file_name)
 

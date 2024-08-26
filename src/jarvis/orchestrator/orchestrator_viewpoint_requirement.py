@@ -39,30 +39,37 @@ def check_add_requirement(p_str_list, **kwargs):
     @anchor check_add_requirement
     Check list of requirement declarations before adding them to jarvis data structure
 
-    @param[in] p_str_list : list of requirements declaration
+    @param[in] p_str_list : list of requirement declarations
     @param[in] kwargs : jarvis data structure
     @return jarvis data structure updated (1) or not (0)
     """
     requirement_list = []
 
     for p_str in p_str_list:
-        if not p_str[0].startswith("The description of "):
-            req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(p_str[0], p_str[1])
+        desc_before_modal = p_str[0].replace('"', "")
+        desc_after_modal = p_str[1].replace('"', "")
+
+        if not desc_before_modal.startswith("The description of "):
+            req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(desc_before_modal,
+                                                                                        desc_after_modal)
 
             # Retrieve the subject in object list
-            req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
+            req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject,
+                                                                                p_is_subject=True,
+                                                                                **kwargs)
 
             if not is_error:
                 req_subject_object = None
                 for obj in req_subject_object_list:
                     if obj:
                         req_subject_object = obj
+                    # Else do nothing
 
                 if req_subject_object:
                     Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
-                                              f"{p_str[0]} shall {p_str[1]}")
+                                              f"{desc_before_modal} shall {desc_after_modal}")
                 else:
-                    Logger.set_info(__name__, f"Requirement identified: {p_str[0]} shall {p_str[1]}")
+                    Logger.set_info(__name__, f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
                     Logger.set_warning(__name__,
                                        f'Subject "{req_subject}" of the requirement is unknown')
 
@@ -95,8 +102,8 @@ def check_add_requirement(p_str_list, **kwargs):
                                                      f"{existing_object.type} with the name "
                                                      f"{answer} already exists")
                                 else:
-                                    requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                             existing_object, req_subject_object,
+                                    requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
+                                                             req_subject_object,
                                                              req_allocated_object_list])
                             else:
                                 if str(existing_object.type.name) != "Requirement":
@@ -104,11 +111,11 @@ def check_add_requirement(p_str_list, **kwargs):
                                                      f"{existing_object.type.name} with the name "
                                                      f"{answer} already exists")
                                 else:
-                                    requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}",
-                                                             existing_object, req_subject_object,
+                                    requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
+                                                             req_subject_object,
                                                              req_allocated_object_list])
                         else:
-                            requirement_list.append([answer, f"{p_str[0]} shall {p_str[1]}", None,
+                            requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
                                                      req_subject_object, req_allocated_object_list])
                     else:
                         Logger.set_error(__name__, "No name entered for identified requirement")
@@ -129,7 +136,10 @@ def check_add_description(p_description_str_list, **kwargs):
 
     # Create a list with all transition names/aliases already in the xml
     xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
-    for requirement_str, description_str in p_description_str_list:
+    for elem in p_description_str_list:
+        requirement_str = elem[0].replace('"', "")
+        description_str = elem[1].replace('"', "")
+
         if 'shall' in description_str:
             if any(requirement_str in s for s in xml_requirement_name_list):
                 for requirement in xml_requirement_list:
@@ -138,7 +148,8 @@ def check_add_description(p_description_str_list, **kwargs):
                             detect_req_pattern(description_str.lstrip(' '))
 
                         # Retrieve the subject in object list
-                        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject, p_is_subject=True,
+                        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject,
+                                                                                            p_is_subject=True,
                                                                                             **kwargs)
 
                         if not is_error:
@@ -381,14 +392,14 @@ def add_requirement(p_requirement_list, **kwargs):
             new_requirement_list.append(new_requirement)
 
             # Test if allocated object is identified in the requirement subject
-            if requirement_item[3]:
-                requirement_item[3].add_allocated_requirement(new_requirement.id)
-                new_allocation_list.append([requirement_item[3], new_requirement])
+            if requirement_item[2]:
+                requirement_item[2].add_allocated_requirement(new_requirement.id)
+                new_allocation_list.append([requirement_item[2], new_requirement])
             # Else do nothing
 
             # Test if allocated object is identified in the requirement object or conditional part or temporal part
-            if requirement_item[4]:
-                for item in requirement_item[4]:
+            if requirement_item[3]:
+                for item in requirement_item[3]:
                     if item:
                         item.add_allocated_requirement(new_requirement.id)
                         new_allocation_list.append([item, new_requirement])
@@ -399,6 +410,7 @@ def add_requirement(p_requirement_list, **kwargs):
         output_xml.write_requirement(new_requirement_list)
         if new_allocation_list:
             output_xml.write_object_allocation(new_allocation_list)
+        # Else do nothing
 
         for requirement in new_requirement_list:
             xml_requirement_list.add(requirement)
@@ -420,6 +432,7 @@ def add_requirement(p_requirement_list, **kwargs):
             # Else do nothing
 
         update = 1
+    # Else do nothing
 
     return update
 
@@ -483,18 +496,20 @@ def check_add_allocation(p_str_list, **kwargs):
     allocation_list = []
     cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_allocation_str_list:
-        alloc_obj = query_object.query_object_by_name(elem[0],
-                                                      **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                     XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
-                                                     XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                     XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
-                                                     XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                     XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                     XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                     XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                     })
+        alloc_obj = query_object.query_object_by_name(elem[0], **{
+            XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+            XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+            XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+            XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+            XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+            XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST]
+        })
 
-        req_obj = query_object.query_object_by_name(elem[1], **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
+        req_obj = query_object.query_object_by_name(elem[1], **{
+            XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
+        })
 
         if not alloc_obj:
             Logger.set_error(__name__, f"Object {elem[0]} not found or cannot satisfy a requirement, "
@@ -614,11 +629,13 @@ def check_add_derived(p_str_list, **kwargs):
     derived_list = []
     cleaned_derived_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_derived_str_list:
-        derived_req_obj = query_object.query_object_by_name(elem[0],
-                                                            **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
+        derived_req_obj = query_object.query_object_by_name(elem[0], **{
+            XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
+        })
 
-        parent_req_obj = query_object.query_object_by_name(elem[1],
-                                                           **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]})
+        parent_req_obj = query_object.query_object_by_name(elem[1], **{
+            XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
+        })
 
         if not derived_req_obj:
             Logger.set_error(__name__, f"Requirement {elem[0]} not found")

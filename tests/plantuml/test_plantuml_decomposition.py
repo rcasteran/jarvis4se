@@ -204,7 +204,7 @@ def test_fun_elem_with_interfaces_plantuml_decomposition(mocker, input_test_fun_
                 '}\n',
                 'f_ext #--> f1c1 : B\n',
                 'f1b #--> f_ext : C\n',
-                'e1b', ' -- ', 'e1c1 ', ': fun_inter_a\n']
+                'e1b', ' -- ', 'e1c1 ', ': Fun_inter_A\n']
 
     test_lib.remove_xml_file(file_name)
 

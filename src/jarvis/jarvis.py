@@ -35,8 +35,6 @@ class MagicJarvis(Magics):
         sio = StringIO(cell)
         # Take the value within the buffer
         input_str = sio.getvalue()
-        # Delete the '"' from input string, to avoid xml to plantuml errors.
-        input_str = input_str.replace('"', "")
         # Delete extra whitespaces
         input_str = re.sub(' +', ' ', input_str)
         # Get model's declaration, need a space after "with" otherwise print a message

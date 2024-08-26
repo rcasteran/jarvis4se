@@ -157,32 +157,36 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
     xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
     xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
     # Loop to filter consumer and create a new list
+    # elem = [data_name, consumer_function_name]
     for elem in consumer_str_list:
+        data_name = elem[0].replace('"', "")
+        consumer_function_name = elem[1].replace('"', "")
+
         is_elem_found = True
-        if not any(item == elem[1] for item in xml_function_name_list) and \
-                not any(item == elem[0] for item in xml_data_name_list):
+        if not any(item == consumer_function_name for item in xml_function_name_list) and \
+                not any(item == data_name for item in xml_data_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                             f"{elem[1]} and {elem[0]} do not exist")
-        elif not any(item == elem[1] for item in xml_function_name_list) or \
-                not any(item == elem[0] for item in xml_data_name_list):
+                             f"{consumer_function_name} and {data_name} do not exist")
+        elif not any(item == consumer_function_name for item in xml_function_name_list) or \
+                not any(item == data_name for item in xml_data_name_list):
             is_elem_found = False
-            if any(item == elem[1] for item in xml_function_name_list) and \
-                    not any(item == elem[0] for item in xml_data_name_list):
+            if any(item == consumer_function_name for item in xml_function_name_list) and \
+                    not any(item == data_name for item in xml_data_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[0]} does not exist")
-            elif any(item == elem[0] for item in xml_data_name_list) and \
-                    not any(item == elem[1] for item in xml_function_name_list):
+                                 f"{data_name} does not exist")
+            elif any(item == data_name for item in xml_data_name_list) and \
+                    not any(item == consumer_function_name for item in xml_function_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[1]} does not exist")
+                                 f"{consumer_function_name} does not exist")
 
         if is_elem_found:
-            Logger.set_debug(__name__, f"[{elem[0]}, {elem[1]}] check")
+            Logger.set_debug(__name__, f"[{data_name}, {consumer_function_name}] check")
             # Loop to filter consumer and create a new list
             for function in xml_function_list:
-                if elem[1] == function.name or elem[1] == function.alias:
+                if consumer_function_name == function.name or consumer_function_name == function.alias:
                     for data in xml_data_list:
-                        if elem[0] == data.name:
+                        if data_name == data.name:
                             if [data, function] not in xml_consumer_function_list:
                                 add_producer_consumer_flow_recursively(data,
                                                                        function,
@@ -391,32 +395,36 @@ def check_add_producer_function(producer_str_list, **kwargs):
     xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
     xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
     # Loop to filter producer and create a new list
+    # elem = [data_name, producer_function_name]
     for elem in producer_str_list:
+        data_name = elem[0].replace('"', "")
+        producer_function_name = elem[1].replace('"', "")
+
         is_elem_found = True
-        if not any(item == elem[1] for item in xml_function_name_list) and \
-                not any(item == elem[0] for item in xml_data_name_list):
+        if not any(item == producer_function_name for item in xml_function_name_list) and \
+                not any(item == data_name for item in xml_data_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                             f"{elem[1]} and {elem[0]} do not exist")
-        elif not any(item == elem[1] for item in xml_function_name_list) or \
-                not any(item == elem[0] for item in xml_data_name_list):
+                             f"{producer_function_name} and {data_name} do not exist")
+        elif not any(item == producer_function_name for item in xml_function_name_list) or \
+                not any(item == data_name for item in xml_data_name_list):
             is_elem_found = False
-            if any(item == elem[1] for item in xml_function_name_list) and \
-                    not any(item == elem[0] for item in xml_data_name_list):
+            if any(item == producer_function_name for item in xml_function_name_list) and \
+                    not any(item == data_name for item in xml_data_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[0]} does not exist")
-            elif any(item == elem[0] for item in xml_data_name_list) and \
-                    not any(item == elem[1] for item in xml_function_name_list):
+                                 f"{data_name} does not exist")
+            elif any(item == data_name for item in xml_data_name_list) and \
+                    not any(item == producer_function_name for item in xml_function_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[1]} does not exist")
+                                 f"{producer_function_name} does not exist")
 
         if is_elem_found:
-            Logger.set_debug(__name__, f"[{elem[0]}, {elem[1]}] check")
+            Logger.set_debug(__name__, f"[{data_name}, {elem[1]}] check")
             # Loop to filter consumer and create a new list
             for function in xml_function_list:
-                if elem[1] == function.name or elem[1] == function.alias:
+                if producer_function_name == function.name or producer_function_name == function.alias:
                     for data in xml_data_list:
-                        if elem[0] == data.name:
+                        if data_name == data.name:
                             if [data, function] not in xml_producer_function_list:
                                 add_producer_consumer_flow_recursively(data,
                                                                        function,
@@ -485,22 +493,26 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
 
     # Create a list with all transition names/aliases already in the xml
     xml_transition_name_list = query_object.query_object_name_in_list(xml_transition_list)
-    for transition_str, condition_str in trans_condition_str_list:
+    # elem = [transition_name, condition_str]
+    for elem in trans_condition_str_list:
+        transition_name = elem[0].replace('"', "")
+        condition_str = elem[1].replace('"', "")
+
         is_elem_found = True
-        if not any(transition_str in s for s in xml_transition_name_list):
+        if not any(transition_name in s for s in xml_transition_name_list):
             is_elem_found = False
             Logger.set_error(__name__,
-                             f"The transition {transition_str} does not exist")
+                             f"The transition {transition_name} does not exist")
 
         if is_elem_found:
             for transition in xml_transition_list:
-                if transition_str == transition.name or transition_str == transition.alias:
+                if transition_name == transition.name or transition_name == transition.alias:
                     if not condition_str.lstrip(' ') in transition.condition_list:
                         condition_list.append([transition, condition_str.lstrip(' ')])
                     else:
                         Logger.set_info(__name__,
                                         f'Condition "{condition_str.lstrip(" ")}" already exists '
-                                        f'for transition {transition_str}')
+                                        f'for transition {transition_name}')
 
     check_condition_list_requirement(condition_list, **kwargs)
     update = add_transition_condition(condition_list, **kwargs)
@@ -588,67 +600,73 @@ def check_add_src_dest(src_dest_str, **kwargs):
 
     # elem = [source/destination, transition_name, state_name]
     for elem in src_dest_str:
+        transition_name = elem[1].replace('"', "")
+        state_name = elem[2].replace('"', "")
+
         is_elem_found = True
-        if not all(t in concatenated_lists for t in [elem[1], elem[2]]):
+        if not all(t in concatenated_lists for t in [transition_name, state_name]):
             is_elem_found = False
-            if any(elem[1] in s for s in xml_transition_name_list) and not any(
-                    elem[2] in j for j in xml_state_name_list):
+            if any(transition_name in s for s in xml_transition_name_list) and not any(
+                    state_name in j for j in xml_state_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[2]} state does not exist")
-            elif any(elem[2] in s for s in xml_state_name_list) and not any(
-                    elem[1] in j for j in xml_transition_name_list):
+                                 f"{state_name} state does not exist")
+            elif any(state_name in s for s in xml_state_name_list) and not any(
+                    transition_name in j for j in xml_transition_name_list):
                 Logger.set_error(__name__,
-                                 f"{elem[1]} transition does not exist")
+                                 f"{transition_name} transition does not exist")
             else:
                 Logger.set_error(__name__,
-                                 f"{elem[1]} transition and {elem[2]} state do not exist")
+                                 f"{transition_name} transition and {state_name} state do not exist")
 
         if is_elem_found:
             if elem[0] == "source":
                 for transition in xml_transition_list:
-                    if elem[1] == transition.name or elem[1] == transition.alias:
+                    if transition_name == transition.name or transition_name == transition.alias:
                         for state in xml_state_list:
-                            if elem[2] == state.name or elem[2] == state.alias:
+                            if state_name == state.name or state_name == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
                                     if datamodel.ExitStateLabel in state.type.name.lower():
                                         Logger.set_error(__name__,
-                                                         f"{elem[2]} is typed as EXIT state, "
+                                                         f"{state_name} is typed as EXIT state, "
                                                          f"it cannot be put as source's transition (not added)")
                                     elif datamodel.EntryStateLabel in state.type.name.lower():
                                         new_src_list.append([transition, state])
                                     else:
                                         Logger.set_error(__name__,
-                                                         f"{elem[2]} is not typed as state, "
+                                                         f"{state_name} is not typed as state, "
                                                          f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.source != state.id:
                                         new_src_list.append([transition, state])
                                     else:
                                         Logger.set_info(__name__,
-                                                        f'{elem[2]} already the source of transition {elem[1]}')
+                                                        f'{state_name} already the source of transition '
+                                                        f'{transition_name}')
 
             elif elem[0] == "destination":
                 for transition in xml_transition_list:
-                    if elem[1] == transition.name or elem[1] == transition.alias:
+                    if transition_name == transition.name or transition_name == transition.alias:
                         for state in xml_state_list:
-                            if elem[2] == state.name or elem[2] == state.alias:
+                            if state_name == state.name or state_name == state.alias:
                                 if not isinstance(state.type, datamodel.BaseType):
                                     if datamodel.EntryStateLabel in state.type.name.lower():
                                         Logger.set_error(__name__,
-                                                         f"{elem[2]} is typed as ENTRY state, it cannot be "
+                                                         f"{state_name} is typed as ENTRY state, it cannot be "
                                                          f"put as destination's transition (not added)")
                                     elif datamodel.ExitStateLabel in state.type.name.lower():
                                         new_dest_list.append([transition, state])
                                     else:
                                         Logger.set_error(__name__,
-                                                         f"{elem[2]} is not typed as state, "
+                                                         f"{state_name} is not typed as state, "
                                                          f"it cannot be put as source's transition (not added)")
                                 else:
                                     if transition.destination != state.id:
                                         new_dest_list.append([transition, state])
                                     else:
                                         Logger.set_info(__name__,
-                                                        f'{elem[2]} already the destination of transition {elem[1]}')
+                                                        f'{state_name} already the destination of transition '
+                                                        f'{transition_name}')
+            # Else do nothing
 
     src_dest_lists = [new_src_list, new_dest_list]
     update = add_src_dest(src_dest_lists, output_xml)
@@ -713,12 +731,18 @@ def check_add_exposes(exposes_str_list, **kwargs):
 
     output = False
     cleaned_exposes_str_list = util.cut_tuple_list(exposes_str_list)
-    for exposes_str in cleaned_exposes_str_list:
-        fun_elem = query_object.query_object_by_name(exposes_str[0], **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
-        fun_inter = query_object.query_object_by_name(exposes_str[1], **{XML_DICT_KEY_3_FUN_INTF_LIST: xml_fun_inter_list})
+    # elem = [fun_elem_name, fun_intf_name]
+    for elem in cleaned_exposes_str_list:
+        fun_elem_name = elem[0].replace('"', "")
+        fun_intf_name = elem[1].replace('"', "")
 
-        check_print_wrong_pair_object((exposes_str[0], fun_elem, 'Functional Element'),
-                                      (exposes_str[1], fun_inter, 'Functional Interface'),
+        fun_elem = query_object.query_object_by_name(fun_elem_name,
+                                                     **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
+        fun_inter = query_object.query_object_by_name(fun_intf_name,
+                                                      **{XML_DICT_KEY_3_FUN_INTF_LIST: xml_fun_inter_list})
+
+        check_print_wrong_pair_object((fun_elem_name, fun_elem, 'Functional Element'),
+                                      (fun_intf_name, fun_inter, 'Functional Interface'),
                                       'exposes')
         if fun_elem and fun_inter:
             check_rule = check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list)

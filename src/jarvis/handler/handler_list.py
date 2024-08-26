@@ -22,14 +22,18 @@ def list_object(p_str_list, **kwargs):
         answer_list: [Input_list, Output_list, Child_list, Data_list]
     """
     answer_list = []
+    # elem = [type_name, object_name]
     for elem in p_str_list:
-        wanted_object = query_object.query_object_by_name(elem[1], **kwargs)
+        type_name = elem[0].replace('"', "")
+        object_name = elem[1].replace('"', "")
+
+        wanted_object = query_object.query_object_by_name(object_name, **kwargs)
         if wanted_object is None:
             Logger.set_error(__name__,
-                             f"Object '{elem[1]}' does not exist")
+                             f"Object '{object_name}' does not exist")
         else:
             object_type = question_answer.get_object_type(wanted_object)
-            wanted_list = switch_object_list(elem[0], wanted_object, object_type, **kwargs)
+            wanted_list = switch_object_list(type_name, wanted_object, object_type, **kwargs)
             if wanted_list:
                 answer_list.append(wanted_list)
             # Else do nothing
@@ -42,11 +46,11 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
     object_list = {}
     if object_type in ("state", "function", "Functional element"):
         if object_type == "state" and type_list_str in ("input", "output"):
-            report_no_list_available(wanted_object, object_type, **kwargs)
+            report_no_list_available(wanted_object, object_type)
         elif object_type != "state" and type_list_str in ("function", "transition"):
-            report_no_list_available(wanted_object, object_type, **kwargs)
+            report_no_list_available(wanted_object, object_type)
         elif object_type != "Functional element" and type_list_str == "interface":
-            report_no_list_available(wanted_object, object_type, **kwargs)
+            report_no_list_available(wanted_object, object_type)
         else:
             switch_type_list = {
                 "input": get_input_list,
@@ -64,7 +68,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
                     Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
                 # Else do nothing
             else:
-                report_no_list_available(wanted_object, object_type, **kwargs)
+                report_no_list_available(wanted_object, object_type)
     elif object_type == "Functional interface" and type_list_str == "data":
         object_list = question_answer.get_fun_intf_data(wanted_object, object_type, **kwargs)
 
@@ -72,7 +76,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     else:
-        report_no_list_available(wanted_object, object_type, **kwargs)
+        report_no_list_available(wanted_object, object_type)
 
     return object_list
 
@@ -235,7 +239,7 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
     return interface_dict
 
 
-def report_no_list_available(wanted_object, object_type, _):
+def report_no_list_available(wanted_object, object_type):
     """Case when there is incompatible list's type with object's type """
     Logger.set_error(__name__, f"No list available for object '{wanted_object.name}' "
                                f"of type '{object_type.capitalize()}', possible lists are:\n"

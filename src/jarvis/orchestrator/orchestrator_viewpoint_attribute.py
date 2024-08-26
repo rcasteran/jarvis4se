@@ -36,8 +36,9 @@ def add_attribute(attribute_str_list, **kwargs):
     new_attribute_list = []
     # Create attribute names list already in xml
     xml_attribute_name_list = query_object.query_object_name_in_list(xml_attribute_list)
-    # Filter attribute_list, keeping only the the ones not already in the xml
-    for attribute_name in attribute_str_list:
+    # Filter attribute_list, keeping only the ones not already in the xml
+    for elem in attribute_str_list:
+        attribute_name = elem.replace('"', "")
         if attribute_name not in xml_attribute_name_list:
             new_attribute = datamodel.Attribute()
             new_attribute.set_name(str(attribute_name))
@@ -72,9 +73,15 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
             update ([0/1]) : 1 if update, else 0
     """
     new_described_attribute_list = []
+
+    # elem = [attribute_name, object_name, attribute_value]
     for elem in described_attribute_list:
+        attribute_name = elem[0].replace('"', "")
+        object_name = elem[1].replace('"', "")
+        attribute_value = elem[2].replace('"', "")
+
         obj_to_set = query_object.query_object_by_name(
-            elem[1],
+            object_name,
             **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
                XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
@@ -84,31 +91,32 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
                XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
                })
         attribute_wanted = query_object.query_object_by_name(
-            elem[0],
+            attribute_name,
             **{XML_DICT_KEY_9_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                })
         if obj_to_set is None or attribute_wanted is None:
-            print(f"{elem[0]:s} do not exist and {elem[1]:s} neither or {elem[1]:s} is not a:\n"
-                  "- Function\n"
-                  "- Data\n"
-                  "- Transition\n"
-                  "- Functional element\n"
-                  "- Functional interface\n"
-                  "- Physical element\n"
-                  "- Physical interface\n")
+            Logger.set_warning(__name__,
+                               f"{attribute_name} do not exist and {object_name} neither or {object_name} is not a:\n"
+                               "- Function\n"
+                               "- Data\n"
+                               "- Transition\n"
+                               "- Functional element\n"
+                               "- Functional interface\n"
+                               "- Physical element\n"
+                               "- Physical interface\n")
         else:
             is_specified = False
             for described_item in attribute_wanted.described_item_list:
                 if described_item[0] == obj_to_set.id:
                     is_specified = True
-                    if described_item[1] != str(elem[2]):
+                    if described_item[1] != attribute_value:
                         Logger.set_warning(__name__,
                                            f"Attribute {attribute_wanted.name} already specified for {obj_to_set.name} "
                                            f"with value {described_item[1]}")
                     # Else do nothing, attribute already set to this value
 
             if not is_specified:
-                new_described_attribute_list.append([attribute_wanted, (obj_to_set, str(elem[2]))])
+                new_described_attribute_list.append([attribute_wanted, (obj_to_set, attribute_value)])
 
     update = add_object_attribute(new_described_attribute_list, **kwargs)
 

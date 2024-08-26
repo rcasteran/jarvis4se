@@ -167,7 +167,7 @@ class CmdParser:
     def matched_simulate(self, simulation_str_list, **kwargs):
         if Config.is_open_modelica:
             if len(simulation_str_list[0]) == 3:
-                wanted_simulation_str = simulation_str_list[0][0].strip()
+                wanted_simulation_str = simulation_str_list[0][0].replace('"', "").strip()
                 regex = r"(state|function)\s(.*)"
                 specific_simulation_str = re.search(regex, wanted_simulation_str, re.MULTILINE)
 
@@ -213,7 +213,7 @@ class CmdParser:
 
     def matched_plot(self, plot_name_str, **kwargs):
         if Config.is_open_modelica:
-            self.simulator.plot(plot_name_str)
+            self.simulator.plot(plot_name_str.replace('"', "").strip())
         else:
             Logger.set_error(__name__,
                              "Open modelica simulation is not activated")
@@ -230,6 +230,7 @@ class CmdParser:
         """
         for regex, method in self.question_list:
             for elem in p_str_list:
+                elem = elem.replace('"', "").strip()
                 result = re.findall(regex, elem, flags=re.MULTILINE | re.IGNORECASE)
                 if result:
                     answer = method(result, **kwargs)
@@ -269,9 +270,9 @@ class CmdParser:
         update = 0
 
         if '(' in str(p_str_list):
-            csv_name = p_str_list[0][0]
+            csv_name = p_str_list[0][0].replace('"', "").strip()
         else:
-            csv_name = p_str_list[0]
+            csv_name = p_str_list[0].replace('"', "").strip()
 
         if os.path.isfile(f"{csv_name}.csv"):
             csv_parser = CsvParser3SE()
@@ -300,7 +301,7 @@ class CmdParser:
         @param[in] kwargs : jarvis data structure
         @return None (no xml update, no info displayed)
         """
-        csv_name = p_str_list[0]
+        csv_name = p_str_list[0].replace('"', "").strip()
         csv_writer = CsvWriter3SE(f"{csv_name}.csv")
         csv_writer.write_file(**kwargs)
 
@@ -318,7 +319,7 @@ class CmdParser:
         """
         update = 0
 
-        if p_str_list[0] == "requirements":
+        if p_str_list[0].replace('"', "").strip() == "requirements":
             update = orchestrator_viewpoint_requirement.analyze_requirement(**kwargs)
         else:
             Logger.set_error(__name__,

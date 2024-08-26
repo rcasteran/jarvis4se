@@ -38,16 +38,18 @@ def add_view(p_str_list, **kwargs):
     # Create a list with all view names already in the xml
     xml_view_name_list = query_object.query_object_name_in_list(xml_view_list)
 
-    for p_str in p_str_list:
+    for elem in p_str_list:
+        view_name = elem.replace('"', "")
+
         # Loop on the list and create set for functions
-        if p_str not in xml_view_name_list:
+        if view_name not in xml_view_name_list:
             # Instantiate view class
-            view = datamodel.View(name=p_str, uid=util.get_unique_id())
+            view = datamodel.View(name=view_name, uid=util.get_unique_id())
             # Add view to new set() and existing set() from xml
             xml_view_list.add(view)
             view_list.append(view)
 
-        activate_view(p_str, xml_view_list)
+        activate_view(view_name, xml_view_list)
 
         if view_list:
             output_xml.write_view(view_list)

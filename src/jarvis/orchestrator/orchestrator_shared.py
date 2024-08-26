@@ -35,6 +35,7 @@ def check_add_child(parent_child_name_str_list, **kwargs):
     parent_child_lists = [[] for _ in range(len(datamodel.TypeWithChildList))]
 
     cleaned_parent_child_list_str = util.cut_tuple_list(parent_child_name_str_list)
+    # elem = [parent_object, child_object]
     for elem in cleaned_parent_child_list_str:
         parent_object = query_object.query_object_by_name(elem[0], **kwargs)
         child_object = query_object.query_object_by_name(elem[1], **kwargs)
@@ -108,13 +109,13 @@ def add_child(parent_child_lists, **kwargs):
                                         output_xml.write_data_consumer([[flow, obj[0]]])
                                         xml_consumer_function_list.append([flow, obj[0]])
 
-                                        Logger.set_info(__name__, f"{obj[0].name} produces {flow}")
+                                        Logger.set_info(__name__, f"{obj[0].name} produces {flow.name}")
                                     else:
                                         # Case of a parent child is producing the data
                                         output_xml.delete_data_relationship([flow, obj[0]], "producer")
                                         xml_producer_function_list.remove([flow, obj[0]])
 
-                                        Logger.set_info(__name__, f"{obj[0].name} does not produce {flow} anymore")
+                                        Logger.set_info(__name__, f"{obj[0].name} does not produce {flow.name} anymore")
 
                             for (flow, function) in xml_producer_function_list:
                                 if obj[1].id == function.id and [flow, obj[0]] not in xml_producer_function_list:
@@ -122,7 +123,7 @@ def add_child(parent_child_lists, **kwargs):
                                         output_xml.write_data_producer([[flow, obj[0]]])
                                         xml_producer_function_list.append([flow, obj[0]])
 
-                                        Logger.set_info(__name__, f"{obj[0].name} consumes {flow}")
+                                        Logger.set_info(__name__, f"{obj[0].name} consumes {flow.name}")
                                     else:
                                         # Case of a parent child is consuming the data
                                         output_xml.delete_data_relationship([flow, obj[0]], "consumer")
@@ -184,11 +185,13 @@ def check_and_delete_object(delete_str_list, **kwargs):
     """
     to_be_deleted_obj_lists = [[] for _ in range(10)]
     # Check if the wanted to delete object exists and can be deleted
-    for obj_str in delete_str_list:
-        object_to_del = query_object.query_object_by_name(obj_str, **kwargs)
+    for elem in delete_str_list:
+        object_name = elem.replace('"', "")
+
+        object_to_del = query_object.query_object_by_name(object_name, **kwargs)
         if object_to_del is None:
             Logger.set_error(__name__,
-                             f"{obj_str} does not exist")
+                             f"{object_name} does not exist")
             continue
 
         check, list_idx = check_relationship_before_delete(object_to_del, **kwargs)
@@ -580,17 +583,21 @@ def check_set_object_type(type_str_list, **kwargs):
     """
     object_type_lists = [[] for _ in range(10)]
     # Check if the wanted object exists and the type can be set
-    for object_str, type_name in type_str_list:
-        object_to_set = query_object.query_object_by_name(object_str, **kwargs)
+    # elem = [object_name, type_name]
+    for elem in type_str_list:
+        object_name = elem[0].replace('"', "")
+        type_name = elem[1].replace('"', "")
+
+        object_to_set = query_object.query_object_by_name(object_name, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
-                             f"{object_str} does not exist")
+                             f"{object_name} does not exist")
             continue
         if object_to_set.type == type_name:
             continue
-        check, basetype_idx = check_new_type(object_to_set, type_name, kwargs[XML_DICT_KEY_11_TYPE_LIST])
+        check, base_type_idx = check_new_type(object_to_set, type_name, kwargs[XML_DICT_KEY_11_TYPE_LIST])
         if check:
-            object_type_lists[basetype_idx].append(object_to_set)
+            object_type_lists[base_type_idx].append(object_to_set)
 
     update = set_object_type(object_type_lists, kwargs['output_xml'])
 
@@ -694,12 +701,16 @@ def check_set_object_alias(alias_str_list, **kwargs):
             update ([0/1]) : 1 if update, else 0
     """
     object_lists = [[] for _ in range(9)]
-    # Check if the wanted to object exists and the type can be set
-    for object_to_set_alias, alias_str in alias_str_list:
-        object_to_set = query_object.query_object_by_name(object_to_set_alias, **kwargs)
+    # Check if the wanted to object exists and the alias can be set
+    # elem = [object_name, alias_str]
+    for elem in alias_str_list:
+        object_name = elem[0].replace('"', "")
+        alias_str = elem[1].replace('"', "")
+
+        object_to_set = query_object.query_object_by_name(object_name, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
-                             f"{object_to_set_alias} does not exist")
+                             f"{object_name} does not exist")
             continue
 
         idx = check_new_alias(object_to_set, alias_str)
@@ -1217,41 +1228,53 @@ def check_add_inheritance(inherit_str_list, **kwargs):
     """
     new_list = []
     for elem in inherit_str_list:
-        # elem_0: inheriting object
-        elem_0 = query_object.query_object_by_name(elem[0],
-                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                  XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                  XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                  XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                  XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                  })
-        # elem_1: object to inherit from
-        elem_1 = query_object.query_object_by_name(elem[1],
-                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                  XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                  XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                  XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                  XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                  })
-        if not elem_0 or not elem_1:
-            if not elem_0 and not elem_1:
-                print_wrong_object_inheritance(elem[0], elem[1])
-            elif not elem_0:
-                print_wrong_object_inheritance(elem[0])
+        object_inheriting_name = elem[0].replace('"', "")
+        object_to_inherit_name = elem[1].replace('"', "")
+
+        object_inheriting = query_object.query_object_by_name(object_inheriting_name,
+                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
+                                                       XML_DICT_KEY_1_FUNCTION_LIST],
+                                                      XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
+                                                          XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                      XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
+                                                          XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                      XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
+                                                          XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                      XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
+                                                          XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                      })
+
+        object_to_inherit = query_object.query_object_by_name(object_to_inherit_name,
+                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
+                                                       XML_DICT_KEY_1_FUNCTION_LIST],
+                                                      XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
+                                                          XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                      XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
+                                                          XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                      XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
+                                                          XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                      XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
+                                                          XML_DICT_KEY_5_PHY_INTF_LIST],
+                                                      })
+        if not object_inheriting or not object_to_inherit:
+            if not object_inheriting and not object_to_inherit:
+                print_wrong_object_inheritance(object_inheriting_name, object_to_inherit_name)
+            elif not object_inheriting:
+                print_wrong_object_inheritance(object_inheriting_name)
             else:
-                print_wrong_object_inheritance(elem[1])
+                print_wrong_object_inheritance(object_to_inherit_name)
             continue
-        if elem_0 == elem_1:
+        if object_inheriting == object_to_inherit:
             Logger.set_warning(__name__,
-                               f"Same object {elem_0.name}")
+                               f"Same object {object_inheriting.name}")
             continue
-        if elem_0.derived == elem_1:
+        if object_inheriting.derived == object_to_inherit:
             continue
 
-        check_obj = check_inheritance(elem_0, elem_1)
+        check_obj = check_inheritance(object_inheriting, object_to_inherit)
         if not check_obj:
             continue
-        new_list.append(elem_0)
+        new_list.append(object_inheriting)
 
     if not new_list:
         return 0

@@ -22,3 +22,8 @@ XML_DICT_KEY_10_VIEW_LIST = 'xml_view_list'
 XML_DICT_KEY_11_TYPE_LIST = 'xml_type_list'
 XML_DICT_KEY_12_FUN_CONS_LIST = 'xml_consumer_function_list'
 XML_DICT_KEY_13_FUN_PROD_LIST = 'xml_producer_function_list'
+
+
+# Functions
+def normalize_xml_string(p_str):
+    return str(p_str).replace("&", "&amp").replace("<", "&lt").replace(">", "&gt").replace("'", "&apos")

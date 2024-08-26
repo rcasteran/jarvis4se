@@ -52,10 +52,11 @@ class StateDiagram:
             open_bracket_str = ' {'
         else:
             open_bracket_str = ''
+
         if state.alias:
-            state_alias = state.alias
+            state_ref = normalize_element_reference(state.alias)
         else:
-            state_alias = state.name.lower().replace(" ", "_").replace("-", "")
+            state_ref = normalize_element_reference(state.name)
 
         if isinstance(state.type, datamodel.BaseType):
             state_type_str = str(state.type).capitalize().replace("_", " ")
@@ -65,7 +66,7 @@ class StateDiagram:
             state_type_str = 'ENTRY'
         else:
             state_type_str = state.type.name
-        self.append_string("'id: ", state.id, '\nstate "', state.name, '"', ' as ', state_alias,
+        self.append_string("'id: ", state.id, '\nstate "', state.name, '"', ' as ', state_ref,
                            ' <<', state_type_str, '>>', open_bracket_str, '\n')
 
     def create_transition(self, transition_list):
@@ -75,16 +76,16 @@ class StateDiagram:
         """
         for transition in transition_list:
             if transition[0].alias:
-                source_alias = transition[0].alias
+                source_ref = normalize_element_reference(transition[0].alias)
             else:
-                source_alias = transition[0].name.lower().replace(" ", "_").replace("-", "")
+                source_ref = normalize_element_reference(transition[0].name)
 
             if transition[1].alias:
-                destination_alias = transition[1].alias
+                destination_ref = normalize_element_reference(transition[1].alias)
             else:
-                destination_alias = transition[1].name.lower().replace(" ", "_").replace("-", "")
+                destination_ref = normalize_element_reference(transition[1].name)
 
-            self.append_string(str(source_alias), " --> ", str(destination_alias), " : ")
+            self.append_string(source_ref, " --> ", destination_ref, " : ")
             conditions_str = ""
             last = len(transition[2]) - 1
             if not transition[2]:
@@ -133,10 +134,9 @@ class SequenceDiagram:
             for i in range(2):
                 if val[i] not in activate_list:
                     activate_list.append(val[i])
-                    self.append_string("activate ", val[i].replace(" ", "_").replace("-", ""), "\n")
+                    self.append_string("activate ", normalize_element_reference(val[i]), "\n")
 
-            relationship_str = val[0].replace(" ", "_").replace("-", "") + ' -> ' \
-                               + val[1].replace(" ", "_").replace("-", "")
+            relationship_str = normalize_element_reference(val[0]) + ' -> ' + normalize_element_reference(val[1])
             if val[3]:
                 seq_number = str(idx + 1) + "- "
             else:
@@ -146,21 +146,19 @@ class SequenceDiagram:
                 if val[i] in activate_list and \
                         not any(val[i] in sub for sub in message_list[idx + 1:]):
                     deactivate_list.append(val[i])
-                    self.append_string("deactivate ", val[i].replace(" ", "_").replace("-", ""),
-                                       "\n")
+                    self.append_string("deactivate ", normalize_element_reference(val[i]), "\n")
 
     def create_participant(self, function):
         """Update the PlantUml text for a function
         @param[in] function function
         @return None
         """
-        # If the string is not formatted like this, plantuml raises error
-        function_name = function.name.lower().replace(" ", "_").replace("-", "")
+        function_ref = normalize_element_reference(function.name)
         if isinstance(function.type, datamodel.BaseType):
             function_type_str = str(function.type).capitalize().replace("_", " ")
         else:
             function_type_str = function.type.name
-        self.append_string("participant ", function_name, ' <<', function_type_str, '>>', "\n")
+        self.append_string("participant ", function_ref, ' <<', function_type_str, '>>', "\n")
 
 
 class ObjDiagram:
@@ -193,13 +191,13 @@ class ObjDiagram:
 
         # If the string is not formatted like this, plantuml raises error
         operand_str = ''
-        function_name = function.name.lower().replace(" ", "_").replace("-", "")
+        function_ref = normalize_element_reference(function.name)
         if isinstance(function.type, datamodel.BaseType):
             function_type_str = str(function.type).capitalize().replace("_", " ")
         else:
             function_type_str = function.type.name
         self.append_string(
-            "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_name,
+            "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_ref,
             ' <<', function_type_str, '>>')
 
         if function.operand:
@@ -219,7 +217,7 @@ class ObjDiagram:
         """
         attribute_str = self.create_object_attributes(component, attribute_list)
         if attribute_str:
-            component_name = component.name.lower().replace(" ", "_").replace("-", "")
+            component_name = normalize_element_reference(component.name)
             self.append_string('note bottom of ', component_name, '\n', attribute_str, 'end note\n')
 
     def create_port(self, flow_list, flow_direction):
@@ -236,7 +234,7 @@ class ObjDiagram:
                 end = '_o\n'
             elif flow_direction == "None":
                 end = '\n'
-            self.append_string('circle ', i[0][1].replace(" ", "_").replace("-", ""), end)
+            self.append_string('circle ', normalize_element_reference(i[0][1]), end)
 
     def create_component(self, component):
         """Update the PlantUml text for a component
@@ -245,13 +243,13 @@ class ObjDiagram:
         """
 
         # If the string is not formatted like this, plantuml raises error
-        component_name = component.name.lower().replace(" ", "_").replace("-", "")
+        component_ref = normalize_element_reference(component.name)
         if isinstance(component.type, datamodel.BaseType):
             component_type_str = str(component.type).capitalize().replace("_", " ")
         else:
             component_type_str = component.type.name
         self.append_string("'id: ", component.id, '\ncomponent "', component.name, '" ', 'as ',
-                           component_name, ' <<', component_type_str, '>>{\n')
+                           component_ref, ' <<', component_type_str, '>>{\n')
 
     def create_output_flow(self, output_flow_list):
         """Update the PlantUml text for output flows list
@@ -273,12 +271,12 @@ class ObjDiagram:
 
             if is_digit:
                 name = i[0][1]
-                relationship_str = "".join([name.replace(" ", "_").replace("-", ""),
+                relationship_str = "".join([normalize_element_reference(name),
                                             middle_arrow,
-                                            name[0:name.index('_')].replace(" ", "_").replace("-", ""),
+                                            normalize_element_reference(name[0:name.index('_')]),
                                             '_o '])
             else:
-                name = i[0][1].replace(" ", "_").replace("-", "")
+                name = normalize_element_reference(i[0][1])
                 relationship_str = "".join([name, middle_arrow, name, '_o '])
             if len(i[1]) > 1:
                 self.string += self.create_multiple_arrow(relationship_str, output_flow_str, i)
@@ -300,12 +298,12 @@ class ObjDiagram:
 
             if is_digit:
                 name = i[0][1]
-                relationship_str = "".join([name[0:name.index('_')].replace(" ", "_").replace("-", ""),
+                relationship_str = "".join([normalize_element_reference(name[0:name.index('_')]),
                                             '_i',
                                             ' --> ',
-                                            name.replace(" ", "_").replace("-", "")])
+                                            normalize_element_reference(name)])
             else:
-                name = i[0][1].replace(" ", "_").replace("-", "")
+                name = normalize_element_reference(i[0][1])
                 relationship_str = "".join([name, '_i', ' --> ', name])
             if len(i[1]) > 1:
                 self.string += self.create_multiple_arrow(relationship_str, input_flow_str, i)
@@ -319,8 +317,8 @@ class ObjDiagram:
         """
         flow_str = ""
         for i in data_flow_list:
-            relationship_str = "".join([i[0][0].replace(" ", "_").replace("-", ""), ' #--> ',
-                                        i[0][1].replace(" ", "_").replace("-", "")])
+            relationship_str = "".join([normalize_element_reference(i[0][0]), ' #--> ',
+                                        normalize_element_reference(i[0][1])])
             if len(i[1]) > 1:
                 self.string += self.create_multiple_arrow(relationship_str, flow_str, i)
             else:
@@ -334,21 +332,18 @@ class ObjDiagram:
         for i in interface_list:
             relationship_str = ""
             if i[0] and i[1]:
-                relationship_str = i[0].name.lower().replace(" ", "_").replace("-", "") + ' -- ' \
-                                   + i[1].name.lower().replace(" ", "_").replace("-", "")
+                relationship_str = normalize_element_reference(i[0].name) + ' -- ' \
+                                   + normalize_element_reference(i[1].name)
             elif not i[0] and i[1]:
-                circle_name = i[1].name.lower().replace(" ", "_").replace("-", "") + '_o'
+                circle_name = normalize_element_reference(i[1].name) + '_o'
                 relationship_str = 'circle ' + circle_name + '\n'
-                relationship_str += i[1].name.lower().replace(" ", "_").replace("-", "") \
-                                    + ' -- ' + circle_name
+                relationship_str += normalize_element_reference(i[1].name) + ' -- ' + circle_name
             elif i[0] and not i[1]:
-                circle_name = i[0].name.lower().replace(" ", "_").replace("-", "") + '_o'
+                circle_name = normalize_element_reference(i[0].name) + '_o'
                 relationship_str = 'circle ' + circle_name + '\n'
-                relationship_str += circle_name + ' -- ' +\
-                                    i[0].name.lower().replace(" ", "_").replace("-", "")
+                relationship_str += circle_name + ' -- ' + normalize_element_reference(i[0].name)
 
-            self.append_string(relationship_str, ' : ',
-                               i[2].name.lower().replace(" ", "_").replace("-", ""), '\n')
+            self.append_string(relationship_str, ' : ', i[2].name, '\n')
 
     @classmethod
     def create_object_attributes(cls, wanted_object, attribute_list):
@@ -387,3 +382,13 @@ class ObjDiagram:
             new_prod_cons_flow_list += rest
             return cls.create_multiple_arrow(relationship_str, flow_str, new_prod_cons_flow_list)
         return flow_str
+
+
+def normalize_element_reference(p_element_name):
+    return p_element_name.lower()\
+        .replace(" ", "_")\
+        .replace("-", "")\
+        .replace("'s", "")\
+        .replace("(", "_")\
+        .replace(")", "_")\
+        .replace(",", "_")

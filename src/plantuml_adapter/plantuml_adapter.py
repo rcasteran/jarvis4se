@@ -847,10 +847,10 @@ def order_list(message_list, data_list):
                 message_object_list.append([i[0], i[1], data, False])
 
     message_object_list = clean_predecessor_list(message_object_list)
-    ordored_message_object_list = get_sequence_list(message_object_list)
+    ordered_message_object_list = get_sequence_list(message_object_list)
 
     # Add index for each item within the list
-    for idx, t in enumerate(ordored_message_object_list):
+    for idx, t in enumerate(ordered_message_object_list):
         ordered_message_list.insert(idx, [t[0], t[1], t[2].name, t[3]])
 
     # Create the ordered(from ordered message list) function's list
@@ -941,7 +941,6 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
 
     flow_producer_name_list = []
     flow_child_producer_list = []
-    temp_input_list = []
     output_list = []
 
     for flow, prod in producer_function_list:
@@ -958,6 +957,8 @@ def get_input_flows(consumer_function_list, producer_function_list, concatenate=
 
     if concatenate:
         output_list = concatenate_flows(output_list)
+    # Else do nothing
+
     return output_list
 
 
