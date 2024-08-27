@@ -103,9 +103,10 @@ def cut_string(input_string):
         elif character == ',':
             if is_noun:
                 current_string = current_string + character
-            else:
+            elif current_string.strip():
                 split_string.append(current_string)
                 current_string = ''
+                is_noun = False
         else:
             current_string = current_string + character
     
