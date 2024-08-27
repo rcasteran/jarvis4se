@@ -158,7 +158,12 @@ class SequenceDiagram:
             function_type_str = str(function.type).capitalize().replace("_", " ")
         else:
             function_type_str = function.type.name
-        self.append_string("participant ", function_ref, ' <<', function_type_str, '>>', "\n")
+
+        if function_type_str.lower() == 'actor':
+            self.append_string('actor "', function.name, '" as ', function_ref, "\n")
+        else:
+            self.append_string('participant "', function.name, '" as ', function_ref, ' <<',
+                               function_type_str, '>>', "\n")
 
 
 class ObjDiagram:
@@ -196,9 +201,14 @@ class ObjDiagram:
             function_type_str = str(function.type).capitalize().replace("_", " ")
         else:
             function_type_str = function.type.name
-        self.append_string(
-            "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_ref,
-            ' <<', function_type_str, '>>')
+
+        if function_type_str.lower() == 'actor' and len(function.child_list) == 0 and not function.operand:
+            self.append_string(
+                "'id: ", str(function.id), '\nactor "', function.name, '" as ', function_ref)
+        else:
+            self.append_string(
+                "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_ref,
+                ' <<', function_type_str, '>>')
 
         if function.operand:
             operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'

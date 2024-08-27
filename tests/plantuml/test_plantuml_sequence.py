@@ -30,8 +30,8 @@ def test_fun_elem_with_interfaces_plantuml_sequence(mocker, input_test_fun_elem_
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return
     expected = ['!pragma teoz true\n',
-                'participant fun_elem_1 <<Functional element>>\n',
-                'participant fun_elem_2 <<Functional element>>\n',
+                'participant "Fun_elem_1" as fun_elem_1 <<Functional element>>\n',
+                'participant "Fun_elem_2" as fun_elem_2 <<Functional element>>\n',
                 'activate fun_elem_1\n',
                 'activate fun_elem_2\n',
                 'fun_elem_1 -> fun_elem_2 : 1- A\n',
