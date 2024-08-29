@@ -114,57 +114,73 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
     new_consumer_list = []
     main_function = None
 
-    for fun in xml_function_list:
-        if diagram_function_str in (fun.name, fun.alias):
-            new_function_list.add(fun)
-            main_function = fun
-            for xml_producer_flow, xml_producer in xml_producer_function_list:
-                if fun == xml_producer:
+    for xml_function in xml_function_list:
+        if diagram_function_str in (xml_function.name, xml_function.alias):
+            new_function_list.add(xml_function)
+            main_function = xml_function
+            for xml_producer_flow, xml_producer_function in xml_producer_function_list:
+                if xml_function == xml_producer_function:
                     check = False
-                    for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
+                    for xml_consumer_flow, xml_consumer_function in xml_consumer_function_list:
                         if xml_producer_flow == xml_consumer_flow:
-                            if xml_consumer.parent is None:
-                                current_func, current_dict = question_answer.get_children(fun)
-                                parent_check = question_answer.check_parentality(xml_consumer, main_function)
-                                if xml_consumer not in current_func and parent_check is False:
-                                    new_consumer_list.append([xml_producer_flow, xml_consumer])
-                                    new_function_list.add(xml_consumer)
+                            if xml_consumer_function.parent is None:
+                                xml_function_children_list, _ = question_answer.get_children(xml_function)
+                                parent_check = question_answer.check_parentality(xml_consumer_function, main_function)
+                                if xml_consumer_function not in xml_function_children_list and parent_check is False:
+                                    new_consumer_list.append([xml_producer_flow, xml_consumer_function])
+                                    new_function_list.add(xml_consumer_function)
                                     check = True
-                            elif main_function.parent == xml_consumer.parent and xml_consumer != main_function:
-                                new_consumer_list.append([xml_consumer_flow, xml_consumer])
-                                new_function_list.add(xml_consumer)
+                            elif main_function.parent == xml_consumer_function.parent and\
+                                    xml_consumer_function != main_function:
+                                new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
+                                new_function_list.add(xml_consumer_function)
                                 check = True
+                            elif xml_consumer_function != main_function:
+                                if len(xml_consumer_function.child_list) == 0:
+                                    new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
+                                    new_function_list.add(xml_consumer_function)
+                                # Else do nothing
+                                check = True
+
                     if check:
-                        if [xml_producer_flow, xml_producer] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer])
+                        if [xml_producer_flow, xml_producer_function] not in new_producer_list:
+                            new_producer_list.append([xml_producer_flow, xml_producer_function])
 
                     if not any(xml_producer_flow in s for s in xml_consumer_function_list):
-                        if [xml_producer_flow, xml_producer] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer])
+                        if [xml_producer_flow, xml_producer_function] not in new_producer_list:
+                            new_producer_list.append([xml_producer_flow, xml_producer_function])
 
     if main_function is not None:
-        for xml_consumer_flow, xml_consumer in xml_consumer_function_list:
-            if xml_consumer == main_function:
+        for xml_consumer_flow, xml_consumer_function in xml_consumer_function_list:
+            if xml_consumer_function == main_function:
                 check = False
-                for xml_producer_flow, producer in xml_producer_function_list:
+                for xml_producer_flow, xml_producer_function in xml_producer_function_list:
                     if xml_producer_flow == xml_consumer_flow:
-                        if producer.parent is None:
-                            current_func, current_dict = question_answer.get_children(producer)
-                            if main_function not in current_func:
-                                new_producer_list.append([xml_producer_flow, producer])
-                                new_function_list.add(producer)
+                        if xml_producer_function.parent is None:
+                            xml_function_children_list, _ = question_answer.get_children(xml_producer_function)
+                            if main_function not in xml_function_children_list:
+                                new_producer_list.append([xml_producer_flow, xml_producer_function])
+                                new_function_list.add(xml_producer_function)
                                 check = True
-                        elif main_function.parent == producer.parent and producer != main_function:
-                            new_producer_list.append([xml_producer_flow, producer])
-                            new_function_list.add(producer)
+                        elif main_function.parent == xml_producer_function.parent and\
+                                xml_producer_function != main_function:
+                            new_producer_list.append([xml_producer_flow, xml_producer_function])
+                            new_function_list.add(xml_producer_function)
                             check = True
+                        elif xml_producer_function != main_function:
+                            if len(xml_producer_function.child_list) == 0:
+                                new_producer_list.append([xml_producer_flow, xml_producer_function])
+                                new_function_list.add(xml_producer_function)
+                            # Else do nothing
+                            check = True
+
                 if check:
-                    if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
-                        new_consumer_list.append([xml_consumer_flow, xml_consumer])
+                    if [xml_consumer_flow, xml_consumer_function] not in new_consumer_list:
+                        new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
 
                 if not any(xml_consumer_flow in s for s in xml_producer_function_list):
-                    if [xml_consumer_flow, xml_consumer] not in new_consumer_list:
-                        new_consumer_list.append([xml_consumer_flow, xml_consumer])
+                    if [xml_consumer_flow, xml_consumer_function] not in new_consumer_list:
+                        new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
 
     for f in new_function_list:
         f.child_list.clear()
