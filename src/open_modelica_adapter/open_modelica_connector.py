@@ -36,10 +36,10 @@ class OpenModelicaConnector(OMCSessionZMQ):
                              f'Working directory change failed. Please check the directory: {p_om_directory}')
 
     def plot(self, p_var_list):
-        if self.sendExpression('plot({' + p_var_list[0] + '})'):
-            Logger.set_info(__name__, f'Variables "{p_var_list[0]}" displayed')
+        if self.sendExpression('plot({' + p_var_list + '})'):
+            Logger.set_info(__name__, f'Variables "{p_var_list}" displayed')
         else:
-            Logger.set_error(__name__, f'Variables "{p_var_list[0]}" not displayed')
+            Logger.set_error(__name__, f'Variables "{p_var_list}" not displayed')
 
 
 

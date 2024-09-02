@@ -70,7 +70,7 @@ class CmdParser:
         ]
 
         self.attribute_command_list = [
-            (r'The ((?!type|alias|source|destination|description).*) of (.*?) is "((.|\n)*?)".',
+            (r'The ((?!type|alias|source|destination|description).*) of (.*?) is "((.|\n)*?)"',
              orchestrator_viewpoint_attribute.check_add_object_attribute),
             (r"The ((?!type|alias|source|destination|description).*) of (.*?) is ([^.|\n]*)",
              orchestrator_viewpoint_attribute.check_add_object_attribute)
@@ -236,7 +236,7 @@ class CmdParser:
 
     def matched_plot(self, plot_name_str, **kwargs):
         if Config.is_open_modelica:
-            self.simulator.plot(plot_name_str.replace('"', "").strip())
+            self.simulator.plot(plot_name_str[0].replace('"', "").strip())
         else:
             Logger.set_error(__name__,
                              "Open modelica simulation is not activated")

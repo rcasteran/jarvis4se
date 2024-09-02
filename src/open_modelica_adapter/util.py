@@ -124,11 +124,11 @@ class StateModel:
                         if not is_initial_value:
                             Logger.set_error(__name__,
                                              f'No attribute "initial value" found for the data '
-                                             f'"{xml_producer_function[0]}"')
+                                             f'"{xml_producer_function[0].name}"')
                     else:
                         Logger.set_error(__name__,
                                          f'No attribute "initial value" found for the data '
-                                         f'"{xml_producer_function[0]}"')
+                                         f'"{xml_producer_function[0].name}"')
                 # Else do nothing
 
         self.string_algorithm = self.string_algorithm + f'end if;\n'
@@ -139,7 +139,7 @@ class StateModel:
             if xml_state.id == p_transition.destination:
                 data_attribute = query_object.query_object_by_name(datamodel.DesignAttributeLabel,
                                                                    **{XML_DICT_KEY_9_ATTRIBUTE_LIST: kwargs[
-                                                                   XML_DICT_KEY_9_ATTRIBUTE_LIST]})
+                                                                       XML_DICT_KEY_9_ATTRIBUTE_LIST]})
                 if data_attribute:
                     for described_item in data_attribute.described_item_list:
                         if described_item[0] == p_transition.id:
