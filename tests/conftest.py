@@ -1598,3 +1598,268 @@ def input_test_function_requirement():
                              ""])
 
     return first_part, second_part
+
+
+@pytest.fixture
+def input_test_issue_95():
+    """@ingroup test_issue_95
+    @anchor input_test_issue_95
+    Defines input fixture for @ref test_issue_95_plantuml_context and @ref test_issue_95_plantuml_chain
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        "0 - A" is a function
+        "1 - B" is a function
+        "2 - C" is a function
+        "3 - D" is a function
+        "4 - E" is a function
+        A is a data
+        "2 - C" composes "1 - B"
+        "1 - B" composes "0 - A"
+        "4 - E" composes "3 - D"
+        "3 - D" composes "0 - A"
+        "2 - C" produces A
+        "4 - E" consumes A
+    """
+    return "\n".join(['"0 - A" is a function',
+                      '"1 - B" is a function',
+                      '"2 - C" is a function',
+                      '"3 - D" is a function',
+                      '"4 - E" is a function',
+                      'A is a data',
+                      '"2 - C" composes "1 - B"',
+                      '"1 - B" composes "0 - A"',
+                      '"4 - E" composes "3 - D"',
+                      '"3 - D" composes "0 - A"',
+                      '"2 - C" produces A',
+                      '"4 - E" consumes A'])
+
+
+@pytest.fixture
+def input_test_fun_elem_decomposed_with_interfaces():
+    """@ingroup test_plantuml_context
+    @anchor input_test_fun_elem_decomposed_with_interfaces
+    Defines input fixture for @ref test_fun_elem_decomposed_with_interfaces_plantuml_context and
+    @ref test_fun_elem_decomposed_with_interfaces_child_plantuml_context
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        "Enabling functional element" extends functional element.
+        "High level functional element" extends functional element.
+        A is a High level functional element
+        B is a functional element
+        B composes A
+        E_Ext is an Enabling functional element
+        I_A_E is a functional interface
+        a is a data
+        FA is a function
+        FB is a function
+        FB composes FA
+        FB_Ext is a function
+        A allocates FA
+        B allocates FB
+        E_Ext allocates FB_Ext
+        FA produces a
+        FB produces a
+        FB_Ext consumes a
+        I_A_E allocates a
+        A exposes I_A_E
+        B exposes I_A_E
+        E_Ext exposes I_A_E
+    """
+    return "\n".join(['"Enabling functional element" extends functional element.',
+                      '"High level functional element" extends functional element.',
+                      'A is a High level functional element',
+                      'B is a functional element',
+                      'B composes A',
+                      'E_Ext is an Enabling functional element',
+                      'I_A_E is a functional interface',
+                      'a is a data',
+                      'FA is a function',
+                      'FB is a function',
+                      'FB composes FA',
+                      'FB_Ext is a function',
+                      'A allocates FA',
+                      'B allocates FB',
+                      'E_Ext allocates FB_Ext',
+                      'FA produces a',
+                      'FB produces a',
+                      'FB_Ext consumes a',
+                      'I_A_E allocates a',
+                      'A exposes I_A_E',
+                      'B exposes I_A_E',
+                      'E_Ext exposes I_A_E'])
+
+
+@pytest.fixture
+def input_test_fun_elem_with_internal_interfaces_plantuml_decomposition():
+    """@ingroup test_plantuml_decomposition
+    @anchor input_test_fun_elem_with_internal_interfaces_plantuml_decomposition
+    Defines input fixture for @ref test_fun_elem_with_internal_interfaces_plantuml_decomposition
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        "Enabling functional element" extends functional element.
+        "Enabling function" extends function.
+        "High level functional element" extends functional element.
+        "High level function" extends function.
+        Flow extends data.
+        "Elem A" is a "High level functional element"
+        The alias of "Elem A" is fun_elem_a
+        "MF Elem A" is a "High level function"
+        The alias of "MF Elem A" is mf_fun_elem_a.
+        fun_elem_a allocates mf_fun_elem_a
+        "Elem Ext" is a "Enabling functional element"
+        The alias of "Elem Ext" is fun_elem_ext
+        "MF Elem Ext" is a "Enabling function".
+        The alias of "MF Elem Ext" is mf_fun_elem_ext.
+        fun_elem_ext allocates mf_fun_elem_ext
+        A is a Flow.
+        mf_fun_elem_ext produces A
+        mf_fun_elem_a consumes A
+        B is a Flow.
+        mf_fun_elem_ext produces B
+        mf_fun_elem_a consumes B
+        I_A_EXT is a functional interface
+        I_A_EXT allocates A
+        I_A_EXT allocates B
+        fun_elem_ext exposes I_A_EXT
+        fun_elem_a exposes I_A_EXT
+        "F7" is a "High level function"
+        mf_fun_elem_a is composed of F7.
+        "F10" is a "High level function"
+        mf_fun_elem_a is composed of F10.
+        "F12" is a "High level function"
+        mf_fun_elem_a is composed of F12.
+        "F20" is a "High level function"
+        mf_fun_elem_a is composed of F20.
+        C is a "Flow"
+        F10 consumes C
+        F12 consumes C
+        F20 produces C
+        "F7a" is a function.
+        F7 is composed of F7a.
+        F7a consumes A
+        F7a consumes B
+        "F10a" is a function.
+        F10 is composed of F10a.
+        F10a consumes C
+        "F12a" is a function.
+        F12 is composed of F12a.
+        F12a consumes C
+        "F20a" is a function.
+        F20 is composed of F20a.
+        F20a produces C
+        "F20b" is a function.
+        F20 is composed of F20b.
+        F20b consumes C
+        fun_elem_a allocates F7.
+        fun_elem_a allocates F10.
+        fun_elem_a allocates F12.
+        fun_elem_a allocates F20.
+        "Elem A1" is a "Functional element"
+        The alias of "Elem A1" is fun_elem_a1
+        fun_elem_a1 composes fun_elem_a
+        fun_elem_a1 allocates F7a
+        fun_elem_a1 exposes I_A_EXT
+        "Elem A2" is a "Functional element"
+        The alias of "Elem A2" is fun_elem_a2
+        fun_elem_a2 composes fun_elem_a
+        fun_elem_a2 allocates F12a
+        fun_elem_a2 allocates F20a
+        "Elem A3" is a "Functional element"
+        The alias of "Elem A3" is fun_elem_a3
+        fun_elem_a3 composes fun_elem_a
+        fun_elem_a3 allocates F10a
+        fun_elem_a3 allocates F20b
+        I_A1_A2 is a functional interface
+        fun_elem_a1 exposes I_A1_A2
+        fun_elem_a2 exposes I_A1_A2
+        I_A2_A3 is a functional interface
+        fun_elem_a2 exposes I_A2_A3
+        fun_elem_a3 exposes I_A2_A3
+        I_A2_A3 allocates C
+    """
+    return "\n".join(['"Enabling functional element" extends functional element.',
+                      '"Enabling function" extends function.',
+                      '"High level functional element" extends functional element.',
+                      '"High level function" extends function.',
+                      'Flow extends data.',
+                      '"Elem A" is a "High level functional element"',
+                      'The alias of "Elem A" is fun_elem_a',
+                      '"MF Elem A" is a "High level function"',
+                      'The alias of "MF Elem A" is mf_fun_elem_a.',
+                      'fun_elem_a allocates mf_fun_elem_a',
+                      '"Elem Ext" is a "Enabling functional element"',
+                      'The alias of "Elem Ext" is fun_elem_ext',
+                      '"MF Elem Ext" is a "Enabling function".',
+                      'The alias of "MF Elem Ext" is mf_fun_elem_ext.',
+                      'fun_elem_ext allocates mf_fun_elem_ext',
+                      'A is a Flow.',
+                      'mf_fun_elem_ext produces A',
+                      'mf_fun_elem_a consumes A',
+                      'B is a Flow.',
+                      'mf_fun_elem_ext produces B',
+                      'mf_fun_elem_a consumes B',
+                      'I_A_EXT is a functional interface',
+                      'I_A_EXT allocates A',
+                      'I_A_EXT allocates B',
+                      'fun_elem_ext exposes I_A_EXT',
+                      'fun_elem_a exposes I_A_EXT',
+                      '"F7" is a "High level function"',
+                      'mf_fun_elem_a is composed of F7.',
+                      '"F10" is a "High level function"',
+                      'mf_fun_elem_a is composed of F10.',
+                      '"F12" is a "High level function"',
+                      'mf_fun_elem_a is composed of F12.',
+                      '"F20" is a "High level function"',
+                      'mf_fun_elem_a is composed of F20.',
+                      'C is a "Flow"',
+                      'F10 consumes C',
+                      'F12 consumes C',
+                      'F20 produces C',
+                      '"F7a" is a function.',
+                      'F7 is composed of F7a.',
+                      'F7a consumes A',
+                      'F7a consumes B',
+                      '"F10a" is a function.',
+                      'F10 is composed of F10a.',
+                      'F10a consumes C',
+                      '"F12a" is a function.',
+                      'F12 is composed of F12a.',
+                      'F12a consumes C',
+                      '"F20a" is a function.',
+                      'F20 is composed of F20a.',
+                      'F20a produces C',
+                      '"F20b" is a function.',
+                      'F20 is composed of F20b.',
+                      'F20b consumes C',
+                      'fun_elem_a allocates F7.',
+                      'fun_elem_a allocates F10.',
+                      'fun_elem_a allocates F12.',
+                      'fun_elem_a allocates F20.',
+                      '"Elem A1" is a "Functional element"',
+                      'The alias of "Elem A1" is fun_elem_a1',
+                      'fun_elem_a1 composes fun_elem_a',
+                      'fun_elem_a1 allocates F7a',
+                      'fun_elem_a1 exposes I_A_EXT',
+                      '"Elem A2" is a "Functional element"',
+                      'The alias of "Elem A2" is fun_elem_a2',
+                      'fun_elem_a2 composes fun_elem_a',
+                      'fun_elem_a2 allocates F12a',
+                      'fun_elem_a2 allocates F20a',
+                      '"Elem A3" is a "Functional element"',
+                      'The alias of "Elem A3" is fun_elem_a3',
+                      'fun_elem_a3 composes fun_elem_a',
+                      'fun_elem_a3 allocates F10a',
+                      'fun_elem_a3 allocates F20b',
+                      'I_A1_A2 is a functional interface',
+                      'fun_elem_a1 exposes I_A1_A2',
+                      'fun_elem_a2 exposes I_A1_A2',
+                      'I_A2_A3 is a functional interface',
+                      'fun_elem_a2 exposes I_A2_A3',
+                      'fun_elem_a3 exposes I_A2_A3',
+                      'I_A2_A3 allocates C'])

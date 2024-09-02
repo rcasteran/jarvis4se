@@ -289,3 +289,50 @@ def test_function_output_auto_external_plantuml_decomposition(mocker, input_test
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 4*len("\'id: xxxxxxxxxx\n")
+
+
+def test_fun_elem_with_internal_interfaces_plantuml_decomposition(
+        mocker, input_test_fun_elem_with_internal_interfaces_plantuml_decomposition):
+    """@ingroup test_plantuml_decomposition
+        @anchor test_fun_elem_with_interfaces_plantuml_decomposition
+        Test decomposition diagram display with functional element decomposition and interface allocation
+
+        @param[in] mocker : mocker fixture reference
+        @param[in] input_test_fun_elem_with_interfaces_2 : input fixture reference
+        @return None
+
+        **Jarvis4se equivalent:**
+        @ref input_test_fun_elem_with_interfaces_2
+        """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_decomposition")
+    file_name = "test_fun_elem_with_internal_interfaces_plantuml_decomposition"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_with_internal_interfaces_plantuml_decomposition}\n"
+                         "show decomposition fun_elem_a\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "Elem A" as elem_a <<High level functional element>>{\n',
+                'object "MF Elem A" as mf_elem_a <<High level function>>\n',
+                'component "Elem A2" as elem_a2 <<Functional element>>{\n',
+                'object "F12a" as f12a <<Function>>\n',
+                'object "F20a" as f20a <<Function>>\n',
+                '}\n',
+                'component "Elem A1" as elem_a1 <<Functional element>>{\n',
+                'object "F7a" as f7a <<Function>>\n',
+                '}\n',
+                'component "Elem A3" as elem_a3 <<Functional element>>{\n',
+                'object "F20b" as f20b <<Function>>\n',
+                'object "F10a" as f10a <<Function>>\n',
+                '}\n',
+                '}\n',
+                'component "Elem Ext" as elem_ext <<Enabling functional element>>{\n',
+                'object "MF Elem Ext" as mf_elem_ext <<Enabling function>>\n',
+                '}\n',
+                'elem_ext -- elem_a1 : I_A_EXT\n',
+                'elem_a2 -- elem_a3 : I_A2_A3\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 12 * len("\'id: xxxxxxxxxx\n")

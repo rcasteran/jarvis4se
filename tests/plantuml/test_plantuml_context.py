@@ -256,3 +256,112 @@ def test_simple_state_in_out_plantuml_context(mocker, input_test_simple_state_in
 
     assert all(i in result for i in expected)
     assert len(result) - len(''.join(expected)) == 3 * len("\'id: xxxxxxxxxx\n")
+
+
+def test_fun_elem_decomposed_with_interfaces_plantuml_context(mocker, input_test_fun_elem_decomposed_with_interfaces):
+    """@ingroup test_plantuml_context
+    @anchor test_fun_elem_decomposed_with_interfaces_plantuml_context
+    Test context diagram display with 2 main elements and 1 child, focused on the main element having a child
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_fun_elem_decomposed_with_interfaces : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function
+    """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
+    file_name = "test_fun_elem_decomposed_with_interfaces_plantuml_context"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_decomposed_with_interfaces}\n"
+                         "show context A\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "E_Ext" as e_ext <<Enabling functional element>>{\n',
+                'object "FB_Ext" as fb_ext <<Function>>\n',
+                '}\n',
+                'component "A" as a <<High level functional element>>{\n',
+                'component "B" as b <<Functional element>>{\n',
+                '}\n',
+                'object "FA" as fa <<Function>>\n',
+                '}\n',
+                'a -- e_ext : I_A_E\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 5 * len("\'id: xxxxxxxxxx\n")
+
+
+def test_fun_elem_decomposed_with_interfaces_child_plantuml_context(mocker,
+                                                                    input_test_fun_elem_decomposed_with_interfaces):
+    """@ingroup test_plantuml_context
+    @anchor test_fun_elem_decomposed_with_interfaces_child_plantuml_context
+    Test context diagram display with 2 main elements and 1 child, focused on the child element
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_fun_elem_decomposed_with_interfaces : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function
+    """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
+    file_name = "test_fun_elem_decomposed_with_interfaces_child_plantuml_context"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_decomposed_with_interfaces}\n"
+                         "show context B\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "B" as b <<Functional element>>{\n',
+                'object "FB" as fb <<Function>>\n',
+                '}\n',
+                'component "E_Ext" as e_ext <<Enabling functional element>>{\n',
+                'object "FB_Ext" as fb_ext <<Function>>\n',
+                '}\n',
+                'b -- e_ext : I_A_E\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 4 * len("\'id: xxxxxxxxxx\n")
+
+
+def test_fun_elem_decomposed_with_interfaces_single_plantuml_context(mocker,
+                                                                     input_test_fun_elem_decomposed_with_interfaces):
+    """@ingroup test_plantuml_context
+    @anchor test_fun_elem_decomposed_with_interfaces_child_plantuml_context
+    Test context diagram display with 2 main elements and 1 child, focused on the main element without a child
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_fun_elem_decomposed_with_interfaces : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function
+    """
+    spy = mocker.spy(plantuml_adapter, "get_fun_elem_context_diagram")
+    file_name = "test_fun_elem_decomposed_with_interfaces_child_plantuml_context"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_fun_elem_decomposed_with_interfaces}\n"
+                         "show context E_Ext\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = ['component "A" as a <<High level functional element>>{\n',
+                'component "B" as b <<Functional element>>{\n',
+                'object "FB" as fb <<Function>>\n',
+                '}\n',
+                'object "FA" as fa <<Function>>\n',
+                '}\n',
+                'component "E_Ext" as e_ext <<Enabling functional element>>{\n',
+                'object "FB_Ext" as fb_ext <<Function>>\n',
+                '}\n',
+                'b -- e_ext : I_A_E\n']
+
+    test_lib.remove_xml_file(file_name)
+
+    assert all(i in result for i in expected)
+    assert len(result) - len(''.join(expected)) == 6 * len("\'id: xxxxxxxxxx\n")
