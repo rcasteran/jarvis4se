@@ -435,11 +435,12 @@ class XmlParser3SE:
             xml_described_item_list = xml_attribute.iter('describedItem')
             for xml_described_item in xml_described_item_list:
                 attribute.add_described_item((xml_described_item.get("id"),
-                                              xml_described_item.get("value")))
+                                              util.denormalize_xml_string(xml_described_item.get("value"))))
                 Logger.set_debug(__name__, f"Element [{xml_described_item.get('id')}] "
                                            f"is described by "
                                            f"attribute [{attribute.id}, {attribute.name}] "
-                                           f"with the value : {xml_described_item.get('value')}")
+                                           f"with the value : "
+                                           f"{util.denormalize_xml_string(xml_described_item.get('value'))}")
 
             # Looking for allocated requirements and add them to the functional interface
             xml_allocated_requirement_list = xml_attribute.iter('allocatedRequirement')
