@@ -2,7 +2,8 @@
 Jarvis diagram module
 """
 # Modules
-from jarvis.query import question_answer
+from jarvis.orchestrator import orchestrator_object
+from jarvis.query import question_answer, query_object
 from tools import Logger
 
 
@@ -116,52 +117,64 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
 
     for xml_function in xml_function_list:
         if diagram_function_str in (xml_function.name, xml_function.alias):
-            new_function_list.add(xml_function)
             main_function = xml_function
-            for xml_producer_flow, xml_producer_function in xml_producer_function_list:
-                if xml_function == xml_producer_function:
-                    check = False
-                    for xml_consumer_flow, xml_consumer_function in xml_consumer_function_list:
-                        if xml_producer_flow == xml_consumer_flow:
-                            if xml_consumer_function.parent is None:
-                                xml_function_children_list, _ = question_answer.get_children(xml_function)
-                                parent_check = question_answer.check_parentality(xml_consumer_function, main_function)
-                                if xml_consumer_function not in xml_function_children_list and parent_check is False:
-                                    new_consumer_list.append([xml_producer_flow, xml_consumer_function])
-                                    new_function_list.add(xml_consumer_function)
-                                    check = True
-                            elif main_function.parent == xml_consumer_function.parent and\
-                                    xml_consumer_function != main_function:
-                                new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
-                                new_function_list.add(xml_consumer_function)
-                                check = True
-                            elif xml_consumer_function != main_function:
-                                if len(xml_consumer_function.child_list) == 0:
-                                    new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
-                                    new_function_list.add(xml_consumer_function)
-                                # Else do nothing
-                                check = True
-
-                    if check:
-                        if [xml_producer_flow, xml_producer_function] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer_function])
-
-                    if not any(xml_producer_flow in s for s in xml_consumer_function_list):
-                        if [xml_producer_flow, xml_producer_function] not in new_producer_list:
-                            new_producer_list.append([xml_producer_flow, xml_producer_function])
+            new_function_list.add(xml_function)
+            break
+        # Else do nothing
 
     if main_function is not None:
+        for xml_producer_flow, xml_producer_function in xml_producer_function_list:
+            if xml_producer_function == main_function:
+                check = False
+                for xml_consumer_flow, xml_consumer_function in xml_consumer_function_list:
+                    if xml_producer_flow == xml_consumer_flow:
+                        if xml_consumer_function.parent is None:
+                            xml_function_children_list, _ = \
+                                query_object.query_object_children_recursively(main_function)
+                            parent_check = \
+                                orchestrator_object.check_object_is_parent_recursively(xml_consumer_function,
+                                                                                       main_function)
+                            if xml_consumer_function not in xml_function_children_list and parent_check is False:
+                                new_consumer_list.append([xml_producer_flow, xml_consumer_function])
+                                new_function_list.add(xml_consumer_function)
+                                check = True
+                            # ELse do nothing
+                        elif main_function.parent == xml_consumer_function.parent and \
+                                xml_consumer_function != main_function:
+                            new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
+                            new_function_list.add(xml_consumer_function)
+                            check = True
+                        elif xml_consumer_function != main_function:
+                            if len(xml_consumer_function.child_list) == 0:
+                                new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
+                                new_function_list.add(xml_consumer_function)
+                            # Else do nothing
+                            check = True
+
+                if check:
+                    if [xml_producer_flow, xml_producer_function] not in new_producer_list:
+                        new_producer_list.append([xml_producer_flow, xml_producer_function])
+
+                if not any(xml_producer_flow in s for s in xml_consumer_function_list):
+                    if [xml_producer_flow, xml_producer_function] not in new_producer_list:
+                        new_producer_list.append([xml_producer_flow, xml_producer_function])
+
         for xml_consumer_flow, xml_consumer_function in xml_consumer_function_list:
             if xml_consumer_function == main_function:
                 check = False
                 for xml_producer_flow, xml_producer_function in xml_producer_function_list:
                     if xml_producer_flow == xml_consumer_flow:
                         if xml_producer_function.parent is None:
-                            xml_function_children_list, _ = question_answer.get_children(xml_producer_function)
-                            if main_function not in xml_function_children_list:
+                            xml_function_children_list, _ = \
+                                query_object.query_object_children_recursively(main_function)
+                            parent_check = \
+                                orchestrator_object.check_object_is_parent_recursively(xml_producer_function,
+                                                                                       main_function)
+                            if xml_producer_function not in xml_function_children_list and parent_check is False:
                                 new_producer_list.append([xml_producer_flow, xml_producer_function])
                                 new_function_list.add(xml_producer_function)
                                 check = True
+                            # ELse do nothing
                         elif main_function.parent == xml_producer_function.parent and\
                                 xml_producer_function != main_function:
                             new_producer_list.append([xml_producer_flow, xml_producer_function])
@@ -182,8 +195,9 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
                     if [xml_consumer_flow, xml_consumer_function] not in new_consumer_list:
                         new_consumer_list.append([xml_consumer_flow, xml_consumer_function])
 
-    for f in new_function_list:
-        f.child_list.clear()
+        for f in new_function_list:
+            f.child_list.clear()
+    # Else do nothing
 
     return new_function_list, new_consumer_list, new_producer_list
 
@@ -207,8 +221,8 @@ def get_fun_inter_for_fun_elem_context(main_fun_elem, xml_fun_inter_list, xml_fu
     for fun_inter in interface_list:
         for fun_elem in xml_fun_elem_list:
             if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
-                if get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
-                        question_answer.check_not_family(main_fun_elem, fun_elem):
+                if check_is_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
+                        orchestrator_object.check_object_is_not_family(main_fun_elem, fun_elem):
                     fun_elem_list.add(fun_elem)
                     if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
                         fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
@@ -216,7 +230,7 @@ def get_fun_inter_for_fun_elem_context(main_fun_elem, xml_fun_inter_list, xml_fu
     return fun_elem_list, interface_list, fun_elem_inter_list
 
 
-def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
+def check_is_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
     """Returns True if it's highest fun_elem exposing fun_inter"""
     check = False
     if not fun_elem.parent:
@@ -229,21 +243,29 @@ def get_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem):
 
 def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, xml_fun_elem_list):
     """Clean unwanted fun_elem and functions from xml_lists then returns them"""
-    main_fun_elem_list, _ = question_answer.get_children(main_fun_elem, level=diagram_level)
+    main_fun_elem_list, _ = query_object.query_object_children_recursively(main_fun_elem,
+                                                                           None,
+                                                                           None,
+                                                                           None,
+                                                                           diagram_level)
     # Remove (child) elements from xml lists that are below the level asked
     for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if not question_answer.check_not_family(unwanted_fun_elem, main_fun_elem):
+        if not orchestrator_object.check_object_is_not_family(unwanted_fun_elem, main_fun_elem):
             for fun in xml_function_list.copy():
                 if fun.id in unwanted_fun_elem.allocated_function_list:
                     xml_function_list.remove(fun)
             xml_fun_elem_list.remove(unwanted_fun_elem)
     # Remove (child) elements from external fun_elem (main_fun_elem point of view)
     for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if question_answer.check_not_family(unwanted_fun_elem, main_fun_elem) and \
+        if orchestrator_object.check_object_is_not_family(unwanted_fun_elem, main_fun_elem) and \
                 unwanted_fun_elem.parent is None:
-            curr_fun_elem_list, _ = question_answer.get_children(unwanted_fun_elem, level=diagram_level)
+            curr_fun_elem_list, _ = query_object.query_object_children_recursively(unwanted_fun_elem,
+                                                                                   None,
+                                                                                   None,
+                                                                                   None,
+                                                                                   diagram_level)
             for un_fun_elem in xml_fun_elem_list.symmetric_difference(curr_fun_elem_list):
-                if not question_answer.check_not_family(unwanted_fun_elem, un_fun_elem):
+                if not orchestrator_object.check_object_is_not_family(unwanted_fun_elem, un_fun_elem):
                     xml_fun_elem_list.remove(un_fun_elem)
 
     return xml_function_list, xml_fun_elem_list
@@ -354,16 +376,20 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
         for xml_flow, xml_fun in xml_flow_list:
             if flow == xml_flow and xml_fun.parent == main_fun.parent:
                 ext_flow_fun_list.add(xml_fun)
-            elif flow == xml_flow and question_answer.check_not_family(main_fun, xml_fun) and \
+            elif flow == xml_flow and orchestrator_object.check_object_is_not_family(main_fun, xml_fun) and \
                     xml_fun.parent is None:
                 ext_flow_fun_list.add(xml_fun)
-            elif flow == xml_flow and not question_answer.check_parentality(xml_fun, main_fun) and \
-                    [xml_flow, xml_fun.parent] not in xml_flow_list:
+            elif flow == xml_flow and not orchestrator_object.check_object_is_parent_recursively(xml_fun, main_fun) \
+                    and [xml_flow, xml_fun.parent] not in xml_flow_list:
                 ext_flow_fun_list.add(xml_fun)
 
     for fun in ext_flow_fun_list.copy():
         if fun.child_list:
-            function_list_dict = question_answer.get_children(fun, level=level)
+            function_list_dict = query_object.query_object_children_recursively(fun,
+                                                                                None,
+                                                                                None,
+                                                                                None,
+                                                                                level)
             ext_flow_fun_list.update(function_list_dict[0])
             ext_flow_parent_dict.update(function_list_dict[1])
 

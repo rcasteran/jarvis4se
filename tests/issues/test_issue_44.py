@@ -34,14 +34,16 @@ def test_issue_44_plantuml_context(mocker, input_test_issue_44):
     # result = plantuml text without "@startuml ... @enduml" tags
     result = spy.spy_return
     expected = ['component "E" as e <<Functional element>>{\n',
+                'component "E11" as e11 <<Functional element>>{\n',
                 'object "F" as f <<Function>>\n',
+                '}\n',
                 '}\n',
                 'component "E1" as e1 <<Functional element>>{\n',
                 'object "F1" as f1 <<Function>>\n',
                 '}\n',
-                'e1', ' -- ', 'e ', ': I_E_E1\n']
+                'e1', ' -- ', 'e11', ' : I_E_E1\n']
 
     test_lib.remove_xml_file(file_name)
 
     assert all(i in result for i in expected)
-    assert len(result) - len(''.join(expected)) == 4 * len("\'id: xxxxxxxxxx\n")
+    assert len(result) - len(''.join(expected)) == 5 * len("\'id: xxxxxxxxxx\n")

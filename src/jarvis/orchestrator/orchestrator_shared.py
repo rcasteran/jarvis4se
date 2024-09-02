@@ -866,7 +866,7 @@ def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
     if isinstance(alloc_obj, datamodel.FunctionalElement):
         if isinstance(obj_to_alloc, (datamodel.Function, datamodel.State)):
             check = True
-            pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+            pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
             if pair:
                 new_alloc = [0, pair]
         else:
@@ -874,7 +874,7 @@ def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
     elif isinstance(alloc_obj, datamodel.State):
         if isinstance(obj_to_alloc, datamodel.Function):
             check = True
-            pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_6_STATE_LIST])
+            pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_6_STATE_LIST], **kwargs)
             if pair:
                 new_alloc = [1, pair]
         else:
@@ -901,16 +901,16 @@ def check_allocation_rules(alloc_obj, obj_to_alloc, **kwargs):
     return check, new_alloc
 
 
-def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list):
+def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
     """Check allocation rules for fun_elem then returns objects if check"""
     count = None
     out = None
-    check_allocation = question_answer.get_allocation_object(obj_to_alloc, fun_elem_list)
+    check_allocation = question_answer.get_allocation_object(obj_to_alloc, fun_elem_list, **kwargs)
     if check_allocation is not None:
         count = len(check_allocation)
         for item in check_allocation:
             # Checks if they are in the same family
-            if not question_answer.check_not_family(item, fun_elem) and item != fun_elem:
+            if not orchestrator_object.check_object_is_not_family(item, fun_elem) and item != fun_elem:
                 count -= 1
 
     if count in (None, 0):
@@ -923,10 +923,10 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list):
     return out
 
 
-def check_state_allocation(state, function, state_list):
+def check_state_allocation(state, function, state_list, **kwargs):
     """Check allocation rules for state then returns objects if check"""
     out = None
-    check_allocation = question_answer.get_allocation_object(function, state_list)
+    check_allocation = question_answer.get_allocation_object(function, state_list, **kwargs)
     if check_allocation is None:
         state.add_allocated_function(function.id)
         out = [state, function]
@@ -941,7 +941,8 @@ def check_state_allocation(state, function, state_list):
 def check_fun_inter_allocation(fun_inter, data, **kwargs):
     """Check allocation rules for fun_inter then returns objects if check"""
     out = None
-    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
+    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                                                                       **kwargs)
     if check_allocation_fun_inter is None:
         check_fe = check_fun_elem_data_consumption(
             data, fun_inter,
@@ -1138,7 +1139,7 @@ def allocate_all_children_in_element(elem, **kwargs):
     """Recursive allocation for children of State/Function"""
     output_xml = kwargs['output_xml']
     check_parent_allocation(elem, **kwargs)
-    object_type = question_answer.get_object_type(elem[1])
+    object_type = query_object.query_object_type(elem[1], **kwargs)
     if elem[1].child_list:
         for i in elem[1].child_list:
             parent_child = [elem[1], i]
@@ -1152,7 +1153,7 @@ def allocate_all_children_in_element(elem, **kwargs):
                 # We want recursivety so it trigger for (0, 1) keys in the dict
                 add_allocation({0: allocated_child_list}, **kwargs)
     else:
-        if object_type == "state" and elem[1].id not in elem[0].allocated_state_list:
+        if object_type == datamodel.BaseType.STATE and elem[1].id not in elem[0].allocated_state_list:
             # Remove previous allocation if any
             xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
             for xml_fun_elem in xml_fun_elem_list:
@@ -1165,7 +1166,7 @@ def allocate_all_children_in_element(elem, **kwargs):
 
             elem[0].add_allocated_state(elem[1].id)
             add_allocation({5: [elem]}, **kwargs)
-        elif object_type == "function" and elem[1].id not in elem[0].allocated_function_list:
+        elif object_type == datamodel.BaseType.FUNCTION and elem[1].id not in elem[0].allocated_function_list:
             # Remove previous allocation if any
             xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
             for xml_fun_elem in xml_fun_elem_list:
@@ -1376,7 +1377,11 @@ def derived_childs(obj, level):
      if c.parent == obj.derived]
     for child in obj.derived.child_list:
         derived_parent_dict[str(child.id)] = str(obj.id)
-    derived_child_set = question_answer.get_children(obj.derived, level=level)[0]
+    derived_child_set = query_object.query_object_children_recursively(obj.derived,
+                                                                       None,
+                                                                       None,
+                                                                       None,
+                                                                       level)[0]
     derived_child_id_list = {c.id for c in obj.derived.child_list}
     obj.derived.child_list.clear()
     derived_child_set.remove(obj.derived)

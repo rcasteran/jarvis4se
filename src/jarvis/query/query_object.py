@@ -1,7 +1,9 @@
 # Libraries
 
 # Modules
+import datamodel
 from xml_adapter import XmlDictKeyListForObjects
+from jarvis.orchestrator import orchestrator_object
 from . import util
 
 
@@ -57,3 +59,52 @@ def query_object_by_name(p_obj_name_str, **kwargs):
     # Else do nothing
 
     return wanted_object
+
+
+def query_object_type(p_object, **kwargs):
+    if isinstance(p_object.type, datamodel.BaseType):
+        object_type = p_object.type
+    else:
+        _, object_type = orchestrator_object.retrieve_type(p_object.type.name, True, **kwargs)
+
+    return object_type
+
+
+def query_object_children_recursively(p_object, p_object_list=None, p_parent_child_dict=None, p_level_count=None,
+                                      p_requested_level=None):
+    if p_object_list is None:
+        p_object_list = set()
+    # Else do nothing
+
+    if p_parent_child_dict is None:
+        p_parent_child_dict = {}
+    # Else do nothing
+
+    if not p_level_count:
+        p_level_count = 0
+    # Else do nothing
+
+    p_object_list.add(p_object)
+
+    if p_object.child_list:
+        p_level_count += 1
+        if p_requested_level:
+            if (p_level_count - 1) == p_requested_level:
+                p_object.child_list.clear()
+            else:
+                for child in p_object.child_list:
+                    p_parent_child_dict[child.id] = p_object.id
+                    query_object_children_recursively(child, p_object_list, p_parent_child_dict, p_level_count,
+                                                      p_requested_level)
+        else:
+            for child in p_object.child_list:
+                p_parent_child_dict[child.id] = p_object.id
+                query_object_children_recursively(child, p_object_list, p_parent_child_dict, p_level_count,
+                                                  p_requested_level)
+    # Else do nothing
+
+    return p_object_list, p_parent_child_dict
+
+
+def query_object_is_not_family(p_object_a, p_object_b):
+    return orchestrator_object.check_object_is_not_family(p_object_a, p_object_b)

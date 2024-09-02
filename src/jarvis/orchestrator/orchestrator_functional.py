@@ -263,7 +263,18 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
         # Check that parent opposite flow is present (if any)
         is_warned, opposite_function = check_opposite(flow, opposite_list, relationship_str, is_warned)
         if opposite_function:
-            if opposite_function.parent is not None and opposite_function.parent != function and \
+            if opposite_function == function.parent:
+                if any([flow, child_f] in opposite_list for child_f in opposite_function.child_list):
+                    remove_producer_consumer_opposite(flow, opposite_function, opposite_list, output_xml,
+                                                      relationship_str)
+                else:
+                    if relationship_str == 'consumer':
+                        Logger.set_error(__name__, f'{opposite_function.name} is a producer of {flow.name} '
+                                                   f'but one of its child is a {relationship_str}')
+                    else:
+                        Logger.set_error(__name__, f'{opposite_function.name} is a consumer of {flow.name} '
+                                                   f'but one of its child is a {relationship_str}')
+            elif opposite_function.parent is not None and opposite_function.parent != function and \
                     opposite_function.parent != function.parent:
                 if [flow, opposite_function.parent] not in opposite_list:
                     add_producer_consumer_opposite(flow, opposite_function.parent, opposite_list, output_xml,
@@ -273,7 +284,7 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
         # Else do nothing
 
     if function.parent is not None:
-        parent_child_list, parent_child_dict = question_answer.get_children(function.parent)
+        parent_child_list, parent_child_dict = query_object.query_object_children_recursively(function.parent)
 
         if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
             add_producer_consumer_flow_recursively(flow, function.parent, current_list, opposite_list, new_list,
@@ -712,7 +723,7 @@ def add_src_dest(src_dest_lists, output_xml):
         new_dest_list = src_dest_lists[1]
         if new_src_list:
             output_xml.write_transition_source(new_src_list)
-            # Warn the user once writtent and added within xml
+            # Warn the user once written and added within xml
             for source in new_src_list:
                 source[0].set_source(source[1].id)
                 Logger.set_info(__name__,
@@ -720,7 +731,7 @@ def add_src_dest(src_dest_lists, output_xml):
 
         if new_dest_list:
             output_xml.write_transition_destination(new_dest_list)
-            # Warn the user once writtent and added within xml
+            # Warn the user once written and added within xml
             for destination in new_dest_list:
                 destination[0].set_destination(destination[1].id)
                 Logger.set_info(__name__,
@@ -765,8 +776,7 @@ def check_add_exposes(exposes_str_list, **kwargs):
                                       (fun_intf_name, fun_inter, 'Functional Interface'),
                                       'exposes')
         if fun_elem and fun_inter:
-            check_rule = check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list)
-            if fun_inter.id not in fun_elem.exposed_interface_list and check_rule:
+            if fun_inter.id not in fun_elem.exposed_interface_list:
                 output = True
                 fun_elem.add_exposed_interface(fun_inter.id)
                 output_xml.write_element_exposed_interface([[fun_elem, fun_inter]])
@@ -777,37 +787,6 @@ def check_add_exposes(exposes_str_list, **kwargs):
         return 1
 
     return 0
-
-
-def check_fun_elem_inter_families(fun_elem, fun_inter, xml_fun_elem_list):
-    """A fun elem can expose an interface if already allocated to a parent/child and
-    an interface can only be exposed by 2 families of fun_elem"""
-    check = True
-    exposed_fun_elem_list = set()
-    for xml_fun_elem in xml_fun_elem_list:
-        if any(s == fun_inter.id for s in xml_fun_elem.exposed_interface_list) and \
-                xml_fun_elem != fun_elem:
-            exposed_fun_elem_list.add(xml_fun_elem)
-
-    if not exposed_fun_elem_list:
-        return check
-
-    opposite_fun_elem_list = []
-    for elem in exposed_fun_elem_list:
-        if question_answer.check_parentality(elem, fun_elem) or \
-                question_answer.check_parentality(fun_elem, elem):
-            return check
-        else:
-            opposite_fun_elem_list.append(elem)
-
-    for idx in range(0, len(opposite_fun_elem_list) - 1):
-        if not question_answer.check_parentality(
-                opposite_fun_elem_list[idx], opposite_fun_elem_list[idx + 1]) and \
-                not question_answer.check_parentality(opposite_fun_elem_list[idx + 1], opposite_fun_elem_list[idx]):
-            check = False
-            return check
-
-    return check
 
 
 def check_print_wrong_pair_object(object_a, object_b, relationship_type):

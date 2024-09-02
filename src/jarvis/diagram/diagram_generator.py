@@ -693,7 +693,8 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     for fun_elem in new_fun_elem_list:
         temp_fun_set = question_answer.get_allocation_object(
             fun_elem,
-            kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            **kwargs
         )
 
         if isinstance(fun_elem.derived, FunctionalElement):
@@ -707,7 +708,8 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
             if isinstance(get_derived_if_in_view, list):
                 alloc_derived_func_set = question_answer.get_allocation_object(
                     fun_elem.derived,
-                    kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+                    kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                    **kwargs
                 )
                 # if alloc_derived_func_set is not None and temp_fun_set is not None:
                 # allocated_fun_set.update(alloc_derived_func_set)

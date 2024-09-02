@@ -183,7 +183,7 @@ def test_fun_elem_exposes_interface_csv(input_test_fun_elem_exposes_interface):
                       ('Fun_elem_3', 'Fun_elem_4'), ('Fun_elem_4', 'Fun_elem_5'),
                       ('Fun_elem_5', 'Fun_elem_6')}
     expected_exposed = {('Fun_elem', 'Fun_inter'), ('Fun_elem_6', 'Fun_inter'),
-                        ('Fun_elem_ext', 'Fun_inter')}
+                        ('Fun_elem_ext', 'Fun_inter'), ('Fun_elem_ext_2', 'Fun_inter')}
 
     assert len(obj_dict['csv_fun_inter_list']) == 1 and len(obj_dict['csv_fun_elem_list']) == 8
     fun_inter = obj_dict['csv_fun_inter_list'].pop()

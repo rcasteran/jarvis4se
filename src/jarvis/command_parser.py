@@ -51,8 +51,6 @@ class CmdParser:
             (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"The description of (.*?) is ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_description),
-            (r"The ((?!type|alias|source|destination|description).*) of (.*?) is ([^.|\n]*)",
-             orchestrator_viewpoint_attribute.check_add_object_attribute),
             (r"([^. |\n][^.|\n]*) shall ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_requirement),
             (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
             (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)",
@@ -69,6 +67,13 @@ class CmdParser:
             (r"^analyze ([^.|\n]*)", CmdParser.matched_analyze),
             (r"^simulate ([^.|\n]*) between ([^.|\n]*) and ([^.|\n]*)", self.matched_simulate),
             (r"^plot ([^.|\n]*)", self.matched_plot)
+        ]
+
+        self.attribute_command_list = [
+            (r'The ((?!type|alias|source|destination|description).*) of (.*?) is "((.|\n)*?)".',
+             orchestrator_viewpoint_attribute.check_add_object_attribute),
+            (r"The ((?!type|alias|source|destination|description).*) of (.*?) is ([^.|\n]*)",
+             orchestrator_viewpoint_attribute.check_add_object_attribute)
         ]
 
         self.reverse_command_list = (r"([^. |\n][^.|\n]*) composes ([^.|\n]*)",
@@ -92,6 +97,8 @@ class CmdParser:
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
         update_list = []
+
+        # Case of non-attribute command
         for regex, method in self.command_list:
             result_chain = None
             result = None
@@ -121,6 +128,22 @@ class CmdParser:
             if update is not None:
                 if isinstance(update, int):
                     update_list.append(update)
+
+        # Case of attribute command
+        result = re.findall(self.attribute_command_list[0][0], string, flags=re.MULTILINE | re.IGNORECASE)
+        if result:
+            update = self.attribute_command_list[0][1](result, **kwargs)
+            if update is not None:
+                if isinstance(update, int):
+                    update_list.append(update)
+        else:
+            result = re.findall(self.attribute_command_list[1][0], string, flags=re.MULTILINE | re.IGNORECASE)
+            if result:
+                update = self.attribute_command_list[1][1](result, **kwargs)
+                if update is not None:
+                    if isinstance(update, int):
+                        update_list.append(update)
+            # Else do nothing
 
         return update_list
 

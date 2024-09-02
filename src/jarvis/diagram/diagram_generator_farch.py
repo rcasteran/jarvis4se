@@ -102,8 +102,16 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
         return plantuml_text
 
     # Get allocated main function to main_fun_elem
-    allocated_function_list = {f for f in xml_function_list
-                               if f.id in main_fun_elem.allocated_function_list and f.parent is None}
+    allocated_function_list = set()
+    for xml_function in xml_function_list:
+        if xml_function.id in main_fun_elem.allocated_function_list:
+            if xml_function.parent is None:
+                allocated_function_list.add(xml_function)
+            elif main_fun_elem.parent is not None:
+                if xml_function.id in main_fun_elem.parent.allocated_function_list:
+                    allocated_function_list.add(xml_function)
+                # Else do nothing
+            # Else do nothing
 
     new_function_list, new_consumer_list, new_producer_list = util.get_allocated_function_context_lists(
         allocated_function_list,
@@ -130,12 +138,13 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
         for str_id in elem.allocated_function_list.copy():
             if str_id not in [i.id for i in new_function_list]:
                 elem.allocated_function_list.remove(str_id)
-        if any(a == elem for a in main_fun_elem.child_list):
-            fun_elem_list.remove(elem)
 
     # Remove parent for main functional element : we do not care about it in context diagram
     if main_fun_elem.parent:
-        fun_elem_list.remove(main_fun_elem.parent)
+        if main_fun_elem.parent in fun_elem_list:
+            fun_elem_list.remove(main_fun_elem.parent)
+        # Else do nothing
+        main_fun_elem.parent = None
 
     plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                   new_consumer_list,

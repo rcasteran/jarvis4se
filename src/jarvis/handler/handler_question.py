@@ -63,7 +63,8 @@ def question_object_allocation(p_object_str, **kwargs):
     p_object_str = p_object_str[0].strip()
     wanted_object = query_object.query_object_by_name(p_object_str, **kwargs)
     if wanted_object:
-        allocation_list = question_answer.get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+        allocation_list = question_answer.get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                **kwargs)
         if allocation_list:
             object_info = f'"{wanted_object.name}" is allocated to ' \
                            + ", ".join([elem.name for elem in allocation_list])

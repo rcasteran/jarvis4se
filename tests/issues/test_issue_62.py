@@ -72,7 +72,6 @@ def test_issue_62_xml(input_test_issue_62):
                      ('High high high level function', 'High high level function')}
     captured_type = set()
     for type_elem in obj_dict['xml_type_list']:
-        print(type_elem, type_elem.base)
         if isinstance(type_elem.base, BaseType):
             base_type = str(type_elem.base)
         else:

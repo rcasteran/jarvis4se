@@ -134,12 +134,10 @@ def test_fun_elem_exposes_interface_in(capsys, input_test_fun_elem_exposes_inter
                 "[ERROR] coco does not exist, choose a valid name/alias for: "
                 "Fun_elem exposes 'Functional Interface'\n",
                 f"{file_name}.xml updated\n"]
-    # Get last part from capsys
-    last_out = captured.out[-len(''.join(expected)):len(captured.out)]
 
     test_lib.remove_xml_file(file_name)
 
-    assert all(i in last_out for i in expected)
+    assert all(i in captured.out for i in expected)
 
 
 def test_function_output_auto_in(capsys, input_test_function_output_auto_decomposition):

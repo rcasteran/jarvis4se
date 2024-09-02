@@ -8,10 +8,8 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from . import query_object
 from tools import Logger
-
-
-
 
 
 def get_consumes_produces_info(wanted_object, relationship_list):
@@ -20,8 +18,8 @@ def get_consumes_produces_info(wanted_object, relationship_list):
     for elem in relationship_list:
         if elem[1].id == wanted_object.id:
             object_relationship.add(elem[0])
-        if elem[0] == wanted_object.name:
-            object_relationship.add(elem[1].name)
+        if elem[0] == wanted_object:
+            object_relationship.add(elem[1])
     if object_relationship:
         return object_relationship
 
@@ -35,28 +33,28 @@ def get_child_name_list(parent_object, object_list):
     return list(child_list)
 
 
-def get_allocation_object(wanted_object, object_list):
+def get_allocation_object(wanted_object, object_list, **kwargs):
     """Get current allocation for an object"""
     allocation_set = set()
-    object_type = get_object_type(wanted_object)
+    object_type = query_object.query_object_type(wanted_object, **kwargs)
 
-    if object_type == 'function':
+    if object_type == datamodel.BaseType.FUNCTION:
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.allocated_function_list):
                 allocation_set.add(fun_elem)
-    elif object_type == 'state':
+    elif object_type == datamodel.BaseType.STATE:
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.allocated_state_list):
                 allocation_set.add(fun_elem)
-    elif object_type == 'data':
+    elif object_type == datamodel.BaseType.DATA:
         for fun_inter in object_list:
             if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
                 allocation_set.add(fun_inter)
-    elif object_type == 'Functional interface':
+    elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
         for fun_elem in object_list:
             if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
                 allocation_set.add(fun_elem)
-    elif object_type == 'Functional element':
+    elif object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
         for function in object_list:
             if any(s == function.id for s in wanted_object.allocated_function_list):
                 allocation_set.add(function)
@@ -100,7 +98,7 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                 prod_last_fun_elem = None
                 if cons[0] == prod[0] and \
                         check_latest(cons[1], kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) == cons[1].name:
-                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
                     if cons_fun_elem_list:
                         for fun_elem in cons_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
@@ -118,7 +116,7 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                             # Else do nothing
                     # Else do nothing
 
-                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
                     if prod_fun_elem_list:
                         for fun_elem in prod_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
@@ -175,8 +173,7 @@ def check_child_fun_elem_exposing_recursively(p_nb_last_fun_elem_exposing, p_fun
     return p_nb_last_fun_elem_exposing
 
 
-def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmerged=False,
-                                         **kwargs):
+def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmerged=False, **kwargs):
     """
     Gets inputs/outputs for object (Function or Functional Element):
     i.e. what is consumed/produces by wanted object or object allocated functions.
@@ -191,8 +188,8 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
     """
     in_or_out_list = []
 
-    object_type = get_object_type(wanted_object)
-    if object_type == "Functional element":
+    object_type = query_object.query_object_type(wanted_object, **kwargs)
+    if object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
         allocated_function_list = set()
         for allocated_function in wanted_object.allocated_function_list:
             for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
@@ -204,7 +201,7 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
             for function_in_or_out in function_in_or_out_list:
                 if function_in_or_out and function_in_or_out[1] not in [f.name for f in allocated_function_list]:
                     in_or_out_list.append(function_in_or_out)
-    elif object_type == "function":
+    elif object_type == datamodel.BaseType.FUNCTION:
         if direction == 'output':
             in_or_out_list = get_in_out_function(wanted_object,
                                                  kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
@@ -288,68 +285,6 @@ def get_objects_from_id_list(id_list, object_list):
     return output_list
 
 
-
-
-
-def check_parentality(object_a, object_b):
-    """Check recursively if object 'a' is not parent of object 'b'"""
-    if object_b.parent:
-        if object_a == object_b.parent:
-            return True
-        else:
-            return check_parentality(object_a, object_b.parent)
-    else:
-        return False
-
-
-def get_children(element, function_list=None, parent_dict=None, count=None, level=None):
-    """Get children recursively, adds them to function_list and create parend_dict"""
-    if function_list is None:
-        function_list = set()
-    if parent_dict is None:
-        parent_dict = {}
-    if not count:
-        count = 0
-
-    function_list.add(element)
-    if element.child_list:
-        count += 1
-        if level:
-            if (count - 1) == level:
-                element.child_list.clear()
-                return function_list, parent_dict
-        for child in element.child_list:
-            parent_dict[child.id] = element.id
-            get_children(child, function_list, parent_dict, count, level)
-
-    return function_list, parent_dict
-
-
-def check_not_family(object_a, object_b):
-    """Returns True if object_a and object_b are not in the same family"""
-    if not check_parentality(object_a, object_b) and not check_parentality(object_b, object_a):
-        return True
-    else:
-        return False
-
-
-def get_object_type(object_to_check):
-    """From an object, returns its type as string"""
-    obj_type_list = [(datamodel.State, 'state'), (datamodel.Function, 'function'),
-                     (datamodel.Data, 'data'), (datamodel.FunctionalElement, 'Functional element'),
-                     (datamodel.View, 'View'), (datamodel.Transition, 'Transition'),
-                     (datamodel.Attribute, 'Attribute'),
-                     (datamodel.FunctionalInterface, 'Functional interface'),
-                     (datamodel.PhysicalElement, 'Physical element'),
-                     (datamodel.PhysicalInterface, 'Physical interface')]
-    object_type = ''
-    for elem in obj_type_list:
-        if isinstance(object_to_check, elem[0]):
-            object_type = elem[1]
-            return object_type
-    return object_type
-
-
 def get_transition_between_states(p_object_src, p_object_dest, **kwargs):
     transition_object = None
 
@@ -366,10 +301,10 @@ def get_fun_intf_data(wanted_object, _, **kwargs):
     """Case for 'list data Functional Interface' """
     data_dict = {}
     data_list = []
-    fun_elem_exposing = get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+    fun_elem_exposing = get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
     if wanted_object.derived:
         derived_fun_elem_exposing = get_allocation_object(wanted_object.derived,
-                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
         if derived_fun_elem_exposing and fun_elem_exposing:
             fun_elem_exposing = fun_elem_exposing.union(derived_fun_elem_exposing)
 

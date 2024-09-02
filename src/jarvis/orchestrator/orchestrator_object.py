@@ -456,3 +456,26 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                         # Else do nothing
                 # Else do nothing
             # Else do nothing
+
+
+def check_object_is_parent_recursively(p_object_parent, p_object_child):
+    is_parent = False
+
+    if p_object_child.parent:
+        if p_object_parent == p_object_child.parent:
+            is_parent = True
+        else:
+            check_object_is_parent_recursively(p_object_parent, p_object_child.parent)
+    # Else do nothing
+
+    return is_parent
+
+
+def check_object_is_not_family(p_object_a, p_object_b):
+    if not check_object_is_parent_recursively(p_object_a, p_object_b) \
+            and not check_object_is_parent_recursively(p_object_b, p_object_a):
+        is_family = True
+    else:
+        is_family = False
+
+    return is_family

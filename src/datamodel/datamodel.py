@@ -239,22 +239,13 @@ class Function:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if self.derived is not None:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
-
-        if self.alias:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        if self.parent is not None:
-            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
-
-        rep += util.str_child_list(self)
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        rep += util.str_derived(self) + '\n'
+        rep += util.str_parent(self) + '\n'
+        rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
+        # Function has no allocated data
 
         # No display of input_role and operand
 
@@ -339,12 +330,13 @@ class Data:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
+        rep = util.str_type(self) + '\n'
+        # Data has no alias
+        # Data cannot be specialized
+        # Data has no parent
+        # Data has no children
         rep += util.str_allocated_req(self)
+        # Data has no allocated data
 
         # No display of predecessor list
 
@@ -472,19 +464,13 @@ class State:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if len(self.alias) > 0:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        if self.parent is not None:
-            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
-
-        rep += util.str_child_list(self)
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # State cannot be specialized
+        rep += util.str_parent(self) + '\n'
+        rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
+        # State has no allocated data
 
         # No display of allocated function list
 
@@ -605,15 +591,13 @@ class Transition:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if len(self.alias) > 0:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # Transition cannot be specialized
+        # Transition has no parent
+        # Transition has no children
         rep += util.str_allocated_req(self)
+        # Transition has no allocated data
 
         # No display of source, destination and condition_list
 
@@ -786,22 +770,13 @@ class FunctionalElement:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if self.derived is not None:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
-
-        if self.alias:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        if self.parent is not None:
-            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
-
-        rep += util.str_child_list(self)
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        rep += util.str_derived(self) + '\n'
+        rep += util.str_parent(self) + '\n'
+        rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
+        # Functional element has no allocated data
 
         # No display of allocated function, allocated state and exposed interface
 
@@ -883,10 +858,13 @@ class View:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
+        rep = util.str_type(self)
+        # View has no alias
+        # View cannot be specialized
+        # View has no parent
+        # View has no children
+        # View has no allocated requirement
+        # View has no allocated data
 
         # No display of allocated item list
 
@@ -980,17 +958,15 @@ class Attribute:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if len(self.alias) > 0:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # Attribute cannot be specialized
+        # Attribute has no parent
+        # Attribute has no children
+        rep += util.str_allocated_req(self)
+        # Attribute has no allocated data
 
         # No display of described item list
-
-        rep += util.str_allocated_req(self)
 
         return rep
 
@@ -1097,19 +1073,12 @@ class FunctionalInterface:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if self.derived is not None:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
-
-        if self.alias:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        rep += util.str_allocated_req(self)
-
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        rep += util.str_derived(self) + '\n'
+        # Functional interface has no parent
+        # Functional interface has no children
+        rep += util.str_allocated_req(self) + '\n'
         rep += util.str_allocated_data(self)
 
         return rep
@@ -1252,22 +1221,14 @@ class PhysicalElement:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if self.derived is not None:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
-
-        if self.alias:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        if self.parent is not None:
-            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
-
-        rep += util.str_child_list(self)
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        rep += util.str_derived(self) + '\n'
+        rep += util.str_parent(self) + '\n'
+        rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
+        # Physical element has no allocated data
+        # Physical element has no allocated data
 
         # No display of allocated functional element list and exposed interface list
 
@@ -1376,18 +1337,13 @@ class PhysicalInterface:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if self.derived is not None:
-            rep += f'"{self.name}" is derived from object with identifier {self.derived.id}.\n'
-
-        if self.alias:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        rep += util.str_derived(self) + '\n'
+        # Physical interface has no parent
+        # Physical interface has no children
         rep += util.str_allocated_req(self)
+        # Physical interface has no allocated data
 
         # No display of allocated functional interface list
 
@@ -1457,10 +1413,13 @@ class Type:
         @param[in] self this class instance
         @return string
         """
-        rep = f'"{self.name}" is a type with identifier {self.id}.\n'
-
-        if len(self.alias) > 0:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
+        rep = f'"{self.name}" is a type (id: {self.id}).\n'
+        rep += util.str_alias(self)
+        # Type cannot be specialized
+        # Type has no parent
+        # Type has no children
+        # Type has no allocated requirement
+        # Type has no allocated data
 
         # No display of base type
 
@@ -1572,18 +1531,13 @@ class Requirement:
         @param[in] self this class instance
         @return string
         """
-        if self.type == type(self).__name__:
-            rep = f'"{self.name}" is a {self.type} of class {type(self).__name__} with identifier {self.id}.\n'
-        else:
-            rep = f'"{self.name}" is a {self.type} with identifier {self.id}.\n'
-
-        if len(self.alias) > 0:
-            rep += f'"{self.name}" alias is {self.alias}.\n'
-
-        if self.parent is not None:
-            rep += f'"{self.name}" has "{self.parent.name}" with identifier {self.parent.id} as parent.\n'
-
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # Requirement cannot be specialized
+        rep += util.str_parent(self) + '\n'
         rep += util.str_child_list(self)
+        # Requirement has no allocated requirement
+        # Requirement has no allocated data
 
         # No display of description
 

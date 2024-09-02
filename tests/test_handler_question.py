@@ -31,9 +31,9 @@ def test_simple_function_handler_question(capsys, input_test_simple_function):
     # result is a text about F1 properties
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
-                '"F1" is a Function with identifier ',
+                '"F1" is a FUNCTION (id:',
                 '"F1" has no child.\n',
-                '"F1" has no allocated requirement.\n']
+                '"F1" has no allocated requirement.']
 
     test_lib.remove_xml_file(file_name)
 
@@ -64,13 +64,12 @@ def test_function_output_auto_handler_question(capsys, input_test_function_outpu
 
     # result is a text about F properties
     captured = capsys.readouterr()
-    print(captured)
     expected = [f"{file_name}.xml parsed\n",
-                '"F" is a Function with identifier ',
+                '"F" is a FUNCTION (id:',
                 '"F" has 2 children:\n',
-                ' - "F1" with identifier ',
-                ' - "F2" with identifier ',
-                '"F" has no allocated requirement.\n']
+                ' - "F1" (id:',
+                ' - "F2" (id:',
+                '"F" has no allocated requirement.']
 
     test_lib.remove_xml_file(file_name)
 

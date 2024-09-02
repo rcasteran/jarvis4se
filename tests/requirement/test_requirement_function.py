@@ -183,5 +183,4 @@ def test_function_requirement(capsys, monkeypatch, input_test_function_requireme
                 f'{file_name}.xml updated']
 
     test_lib.remove_xml_file(file_name)
-    print(captured.out)
     assert all(i in captured.out for i in expected)

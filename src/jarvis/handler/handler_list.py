@@ -2,6 +2,7 @@
 
 
 # Modules
+import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
@@ -32,7 +33,7 @@ def list_object(p_str_list, **kwargs):
             Logger.set_error(__name__,
                              f"Object '{object_name}' does not exist")
         else:
-            object_type = question_answer.get_object_type(wanted_object)
+            object_type = query_object.query_object_type(wanted_object, **kwargs)
             wanted_list = switch_object_list(type_name, wanted_object, object_type, **kwargs)
             if wanted_list:
                 answer_list.append(wanted_list)
@@ -44,12 +45,14 @@ def list_object(p_str_list, **kwargs):
 def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
     """Switch depending on list's type and object's type """
     object_list = {}
-    if object_type in ("state", "function", "Functional element"):
-        if object_type == "state" and type_list_str in ("input", "output"):
+    if object_type in (datamodel.BaseType.STATE,
+                       datamodel.BaseType.FUNCTION,
+                       datamodel.BaseType.FUNCTIONAL_ELEMENT):
+        if object_type == datamodel.BaseType.STATE and type_list_str in ("input", "output"):
             report_no_list_available(wanted_object, object_type)
-        elif object_type != "state" and type_list_str in ("function", "transition"):
+        elif object_type != datamodel.BaseType.STATE and type_list_str in ("function", "transition"):
             report_no_list_available(wanted_object, object_type)
-        elif object_type != "Functional element" and type_list_str == "interface":
+        elif object_type != datamodel.BaseType.FUNCTIONAL_ELEMENT and type_list_str == "interface":
             report_no_list_available(wanted_object, object_type)
         else:
             switch_type_list = {
@@ -69,7 +72,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
                 # Else do nothing
             else:
                 report_no_list_available(wanted_object, object_type)
-    elif object_type == "Functional interface" and type_list_str == "data":
+    elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE and type_list_str == "data":
         object_list = question_answer.get_fun_intf_data(wanted_object, object_type, **kwargs)
 
         if not object_list:
@@ -196,11 +199,11 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
     """Case for 'list interface Functional element'"""
     interface_dict = {}
     id_list = wanted_object.exposed_interface_list
-    main_fun_elem_child_list, _ = question_answer.get_children(wanted_object)
+    main_fun_elem_child_list, _ = query_object.query_object_children_recursively(wanted_object)
     if wanted_object.derived:
         id_list = id_list.union(wanted_object.derived.exposed_interface_list)
         main_fun_elem_child_list = main_fun_elem_child_list.union(
-            question_answer.get_children(wanted_object.derived)[0])
+            query_object.query_object_children_recursively(wanted_object.derived)[0])
 
     fun_inter_list = question_answer.get_objects_from_id_list(id_list,
                                                               kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
@@ -213,12 +216,12 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
             for fun_elem in kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]:
                 if fun_elem not in main_fun_elem_child_list and \
                         interface.id in fun_elem.exposed_interface_list and \
-                        question_answer.check_not_family(fun_elem, wanted_object):
+                        query_object.query_object_is_not_family(fun_elem, wanted_object):
                     exposing_fun_elem.add((interface, fun_elem))
 
         interface_list = set()
         for k in exposing_fun_elem:
-            child_list, _ = question_answer.get_children(k[1])
+            child_list, _ = query_object.query_object_children_recursively(k[1])
             child_list.remove(k[1])
             if child_list:
                 check = True

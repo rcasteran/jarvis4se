@@ -311,12 +311,9 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
                                                             unmerged_data_list,
                                                             function_list,
                                                             fun_elem_list,
-                                                            is_decomposition=False)
-
+                                                            is_decomposition=True)
         data_flow_list = concatenate_flows(data_flow_list)
-
     else:
-
         # Filter consumers and producers list in order to create data flow
         data_flow_list = get_exchanged_flows(consumer_function_list, producer_function_list,
                                              {}, concatenate=True)
@@ -343,20 +340,43 @@ def get_fun_elem_context_diagram(function_list, consumer_function_list, producer
         string_obj.create_object(function, xml_attribute_list)
 
     for fun_elem in fun_elem_list:
-        string_obj.create_component(fun_elem)
-        check_function = False
-        for f in function_list:
-            if any(a == f.id for a in fun_elem.allocated_function_list):
-                if len(fun_elem.allocated_function_list) > 1:
-                    check_function = False
-                else:
-                    check_function = True
-                write_function_object(string_obj, f, input_flow_list, output_flow_list,
-                                      check_function, xml_attribute_list, component_obj=fun_elem)
-        if not check_function:
-            string_obj.append_string('}\n')
-            string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+        if not fun_elem.parent:
+            string_obj.create_component(fun_elem)
+            fun_elem_child_function_list = set()
+            for fun_elem_child in fun_elem.child_list:
+                string_obj.create_component(fun_elem_child)
+                check_function_child = False
+                for child_f in function_list:
+                    if any(a == child_f.id for a in fun_elem_child.allocated_function_list):
+                        if len(fun_elem_child.allocated_function_list) > 1:
+                            check_function_child = False
+                        else:
+                            check_function_child = True
+                        write_function_object(string_obj, child_f, input_flow_list, output_flow_list,
+                                              check_function_child, xml_attribute_list, component_obj=fun_elem_child)
+                        fun_elem_child_function_list.add(child_f)
+                    # Else do nothing
+                if not check_function_child:
+                    string_obj.append_string('}\n')
+                    string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+                # Else do nothing
 
+            check_function = False
+            for f in function_list:
+                if any(a == f.id for a in fun_elem.allocated_function_list):
+                    if f not in fun_elem_child_function_list:
+                        if len(fun_elem.allocated_function_list) > 1:
+                            check_function = False
+                        else:
+                            check_function = True
+                        write_function_object(string_obj, f, input_flow_list, output_flow_list,
+                                              check_function, xml_attribute_list, component_obj=fun_elem)
+                    # Else do nothing
+            if not check_function:
+                string_obj.append_string('}\n')
+                string_obj.create_component_attribute(fun_elem, xml_attribute_list)
+            # Else do nothing
+        # Else do nothing : fun_elem is a child
     string_obj.create_input_flow(input_flow_list)
     string_obj.create_output_flow(output_flow_list)
     string_obj.create_data_flow(data_flow_list)
@@ -381,8 +401,8 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
     @return functional interfaces list
     """
 
-    interface_list = []
-    removed_data_flow_list = []
+    interface_list = {}
+    removed_data_flow_list = {}
     initial_data = list(data_flow_list)
     idx = 0
     # Get all fun_inter with allocated data within data_flow_list and create interface list
@@ -423,12 +443,16 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
                                     if (first_fun and is_first_fun_elem and not second_fun) or \
                                             (second_fun and is_second_fun_elem and not first_fun) or \
                                             (first_fun and is_first_fun_elem and second_fun and is_second_fun_elem):
-                                        Logger.set_debug(__name__, f"[{first_fun}, {second_fun}, {fun_inter}] added")
-                                        interface_list.insert(idx, [first_fun, second_fun, fun_inter])
-                                        removed_data_flow_list.insert(idx, data_flow)
+                                        if [first_fun, second_fun, fun_inter] not in interface_list.values():
+                                            Logger.set_debug(__name__, f"[{first_fun}, {second_fun}, {fun_inter}] added")
+                                            interface_list[idx] = [first_fun, second_fun, fun_inter]
+                                            idx += 1
+                                        # Else do nothing
+                                        if not removed_data_flow_list.get(idx):
+                                            removed_data_flow_list[idx] = [data_flow]
+                                        else:
+                                            removed_data_flow_list[idx].append(data_flow)
                                         data_flow_list.remove(data_flow)
-                                        idx += 1
-                                        break
         else:
             Logger.set_info(__name__, f"{fun_inter.name} does not have any allocated data (no display)")
 
@@ -438,10 +462,10 @@ def get_interface_list(fun_inter_list, data_list, data_flow_list, function_list,
         return None, initial_data
 
     # (re)Add [producer, consumer, data_name] to data_flow_list if no interface exposed
-    if any(isinstance(s, list) for s in interface_list):
-        for idx, rest_inter in enumerate(interface_list):
-            if isinstance(rest_inter, list):
-                data_flow_list.append(removed_data_flow_list[idx])
+    for key, value in interface_list.items():
+        if len(value) > 0:
+            for flow in removed_data_flow_list[idx]:
+                data_flow_list.append(flow)
 
     return output_list, data_flow_list
 
@@ -458,64 +482,105 @@ def get_fun_elem_from_fun_inter(interface_list, fun_elem_list, is_decomposition=
     """
 
     output_list = []
-    for ix, (first, second, interface) in enumerate(interface_list):
-        fun_elem_1 = None
-        fun_elem_2 = None
-        if first:
-            for elem_1 in fun_elem_list:
-                if any(s == interface.id for s in elem_1.exposed_interface_list):
-                    if is_decomposition:
-                        if not elem_1.child_list:
-                            fun_elem_1 = elem_1
-                        else:
-                            check = True
-                            for child in elem_1.child_list:
-                                if any(s == interface.id for s in child.exposed_interface_list):
-                                    check = False
-                            if check:
-                                fun_elem_1 = elem_1
-                    else:
-                        fun_elem_1 = elem_1
+    for ix, value in interface_list.items():
+        first_fun = value[0]
+        second_fun = value[1]
+        interface = value[2]
+        first_fun_elem = None
+        second_fun_elem = None
 
-        if second:
-            for elem_2 in fun_elem_list:
-                if not first:
+        if first_fun:
+            for fun_elem in fun_elem_list:
+                if any(s == interface.id for s in fun_elem.exposed_interface_list) \
+                        and any(s == first_fun.id for s in fun_elem.allocated_function_list):
                     if is_decomposition:
-                        if any(s == interface.id for s in elem_2.exposed_interface_list):
-                            if not elem_2.child_list:
-                                fun_elem_2 = elem_2
-                            else:
-                                check = True
-                                for child in elem_2.child_list:
-                                    if any(s == interface.id for s in child.exposed_interface_list):
-                                        check = False
-                                if check:
-                                    fun_elem_2 = elem_2
+                        if not fun_elem.child_list:
+                            first_fun_elem = fun_elem
+                        else:
+                            first_fun_elem = fun_elem
+                            for child in fun_elem.child_list:
+                                if any(s == interface.id for s in child.exposed_interface_list) \
+                                        and any(s == first_fun.id for s in child.allocated_function_list):
+                                    first_fun_elem = child
                     else:
-                        fun_elem_2 = elem_2
-                else:
-                    if any(s == interface.id for s in elem_2.exposed_interface_list) and \
-                            elem_2 != fun_elem_1:
+                        first_fun_elem = fun_elem
+
+        if second_fun:
+            is_internal_flow = False
+            for fun_elem in fun_elem_list:
+                if fun_elem != first_fun_elem:
+                    if any(s == interface.id for s in fun_elem.exposed_interface_list) \
+                            and any(s == second_fun.id for s in fun_elem.allocated_function_list):
                         if is_decomposition:
-                            if not elem_2.child_list:
-                                fun_elem_2 = elem_2
+                            if not fun_elem.child_list:
+                                second_fun_elem = fun_elem
                             else:
-                                check = True
-                                for child in elem_2.child_list:
-                                    if any(s == interface.id for s in child.exposed_interface_list):
-                                        check = False
-
-                                if check:
-                                    fun_elem_2 = elem_2
+                                second_fun_elem = fun_elem
+                                for child in fun_elem.child_list:
+                                    if any(s == interface.id for s in child.exposed_interface_list) \
+                                            and any(s == second_fun.id for s in child.allocated_function_list):
+                                        second_fun_elem = child
                         else:
-                            fun_elem_2 = elem_2
+                            second_fun_elem = fun_elem
+                elif any(s == second_fun.id for s in fun_elem.allocated_function_list):
+                    is_internal_flow = True
 
-        if not (not fun_elem_1 and not fun_elem_2):
-            if [fun_elem_1, fun_elem_2, interface] not in output_list:
-                output_list.append([fun_elem_1, fun_elem_2, interface])
-            interface_list[ix] = False
+            if is_internal_flow and second_fun_elem is None:
+                second_fun_elem = first_fun_elem
+            # Else do nothing
+
+        if first_fun_elem or second_fun_elem:
+            if first_fun_elem != second_fun_elem \
+                    and not check_is_fun_inter([first_fun_elem, second_fun_elem, interface], output_list,
+                                               is_decomposition)\
+                    and not check_is_fun_inter([second_fun_elem, first_fun_elem, interface], output_list,
+                                               is_decomposition):
+                output_list.append([first_fun_elem, second_fun_elem, interface])
+            # Else do nothing
+            interface_list[ix] = []
 
     return output_list, interface_list
+
+
+def check_is_fun_inter(p_interface, p_interface_list, is_decomposition=True):
+    is_fun_inter = (p_interface in p_interface_list)
+
+    if is_decomposition:
+        if not is_fun_inter:
+            if p_interface[0]:
+                if p_interface[0].parent:
+                    if [p_interface[0].parent, p_interface[1], p_interface[2]] in p_interface_list:
+                        p_interface_list.remove([p_interface[0].parent, p_interface[1], p_interface[2]])
+                # Else do nothing
+
+                if not is_fun_inter:
+                    for child in p_interface[0].child_list:
+                        if [child, p_interface[1], p_interface[2]] in p_interface_list:
+                            is_fun_inter = True
+                            break
+                # Else do nothing
+            # Else do nothing
+        # Else do nothing
+
+        if not is_fun_inter:
+            if p_interface[1]:
+                if p_interface[1].parent:
+                    if [p_interface[0], p_interface[1].parent, p_interface[2]] in p_interface_list:
+                        p_interface_list.remove([p_interface[0], p_interface[1].parent, p_interface[2]])
+                # Else do nothing
+
+                if not is_fun_inter:
+                    for child in p_interface[1].child_list:
+                        if [p_interface[0], child, p_interface[2]] in p_interface_list:
+                            is_fun_inter = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+            # Else do nothing
+        # Else do nothing
+    # Else do nothing
+
+    return is_fun_inter
 
 
 def check_child_allocation(string_obj, fun_elem, function_list, xml_attribute_list):
@@ -597,7 +662,6 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                                                             union(external_function_list),
                                                             fun_elem_list,
                                                             is_decomposition=True)
-
         data_flow_list = concatenate_flows(data_flow_list)
 
     else:
