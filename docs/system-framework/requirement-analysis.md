@@ -4,7 +4,7 @@ Requirement analysis is the systematic examination of a [goal](broken-reference)
 
 From a methodological point of view:
 
-* A goal is achieved by an [activity](broken-reference) that can be performed by the [system](broken-reference), an [actor](broken-reference) or an [enabling system](broken-reference). If the goal cannot be achieved by a single activity, then it can be refined into different subgoals up to identify an activity for each subgoal in the [operational analysis](operational-analysis.md). Either goal is satisfied if all subgoals are satisfied (AND-decomposition) or goal is satisfied if at least one subgoal is satisfied (OR-decomposition)
+* A goal is achieved by an [activity](broken-reference) that can be performed by the [system](broken-reference), an [actor](broken-reference) or an [enabling system](broken-reference). If the goal cannot be achieved by a single activity, then it can be refined into different subgoals up to identify an activity for each subgoal in the [operational analysis](operational-analysis.md).A goal is satisfied if all subgoals are satisfied (AND-decomposition) or if at least one subgoal is satisfied (OR-decomposition)
 * A goal can be in conflict with another goal: in this case only one of the two goals can be achieved by an activity
 * A requirement is specifying a behavior or a quality of the activity to be perfomed to achieve a goal. A requirement that specifies a behavior or a quality of an activity performed by the system can be derived into different subrequirements up to identify a system element in the [physical architecture definition](physical-architecture-definition.md).
 
@@ -49,21 +49,24 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 The first command is only required when the attribute does not exist.
 {% endhint %}
 
-### Description definition
+### Text definition
 
-JARVIS4SE allows to define the description _\<requirement\_description>_ of a requirement named _\<requirement name>_ through the following command:
+JARVIS4SE allows to define the text _\<requirement\_text>_ of a requirement named _\<requirement name>_ through the following command:
 
 ```
-The description of <requirement_name> is <requirement_description>
+The text of <requirement_name> is <requirement_text>
 ```
 
-{% hint style="info" %}
-The description of a requirement is handled as an attribute of the requirement named "description".\
-Therefore using this command multiple times for the same transition will only keep the latest description value.
+{% hint style="danger" %}
+The text of a requirement is handled as an attribute of the requirement named "text".\
+Therefore:
+
+* Using this command multiple times for the same requirement will only keep the latest text value.
+* JARVIS4SE does not allow to define a new attribute named "text"
 {% endhint %}
 
 {% hint style="info" %}
-The description of a requirement must be a sentence containing the modal "shall".
+The text of a requirement must be a sentence containing the modal "shall".
 {% endhint %}
 
 ## Requirement decomposition

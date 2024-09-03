@@ -186,10 +186,13 @@ JARVIS4SE allows to define the source of a transition named _\<transition name>_
 The source of <transition name> is <state name>
 ```
 
-{% hint style="info" %}
+{% hint style="danger" %}
 The source of a transition is handled as an attribute of the transition named "source".
 
-Therefore using this command multiple times for the same transition will only keep the latest state name.
+Therefore:
+
+* Using this command multiple times for the same transition will only keep the latest state name.
+* JARVIS4SE does not allow to define a new attribute named "source"
 {% endhint %}
 
 #### Destination definition
@@ -200,10 +203,13 @@ JARVIS4SE allows to define the destination of a transition named _\<transition n
 The destination of <transition name> is <state name>
 ```
 
-{% hint style="info" %}
+{% hint style="danger" %}
 The destination of a transition is handled as an attribute of the transition named "destination".&#x20;
 
-Therefore using this command multiple times for the same transition will only keep the latest state name.
+Therefore:
+
+* Using this command multiple times for the same transition will only keep the latest state name.
+* JARVIS4SE does not allow to define a new attribute named "destination"
 {% endhint %}
 
 #### Condition definition
@@ -214,7 +220,7 @@ JARVIS4SE allows to add a transition condition _\<transition condition value>_ f
 Condition for <transition name> is: <transition condition value>
 ```
 
-{% hint style="info" %}
+{% hint style="danger" %}
 Two transition conditions for the same transition differs only in their syntax.
 
 For exemple, the transition conditions "VOLTAGE > 7V" and "VOLTAGE > 7 V" are considered to be different conditions.
@@ -403,7 +409,7 @@ JARVIS4SE allows to allocate a function named \<function name> to a state named 
 <state name> allocates <function name>
 ```
 
-{% hint style="info" %}
+{% hint style="danger" %}
 When allocating a function to a state, if the function is allocated to a functional element, then the state is allocated to this functional element.&#x20;
 
 Reversewise, when allocating a function to a state, if the state is allocated to a functional element, then the function is allocated to this functional element.
