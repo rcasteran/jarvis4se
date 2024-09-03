@@ -391,15 +391,15 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
 
     for obj in object_instance_list:
         for xml_requirement in xml_requirement_list:
-            if xml_requirement.description:
+            if xml_requirement.text:
                 req_subject_object = orchestrator_viewpoint_requirement.retrieve_req_subject_object(
-                    xml_requirement.description, **kwargs)
+                    xml_requirement.text, **kwargs)
                 req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
-                    xml_requirement.description, **kwargs)
+                    xml_requirement.text, **kwargs)
                 req_condition_object_list = orchestrator_viewpoint_requirement.retrieve_req_condition_object_list(
-                    xml_requirement.description, **kwargs)
+                    xml_requirement.text, **kwargs)
                 req_temporal_object_list = orchestrator_viewpoint_requirement.retrieve_req_temporal_object_list(
-                    xml_requirement.description, **kwargs)
+                    xml_requirement.text, **kwargs)
 
                 if req_subject_object is not None:
                     if obj == req_subject_object:

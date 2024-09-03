@@ -116,6 +116,7 @@ def test_simple_function_allocation_manual_requirement_function(capsys, monkeypa
 
     test_lib.remove_xml_file(file_name)
 
+    print(captured.out)
     assert all(i in captured.out for i in expected)
 
 
@@ -154,22 +155,15 @@ def test_function_requirement(capsys, monkeypatch, input_test_function_requireme
                 f'{file_name}.xml parsed\n',
                 f'Requirement identified about To calculate y: To calculate y shall calculate y as follows: y = a*x+b\n',
                 f'[WARNING] Function To calculate y does not consume nor produce Data y\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data y\n',
                 f'Requirement identified about To calculate y: F1 shall calculate y in less than 10 msec\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data y\n',
                 f'Requirement identified about To calculate y: If a is greater than 1, '
                 f'then F1 shall consider a as being equal to 1\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data a\n',
                 f'[WARNING] Function To calculate y does not consume nor produce Data a\n',
                 f'Requirement identified about To calculate y: When a is set to 0, '
                 f'F1 shall consider b as being equal to 10\n',
                 f'[WARNING] Function To calculate y does not consume nor produce Data b\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data a\n',
                 f'Requirement identified about To calculate y: When b is changed, if a is set to 0, '
                 f'then F1 shall consider b as unchanged\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data b\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data a\n',
-                f'[WARNING] Function To calculate y does not consume nor produce Data b\n',
                 f'F1_req_1 is a requirement\n',
                 f'F1_req_2 is a requirement\n',
                 f'F1_req_3 is a requirement\n',

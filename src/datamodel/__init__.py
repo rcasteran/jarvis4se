@@ -33,3 +33,4 @@ from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel
 from .datamodel import DesignAttributeLabel
 from .datamodel import InitialValueAttributeLabel
+from .datamodel import RequirementTextLabel

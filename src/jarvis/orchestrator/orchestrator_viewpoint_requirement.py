@@ -49,7 +49,7 @@ def check_add_requirement(p_str_list, **kwargs):
         desc_before_modal = p_str[0].replace('"', "")
         desc_after_modal = p_str[1].replace('"', "")
 
-        if not desc_before_modal.startswith("The description of "):
+        if not desc_before_modal.startswith("The text of "):
             req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(desc_before_modal,
                                                                                         desc_after_modal)
 
@@ -73,8 +73,8 @@ def check_add_requirement(p_str_list, **kwargs):
                     Logger.set_warning(__name__,
                                        f'Subject "{req_subject}" of the requirement is unknown')
 
-                # Check if a requirement with the same description already exist
-                sequence_ratio_list = evaluate_description_similarities(req_subject,
+                # Check if a requirement with the same text already exist
+                sequence_ratio_list = evaluate_text_similarities(req_subject,
                                                                         req_object,
                                                                         req_conditional,
                                                                         req_temporal,
@@ -84,7 +84,7 @@ def check_add_requirement(p_str_list, **kwargs):
                     similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
                     Logger.set_info(__name__,
                                     f"Requirement {similar_requirement_name} has the same "
-                                    f"description (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
+                                    f"text (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
                 else:
                     req_allocated_object_list = check_requirement_relationship(req_subject_object,
                                                                                req_object,
@@ -130,22 +130,22 @@ def check_add_requirement(p_str_list, **kwargs):
     return update
 
 
-def check_add_description(p_description_str_list, **kwargs):
+def check_add_text(p_text_str_list, **kwargs):
     xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
-    description_list = []
+    text_list = []
 
     # Create a list with all transition names/aliases already in the xml
     xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
-    for elem in p_description_str_list:
+    for elem in p_text_str_list:
         requirement_str = elem[0].replace('"', "")
-        description_str = elem[1].replace('"', "")
+        text_str = elem[1].replace('"', "")
 
-        if 'shall' in description_str:
+        if 'shall' in text_str:
             if any(requirement_str in s for s in xml_requirement_name_list):
                 for requirement in xml_requirement_list:
                     if requirement_str == requirement.name or requirement_str == requirement.alias:
                         req_subject, req_object, req_conditional, req_temporal = \
-                            detect_req_pattern(description_str.lstrip(' '))
+                            detect_req_pattern(text_str.lstrip(' '))
 
                         # Retrieve the subject in object list
                         req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject,
@@ -166,8 +166,8 @@ def check_add_description(p_description_str_list, **kwargs):
                                                    f'Subject "{req_subject}" of the requirement {requirement.name} '
                                                    f'is unknown')
 
-                            # Check if a requirement with the same description already exist
-                            sequence_ratio_list = evaluate_description_similarities(req_subject,
+                            # Check if a requirement with the same text already exist
+                            sequence_ratio_list = evaluate_text_similarities(req_subject,
                                                                                     req_object,
                                                                                     req_conditional,
                                                                                     req_temporal,
@@ -177,7 +177,7 @@ def check_add_description(p_description_str_list, **kwargs):
                                 similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
                                 Logger.set_info(__name__,
                                                 f"Requirement {similar_requirement_name} has the same "
-                                                f"description (confidence factor: "
+                                                f"text (confidence factor: "
                                                 f"{sequence_ratio_list[similar_requirement_name]})")
                             else:
                                 req_allocated_object_list = check_requirement_relationship(req_subject_object,
@@ -185,7 +185,7 @@ def check_add_description(p_description_str_list, **kwargs):
                                                                                            req_conditional,
                                                                                            req_temporal,
                                                                                            **kwargs)
-                                description_list.append([requirement, description_str.lstrip(' '),
+                                text_list.append([requirement, text_str.lstrip(' '),
                                                          req_subject_object,
                                                          req_allocated_object_list])
                             # Else do nothing
@@ -196,21 +196,21 @@ def check_add_description(p_description_str_list, **kwargs):
                                  f"The requirement {requirement_str} does not exist")
         else:
             Logger.set_error(__name__,
-                             f"Description bad formatted: {description_str}")
+                             f"text bad formatted: {text_str}")
 
-    update = add_requirement_description(description_list, **kwargs)
+    update = add_requirement_text(text_list, **kwargs)
 
     return update
 
 
-def evaluate_description_similarities(p_req_subject, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
+def evaluate_text_similarities(p_req_subject, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
     xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     sequence_ratio_list = {}
 
     for xml_requirement in xml_requirement_list:
-        if xml_requirement.description:
+        if xml_requirement.text:
             xml_requirement_subject, xml_requirement_object, xml_requirement_conditional, \
-                xml_requirement_temporal = detect_req_pattern(xml_requirement.description)
+                xml_requirement_temporal = detect_req_pattern(xml_requirement.text)
 
             sequence_subject = difflib.SequenceMatcher(None,
                                                        xml_requirement_subject,
@@ -385,7 +385,7 @@ def add_requirement(p_requirement_list, **kwargs):
         if requirement_item[0] not in xml_requirement_name_list:
             new_requirement = datamodel.Requirement()
             new_requirement.set_name(str(requirement_item[0]))
-            new_requirement.set_description(str(requirement_item[1]))
+            new_requirement.set_text(str(requirement_item[1]))
             # Generate and set unique identifier of length 10 integers
             new_requirement.set_id(util.get_unique_id())
             # alias is 'none' by default
@@ -437,30 +437,30 @@ def add_requirement(p_requirement_list, **kwargs):
     return update
 
 
-def add_requirement_description(p_description_list, **kwargs):
+def add_requirement_text(p_text_list, **kwargs):
     output_xml = kwargs['output_xml']
     update = 0
 
-    for description_item in p_description_list:
+    for text_item in p_text_list:
         new_allocation_list = []
         # Test if allocated object is identified in the requirement subject
-        if description_item[2]:
-            description_item[2].add_allocated_requirement(description_item[0].id)
-            new_allocation_list.append([description_item[2], description_item[0]])
+        if text_item[2]:
+            text_item[2].add_allocated_requirement(text_item[0].id)
+            new_allocation_list.append([text_item[2], text_item[0]])
         # Else do nothing
 
         # Test if allocated object is identified in the requirement object or conditional part or temporal part
-        if description_item[3]:
-            for item in description_item[3]:
+        if text_item[3]:
+            for item in text_item[3]:
                 if item:
-                    item.add_allocated_requirement(description_item[0].id)
-                    new_allocation_list.append([item, description_item[0]])
+                    item.add_allocated_requirement(text_item[0].id)
+                    new_allocation_list.append([item, text_item[0]])
                 # Else do nothing
         # Else do nothing
 
-        output_xml.write_requirement_description([[description_item[0], description_item[1]]])
+        output_xml.write_requirement_text([[text_item[0], text_item[1]]])
         Logger.set_info(__name__,
-                        f"{description_item[0].name} description is {description_item[1]}")
+                        f"{text_item[0].name} text is {text_item[1]}")
 
         if new_allocation_list:
             output_xml.write_object_allocation(new_allocation_list)
@@ -569,8 +569,8 @@ def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
     for req in p_allocated_parent.allocated_req_list:
         for xml_req in kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]:
             if xml_req.id == req.id:
-                parent_req_object = retrieve_requirement_object(xml_req.description.split("shall")[1])
-                req_object = retrieve_requirement_object(p_requirement.description.split("shall")[1])
+                parent_req_object = retrieve_requirement_object(xml_req.text.split("shall")[1])
+                req_object = retrieve_requirement_object(p_requirement.text.split("shall")[1])
                 sequence = difflib.SequenceMatcher(None, parent_req_object, req_object)
                 Logger.set_debug(__name__, f"{parent_req_object} from requirement {xml_req.id} compared with "
                                            f"{req_object} from requirement {p_requirement.id} - confidence factor: "
@@ -599,9 +599,9 @@ def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
 def retrieve_requirement_object(p_requirement_object_str):
     """@ingroup jarvis
     @anchor retrieve_requirement_object
-    Retrieve requirement object from requirement description
+    Retrieve requirement object from requirement text
 
-    @param[in] p_requirement_object_str : requirement description
+    @param[in] p_requirement_object_str : requirement text
     @return requirement object
     """
     req_object = ''
@@ -670,9 +670,9 @@ def check_add_derived(p_str_list, **kwargs):
 def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     """@ingroup jarvis
     @anchor retrieve_req_proper_noun_object
-    Retrieve list of objects named as proper nouns found in requirement description
+    Retrieve list of objects named as proper nouns found in requirement text
 
-    @param[in] p_req_str : requirement description
+    @param[in] p_req_str : requirement text
     @param[in] p_is_subject : indicate if list of objects named as proper nouns concern the requirement subject
     only (TRUE) or not (FALSE)
     @param[in] kwargs : jarvis data structure
@@ -827,7 +827,7 @@ def retrieve_req_subject_object(p_req_str, **kwargs):
     @anchor retrieve_req_subject_object
     Retrieve list of objects named as proper nouns found for requirement subject
 
-    @param[in] p_req_str : requirement description
+    @param[in] p_req_str : requirement text
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
@@ -850,7 +850,7 @@ def retrieve_req_object_object_list(p_req_str, **kwargs):
     @anchor retrieve_req_object_object_list
     Retrieve list of objects named as proper nouns found for requirement object
 
-    @param[in] p_req_str : requirement description
+    @param[in] p_req_str : requirement text
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
@@ -870,7 +870,7 @@ def retrieve_req_condition_object_list(p_req_str, **kwargs):
     @anchor retrieve_req_condition_object_list
     Retrieve list of objects named as proper nouns found for requirement condition
 
-    @param[in] p_req_str : requirement description
+    @param[in] p_req_str : requirement text
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
@@ -890,7 +890,7 @@ def retrieve_req_temporal_object_list(p_req_str, **kwargs):
     @anchor retrieve_req_temporal_object_list
     Retrieve list of objects named as proper nouns found for requirement temporal condition
 
-    @param[in] p_req_str : requirement description
+    @param[in] p_req_str : requirement text
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
@@ -919,16 +919,16 @@ def analyze_requirement(**kwargs):
 
     for xml_requirement in xml_requirement_list:
         # Check if the requirement subject is known
-        req_subject_object = retrieve_req_subject_object(xml_requirement.description, **kwargs)
+        req_subject_object = retrieve_req_subject_object(xml_requirement.text, **kwargs)
 
         if req_subject_object is None:
             # Ask user to create the object in the jarvis data structure
             answer = handler_question.question_to_user(f"Do you want to create an object for the subject of "
-                                                       f"the requirement: {xml_requirement.description} "
+                                                       f"the requirement: {xml_requirement.text} "
                                                        f"(id: {xml_requirement.id}) ? (Y/N)")
 
             if answer == "y":
-                req_subject, _, _, _ = detect_req_pattern(xml_requirement.description)
+                req_subject, _, _, _ = detect_req_pattern(xml_requirement.text)
                 # Check if data type is in the requirement subject
                 req_subject_type = None
                 req_subject_name = None
@@ -995,7 +995,7 @@ def analyze_requirement(**kwargs):
                 break
             else:
                 Logger.set_warning(__name__,
-                                   f"Subject of requirement: {xml_requirement.description} (id: {xml_requirement.id}) "
+                                   f"Subject of requirement: {xml_requirement.text} (id: {xml_requirement.id}) "
                                    f"is not defined in the system analysis")
         # Else do nothing
 

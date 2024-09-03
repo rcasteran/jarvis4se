@@ -945,28 +945,28 @@ class XmlWriter3SE:
                                                   'type': self.check_object_type(requirement.type),
                                                   'alias': requirement.alias})
 
-                description_tag = etree.SubElement(requirement_tag, "description")
-                description_tag.text = requirement.description
+                text_tag = etree.SubElement(requirement_tag, "text")
+                text_tag.text = requirement.text
 
                 _req_part_list_tag = etree.SubElement(requirement_tag, "requirementPartList")
 
         Logger.set_debug(__name__, self.write_requirement.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
-    def write_requirement_description(self, p_description_list):
-        """Write requirement description from list [requirement, description]
-        @param[in] object_allocated_object_list : list of requirement description
+    def write_requirement_text(self, p_text_list):
+        """Write requirement text from list [requirement, text]
+        @param[in] object_allocated_object_list : list of requirement text
         @return None
         """
         parser = etree.XMLParser(remove_blank_text=True)
         root = self.tree.parse(self.file, parser)
 
         for requirement_tag in root.findall(".//requirement"):
-            for req, description_req in p_description_list:
+            for req, text_req in p_text_list:
                 if requirement_tag.get('id') == req.id:
-                    tag = requirement_tag.find('description')
-                    tag.text = util.normalize_xml_string(description_req)
+                    tag = requirement_tag.find('text')
+                    tag.text = util.normalize_xml_string(text_req)
                 # Else do nothing
 
-        Logger.set_debug(__name__, self.write_requirement_description.__name__)
+        Logger.set_debug(__name__, self.write_requirement_text.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

@@ -558,7 +558,7 @@ def check_condition_list_requirement(p_condition_list, **kwargs):
     for condition in p_condition_list:
         for xml_requirement in xml_requirement_list:
             _, _, _, xml_requirement_temporal = \
-                orchestrator_viewpoint_requirement.detect_req_pattern(xml_requirement.description)
+                orchestrator_viewpoint_requirement.detect_req_pattern(xml_requirement.text)
 
             if len(xml_requirement_temporal) > 0:
                 if xml_requirement_temporal in condition[1]:
@@ -661,7 +661,12 @@ def check_add_src_dest(src_dest_str, **kwargs):
                                                          f"{state_name} is typed as EXIT state, "
                                                          f"it cannot be put as source's transition (not added)")
                                     elif datamodel.EntryStateLabel in state.type.name.lower():
-                                        new_src_list.append([transition, state])
+                                        if transition.source != state.id:
+                                            new_src_list.append([transition, state])
+                                        else:
+                                            Logger.set_info(__name__,
+                                                            f'{state_name} already the source of transition '
+                                                            f'{transition_name}')
                                     else:
                                         Logger.set_error(__name__,
                                                          f"{state_name} is not typed as state, "
@@ -685,7 +690,12 @@ def check_add_src_dest(src_dest_str, **kwargs):
                                                          f"{state_name} is typed as ENTRY state, it cannot be "
                                                          f"put as destination's transition (not added)")
                                     elif datamodel.ExitStateLabel in state.type.name.lower():
-                                        new_dest_list.append([transition, state])
+                                        if transition.destination != state.id:
+                                            new_dest_list.append([transition, state])
+                                        else:
+                                            Logger.set_info(__name__,
+                                                            f'{state_name} already the destination of transition '
+                                                            f'{transition_name}')
                                     else:
                                         Logger.set_error(__name__,
                                                          f"{state_name} is not typed as state, "

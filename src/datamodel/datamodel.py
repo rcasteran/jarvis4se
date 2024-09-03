@@ -798,7 +798,7 @@ class View:
         unique name
         
         @var type
-        attribute type\n
+        view type\n
         Could be @ref BaseType .STATE or a @ref Type based on @ref BaseType .VIEW
         
         @var activated
@@ -1459,8 +1459,8 @@ class Requirement:
         @var child_list
         child list
 
-        @var description
-        requirement description
+        @var text
+        requirement text
         """
         self.id = p_id
         self.name = p_name
@@ -1468,7 +1468,7 @@ class Requirement:
         self.type = p_type
         self.parent = p_parent
         self.child_list = set()
-        self.description = ""
+        self.text = ""
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1518,13 +1518,13 @@ class Requirement:
         """
         self.child_list.add(p_child)
 
-    def set_description(self, p_description):
-        """Set description
+    def set_text(self, p_text):
+        """Set text
         @param[in] self this class instance
-        @param[in] p_description requirement description
+        @param[in] p_text requirement text
         @return None
         """
-        self.description = p_description
+        self.text = p_text
 
     def __str__(self):
         """Return a string representation of the class instance
@@ -1555,3 +1555,4 @@ EntryStateLabel = 'entry'
 ExitStateLabel = 'exit'
 DesignAttributeLabel = 'design'
 InitialValueAttributeLabel = "initial value"
+RequirementTextLabel = 'text'

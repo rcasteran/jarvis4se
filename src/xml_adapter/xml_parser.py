@@ -676,10 +676,10 @@ class XmlParser3SE:
 
             requirement_list.add(requirement)
 
-            # Looking for requirement description
-            xml_description_list = xml_requirement.iter('description')
-            for xml_description in xml_description_list:
-                requirement.set_description(xml_description.text)
+            # Looking for requirement text
+            xml_text_list = xml_requirement.iter('text')
+            for xml_text in xml_text_list:
+                requirement.set_text(util.denormalize_xml_string(xml_text.text))
 
             # Looking for requirement child
             xml_requirement_part_list = xml_requirement.iter('requirementPart')
