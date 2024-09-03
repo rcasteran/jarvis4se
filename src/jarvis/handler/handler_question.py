@@ -45,7 +45,18 @@ def question_object_info(p_object_str, **kwargs):
     wanted_object = query_object.query_object_by_name(object_str, **kwargs)
 
     if wanted_object:
-        return str(wanted_object)
+        info_str = str(wanted_object)
+
+        wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
+        for wanted_object_attribute in wanted_object_attribute_list:
+            if len(wanted_object_attribute[1]) > len(f'"{wanted_object.name}" {wanted_object_attribute[0]}'):
+                info_str += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is:\n' \
+                                   f'{wanted_object_attribute[1]}'
+            else:
+                info_str += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is ' \
+                                   f'{wanted_object_attribute[1]}'
+
+        return info_str
     else:
         Logger.set_info(__name__, f"I do not know the following object: {object_str}")
 
