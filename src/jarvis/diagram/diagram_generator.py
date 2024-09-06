@@ -357,7 +357,8 @@ def case_sequence_diagram(**kwargs):
     object_list_str = [s.rstrip() for s in object_list_str]
     if object_list_str:
         if len(object_list_str) == 1 and \
-                any(s == object_list_str[0] for s in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])):
+                any(s == object_list_str[0] for s in
+                    query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])):
             plantuml_string = get_fun_inter_sequence_diagram(object_list_str.pop(), **kwargs)
         elif len(object_list_str) >= 1:
             # Check view if activated and filter allocated item,
@@ -367,7 +368,8 @@ def case_sequence_diagram(**kwargs):
                                                                  kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(xml_data_list) > 0:
-                if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) for i in object_list_str):
+                if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+                       for i in object_list_str):
 
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         xml_cons = [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
@@ -377,6 +379,7 @@ def case_sequence_diagram(**kwargs):
                     else:
                         xml_cons = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
                         xml_prod = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+
                     plantuml_string = show_functions_sequence(object_list_str,
                                                               kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                               xml_cons,
@@ -567,18 +570,19 @@ def show_states_chain(state_list_str, xml_state_list, xml_transition_list):
     return plantuml_text
 
 
-def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_function_list,
+def show_functions_sequence(function_name_list, xml_function_list, xml_consumer_function_list,
                             xml_producer_function_list, xml_data_list, str_out=False):
     """Creates lists with desired objects for <functions> sequence, send them to plantuml_adapter.py
     then returns plantuml_text"""
     new_function_list = set()
 
-    for i in function_list_str:
-        fun = query_object.query_object_by_name(i, **{XML_DICT_KEY_1_FUNCTION_LIST: xml_function_list})
-        if not fun:
-            continue
-        fun.child_list.clear()
-        new_function_list.add(fun)
+    for function_name in function_name_list:
+        fun = query_object.query_object_by_name(function_name, **{XML_DICT_KEY_1_FUNCTION_LIST: xml_function_list})
+        if fun:
+            fun.child_list.clear()
+            new_function_list.add(fun)
+        else:
+            Logger.set_warning(__name__, f'{function_name} is unknown')
 
     new_consumer_list = util.get_cons_or_prod_paired(new_function_list,
                                                      xml_consumer_function_list,
@@ -604,7 +608,7 @@ def show_functions_sequence(function_list_str, xml_function_list, xml_consumer_f
                                                           new_data_list, str_out)
     if not str_out:
         Logger.set_info(__name__,
-                        "Sequence Diagram " + str(", ".join(function_list_str)) + " generated")
+                        "Sequence Diagram " + str(", ".join(function_name_list)) + " generated")
 
     return plantuml_text
 
