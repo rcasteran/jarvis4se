@@ -26,7 +26,7 @@ def test_simple_function_handler_question(capsys, input_test_simple_function):
     jarvis4se.jarvis("", f"with {file_name}\n"
                          f"{input_test_simple_function}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "what is F1 ?\n")
+                         "what is F1 as text ?\n")
 
     # result is a text about F1 properties
     captured = capsys.readouterr()
@@ -60,7 +60,7 @@ def test_function_output_auto_handler_question(capsys, input_test_function_outpu
                          f"{input_test_function_output_auto_decomposition[1]}\n")
 
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "what is F ?\n")
+                         "what is F as text ?\n")
 
     # result is a text about F properties
     captured = capsys.readouterr()

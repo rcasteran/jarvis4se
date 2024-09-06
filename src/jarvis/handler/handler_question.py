@@ -13,6 +13,12 @@ from jarvis.query import query_object, question_answer
 from tools import Logger
 
 
+# Constants
+TEXT_ANSWER_DISPLAY = 'as text'
+ANSWER_FORMAT_STRING = 'str'
+ANSWER_FORMAT_DICT = 'dict'
+
+
 def question_to_user(p_question_str):
     """@ingroup jarvis
     @anchor question_to_user
@@ -29,7 +35,7 @@ def question_to_user(p_question_str):
         answer = "q"
         Logger.set_info(__name__,
                         f"Answer interrupted")
-    return answer
+    return answer, ANSWER_FORMAT_STRING
 
 
 def question_object_info(p_object_str, **kwargs):
@@ -41,24 +47,48 @@ def question_object_info(p_object_str, **kwargs):
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
-    object_str = p_object_str[0].strip()
-    wanted_object = query_object.query_object_by_name(object_str, **kwargs)
+    info_obj = None
+    info_obj_format = None
+    object_name = p_object_str[0].strip()
+
+    if TEXT_ANSWER_DISPLAY in object_name:
+        is_answer_text = True
+        object_name = object_name[0: object_name.index(TEXT_ANSWER_DISPLAY)].strip()
+    else:
+        is_answer_text = False
+
+    wanted_object = query_object.query_object_by_name(object_name, **kwargs)
 
     if wanted_object:
-        info_str = str(wanted_object)
+        if is_answer_text:
+            info_obj = str(wanted_object)
 
-        wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
-        for wanted_object_attribute in wanted_object_attribute_list:
-            if len(wanted_object_attribute[1]) > len(f'"{wanted_object.name}" {wanted_object_attribute[0]}'):
-                info_str += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is:\n' \
-                                   f'{wanted_object_attribute[1]}'
-            else:
-                info_str += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is ' \
-                                   f'{wanted_object_attribute[1]}'
+            wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
+            for wanted_object_attribute in wanted_object_attribute_list:
+                if len(wanted_object_attribute[1]) > len(f'"{wanted_object.name}" {wanted_object_attribute[0]}'):
+                    info_obj += ('\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is:\n'
+                                        f'{wanted_object_attribute[1]}')
+                else:
+                    info_obj += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is ' \
+                                       f'{wanted_object_attribute[1]}'
 
-        return info_str
+            info_obj_format = ANSWER_FORMAT_STRING
+        else:
+            wanted_object_attribute_dict = {}
+            wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
+            for wanted_object_attribute in wanted_object_attribute_list:
+                wanted_object_attribute_dict[wanted_object_attribute[0]] = wanted_object_attribute[1]
+
+            info_obj = {'title': f"Object {wanted_object.name}:",
+                        'data': {**wanted_object.info()[0], **wanted_object_attribute_dict},
+                        'columns': [*wanted_object.info()[1], *wanted_object_attribute_dict.keys()],
+                        'index': [0]}
+
+            info_obj_format = ANSWER_FORMAT_DICT
     else:
-        Logger.set_info(__name__, f"I do not know the following object: {object_str}")
+        Logger.set_info(__name__, f"I do not know the following object: {object_name}")
+
+    return info_obj, info_obj_format
 
 
 def question_object_allocation(p_object_str, **kwargs):
@@ -84,4 +114,4 @@ def question_object_allocation(p_object_str, **kwargs):
     else:
         object_info = f'"{p_object_str}" is unknown'
 
-    return object_info
+    return object_info, ANSWER_FORMAT_STRING

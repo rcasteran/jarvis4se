@@ -137,10 +137,24 @@ def get_pandas_table(data_dict):
     """Returns pandas data frame called from command_parser.matched_list()
     with data_dict as list of ..."""
     if 'columns' in data_dict.keys():
-        data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'])
+        if 'index' in data_dict.keys():
+            data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'], index=data_dict['index'])
+            data_frame = data_frame.T
+        else:
+            data_frame = pd.DataFrame(data_dict['data'], columns=data_dict['columns'])
+            if 'transpose' in data_dict.keys():
+                data_frame = data_frame.T
+            # Else do nothing
     else:
-        data_frame = pd.DataFrame(data_dict['data'])
-    data_frame = data_frame.T
+        if 'index' in data_dict.keys():
+            data_frame = pd.DataFrame(data_dict['data'], index=data_dict['index'])
+            data_frame = data_frame.T
+        else:
+            data_frame = pd.DataFrame(data_dict['data'])
+            if 'transpose' in data_dict.keys():
+                data_frame = data_frame.T
+            # Else do nothing
+
     if 'Data' in data_dict['title'] or 'Transition' in data_dict['title']:
         if 'Data' in data_dict['title']:
             first = 1
@@ -148,8 +162,11 @@ def get_pandas_table(data_dict):
         else:
             first = 3
             last = 4
+
         for idx in range(first, last):
             data_frame.iloc[idx] = data_frame.iloc[idx].str.join("\\n")
+    # Else do nothing
+
     data_frame = data_frame.style \
         .set_caption(data_dict['title']) \
         .set_properties(**{'white-space': 'nowrap'})

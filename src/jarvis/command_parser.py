@@ -260,10 +260,16 @@ class CmdParser:
                 elem = elem.replace('"', "").strip()
                 result = re.findall(regex, elem, flags=re.MULTILINE | re.IGNORECASE)
                 if result:
-                    answer = method(result, **kwargs)
+                    answer, answer_format = method(result, **kwargs)
                     if answer:
-                        # Single display (not related to logging)
-                        print(answer)
+                        if answer_format == handler_question.ANSWER_FORMAT_STRING:
+                            # Single display (not related to logging)
+                            print(answer)
+                        elif answer_format == handler_question.ANSWER_FORMAT_DICT:
+                            display(HTML(util.get_pandas_table(answer)))
+                        # Else do nothing
+                    # Else do nothing
+                # Else do nothing
 
         return None
 

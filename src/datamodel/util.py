@@ -2,6 +2,15 @@
 Module for 3SE datamodel
 """
 
+# Constants
+INFO_KEY_TYPE = 'type'
+INFO_KEY_ALIAS = 'alias'
+INFO_KEY_PARENT = 'parent'
+INFO_KEY_DERIVED = 'derived from object'
+INFO_KEY_CHILD_LIST = 'child list'
+INFO_KEY_REQUIREMENT_LIST = 'requirement list'
+INFO_KEY_DATA_LIST = 'allocated data list'
+
 class Point:
     """@ingroup datamodel
     @anchor Point
@@ -73,7 +82,7 @@ class EndPoint:
 def str_type(p_obj):
     """@ingroup datamodel
     @anchor str_type
-    Return a string representation of the type of a class instance
+    Return a string representation of the type of class instance
     @param[in] p_obj class instance
     @return string
     """
@@ -83,6 +92,21 @@ def str_type(p_obj):
         rep = f'"{p_obj.name}" is a {p_obj.type.name} (id:{p_obj.id}).'
 
     return rep
+
+
+def info_type(p_obj):
+    """@ingroup datamodel
+    @anchor info_type
+    Return a dict representation of the type of class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if p_obj.type == type(p_obj).__name__:
+        info_dict = {INFO_KEY_TYPE: type(p_obj).__name__}
+    else:
+        info_dict = {INFO_KEY_TYPE: p_obj.type.name}
+
+    return info_dict
 
 
 def str_alias(p_obj):
@@ -100,6 +124,21 @@ def str_alias(p_obj):
     return rep
 
 
+def info_alias(p_obj):
+    """@ingroup datamodel
+    @anchor info_alias
+    Return a dict representation of the alias of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if p_obj.alias:
+        info_dict = {INFO_KEY_ALIAS: p_obj.alias}
+    else:
+        info_dict = {INFO_KEY_ALIAS: 'none'}
+
+    return info_dict
+
+
 def str_parent(p_obj):
     """@ingroup datamodel
     @anchor str_parent
@@ -115,9 +154,24 @@ def str_parent(p_obj):
     return rep
 
 
+def info_parent(p_obj):
+    """@ingroup datamodel
+    @anchor info_parent
+    Return a dict representation of the parent of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if p_obj.parent is not None:
+        info_dict = {INFO_KEY_PARENT: p_obj.parent.name}
+    else:
+        info_dict = {INFO_KEY_PARENT: 'none'}
+
+    return info_dict
+
+
 def str_derived(p_obj):
     """@ingroup datamodel
-    @anchor str_type
+    @anchor str_derived
     Return a string representation of the object the class instance is derived from
     @param[in] p_obj class instance
     @return string
@@ -128,6 +182,21 @@ def str_derived(p_obj):
         rep = f'"{p_obj.name}" is not derived from other object.'
 
     return rep
+
+
+def info_derived(p_obj):
+    """@ingroup datamodel
+    @anchor info_derived
+    Return a dict representation of the object the class instance is derived from
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if p_obj.derived is not None:
+        info_dict = {INFO_KEY_DERIVED: p_obj.derived.id}
+    else:
+        info_dict = {INFO_KEY_DERIVED: 'none'}
+
+    return info_dict
 
 
 def str_child_list(p_obj):
@@ -153,6 +222,25 @@ def str_child_list(p_obj):
     return rep
 
 
+def info_child_list(p_obj):
+    """@ingroup datamodel
+    @anchor info_child_list
+    Return a dict representation of the child list of a class instance
+    @param[in] p_obj class instance
+    @return string
+    """
+    if len(p_obj.child_list) > 0:
+        child_name_list = ''
+        for item in p_obj.child_list:
+            child_name_list += f'{item.name}\n'
+        child_name_list = child_name_list[:-1]
+        info_dict = {INFO_KEY_CHILD_LIST: child_name_list}
+    else:
+        info_dict = {INFO_KEY_CHILD_LIST: 'none'}
+
+    return info_dict
+
+
 def str_allocated_req(p_obj):
     """@ingroup datamodel
     @anchor str_allocated_req
@@ -176,6 +264,25 @@ def str_allocated_req(p_obj):
     return rep
 
 
+def info_allocated_req(p_obj):
+    """@ingroup datamodel
+    @anchor info_allocated_req
+    Return a dict representation of the allocated requirement list of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if len(p_obj.allocated_req_list) > 0:
+        req_id_list = ''
+        for item in p_obj.allocated_req_list:
+            req_id_list += f'{item})\n'
+        req_id_list = req_id_list[:-1]
+        info_dict = {INFO_KEY_REQUIREMENT_LIST: req_id_list}
+    else:
+        info_dict = {INFO_KEY_REQUIREMENT_LIST: 'none'}
+
+    return info_dict
+
+
 def str_allocated_data(p_obj):
     """@ingroup datamodel
     @anchor str_allocated_data
@@ -197,3 +304,22 @@ def str_allocated_data(p_obj):
         rep = f'"{p_obj.name}" has no allocated data.'
 
     return rep
+
+
+def info_allocated_data(p_obj):
+    """@ingroup datamodel
+    @anchor info_allocated_data
+    Return a dict representation of the allocated data list of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if len(p_obj.allocated_data_list) > 0:
+        data_id_list = ''
+        for item in p_obj.allocated_data_list:
+            data_id_list += f'{item}\n'
+        data_id_list = data_id_list[:-1]
+        info_dict = {INFO_KEY_DATA_LIST: data_id_list}
+    else:
+        info_dict = {INFO_KEY_DATA_LIST: 'none'}
+
+    return info_dict

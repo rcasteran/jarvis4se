@@ -251,6 +251,27 @@ class Function:
 
         return rep
 
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                **util.info_derived(self),
+                **util.info_parent(self),
+                **util.info_child_list(self),
+                **util.info_allocated_req(self)
+                # Function has no allocated data
+                # No display of input_role and operand
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_DERIVED,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
+
 
 class Data:
     """@ingroup datamodel
@@ -341,6 +362,23 @@ class Data:
         # No display of predecessor list
 
         return rep
+
+    def info(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        return {**util.str_type(self),
+                # Data has no alias
+                # Data cannot be specialized
+                # Data has no parent
+                # Data has no children
+                **util.str_allocated_req(self)
+                # Data has no allocated data
+                # No display of predecessor list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
 
 
 class State:
@@ -476,6 +514,27 @@ class State:
 
         return rep
 
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.str_type(self),
+                **util.str_alias(self),
+                # State cannot be specialized
+                **util.str_parent(self),
+                **util.str_child_list(self),
+                **util.str_allocated_req(self)
+                # State has no allocated data
+                # No display of allocated function list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
+
+
 
 class Transition:
     """@ingroup datamodel
@@ -602,6 +661,24 @@ class Transition:
         # No display of source, destination and condition_list
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                # Transition cannot be specialized
+                # Transition has no parent
+                # Transition has no children
+                **util.info_allocated_req(self)
+                # Transition has no allocated data
+                # No display of source, destination and condition_list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
 
 
 class FunctionalElement:
@@ -782,6 +859,27 @@ class FunctionalElement:
 
         return rep
 
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                **util.info_derived(self),
+                **util.info_parent(self),
+                **util.info_child_list(self),
+                **util.info_allocated_req(self)
+                # Functional element has no allocated data
+                # No display of allocated function, allocated state and exposed interface
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_DERIVED,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
+
 
 class View:
     """@ingroup datamodel
@@ -869,6 +967,22 @@ class View:
         # No display of allocated item list
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self)
+                # View has no alias
+                # View cannot be specialized
+                # View has no parent
+                # View has no children
+                # View has no allocated requirement
+                # View has no allocated data
+                # No display of allocated item list
+                }, [util.INFO_KEY_TYPE
+                    ]
 
 
 class Attribute:
@@ -969,6 +1083,24 @@ class Attribute:
         # No display of described item list
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                # Attribute cannot be specialized
+                # Attribute has no parent
+                # Attribute has no children
+                **util.info_allocated_req(self)
+                # Attribute has no allocated data
+                # No display of described item list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
 
 
 class FunctionalInterface:
@@ -1082,6 +1214,25 @@ class FunctionalInterface:
         rep += util.str_allocated_data(self)
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                **util.info_derived(self),
+                # Functional interface has no parent
+                # Functional interface has no children
+                **util.info_allocated_req(self),
+                **util.info_allocated_data(self)
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_DERIVED,
+                    util.INFO_KEY_REQUIREMENT_LIST,
+                    util.INFO_KEY_DATA_LIST
+                    ]
 
 
 class PhysicalElement:
@@ -1228,11 +1379,31 @@ class PhysicalElement:
         rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
         # Physical element has no allocated data
-        # Physical element has no allocated data
 
         # No display of allocated functional element list and exposed interface list
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                **util.info_derived(self),
+                **util.info_parent(self),
+                **util.info_child_list(self),
+                **util.info_allocated_req(self)
+                # Physical element has no allocated data
+                # No display of allocated functional element list and exposed interface list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_DERIVED,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
 
 
 class PhysicalInterface:
@@ -1349,6 +1520,26 @@ class PhysicalInterface:
 
         return rep
 
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                **util.info_derived(self),
+                # Physical interface has no parent
+                # Physical interface has no children
+                **util.info_allocated_req(self)
+                # Physical interface has no allocated data
+                # No display of allocated functional interface list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_DERIVED,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
+
+
 
 class Type:
     """@ingroup datamodel
@@ -1424,6 +1615,21 @@ class Type:
         # No display of base type
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_alias(self)
+                # Type cannot be specialized
+                # Type has no parent
+                # Type has no children
+                # Type has no allocated requirement
+                # Type has no allocated data
+                # No display of base type
+                }, [util.INFO_KEY_ALIAS
+                    ]
 
 
 class Requirement:
@@ -1542,6 +1748,25 @@ class Requirement:
         # No display of description
 
         return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                # Requirement cannot be specialized
+                **util.info_parent(self),
+                **util.info_child_list(self)
+                # Requirement has no allocated requirement
+                # Requirement has no allocated data
+                # No display of description
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST
+                    ]
 
 
 # Global variables definition

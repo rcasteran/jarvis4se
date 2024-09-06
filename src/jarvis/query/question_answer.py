@@ -339,6 +339,7 @@ def get_fun_intf_data(wanted_object, _, **kwargs):
 
         if data_list:
             data_dict = {'title': f"Data list for {wanted_object.name}:",
-                         'data': data_list}
+                         'data': data_list,
+                         'index': [0]}
 
     return data_dict

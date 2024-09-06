@@ -92,7 +92,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                                                req_temporal,
                                                                                **kwargs)
 
-                    answer = handler_question.question_to_user(f"Please give a requirement name: ")
+                    answer, _ = handler_question.question_to_user(f"Please give a requirement name: ")
                     if len(answer) > 0 and answer != "q":
                         existing_object = query_object.query_object_by_name(answer, **kwargs)
                         if existing_object:
@@ -923,9 +923,9 @@ def analyze_requirement(**kwargs):
 
         if req_subject_object is None:
             # Ask user to create the object in the jarvis data structure
-            answer = handler_question.question_to_user(f"Do you want to create an object for the subject of "
-                                                       f"the requirement: {xml_requirement.text} "
-                                                       f"(id: {xml_requirement.id}) ? (Y/N)")
+            answer, _ = handler_question.question_to_user(f"Do you want to create an object for the subject of "
+                                                          f"the requirement: {xml_requirement.text} "
+                                                          f"(id: {xml_requirement.id}) ? (Y/N)")
 
             if answer == "y":
                 req_subject, _, _, _ = detect_req_pattern(xml_requirement.text)
@@ -981,7 +981,7 @@ def analyze_requirement(**kwargs):
                 # Else do nothing
 
                 if req_subject_type is None:
-                    req_subject_type = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')
+                    req_subject_type, _ = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')
                 # Else do nothing
 
                 # Create_specific_obj_by_type

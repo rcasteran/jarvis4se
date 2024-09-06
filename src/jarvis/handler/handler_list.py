@@ -11,6 +11,9 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
 from jarvis.query import query_object, question_answer
 from tools import Logger
 
+# Global variables
+HORIZONTAL_LIST_DISPLAY = 'horizontally'
+
 
 def list_object(p_str_list, **kwargs):
     """
@@ -28,13 +31,19 @@ def list_object(p_str_list, **kwargs):
         type_name = elem[0].replace('"', "")
         object_name = elem[1].replace('"', "")
 
+        if HORIZONTAL_LIST_DISPLAY in object_name:
+            is_list_transposed = True
+            object_name = object_name[0: object_name.index(HORIZONTAL_LIST_DISPLAY)].strip()
+        else:
+            is_list_transposed = False
+
         wanted_object = query_object.query_object_by_name(object_name, **kwargs)
         if wanted_object is None:
             Logger.set_error(__name__,
                              f"Object '{object_name}' does not exist")
         else:
             object_type = query_object.query_object_type(wanted_object, **kwargs)
-            wanted_list = switch_object_list(type_name, wanted_object, object_type, **kwargs)
+            wanted_list = switch_object_list(type_name, wanted_object, object_type, is_list_transposed, **kwargs)
             if wanted_list:
                 answer_list.append(wanted_list)
             # Else do nothing
@@ -42,7 +51,7 @@ def list_object(p_str_list, **kwargs):
     return answer_list
 
 
-def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
+def switch_object_list(type_list_str, wanted_object, object_type, is_list_transposed, **kwargs):
     """Switch depending on list's type and object's type """
     object_list = {}
     if object_type in (datamodel.BaseType.STATE,
@@ -65,7 +74,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
             }
             type_list = switch_type_list.get(type_list_str, None)
             if type_list:
-                object_list = type_list(wanted_object, object_type, **kwargs)
+                object_list = type_list(wanted_object, object_type, is_list_transposed, **kwargs)
 
                 if not object_list:
                     Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
@@ -84,7 +93,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, **kwargs):
     return object_list
 
 
-def get_input_list(wanted_object, _, **kwargs):
+def get_input_list(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list input Function/Functional ELement' """
     input_dict = {}
     input_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', **kwargs)
@@ -93,13 +102,20 @@ def get_input_list(wanted_object, _, **kwargs):
         input_list.append(*question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
                                                                                 direction='input', **kwargs))
     if input_list:
-        input_dict = {'title': f"Input list for {wanted_object.name}:",
-                      'data': input_list,
-                      'columns': ["Data name", "Producer"]}
+        if is_list_transposed:
+            input_dict = {'title': f"Input list for {wanted_object.name}:",
+                          'data': input_list,
+                          'columns': ["Data name", "Producer"],
+                          'transpose': 'y'}
+        else:
+            input_dict = {'title': f"Input list for {wanted_object.name}:",
+                          'data': input_list,
+                          'columns': ["Data name", "Producer"]}
+
     return input_dict
 
 
-def get_output_list(wanted_object, _, **kwargs):
+def get_output_list(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list output Function/Functional ELement' """
     output_dict = {}
     output_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='output', **kwargs)
@@ -108,14 +124,19 @@ def get_output_list(wanted_object, _, **kwargs):
         output_list.append(*question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
                                                                                  direction='output', **kwargs))
     if output_list:
-        output_dict = {'title': f"Output list for {wanted_object.name}:",
-                       'data': output_list,
-                       'columns': ["Data name", "Consumer"]}
-
+        if is_list_transposed:
+            output_dict = {'title': f"Output list for {wanted_object.name}:",
+                           'data': output_list,
+                           'columns': ["Data name", "Consumer"],
+                           'transpose': 'y'}
+        else:
+            output_dict = {'title': f"Output list for {wanted_object.name}:",
+                           'data': output_list,
+                           'columns': ["Data name", "Consumer"]}
     return output_dict
 
 
-def get_child_list(wanted_object, object_type, **kwargs):
+def get_child_list(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list child Function/State/Functional ELement' """
     child_dict = {}
     child_list = None
@@ -140,14 +161,20 @@ def get_child_list(wanted_object, object_type, **kwargs):
                 wanted_object.derived, kwargs[XML_DICT_KEY_1_FUNCTION_LIST], kwargs[XML_DICT_KEY_6_STATE_LIST])]
 
     if child_list:
-        child_dict = {'title': f"Child list for {wanted_object.name}:",
-                      'data': list(tuple(sorted(child_list))),
-                      'columns': ["Object's name", "Relationship's type"]}
+        if is_list_transposed:
+            child_dict = {'title': f"Child list for {wanted_object.name}:",
+                          'data': list(tuple(sorted(child_list))),
+                          'columns': ["Object's name", "Relationship's type"],
+                          'transpose': 'y'}
+        else:
+            child_dict = {'title': f"Child list for {wanted_object.name}:",
+                          'data': list(tuple(sorted(child_list))),
+                          'columns': ["Object's name", "Relationship's type"]}
 
     return child_dict
 
 
-def get_state_function(wanted_object, _, **kwargs):
+def get_state_function(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list function State' """
     function_dict = {}
     function_list = []
@@ -157,14 +184,20 @@ def get_state_function(wanted_object, _, **kwargs):
                 function_list.append((fun.name, "Function allocation"))
 
     if function_list:
-        function_dict = {'title': f"Function list for {wanted_object.name}:",
-                         'data': list(tuple(sorted(function_list))),
-                         'columns': ["Object's name", "Relationship's type"]}
+        if is_list_transposed:
+            function_dict = {'title': f"Function list for {wanted_object.name}:",
+                             'data': list(tuple(sorted(function_list))),
+                             'columns': ["Object's name", "Relationship's type"],
+                             'transpose': 'y'}
+        else:
+            function_dict = {'title': f"Function list for {wanted_object.name}:",
+                             'data': list(tuple(sorted(function_list))),
+                             'columns': ["Object's name", "Relationship's type"]}
 
     return function_dict
 
 
-def get_state_transition(wanted_object, _, **kwargs):
+def get_state_transition(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list transition State' """
     transition_dict = {}
     transition_list = []
@@ -190,12 +223,14 @@ def get_state_transition(wanted_object, _, **kwargs):
 
     if transition_list:
         transition_dict = {'title': f"Transition list for {wanted_object.name}:",
-                           'data': transition_list}
+                           'data': transition_list,
+                           'index': [0]
+                           }
 
     return transition_dict
 
 
-def get_fun_elem_interface(wanted_object, _, **kwargs):
+def get_fun_elem_interface(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case for 'list interface Functional element'"""
     interface_dict = {}
     id_list = wanted_object.exposed_interface_list
@@ -235,9 +270,15 @@ def get_fun_elem_interface(wanted_object, _, **kwargs):
                 interface_list.add((k[0].name, k[1].name))
 
         if interface_list:
-            interface_dict = {'title': f"Interface list for {wanted_object.name}:",
-                              'data': list(tuple(sorted(interface_list))),
-                              'columns': ["Interface ", "Last connected functional element"]}
+            if is_list_transposed:
+                interface_dict = {'title': f"Interface list for {wanted_object.name}:",
+                                  'data': list(tuple(sorted(interface_list))),
+                                  'columns': ["Interface ", "Last connected functional element"],
+                                  'transpose': 'y'}
+            else:
+                interface_dict = {'title': f"Interface list for {wanted_object.name}:",
+                                  'data': list(tuple(sorted(interface_list))),
+                                  'columns': ["Interface ", "Last connected functional element"]}
 
     return interface_dict
 

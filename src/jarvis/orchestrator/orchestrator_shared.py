@@ -1118,9 +1118,9 @@ def check_parent_allocation(elem, **kwargs):
             if object_parent.id in fun_elem_parent.allocated_function_list:
                 check = True
         if not check:
-            answer = handler_question.question_to_user(f"Do you also want to allocate parents "
-                                                       f"(i.e. {object_parent.name} "
-                                                       f"to {fun_elem_parent.name}) ? (Y/N)")
+            answer, _ = handler_question.question_to_user(f"Do you also want to allocate parents "
+                                                          f"(i.e. {object_parent.name} "
+                                                          f"to {fun_elem_parent.name}) ? (Y/N)")
             if answer.lower() == "y":
                 if isinstance(elem[1], datamodel.State):
                     fun_elem_parent.add_allocated_state(object_parent.id)
