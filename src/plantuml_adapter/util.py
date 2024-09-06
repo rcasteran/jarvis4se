@@ -405,4 +405,7 @@ def normalize_element_reference(p_element_name):
         .replace("'s", "")\
         .replace("(", "_")\
         .replace(")", "_")\
-        .replace(",", "_")
+        .replace(",", "_")\
+        .replace("'", "")\
+        .replace("<", "_")\
+        .replace(">", "_")
