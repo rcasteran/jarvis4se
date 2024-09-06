@@ -215,7 +215,11 @@ class ObjDiagram:
         attribute_str = self.create_object_attributes(function, attribute_list)
 
         if len(attribute_str) > 1 or len(operand_str) > 1:
-            self.append_string(" {\n", operand_str, attribute_str, "}\n")
+            if function_type_str.lower() == 'actor':
+                # TODO
+                self.append_string("\n")
+            else:
+                self.append_string(" {\n", operand_str, attribute_str, "}\n")
         else:
             self.append_string("\n")
 
