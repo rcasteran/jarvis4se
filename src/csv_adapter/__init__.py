@@ -1,4 +1,4 @@
-""" @package csv_adapter
+""" @defgroup csv_adapter
 Module for 3SE csv parsing and writing
 """
 from .csv_writer import CsvWriter3SE

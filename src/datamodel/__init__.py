@@ -1,4 +1,4 @@
-""" @package datamodel
+""" @defgroup datamodel
 Module for 3SE datamodel
 
 Defines the following basic types that are manipulated by systems engineers:

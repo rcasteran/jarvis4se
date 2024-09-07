@@ -1,4 +1,4 @@
-""" @package tools
+""" @defgroup tools
 Tooling module
 
 Defines the following classes that provides tooling features used by Jarvis:

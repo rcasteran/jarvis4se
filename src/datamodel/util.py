@@ -111,7 +111,7 @@ def info_type(p_obj):
 
 def str_alias(p_obj):
     """@ingroup datamodel
-    @anchor str_type
+    @anchor str_alias
     Return a string representation of the alias of a class instance
     @param[in] p_obj class instance
     @return string

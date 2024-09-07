@@ -1,4 +1,4 @@
-""" @package xml_adapter
+""" @defgroup xml_adapter
 Module for 3SE xml parsing and writing
 """
 from .xml_writer import XmlWriter3SE

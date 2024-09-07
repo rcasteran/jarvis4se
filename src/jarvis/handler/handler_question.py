@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup handler
+Jarvis handler module
 """
 # Libraries
 
@@ -20,7 +20,7 @@ ANSWER_FORMAT_DICT = 'dict'
 
 
 def question_to_user(p_question_str):
-    """@ingroup jarvis
+    """@ingroup handler
     @anchor question_to_user
     Ask question to user and get its answer
 
@@ -39,7 +39,7 @@ def question_to_user(p_question_str):
 
 
 def question_object_info(p_object_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup handler
     @anchor question_object_info
     Get answer to the user question: "What is <object name> ?"
 
@@ -92,7 +92,7 @@ def question_object_info(p_object_str, **kwargs):
 
 
 def question_object_allocation(p_object_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup handler
     @anchor question_object_allocation
     Get answer to the user question: "Is <object name> allocated ?"
 

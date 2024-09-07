@@ -1,7 +1,7 @@
-""" @package simulation
+""" @defgroup simulation
 Jarvis simulation module
 
-Defines the different functions and classes used by Jarvis to build simulations by filtering and selecting objects before
-calling @ref open_modelica_adapter
+Handles the user commands coming from @ref Jarvis module related to object simulation by filtering and selecting objects
+coming from @ref query module before calling @ref open_modelica_adapter module
 """
 from . import simulation_generator

@@ -343,7 +343,7 @@ class CmdParser:
     @staticmethod
     def matched_analyze(p_str_list, **kwargs):
         """@ingroup jarvis
-        @anchor matched_export
+        @anchor matched_analyze
         Get "export" declaration for exporting objects to a csv filename
 
         @param[in] p_str_list : list of input strings

@@ -1,4 +1,4 @@
-""" @package plantuml_adapter
+""" @defgroup plantuml_adapter
 Plantuml adapter module
 
 Defines the different functions and classes used by Jarvis to call Plantuml as a diagram generator:
