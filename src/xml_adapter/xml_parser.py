@@ -311,7 +311,7 @@ class XmlParser3SE:
             # Looking for conditions and add them to the transition
             xml_transition_condition_list = xml_transition.iter('condition')
             for xml_condition in xml_transition_condition_list:
-                transition.add_condition(xml_condition.get("text"))
+                transition.add_condition(util.denormalize_xml_string(xml_condition.get("text")))
 
             # Looking for allocated requirements and add them to the transition
             xml_allocated_requirement_list = xml_transition.iter('allocatedRequirement')
