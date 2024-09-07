@@ -2,7 +2,6 @@
 Jarvis diagram module
 """
 # Modules
-from jarvis.orchestrator import orchestrator_object
 from jarvis.query import question_answer, query_object
 from tools import Logger
 
@@ -132,8 +131,8 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
                             xml_function_children_list, _ = \
                                 query_object.query_object_children_recursively(main_function)
                             parent_check = \
-                                orchestrator_object.check_object_is_parent_recursively(xml_consumer_function,
-                                                                                       main_function)
+                                query_object.query_object_is_parent_recursively(xml_consumer_function,
+                                                                                main_function)
                             if xml_consumer_function not in xml_function_children_list and parent_check is False:
                                 new_consumer_list.append([xml_producer_flow, xml_consumer_function])
                                 new_function_list.add(xml_consumer_function)
@@ -168,8 +167,8 @@ def get_function_context_lists(diagram_function_str, xml_function_list, xml_cons
                             xml_function_children_list, _ = \
                                 query_object.query_object_children_recursively(main_function)
                             parent_check = \
-                                orchestrator_object.check_object_is_parent_recursively(xml_producer_function,
-                                                                                       main_function)
+                                query_object.query_object_is_parent_recursively(xml_producer_function,
+                                                                                main_function)
                             if xml_producer_function not in xml_function_children_list and parent_check is False:
                                 new_producer_list.append([xml_producer_flow, xml_producer_function])
                                 new_function_list.add(xml_producer_function)
@@ -222,7 +221,7 @@ def get_fun_inter_for_fun_elem_context(main_fun_elem, xml_fun_inter_list, xml_fu
         for fun_elem in xml_fun_elem_list:
             if any(i == fun_inter.id for i in fun_elem.exposed_interface_list):
                 if check_is_highest_fun_elem_exposing_fun_inter(fun_inter, fun_elem) and \
-                        orchestrator_object.check_object_is_not_family(main_fun_elem, fun_elem):
+                        query_object.query_object_is_not_family(main_fun_elem, fun_elem):
                     fun_elem_list.add(fun_elem)
                     if [main_fun_elem, fun_elem, fun_inter] not in fun_elem_inter_list:
                         fun_elem_inter_list.append([main_fun_elem, fun_elem, fun_inter])
@@ -250,14 +249,14 @@ def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, 
                                                                            diagram_level)
     # Remove (child) elements from xml lists that are below the level asked
     for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if not orchestrator_object.check_object_is_not_family(unwanted_fun_elem, main_fun_elem):
+        if not query_object.query_object_is_not_family(unwanted_fun_elem, main_fun_elem):
             for fun in xml_function_list.copy():
                 if fun.id in unwanted_fun_elem.allocated_function_list:
                     xml_function_list.remove(fun)
             xml_fun_elem_list.remove(unwanted_fun_elem)
     # Remove (child) elements from external fun_elem (main_fun_elem point of view)
     for unwanted_fun_elem in xml_fun_elem_list.symmetric_difference(main_fun_elem_list):
-        if orchestrator_object.check_object_is_not_family(unwanted_fun_elem, main_fun_elem) and \
+        if query_object.query_object_is_not_family(unwanted_fun_elem, main_fun_elem) and \
                 unwanted_fun_elem.parent is None:
             curr_fun_elem_list, _ = query_object.query_object_children_recursively(unwanted_fun_elem,
                                                                                    None,
@@ -265,7 +264,7 @@ def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, 
                                                                                    None,
                                                                                    diagram_level)
             for un_fun_elem in xml_fun_elem_list.symmetric_difference(curr_fun_elem_list):
-                if not orchestrator_object.check_object_is_not_family(unwanted_fun_elem, un_fun_elem):
+                if not query_object.query_object_is_not_family(unwanted_fun_elem, un_fun_elem):
                     xml_fun_elem_list.remove(un_fun_elem)
 
     return xml_function_list, xml_fun_elem_list
@@ -376,10 +375,10 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
         for xml_flow, xml_fun in xml_flow_list:
             if flow == xml_flow and xml_fun.parent == main_fun.parent:
                 ext_flow_fun_list.add(xml_fun)
-            elif flow == xml_flow and orchestrator_object.check_object_is_not_family(main_fun, xml_fun) and \
+            elif flow == xml_flow and query_object.query_object_is_not_family(main_fun, xml_fun) and \
                     xml_fun.parent is None:
                 ext_flow_fun_list.add(xml_fun)
-            elif flow == xml_flow and not orchestrator_object.check_object_is_parent_recursively(xml_fun, main_fun) \
+            elif flow == xml_flow and not query_object.query_object_is_parent_recursively(xml_fun, main_fun) \
                     and [xml_flow, xml_fun.parent] not in xml_flow_list:
                 ext_flow_fun_list.add(xml_fun)
 

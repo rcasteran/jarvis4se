@@ -61,7 +61,7 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                                                            None,
                                                            None,
                                                            diagram_level)
-        # derived = childs_inheritance(main_fun, level=diagram_level)
+        # derived = add_inherited_object_children(main_fun, level=diagram_level)
         # if derived:
         #     main_function_list = main_function_list.union(derived[0])
         #     main_parent_dict.update(derived[1])
@@ -80,7 +80,7 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                     Logger.set_debug(__name__, f"[{prod[0]}, {k.name} removed]")
     else:
         main_function_list, main_parent_dict = query_object.query_object_children_recursively(main_fun)
-        # derived = childs_inheritance(main_fun)
+        # derived = add_inherited_object_children(main_fun)
         # if derived:
         #     main_function_list = main_function_list.union(derived[0])
         #     main_parent_dict.update(derived[1])

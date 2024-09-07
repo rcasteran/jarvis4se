@@ -1,3 +1,6 @@
+""" @defgroup query
+Jarvis query module
+"""
 # Libraries
 
 
@@ -8,6 +11,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+from jarvis.orchestrator import orchestrator_object
 from . import query_object
 from tools import Logger
 
@@ -34,34 +38,7 @@ def get_child_name_list(parent_object, object_list):
 
 
 def get_allocation_object(wanted_object, object_list, **kwargs):
-    """Get current allocation for an object"""
-    allocation_set = set()
-    object_type = query_object.query_object_type(wanted_object, **kwargs)
-
-    if object_type == datamodel.BaseType.FUNCTION:
-        for fun_elem in object_list:
-            if any(s == wanted_object.id for s in fun_elem.allocated_function_list):
-                allocation_set.add(fun_elem)
-    elif object_type == datamodel.BaseType.STATE:
-        for fun_elem in object_list:
-            if any(s == wanted_object.id for s in fun_elem.allocated_state_list):
-                allocation_set.add(fun_elem)
-    elif object_type == datamodel.BaseType.DATA:
-        for fun_inter in object_list:
-            if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
-                allocation_set.add(fun_inter)
-    elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-        for fun_elem in object_list:
-            if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
-                allocation_set.add(fun_elem)
-    elif object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-        for function in object_list:
-            if any(s == function.id for s in wanted_object.allocated_function_list):
-                allocation_set.add(function)
-    if allocation_set:
-        return allocation_set
-
-    return
+    return orchestrator_object.retrieve_allocated_object_list(wanted_object, object_list, **kwargs)
 
 
 def get_fun_elem_function_state_allocation(wanted_object, xml_function_list, xml_state_list):
@@ -285,19 +262,7 @@ def get_objects_from_id_list(id_list, object_list):
     return output_list
 
 
-def get_transition_between_states(p_object_src, p_object_dest, **kwargs):
-    transition_object = None
-
-    for transition in kwargs[XML_DICT_KEY_7_TRANSITION_LIST]:
-        if p_object_src.id == transition.source and p_object_dest.id == transition.destination:
-            transition_object = transition
-            break
-        # Else do nothing
-
-    return transition_object
-
-
-def get_fun_intf_data(wanted_object, _, **kwargs):
+def get_fun_intf_data(wanted_object, _, is_list_transposed, **kwargs):
     """Case for 'list data Functional Interface' """
     data_dict = {}
     data_list = []
@@ -338,8 +303,16 @@ def get_fun_intf_data(wanted_object, _, **kwargs):
                                                      **kwargs))
 
         if data_list:
-            data_dict = {'title': f"Data list for {wanted_object.name}:",
-                         'data': data_list,
-                         'index': [0]}
+            if is_list_transposed:
+                data_dict = {'title': f"Data list for {wanted_object.name}:",
+                             'data': data_list,
+                             'columns': ['Data', 'Last consumer Function(s)', 'Last consumer Functional element(s)',
+                                         'Last producer Function(s)', 'Last producer Functional element(s)'],
+                             'transpose': 'y'}
+            else:
+                data_dict = {'title': f"Data list for {wanted_object.name}:",
+                             'data': data_list,
+                             'columns': ['Data', 'Last consumer Function(s)', 'Last consumer Functional element(s)',
+                                         'Last producer Function(s)', 'Last producer Functional element(s)']}
 
     return data_dict

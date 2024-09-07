@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 
@@ -10,7 +10,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from jarvis.query import query_object, question_answer
+from . import orchestrator_object
 from jarvis import util
 from tools import Logger
 
@@ -38,7 +38,7 @@ def check_add_type_extension(extends_str_list, **kwargs):
         type_extension_name = elem[0].replace('"', "")
         type_to_extend_name = elem[1].replace('"', "")
 
-        if any(t == type_extension_name for t in query_object.query_object_name_in_list(xml_type_list)):
+        if any(t == type_extension_name for t in orchestrator_object.check_object_name_in_list(xml_type_list)):
             Logger.set_info(__name__,
                             f'"{type_extension_name}" already exists')
             continue
@@ -84,8 +84,8 @@ def check_get_type_to_extend(type_str, xml_type_list):
     if any(a == formatted_type_str for a in [i.name for i in datamodel.BaseType]):
         return datamodel.BaseType[formatted_type_str]
 
-    if any(a == type_str for a in query_object.query_object_name_in_list(xml_type_list)):
-        check = query_object.query_object_by_name(type_str, **{XML_DICT_KEY_11_TYPE_LIST: xml_type_list})
+    if any(a == type_str for a in orchestrator_object.check_object_name_in_list(xml_type_list)):
+        check = orchestrator_object.retrieve_object_by_name(type_str, **{XML_DICT_KEY_11_TYPE_LIST: xml_type_list})
         return check
 
     return check

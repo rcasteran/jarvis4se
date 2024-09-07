@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 
@@ -10,8 +10,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from jarvis.orchestrator import orchestrator_viewpoint_requirement
-from jarvis.query import query_object, question_answer
+from jarvis.orchestrator import orchestrator_viewpoint_requirement, orchestrator_object
 from jarvis import util
 from tools import Logger
 
@@ -35,7 +34,7 @@ def add_attribute(attribute_str_list, **kwargs):
 
     new_attribute_list = []
     # Create attribute names list already in xml
-    xml_attribute_name_list = query_object.query_object_name_in_list(xml_attribute_list)
+    xml_attribute_name_list = orchestrator_object.check_object_name_in_list(xml_attribute_list)
     # Filter attribute_list, keeping only the ones not already in the xml
     for elem in attribute_str_list:
         attribute_name = elem.replace('"', "")
@@ -80,7 +79,7 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
         object_name = elem[1].replace('"', "")
         attribute_value = elem[2].replace('"', "")
 
-        obj_to_set = query_object.query_object_by_name(
+        obj_to_set = orchestrator_object.retrieve_object_by_name(
             object_name,
             **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
@@ -90,7 +89,7 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
                XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
                XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
                })
-        attribute_wanted = query_object.query_object_by_name(
+        attribute_wanted = orchestrator_object.retrieve_object_by_name(
             attribute_name,
             **{XML_DICT_KEY_9_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                })

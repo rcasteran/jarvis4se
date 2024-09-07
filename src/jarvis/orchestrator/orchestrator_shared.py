@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 
@@ -12,7 +12,6 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import orchestrator_object
 from jarvis.handler import handler_question
-from jarvis.query import query_object, question_answer
 from jarvis import util
 from tools import Logger
 
@@ -37,8 +36,8 @@ def check_add_child(parent_child_name_str_list, **kwargs):
     cleaned_parent_child_list_str = util.cut_tuple_list(parent_child_name_str_list)
     # elem = [parent_object, child_object]
     for elem in cleaned_parent_child_list_str:
-        parent_object = query_object.query_object_by_name(elem[0], **kwargs)
-        child_object = query_object.query_object_by_name(elem[1], **kwargs)
+        parent_object = orchestrator_object.retrieve_object_by_name(elem[0], **kwargs)
+        child_object = orchestrator_object.retrieve_object_by_name(elem[1], **kwargs)
         if parent_object is not None and child_object is not None:
             check_pair = None
             for idx, obj_type in enumerate(datamodel.TypeWithChildList):
@@ -188,7 +187,7 @@ def check_and_delete_object(delete_str_list, **kwargs):
     for elem in delete_str_list:
         object_name = elem.replace('"', "")
 
-        object_to_del = query_object.query_object_by_name(object_name, **kwargs)
+        object_to_del = orchestrator_object.retrieve_object_by_name(object_name, **kwargs)
         if object_to_del is None:
             Logger.set_error(__name__,
                              f"{object_name} does not exist")
@@ -588,7 +587,7 @@ def check_set_object_type(type_str_list, **kwargs):
         object_name = elem[0].replace('"', "")
         type_name = elem[1].replace('"', "")
 
-        object_to_set = query_object.query_object_by_name(object_name, **kwargs)
+        object_to_set = orchestrator_object.retrieve_object_by_name(object_name, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
                              f"{object_name} does not exist")
@@ -615,8 +614,9 @@ def check_new_type(object_to_set, type_name, xml_type_list):
             base_type_idx = obj_base_type.value
             check = True
             object_to_set.set_type(obj_base_type)
-        elif any(t == type_name for t in query_object.query_object_name_in_list(xml_type_list)):
-            obj_type = query_object.query_object_by_name(type_name, **{XML_DICT_KEY_11_TYPE_LIST: xml_type_list})
+        elif any(t == type_name for t in orchestrator_object.check_object_name_in_list(xml_type_list)):
+            obj_type = orchestrator_object.retrieve_object_by_name(type_name,
+                                                                   **{XML_DICT_KEY_11_TYPE_LIST: xml_type_list})
             check = check_type_recursively(obj_type)
             if not check:
                 Logger.set_info(__name__,
@@ -707,7 +707,7 @@ def check_set_object_alias(alias_str_list, **kwargs):
         object_name = elem[0].replace('"', "")
         alias_str = elem[1].replace('"', "")
 
-        object_to_set = query_object.query_object_by_name(object_name, **kwargs)
+        object_to_set = orchestrator_object.retrieve_object_by_name(object_name, **kwargs)
         if object_to_set is None:
             Logger.set_error(__name__,
                              f"{object_name} does not exist")
@@ -796,20 +796,22 @@ def check_add_allocation(allocation_str_list, **kwargs):
     }
     cleaned_allocation_str_list = util.cut_tuple_list(allocation_str_list)
     for elem in cleaned_allocation_str_list:
-        alloc_obj = query_object.query_object_by_name(elem[0],
-                                                      **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                     XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
-                                                     XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                     XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                     XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                     })
-        obj_to_alloc = query_object.query_object_by_name(elem[1],
-                                                         **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                        XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
-                                                        XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                        XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                        XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                        })
+        alloc_obj = orchestrator_object.retrieve_object_by_name(
+            elem[0],
+            **{XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+               })
+        obj_to_alloc = orchestrator_object.retrieve_object_by_name(
+            elem[1],
+            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+               XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+               XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+               })
         check_obj = check_allocation_objects_types(alloc_obj, obj_to_alloc, elem)
         if not check_obj:
             continue
@@ -905,7 +907,7 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
     """Check allocation rules for fun_elem then returns objects if check"""
     count = None
     out = None
-    check_allocation = question_answer.get_allocation_object(obj_to_alloc, fun_elem_list, **kwargs)
+    check_allocation = orchestrator_object.retrieve_allocated_object_list(obj_to_alloc, fun_elem_list, **kwargs)
     if check_allocation is not None:
         count = len(check_allocation)
         for item in check_allocation:
@@ -926,7 +928,7 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
 def check_state_allocation(state, function, state_list, **kwargs):
     """Check allocation rules for state then returns objects if check"""
     out = None
-    check_allocation = question_answer.get_allocation_object(function, state_list, **kwargs)
+    check_allocation = orchestrator_object.retrieve_allocated_object_list(function, state_list, **kwargs)
     if check_allocation is None:
         state.add_allocated_function(function.id)
         out = [state, function]
@@ -941,8 +943,10 @@ def check_state_allocation(state, function, state_list, **kwargs):
 def check_fun_inter_allocation(fun_inter, data, **kwargs):
     """Check allocation rules for fun_inter then returns objects if check"""
     out = None
-    check_allocation_fun_inter = question_answer.get_allocation_object(data, kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                                       **kwargs)
+    check_allocation_fun_inter = orchestrator_object.retrieve_allocated_object_list(
+        data,
+        kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+        **kwargs)
     if check_allocation_fun_inter is None:
         check_fe = check_fun_elem_data_consumption(
             data, fun_inter,
@@ -1139,7 +1143,12 @@ def allocate_all_children_in_element(elem, **kwargs):
     """Recursive allocation for children of State/Function"""
     output_xml = kwargs['output_xml']
     check_parent_allocation(elem, **kwargs)
-    object_type = query_object.query_object_type(elem[1], **kwargs)
+
+    if isinstance(elem[1].type, datamodel.BaseType):
+        object_type = elem[1].type
+    else:
+        _, object_type = orchestrator_object.retrieve_type(elem[1].type.name, True, **kwargs)
+
     if elem[1].child_list:
         for i in elem[1].child_list:
             parent_child = [elem[1], i]
@@ -1232,31 +1241,33 @@ def check_add_inheritance(inherit_str_list, **kwargs):
         object_inheriting_name = elem[0].replace('"', "")
         object_to_inherit_name = elem[1].replace('"', "")
 
-        object_inheriting = query_object.query_object_by_name(object_inheriting_name,
-                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
-                                                       XML_DICT_KEY_1_FUNCTION_LIST],
-                                                      XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
-                                                          XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                      XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
-                                                          XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                      XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
-                                                          XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                      XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
-                                                          XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                      })
+        object_inheriting = orchestrator_object.retrieve_object_by_name(
+            object_inheriting_name,
+            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
+                XML_DICT_KEY_1_FUNCTION_LIST],
+               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
+                   XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
+                   XML_DICT_KEY_3_FUN_INTF_LIST],
+               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
+                   XML_DICT_KEY_4_PHY_ELEM_LIST],
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
+                   XML_DICT_KEY_5_PHY_INTF_LIST],
+               })
 
-        object_to_inherit = query_object.query_object_by_name(object_to_inherit_name,
-                                                   **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
-                                                       XML_DICT_KEY_1_FUNCTION_LIST],
-                                                      XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
-                                                          XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                      XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
-                                                          XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                      XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
-                                                          XML_DICT_KEY_4_PHY_ELEM_LIST],
-                                                      XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
-                                                          XML_DICT_KEY_5_PHY_INTF_LIST],
-                                                      })
+        object_to_inherit = orchestrator_object.retrieve_object_by_name(
+            object_to_inherit_name,
+            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[
+                XML_DICT_KEY_1_FUNCTION_LIST],
+               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[
+                   XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[
+                   XML_DICT_KEY_3_FUN_INTF_LIST],
+               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[
+                   XML_DICT_KEY_4_PHY_ELEM_LIST],
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[
+                   XML_DICT_KEY_5_PHY_INTF_LIST],
+               })
         if not object_inheriting or not object_to_inherit:
             if not object_inheriting and not object_to_inherit:
                 print_wrong_object_inheritance(object_inheriting_name, object_to_inherit_name)
@@ -1340,144 +1351,3 @@ def add_derived(object_list, output_xml):
                             f"{obj.name} inherited from {obj.derived.name}")
         return 1
     return 0
-
-
-# Inheritance start here - Should be moved/refactored after validation
-def childs_inheritance(*xml_obj_set, level=None):
-    """Check if object from xml_obj_set is derived, if yes:
-    - call derived_childs()
-    - returns derived_parent_dict of derived objects id, derived_child_set of derived objects and
-    derived_child_id_list
-    Parameter:
-    - obj: set() of objects
-    - level: diagram level"""
-    derived_child_set = set()
-    derived_parent_dict = {}
-    derived_child_id_list = set()
-
-    for xml_set in xml_obj_set:
-        for elem in xml_set:
-            if elem.derived:
-                partial_child_set, partial_par_dict, partial_child_id_set = derived_childs(elem,
-                                                                                           level)
-                derived_child_set = derived_child_set.union(partial_child_set)
-                derived_parent_dict.update(partial_par_dict)
-                derived_child_id_list = derived_child_id_list.union(partial_child_id_set)
-
-    return derived_child_set, derived_parent_dict, derived_child_id_list
-
-
-def derived_childs(obj, level):
-    """Add derived object childs to object and set derived parent to object"""
-    derived_parent_dict = {}
-
-    [obj.add_child(c) for c in obj.derived.child_list
-     if c.parent == obj.derived]
-    [c.set_parent(obj) for c in obj.derived.child_list
-     if c.parent == obj.derived]
-    for child in obj.derived.child_list:
-        derived_parent_dict[str(child.id)] = str(obj.id)
-    derived_child_set = query_object.query_object_children_recursively(obj.derived,
-                                                                       None,
-                                                                       None,
-                                                                       None,
-                                                                       level)[0]
-    derived_child_id_list = {c.id for c in obj.derived.child_list}
-    obj.derived.child_list.clear()
-    derived_child_set.remove(obj.derived)
-
-    return derived_child_set, derived_parent_dict, derived_child_id_list
-
-
-def reset_childs_inheritance(*xml_obj_set, derived_child_id=None):
-    """Check if there is first level derived child id list, if yes reset original child/parent
-    relationships"""
-    if derived_child_id:
-        for xml_set in xml_obj_set:
-            for elem in xml_set:
-                if elem.derived:
-                    child_pop = [c for c in elem.child_list
-                                 if c.id in [f for f in derived_child_id]]
-                    [elem.derived.add_child(c) for c in child_pop]
-                    [c.set_parent(elem.derived) for c in child_pop]
-
-
-def attribute_inheritance(xml_attribute_set, *xml_object_set):
-    """Attribute inheritance"""
-    modified_attrib_set = set()
-    derived_elem = set()
-
-    for xml_set in xml_object_set:
-        [derived_elem.add(e) for e in xml_set if e.derived]
-
-    for attribute in xml_attribute_set:
-        for obj_id, value in attribute.described_item_list.copy():
-            for der_obj in derived_elem:
-                if obj_id == der_obj.derived.id:
-                    attribute.add_described_item((der_obj.id, value))
-                    modified_attrib_set.add((attribute.id, der_obj.id, value))
-
-    return modified_attrib_set
-
-
-def reset_attribute_inheritance(xml_attribute_set, to_be_reset_id_set):
-    """Reset attributes"""
-    for attribute in xml_attribute_set:
-        [attribute.described_item_list.remove((e[1], e[2])) for e in to_be_reset_id_set
-         if e[0] == attribute.id]
-
-
-def view_inheritance(xml_view_set, *xml_obj_set):
-    """View inheritance"""
-    temp_view_set = set()
-    derived_elem_set = set()
-
-    for xml_set in xml_obj_set:
-        [derived_elem_set.add(e) for e in xml_set if e.derived]
-
-    for view in xml_view_set:
-        for item_id in view.allocated_item_list.copy():
-            for obj in derived_elem_set:
-                if item_id == obj.derived.id:
-                    temp_view_set.add((view.id, obj.id))
-                    view.add_allocated_item(obj.id)
-
-    return temp_view_set
-
-
-def reset_view_inheritance(xml_view_set, to_be_removed_id):
-    """Reset views"""
-    for view in xml_view_set:
-        for ids in to_be_removed_id:
-            if view.id == ids[0]:
-                view.allocated_item_list.remove(ids[1])
-
-
-def allocation_inheritance(xml_obj_set, xml_allocated_obj_set):
-    """Allocation Inheritance"""
-    alloc_to_reset = []
-    for elem in xml_obj_set:
-        if elem.derived:
-            if isinstance(elem, datamodel.FunctionalElement):
-                pair = [elem, {i for i in elem.derived.allocated_function_list
-                               if i not in elem.allocated_function_list}]
-                elem.allocated_function_list = elem.allocated_function_list.union(
-                    elem.derived.allocated_function_list)
-                alloc_to_reset.append(pair)
-            if isinstance(elem, datamodel.FunctionalInterface):
-                pair = [elem, {i for i in elem.derived.allocated_data_list
-                               if i not in elem.allocated_data_list}]
-                elem.allocated_data_list = elem.allocated_data_list.union(
-                    elem.derived.allocated_data_list)
-                alloc_to_reset.append(pair)
-
-    return alloc_to_reset
-
-
-def reset_alloc_inheritance(pairs_to_reset):
-    """Reset Allocation Inheritance"""
-    for pair in pairs_to_reset:
-        if isinstance(pair[0], datamodel.FunctionalElement):
-            [pair[0].allocated_function_list.remove(fun_id) for fun_id in pair[1]]
-        if isinstance(pair[0], datamodel.FunctionalInterface):
-            [pair[0].allocated_data_list.remove(data_id) for data_id in pair[1]]

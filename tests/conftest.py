@@ -1016,6 +1016,48 @@ def input_test_simple_function():
 
 
 @pytest.fixture
+def input_test_simple_function_in_out_inheritance():
+    """@ingroup test_plantuml_context
+    @anchor input_test_simple_function_in_out_inheritance
+    Defines input fixture for:
+    - @ref test_simple_function_in_out
+    - @ref test_simple_function_in_out_inheritance
+    - @ref test_simple_function_csv
+    - @ref test_simple_function_handler_question
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        F1 is a function
+        a is a data
+        b is a data
+        =============================
+        F1 produces b
+        =============================
+        F1 consumes a
+        =============================
+        F2 is a function
+        F2 inherits from F1
+    """
+    first_part = "\n".join(["F1 is a function",
+                            "a is a data",
+                            "b is a data"])
+
+    second_part = "\n".join(["F1 produces b",
+                             ""])
+
+    third_part = "\n".join(["F1 consumes a",
+                            ""])
+
+    fourth_part = "\n".join(["F2 is a function",
+                             "F2 inherits from F1",
+                             ""])
+
+    return first_part, second_part, third_part, fourth_part
+
+
+@pytest.fixture
 def input_test_extended_attribute():
     """@ingroup test_xml_file
     @anchor input_test_extended_attribute

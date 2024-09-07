@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 
@@ -11,7 +11,6 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from . import orchestrator_shared, orchestrator_object, orchestrator_viewpoint_requirement
-from jarvis.query import query_object, question_answer
 from jarvis import util
 from tools import Logger
 
@@ -42,7 +41,7 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
     data_predecessor_str_list = util.cut_tuple_list(data_predecessor_str_set)
 
     # Create data names list already in xml
-    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
+    xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
 
     for elem in data_predecessor_str_list:
         is_elem_found = True
@@ -154,8 +153,8 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
 
     new_consumer_list = []
     # Create object names/aliases list and data's name
-    xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
-    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
+    xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
+    xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
     # Loop to filter consumer and create a new list
     # elem = [data_name, consumer_function_name]
     for elem in consumer_str_list:
@@ -284,7 +283,7 @@ def add_producer_consumer_flow_recursively(flow, function, current_list, opposit
         # Else do nothing
 
     if function.parent is not None:
-        parent_child_list, parent_child_dict = query_object.query_object_children_recursively(function.parent)
+        parent_child_list, parent_child_dict = orchestrator_object.retrieve_object_children_recursively(function.parent)
 
         if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
             add_producer_consumer_flow_recursively(flow, function.parent, current_list, opposite_list, new_list,
@@ -421,8 +420,8 @@ def check_add_producer_function(producer_str_list, **kwargs):
 
     new_producer_list = []
     # Create object names/aliases list
-    xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
-    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
+    xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
+    xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
     # Loop to filter producer and create a new list
     # elem = [data_name, producer_function_name]
     for elem in producer_str_list:
@@ -523,7 +522,7 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
     condition_list = []
 
     # Create a list with all transition names/aliases already in the xml
-    xml_transition_name_list = query_object.query_object_name_in_list(xml_transition_list)
+    xml_transition_name_list = orchestrator_object.check_object_name_in_list(xml_transition_list)
     # elem = [transition_name, condition_str]
     for elem in trans_condition_str_list:
         transition_name = elem[0].replace('"', "")
@@ -624,8 +623,8 @@ def check_add_src_dest(src_dest_str, **kwargs):
     new_src_list = []
     new_dest_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_transition_name_list = query_object.query_object_name_in_list(xml_transition_list)
-    xml_state_name_list = query_object.query_object_name_in_list(xml_state_list)
+    xml_transition_name_list = orchestrator_object.check_object_name_in_list(xml_transition_list)
+    xml_state_name_list = orchestrator_object.check_object_name_in_list(xml_state_list)
 
     concatenated_lists = [*xml_transition_name_list, *xml_state_name_list]
 
@@ -777,10 +776,10 @@ def check_add_exposes(exposes_str_list, **kwargs):
         fun_elem_name = elem[0].replace('"', "")
         fun_intf_name = elem[1].replace('"', "")
 
-        fun_elem = query_object.query_object_by_name(fun_elem_name,
-                                                     **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
-        fun_inter = query_object.query_object_by_name(fun_intf_name,
-                                                      **{XML_DICT_KEY_3_FUN_INTF_LIST: xml_fun_inter_list})
+        fun_elem = orchestrator_object.retrieve_object_by_name(fun_elem_name,
+                                                               **{XML_DICT_KEY_2_FUN_ELEM_LIST: xml_fun_elem_list})
+        fun_inter = orchestrator_object.retrieve_object_by_name(fun_intf_name,
+                                                                **{XML_DICT_KEY_3_FUN_INTF_LIST: xml_fun_inter_list})
 
         check_print_wrong_pair_object((fun_elem_name, fun_elem, 'Functional Element'),
                                       (fun_intf_name, fun_inter, 'Functional Interface'),

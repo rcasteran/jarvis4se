@@ -39,39 +39,25 @@ def test_simple_function_plantuml_context(mocker, input_test_simple_function):
     assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
 
 
-def test_simple_function_in_out_plantuml_context(mocker):
+def test_simple_function_in_out_plantuml_context(mocker, input_test_simple_function_in_out_inheritance):
     """@ingroup test_plantuml_context
     Test context diagram display with a single function with one input and one output
 
     @param[in] mocker : mocker fixture reference
+    @param[in] input_test_simple_function_in_out_inheritance : input fixture reference
     @return None
 
     **Jarvis4se equivalent:**
-
-        with simple_function_in_out
-        F1 is a function
-        a is a data
-        b is a data
-        =============================
-        with simple_function_in_out
-        F1 produces b
-        =============================
-        with simple_function_in_out
-        F1 consumes a
-        =============================
-        with simple_function_in_out
-        show context F1
+    @ref input_test_simple_function_in_out_inheritance
     """
     spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
     file_name = "test_simple_function_in_out_plantuml_context"
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 is a function\n"
-                         "a is a data\n"
-                         "b is a data\n")
+                         f"{input_test_simple_function_in_out_inheritance[0]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 produces b\n")
+                         f"{input_test_simple_function_in_out_inheritance[1]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
-                         "F1 consumes a\n")
+                         f"{input_test_simple_function_in_out_inheritance[2]}\n")
     jarvis4se.jarvis("", f"with {file_name}\n"
                          "show context F1\n")
 
@@ -82,6 +68,43 @@ def test_simple_function_in_out_plantuml_context(mocker):
                'circle f1_o\n' \
                'f1_i --> f1 : a\n' \
                'f1 --> f1_o  : b\n'
+
+    test_lib.remove_xml_file(file_name)
+
+    assert expected in result
+    assert len(result) - len(expected) == len("\'id: xxxxxxxxxx\n")
+
+
+def test_simple_function_in_out_inheritance_plantuml_context(mocker, input_test_simple_function_in_out_inheritance):
+    """@ingroup test_plantuml_context
+    Test context diagram display with a single function with one input and one output
+
+    @param[in] mocker : mocker fixture reference
+    @param[in] input_test_simple_function_in_out_inheritance : input fixture reference
+    @return None
+
+    **Jarvis4se equivalent:**
+    @ref input_test_simple_function_in_out_inheritance
+    """
+    spy = mocker.spy(plantuml_adapter, "get_function_diagrams")
+    file_name = "test_simple_function_in_out_inheritance_plantuml_context"
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_simple_function_in_out_inheritance[0]}\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_simple_function_in_out_inheritance[1]}\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_simple_function_in_out_inheritance[2]}\n")
+    jarvis4se.jarvis("", f"with {file_name}\n"
+                         f"{input_test_simple_function_in_out_inheritance[3]}\n"
+                         "show context F2\n")
+
+    # result = plantuml text without "@startuml ... @enduml" tags
+    result = spy.spy_return
+    expected = 'object "F2" as f2 <<Function>>\n' \
+               'circle f2_i\n' \
+               'circle f2_o\n' \
+               'f2_i --> f2 : a\n' \
+               'f2 --> f2_o  : b\n'
 
     test_lib.remove_xml_file(file_name)
 

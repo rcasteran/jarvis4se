@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 
@@ -10,8 +10,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from . import orchestrator_shared
-from jarvis.query import query_object, question_answer
+from . import orchestrator_shared, orchestrator_object
 from jarvis import util
 from tools import Logger
 
@@ -36,7 +35,7 @@ def add_view(p_str_list, **kwargs):
     update = 0
 
     # Create a list with all view names already in the xml
-    xml_view_name_list = query_object.query_object_name_in_list(xml_view_list)
+    xml_view_name_list = orchestrator_object.check_object_name_in_list(xml_view_list)
 
     for elem in p_str_list:
         view_name = elem.replace('"', "")
@@ -93,9 +92,9 @@ def check_get_consider(consider_str_list, **kwargs):
 
     allocated_item_list = []
     # Create lists with all object names/aliases already in the xml
-    xml_fun_elem_name_list = query_object.query_object_name_in_list(xml_fun_elem_list)
-    xml_function_name_list = query_object.query_object_name_in_list(xml_function_list)
-    xml_data_name_list = query_object.query_object_name_in_list(xml_data_list)
+    xml_fun_elem_name_list = orchestrator_object.check_object_name_in_list(xml_fun_elem_list)
+    xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
+    xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
 
     consider_str_list = util.cut_chain_from_string_list(consider_str_list)
 

@@ -1,5 +1,5 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 import re
@@ -16,7 +16,6 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
 from . import orchestrator_object
 from tools import Logger
 from jarvis.handler import handler_question
-from jarvis.query import query_object, question_answer
 from jarvis import util
 
 # Constants
@@ -35,7 +34,7 @@ TO_TAG = "TO"
 
 
 def check_add_requirement(p_str_list, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor check_add_requirement
     Check list of requirement declarations before adding them to jarvis data structure
 
@@ -94,7 +93,7 @@ def check_add_requirement(p_str_list, **kwargs):
 
                     answer, _ = handler_question.question_to_user(f"Please give a requirement name: ")
                     if len(answer) > 0 and answer != "q":
-                        existing_object = query_object.query_object_by_name(answer, **kwargs)
+                        existing_object = orchestrator_object.retrieve_object_by_name(answer, **kwargs)
                         if existing_object:
                             if isinstance(existing_object.type, datamodel.BaseType):
                                 if str(existing_object.type) != "Requirement":
@@ -135,7 +134,7 @@ def check_add_text(p_text_str_list, **kwargs):
     text_list = []
 
     # Create a list with all transition names/aliases already in the xml
-    xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
+    xml_requirement_name_list = orchestrator_object.check_object_name_in_list(xml_requirement_list)
     for elem in p_text_str_list:
         requirement_str = elem[0].replace('"', "")
         text_str = elem[1].replace('"', "")
@@ -239,7 +238,7 @@ def evaluate_text_similarities(p_req_subject, p_req_object, p_req_conditional, p
 
 
 def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor detect_req_pattern
     Detect requirement pattern in requirement declaration
 
@@ -285,7 +284,7 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
 
 
 def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor check_requirement_relationship
     Check requirement relationship between the object related to the requirement subject and the potential objects
     related to requirement object, conditional or temporal parts
@@ -363,7 +362,7 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
 
 
 def add_requirement(p_requirement_list, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor add_requirement
     Add requirement list to jarvis data structure
 
@@ -379,7 +378,7 @@ def add_requirement(p_requirement_list, **kwargs):
 
     update = 0
     # Create requirement names list already in xml
-    xml_requirement_name_list = query_object.query_object_name_in_list(xml_requirement_list)
+    xml_requirement_name_list = orchestrator_object.check_object_name_in_list(xml_requirement_list)
     # Filter attribute_list, keeping only the ones not already in the xml
     for requirement_item in p_requirement_list:
         if requirement_item[0] not in xml_requirement_name_list:
@@ -485,7 +484,7 @@ def add_requirement_text(p_text_list, **kwargs):
 
 
 def check_add_allocation(p_str_list, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor check_add_allocation
     Check list of requirement allocation declaration and add them to jarvis data structure
 
@@ -496,20 +495,22 @@ def check_add_allocation(p_str_list, **kwargs):
     allocation_list = []
     cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_allocation_str_list:
-        alloc_obj = query_object.query_object_by_name(elem[0], **{
-            XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-            XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
-            XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
-            XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
-            XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-            XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-            XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-            XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST]
-        })
+        alloc_obj = orchestrator_object.retrieve_object_by_name(
+            elem[0],
+            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+               XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
+               XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+               XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST]
+               })
 
-        req_obj = query_object.query_object_by_name(elem[1], **{
-            XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
-        })
+        req_obj = orchestrator_object.retrieve_object_by_name(
+            elem[1],
+            **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
+               })
 
         if not alloc_obj:
             Logger.set_error(__name__, f"Object {elem[0]} not found or cannot satisfy a requirement, "
@@ -555,7 +556,7 @@ def check_add_allocation(p_str_list, **kwargs):
 
 
 def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor update_requirement_link
     Update the requirement link in jarvis data structure according to object parent it has been allocated to
 
@@ -597,7 +598,7 @@ def update_requirement_link(p_allocated_parent, p_requirement, **kwargs):
 
 
 def retrieve_requirement_object(p_requirement_object_str):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_requirement_object
     Retrieve requirement object from requirement text
 
@@ -618,7 +619,7 @@ def retrieve_requirement_object(p_requirement_object_str):
 
 
 def check_add_derived(p_str_list, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor check_add_derived
     Check list of requirement derivation link requests and add them to jarvis data structure
 
@@ -629,11 +630,11 @@ def check_add_derived(p_str_list, **kwargs):
     derived_list = []
     cleaned_derived_str_list = util.cut_tuple_list(p_str_list)
     for elem in cleaned_derived_str_list:
-        derived_req_obj = query_object.query_object_by_name(elem[0], **{
+        derived_req_obj = orchestrator_object.retrieve_object_by_name(elem[0], **{
             XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
         })
 
-        parent_req_obj = query_object.query_object_by_name(elem[1], **{
+        parent_req_obj = orchestrator_object.retrieve_object_by_name(elem[1], **{
             XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
         })
 
@@ -668,7 +669,7 @@ def check_add_derived(p_str_list, **kwargs):
 
 
 def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_req_proper_noun_object
     Retrieve list of objects named as proper nouns found in requirement text
 
@@ -682,7 +683,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
     is_error = False
 
     # Try to retrieve the subject object as a whole
-    req_string_object = query_object.query_object_by_name(p_req_str, **kwargs)
+    req_string_object = orchestrator_object.retrieve_object_by_name(p_req_str, **kwargs)
 
     if req_string_object is None:
         is_previous_proper_noun_singular_tag = False
@@ -721,7 +722,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
             if is_error:
                 break
             elif is_proper_noun:
-                req_string_object_list.append(query_object.query_object_by_name(tag[0], **kwargs))
+                req_string_object_list.append(orchestrator_object.retrieve_object_by_name(tag[0], **kwargs))
             elif is_function_name:
                 is_previous_function_name = True
                 function_name_str = function_name_str + ' ' + tag[0]
@@ -729,7 +730,8 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
             if not is_function_name and is_previous_function_name:
                 Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-                req_string_object_list.append(query_object.query_object_by_name(function_name_str[1:], **kwargs))
+                req_string_object_list.append(
+                    orchestrator_object.retrieve_object_by_name(function_name_str[1:], **kwargs))
                 function_name_str = ''
                 is_previous_function_name = False
 
@@ -738,7 +740,7 @@ def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
 
         if is_function_name:
             Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-            req_string_object_list.append(query_object.query_object_by_name(function_name_str[1:], **kwargs))
+            req_string_object_list.append(orchestrator_object.retrieve_object_by_name(function_name_str[1:], **kwargs))
         # Else do nothing
     else:
         req_string_object_list.append(req_string_object)
@@ -823,7 +825,7 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
 
 
 def retrieve_req_subject_object(p_req_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_req_subject_object
     Retrieve list of objects named as proper nouns found for requirement subject
 
@@ -846,7 +848,7 @@ def retrieve_req_subject_object(p_req_str, **kwargs):
 
 
 def retrieve_req_object_object_list(p_req_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_req_object_object_list
     Retrieve list of objects named as proper nouns found for requirement object
 
@@ -866,7 +868,7 @@ def retrieve_req_object_object_list(p_req_str, **kwargs):
 
 
 def retrieve_req_condition_object_list(p_req_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_req_condition_object_list
     Retrieve list of objects named as proper nouns found for requirement condition
 
@@ -886,7 +888,7 @@ def retrieve_req_condition_object_list(p_req_str, **kwargs):
 
 
 def retrieve_req_temporal_object_list(p_req_str, **kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor retrieve_req_temporal_object_list
     Retrieve list of objects named as proper nouns found for requirement temporal condition
 
@@ -906,7 +908,7 @@ def retrieve_req_temporal_object_list(p_req_str, **kwargs):
 
 
 def analyze_requirement(**kwargs):
-    """@ingroup jarvis
+    """@ingroup orchestrator
     @anchor analyze_requirement
     Analyze requirements against jarvis data structure
 
@@ -989,7 +991,7 @@ def analyze_requirement(**kwargs):
                     [[req_subject_name, req_subject_type]],
                     **kwargs)
                 
-                req_subject_object = query_object.query_object_by_name(req_subject_name, **kwargs)
+                req_subject_object = orchestrator_object.retrieve_object_by_name(req_subject_name, **kwargs)
                 
             elif answer == "q":
                 break

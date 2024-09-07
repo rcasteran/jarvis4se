@@ -1,19 +1,19 @@
-"""@defgroup jarvis
-Jarvis module
+""" @defgroup orchestrator
+Jarvis orchestrator module
 """
 # Libraries
 import re
 
 # Modules
 import datamodel
+from xml_adapter import XmlDictKeyListForObjects
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
 from jarvis import util
-from jarvis.orchestrator import orchestrator_viewpoint_requirement
-from jarvis.query import query_object, question_answer
+from . import orchestrator_viewpoint_requirement
 from tools import Logger
 
 
@@ -115,7 +115,7 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
 
         if "?" not in elem[1]:
             specific_type, base_type = retrieve_type(object_type, **kwargs)
-            existing_object = query_object.query_object_by_name(object_name, **kwargs)
+            existing_object = retrieve_object_by_name(object_name, **kwargs)
 
             if existing_object:
                 if isinstance(existing_object.type, datamodel.BaseType):
@@ -156,8 +156,8 @@ def retrieve_type(p_type_str, p_is_silent=False, **kwargs):
         base_type = next((i for i in [str(i) for i in datamodel.BaseType]
                           if i == p_type_str.capitalize()))
     else:
-        specific_type = query_object.query_object_by_name(p_type_str,
-                                                          **{XML_DICT_KEY_11_TYPE_LIST: kwargs[XML_DICT_KEY_11_TYPE_LIST]})
+        specific_type = retrieve_object_by_name(p_type_str,
+                                                **{XML_DICT_KEY_11_TYPE_LIST: kwargs[XML_DICT_KEY_11_TYPE_LIST]})
         if specific_type is None:
             if not p_is_silent:
                 Logger.set_error(__name__,
@@ -212,11 +212,176 @@ def retrieve_implicit_object_relationship(p_object_src, p_object_dest, p_context
 
                         if object_in_context.type == datamodel.BaseType.STATE and \
                                 object_in_context_type != p_object_dest:
-                            implicit_object = question_answer.get_transition_between_states(p_object_dest,
-                                                                                            object_in_context,
-                                                                                            **kwargs)
+                            implicit_object = retrieve_object_transition_between_states(p_object_dest,
+                                                                                        object_in_context,
+                                                                                        **kwargs)
 
     return implicit_object
+
+
+def retrieve_object_transition_between_states(p_object_src, p_object_dest, **kwargs):
+    transition_object = None
+
+    for transition in kwargs[XML_DICT_KEY_7_TRANSITION_LIST]:
+        if p_object_src.id == transition.source and p_object_dest.id == transition.destination:
+            transition_object = transition
+            break
+        # Else do nothing
+
+    return transition_object
+
+
+def retrieve_object_children_recursively(p_object, p_object_list=None, p_parent_child_dict=None, p_level_count=None,
+                                         p_requested_level=None):
+    if p_object_list is None:
+        p_object_list = set()
+    # Else do nothing
+
+    if p_parent_child_dict is None:
+        p_parent_child_dict = {}
+    # Else do nothing
+
+    if not p_level_count:
+        p_level_count = 0
+    # Else do nothing
+
+    p_object_list.add(p_object)
+
+    if p_object.child_list:
+        p_level_count += 1
+        if p_requested_level:
+            if (p_level_count - 1) == p_requested_level:
+                p_object.child_list.clear()
+            else:
+                for child in p_object.child_list:
+                    p_parent_child_dict[child.id] = p_object.id
+                    retrieve_object_children_recursively(child, p_object_list, p_parent_child_dict, p_level_count,
+                                                         p_requested_level)
+        else:
+            for child in p_object.child_list:
+                p_parent_child_dict[child.id] = p_object.id
+                retrieve_object_children_recursively(child, p_object_list, p_parent_child_dict, p_level_count,
+                                                     p_requested_level)
+    # Else do nothing
+
+    return p_object_list, p_parent_child_dict
+
+
+def retrieve_object_by_name(p_obj_name_str, **kwargs):
+    """
+    Returns the desired object from object's string
+    Args:
+        p_obj_name_str ([object_string]): list of object's name from cell
+        **kwargs: xml lists
+
+    Returns:
+        wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
+    """
+    wanted_object = None
+    whole_objects_name_list = check_object_name_in_dict(**kwargs)
+
+    if any(p_obj_name_str in s for s in whole_objects_name_list):
+        result = [False] * len(XmlDictKeyListForObjects)
+        for i in range(len(XmlDictKeyListForObjects)):
+            result[i] = any(a == p_obj_name_str for a in whole_objects_name_list[i])
+
+        wanted_object = match_object(p_obj_name_str, result, p_xml_str_lists=XmlDictKeyListForObjects, **kwargs)
+    # Else do nothing
+
+    return wanted_object
+
+
+def match_object(object_str, result, p_xml_str_lists=None, **kwargs):
+    """Returns wanted_object from object_str and result matched from name lists"""
+    # Because match_object() called within match_allocated() TBC/TBT if match_allocated()
+    # still needed
+    if not p_xml_str_lists:
+        p_xml_str_lists = XmlDictKeyListForObjects
+    for i in range(len(p_xml_str_lists)):
+        if result[i]:
+            for obj in kwargs[p_xml_str_lists[i]]:
+                if object_str == obj.name:
+                    return obj
+                try:
+                    if object_str == obj.alias:
+                        return obj
+                except AttributeError:
+                    # To avoid error when there is no alias for the object
+                    pass
+    return None
+
+
+def retrieve_allocated_object_list(wanted_object, object_list, **kwargs):
+    """Get current allocation for an object"""
+    allocation_set = set()
+
+    if isinstance(wanted_object.type, datamodel.BaseType):
+        object_type = wanted_object.type
+    else:
+        _, object_type = retrieve_type(wanted_object.type.name, True, **kwargs)
+
+    if object_type == datamodel.BaseType.FUNCTION:
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.allocated_function_list):
+                allocation_set.add(fun_elem)
+            # Else do nothing
+    elif object_type == datamodel.BaseType.STATE:
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.allocated_state_list):
+                allocation_set.add(fun_elem)
+            # Else do nothing
+    elif object_type == datamodel.BaseType.DATA:
+        for fun_inter in object_list:
+            if any(s == wanted_object.id for s in fun_inter.allocated_data_list):
+                allocation_set.add(fun_inter)
+            # Else do nothing
+    elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+        for fun_elem in object_list:
+            if any(s == wanted_object.id for s in fun_elem.exposed_interface_list):
+                allocation_set.add(fun_elem)
+            # Else do nothing
+    elif object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+        for function in object_list:
+            if any(s == function.id for s in wanted_object.allocated_function_list):
+                allocation_set.add(function)
+            # Else do nothing
+    # Else do nothing
+
+    if len(allocation_set) == 0:
+        allocation_set = None
+    # Else do nothing
+
+    return allocation_set
+
+
+def check_object_name_in_dict(**kwargs):
+    """Returns lists of objects with their names depending on kwargs"""
+    whole_objects_name_list = [[] for _ in range(len(XmlDictKeyListForObjects))]
+    for i in range(len(XmlDictKeyListForObjects)):
+        if kwargs.get(XmlDictKeyListForObjects[i], False):
+            whole_objects_name_list[i] = check_object_name_in_list(kwargs[XmlDictKeyListForObjects[i]])
+        # Else do nothing
+
+    return whole_objects_name_list
+
+
+def check_object_name_in_list(p_object_list):
+    """
+    Method that returns a list with all object aliases/names from object's list
+
+    """
+    object_name_list = []
+    # Create the xml [object_name (and object_alias)] list
+    for obj in p_object_list:
+        object_name_list.append(obj.name)
+        try:
+            if len(obj.alias) > 0:
+                object_name_list.append(obj.alias)
+        except AttributeError:
+            # To avoid error when there is no alias attribute for the object
+            pass
+
+    return object_name_list
 
 
 def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
@@ -479,3 +644,6 @@ def check_object_is_not_family(p_object_a, p_object_b):
         is_family = False
 
     return is_family
+
+
+

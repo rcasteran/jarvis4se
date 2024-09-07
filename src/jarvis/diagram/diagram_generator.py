@@ -12,8 +12,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
     XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
     XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from jarvis.query import query_object, question_answer
-from jarvis.orchestrator import orchestrator_shared
+from jarvis.query import query_object, question_answer, query_inheritance
 from jarvis import util as jarvis_util
 from . import diagram_generator_chain
 from . import diagram_generator_farch
@@ -85,9 +84,22 @@ def case_context_diagram(**kwargs):
     plantuml_string = None
 
     if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
-        child_inheritance = orchestrator_shared.childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+        consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            **kwargs
+        )
+        produced_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+            **kwargs
+        )
+        child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+        )
+        attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
 
         plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
                                                                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
@@ -97,8 +109,24 @@ def case_context_diagram(**kwargs):
                                                                        kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
                                                                        kwargs[XML_DICT_KEY_11_TYPE_LIST])
 
-        orchestrator_shared.reset_childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST], derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
+        query_inheritance.query_inheritance_remove_inherited_object(
+            consumed_flow_inheritance,
+            kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            **kwargs
+        )
+        query_inheritance.query_inheritance_remove_inherited_object(
+            produced_flow_inheritance,
+            kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+            **kwargs
+        )
+        query_inheritance.query_inheritance_remove_inherited_object_children(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            derived_child_id=child_inheritance[2]
+        )
+        query_inheritance.query_inheritance_remove_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            attribute_inheritance
+        )
 
     elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST]):
         plantuml_string = show_states_chain([kwargs['diagram_object_str']],
@@ -106,17 +134,27 @@ def case_context_diagram(**kwargs):
                                             kwargs[XML_DICT_KEY_7_TRANSITION_LIST])
 
     elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
-        child_inheritance = orchestrator_shared.childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                   kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                                   level=None)
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                                          kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
-        func_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
-        fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                                                 kwargs[XML_DICT_KEY_0_DATA_LIST])
+        child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            level=None
+        )
+        attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]
+        )
+        func_alloc_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            **kwargs
+        )
+        fun_inter_alloc_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+            kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+            kwargs[XML_DICT_KEY_0_DATA_LIST],
+            **kwargs
+        )
 
         plantuml_string = diagram_generator_farch.show_fun_elem_context(kwargs['diagram_object_str'],
                                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
@@ -127,12 +165,23 @@ def case_context_diagram(**kwargs):
                                                                         kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                                         kwargs[XML_DICT_KEY_0_DATA_LIST])
 
-        orchestrator_shared.reset_childs_inheritance(kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                     kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                     derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
-        orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
-        orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
+        query_inheritance.query_inheritance_remove_inherited_object_children(
+            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+            derived_child_id=child_inheritance[2]
+        )
+        query_inheritance.query_inheritance_remove_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            attribute_inheritance
+        )
+        query_inheritance.query_inheritance_remove_inherited_object(
+            func_alloc_inheritance,
+            None,
+            **kwargs)
+        query_inheritance.query_inheritance_remove_inherited_object(
+            fun_inter_alloc_inheritance,
+            None,
+            **kwargs)
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
@@ -163,9 +212,9 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    v_inheritance = orchestrator_shared.view_inheritance(kwargs[XML_DICT_KEY_10_VIEW_LIST],
-                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+    v_inheritance = query_inheritance.query_inheritance_add_inherited_view(kwargs[XML_DICT_KEY_10_VIEW_LIST],
+                                                                           kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                           kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
 
     # Check view if activated and filter allocated item
     function_list = util.get_object_list_from_view(diagram_object_str,
@@ -184,9 +233,14 @@ def case_decomposition_diagram(**kwargs):
         producer_list = []
 
     if diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
-        child_inheritance = orchestrator_shared.childs_inheritance(function_list, level=diagram_level)
-        attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                          function_list)
+        child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
+            function_list,
+            level=diagram_level
+        )
+        attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            function_list
+        )
 
         plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_object_str,
                                                                              function_list,
@@ -196,23 +250,41 @@ def case_decomposition_diagram(**kwargs):
                                                                              kwargs[XML_DICT_KEY_11_TYPE_LIST],
                                                                              diagram_level=diagram_level)
 
-        orchestrator_shared.reset_childs_inheritance(function_list, derived_child_id=child_inheritance[2])
-        orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
+        query_inheritance.query_inheritance_remove_inherited_object_children(
+            function_list,
+            derived_child_id=child_inheritance[2]
+        )
+        query_inheritance.query_inheritance_remove_inherited_attribute(
+            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            attribute_inheritance
+        )
     elif diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         fun_elem_list = util.get_object_list_from_view(diagram_object_str,
                                                        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                        kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
         if len(fun_elem_list) > 0:
-            child_inheritance = orchestrator_shared.childs_inheritance(function_list, fun_elem_list,
-                                                                       level=diagram_level)
-            attribute_inheritance = orchestrator_shared.attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                              function_list,
-                                                                              fun_elem_list,
-                                                                              kwargs[XML_DICT_KEY_3_FUN_INTF_LIST])
-            func_alloc_inheritance = orchestrator_shared.allocation_inheritance(fun_elem_list, function_list)
-            fun_inter_alloc_inheritance = orchestrator_shared.allocation_inheritance(kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-                                                                                     kwargs[XML_DICT_KEY_0_DATA_LIST])
+            child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
+                function_list,
+                fun_elem_list,
+                level=diagram_level
+            )
+            attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
+                kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                function_list,
+                fun_elem_list,
+                kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]
+            )
+            func_alloc_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                fun_elem_list,
+                function_list,
+                **kwargs
+            )
+            fun_inter_alloc_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
+                kwargs[XML_DICT_KEY_0_DATA_LIST],
+                **kwargs
+            )
 
             plantuml_string = diagram_generator_farch.show_fun_elem_decomposition(diagram_object_str,
                                                                                   function_list,
@@ -224,18 +296,31 @@ def case_decomposition_diagram(**kwargs):
                                                                                   kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                                                   diagram_level)
 
-            orchestrator_shared.reset_childs_inheritance(function_list,
-                                                         fun_elem_list,
-                                                         derived_child_id=child_inheritance[2])
-            orchestrator_shared.reset_attribute_inheritance(kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST], attribute_inheritance)
-            orchestrator_shared.reset_alloc_inheritance(func_alloc_inheritance)
-            orchestrator_shared.reset_alloc_inheritance(fun_inter_alloc_inheritance)
+            query_inheritance.query_inheritance_remove_inherited_object_children(
+                function_list,
+                fun_elem_list,
+                derived_child_id=child_inheritance[2]
+            )
+            query_inheritance.query_inheritance_remove_inherited_attribute(
+                kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                attribute_inheritance
+            )
+            query_inheritance.query_inheritance_remove_inherited_object(
+                func_alloc_inheritance,
+                None,
+                **kwargs
+            )
+            query_inheritance.query_inheritance_remove_inherited_object(
+                fun_inter_alloc_inheritance,
+                None,
+                **kwargs
+            )
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the object {diagram_object_str}"
                            f"(i.e. it is not a function, nor a functional element)")
 
-    orchestrator_shared.reset_view_inheritance(kwargs[XML_DICT_KEY_10_VIEW_LIST], v_inheritance)
+    query_inheritance.query_inheritance_remove_inherited_view(kwargs[XML_DICT_KEY_10_VIEW_LIST], v_inheritance)
 
     return plantuml_string
 
@@ -386,7 +471,8 @@ def case_sequence_diagram(**kwargs):
                                                               xml_prod,
                                                               xml_data_list)
 
-                elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]) for i in object_list_str):
+                elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+                         for i in object_list_str):
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         kwargs[XML_DICT_KEY_12_FUN_CONS_LIST] = \
                             [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
@@ -631,7 +717,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
         fun_inter_str, **{XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]})
 
     if fun_inter:
-        data_list_fun_inter = question_answer.get_fun_intf_data(fun_inter, None, **kwargs)['data']
+        data_list_fun_inter = question_answer.get_fun_intf_data(fun_inter, None, False, **kwargs)['data']
         for elem in data_list_fun_inter:
             fun_elem_data = None
             if elem['Last consumer Functional element(s)']:
