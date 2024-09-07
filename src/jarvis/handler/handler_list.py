@@ -1,3 +1,6 @@
+""" @defgroup handler
+Jarvis handler module
+"""
 # Libraries
 
 
@@ -82,7 +85,7 @@ def switch_object_list(type_list_str, wanted_object, object_type, is_list_transp
             else:
                 report_no_list_available(wanted_object, object_type)
     elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE and type_list_str == "data":
-        object_list = question_answer.get_fun_intf_data(wanted_object, object_type, **kwargs)
+        object_list = question_answer.get_fun_intf_data(wanted_object, object_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
@@ -222,10 +225,17 @@ def get_state_transition(wanted_object, object_type, is_list_transposed, **kwarg
                     })
 
     if transition_list:
-        transition_dict = {'title': f"Transition list for {wanted_object.name}:",
-                           'data': transition_list,
-                           'index': [0]
-                           }
+        if is_list_transposed:
+            transition_dict = {'title': f"Transition list for {wanted_object.name}:",
+                               'data': transition_list,
+                               'columns': ["Transition name", "Source state", "Destination state", "Condition(s)"],
+                               'transpose': 'y'
+                               }
+        else:
+            transition_dict = {'title': f"Transition list for {wanted_object.name}:",
+                               'data': transition_list,
+                               'columns': ["Transition name", "Source state", "Destination state", "Condition(s)"]
+                               }
 
     return transition_dict
 

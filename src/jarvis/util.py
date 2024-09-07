@@ -155,17 +155,7 @@ def get_pandas_table(data_dict):
                 data_frame = data_frame.T
             # Else do nothing
 
-    if 'Data' in data_dict['title'] or 'Transition' in data_dict['title']:
-        if 'Data' in data_dict['title']:
-            first = 1
-            last = 5
-        else:
-            first = 3
-            last = 4
-
-        for idx in range(first, last):
-            data_frame.iloc[idx] = data_frame.iloc[idx].str.join("\\n")
-    # Else do nothing
+    data_frame = data_frame.replace(r"\n", "<br>", regex=True)
 
     data_frame = data_frame.style \
         .set_caption(data_dict['title']) \

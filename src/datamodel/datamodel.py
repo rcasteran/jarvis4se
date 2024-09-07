@@ -368,12 +368,12 @@ class Data:
         @param[in] self this class instance
         @return string
         """
-        return {**util.str_type(self),
+        return {**util.info_type(self),
                 # Data has no alias
                 # Data cannot be specialized
                 # Data has no parent
                 # Data has no children
-                **util.str_allocated_req(self)
+                **util.info_allocated_req(self)
                 # Data has no allocated data
                 # No display of predecessor list
                 }, [util.INFO_KEY_TYPE,
