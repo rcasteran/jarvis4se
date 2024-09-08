@@ -102,8 +102,12 @@ def get_input_list(wanted_object, object_type, is_list_transposed, **kwargs):
     input_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', **kwargs)
 
     if wanted_object.derived:
-        input_list.append(*question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
-                                                                                direction='input', **kwargs))
+        for input_derived in question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
+                                                                                  direction='input',
+                                                                                  **kwargs):
+            input_list.append(input_derived)
+    # Else do nothing
+
     if input_list:
         if is_list_transposed:
             input_dict = {'title': f"Input list for {wanted_object.name}:",
@@ -124,8 +128,12 @@ def get_output_list(wanted_object, object_type, is_list_transposed, **kwargs):
     output_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='output', **kwargs)
 
     if wanted_object.derived:
-        output_list.append(*question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
-                                                                                 direction='output', **kwargs))
+        for output_derived in question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
+                                                                                   direction='output',
+                                                                                   **kwargs):
+            output_list.append(output_derived)
+    # Else do nothing
+    
     if output_list:
         if is_list_transposed:
             output_dict = {'title': f"Output list for {wanted_object.name}:",

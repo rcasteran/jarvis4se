@@ -347,6 +347,16 @@ def case_chain_diagram(**kwargs):
                                                            kwargs[XML_DICT_KEY_10_VIEW_LIST])
 
             if len(function_list) > 0:
+                consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                    function_list,
+                    kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                    **kwargs
+                )
+                produced_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                    function_list,
+                    kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                    **kwargs
+                )
                 _, consumer_list, producer_list = \
                     util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                                 kwargs[XML_DICT_KEY_10_VIEW_LIST],
@@ -362,6 +372,17 @@ def case_chain_diagram(**kwargs):
                                                                               producer_list,
                                                                               kwargs[XML_DICT_KEY_11_TYPE_LIST],
                                                                               kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
+
+                query_inheritance.query_inheritance_remove_inherited_object(
+                    consumed_flow_inheritance,
+                    kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                    **kwargs
+                )
+                query_inheritance.query_inheritance_remove_inherited_object(
+                    produced_flow_inheritance,
+                    kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                    **kwargs
+                )
             else:
                 Logger.set_warning(__name__,
                                    f"Nothing to display for the selected view")
