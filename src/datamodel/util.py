@@ -10,6 +10,8 @@ INFO_KEY_DERIVED = 'derived from object'
 INFO_KEY_CHILD_LIST = 'child list'
 INFO_KEY_REQUIREMENT_LIST = 'requirement list'
 INFO_KEY_DATA_LIST = 'allocated data list'
+INFO_KEY_TEXT = 'text'
+
 
 class Point:
     """@ingroup datamodel
@@ -274,7 +276,7 @@ def info_allocated_req(p_obj):
     if len(p_obj.allocated_req_list) > 0:
         req_id_list = ''
         for item in p_obj.allocated_req_list:
-            req_id_list += f'{item})\n'
+            req_id_list += f'{item}\n'
         req_id_list = req_id_list[:-1]
         info_dict = {INFO_KEY_REQUIREMENT_LIST: req_id_list}
     else:
@@ -321,5 +323,35 @@ def info_allocated_data(p_obj):
         info_dict = {INFO_KEY_DATA_LIST: data_id_list}
     else:
         info_dict = {INFO_KEY_DATA_LIST: 'none'}
+
+    return info_dict
+
+
+def str_text(p_obj):
+    """@ingroup datamodel
+    @anchor str_text
+    Return a string representation of the test of a class instance
+    @param[in] p_obj class instance
+    @return string
+    """
+    if p_obj.text:
+        rep = f'"{p_obj.name}" text is {p_obj.text}.'
+    else:
+        rep = f'"{p_obj.name}" has no text.'
+
+    return rep
+
+
+def info_text(p_obj):
+    """@ingroup datamodel
+    @anchor info_text
+    Return a dict representation of the text of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if p_obj.text:
+        info_dict = {INFO_KEY_TEXT: p_obj.text}
+    else:
+        info_dict = {INFO_KEY_TEXT: 'none'}
 
     return info_dict

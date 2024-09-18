@@ -74,23 +74,22 @@ def check_add_requirement(p_str_list, **kwargs):
 
                 # Check if a requirement with the same text already exist
                 sequence_ratio_list = evaluate_text_similarities(req_subject,
-                                                                        req_object,
-                                                                        req_conditional,
-                                                                        req_temporal,
-                                                                        **kwargs)
+                                                                 req_object,
+                                                                 req_conditional,
+                                                                 req_temporal,
+                                                                 **kwargs)
 
+                req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                                                                           req_object,
+                                                                           req_conditional,
+                                                                           req_temporal,
+                                                                           **kwargs)
                 if sequence_ratio_list:
                     similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
                     Logger.set_info(__name__,
                                     f"Requirement {similar_requirement_name} has the same "
                                     f"text (confidence factor: {sequence_ratio_list[similar_requirement_name]})")
                 else:
-                    req_allocated_object_list = check_requirement_relationship(req_subject_object,
-                                                                               req_object,
-                                                                               req_conditional,
-                                                                               req_temporal,
-                                                                               **kwargs)
-
                     answer, _ = handler_question.question_to_user(f"Please give a requirement name: ")
                     if len(answer) > 0 and answer != "q":
                         existing_object = orchestrator_object.retrieve_object_by_name(answer, **kwargs)
@@ -167,10 +166,16 @@ def check_add_text(p_text_str_list, **kwargs):
 
                             # Check if a requirement with the same text already exist
                             sequence_ratio_list = evaluate_text_similarities(req_subject,
-                                                                                    req_object,
-                                                                                    req_conditional,
-                                                                                    req_temporal,
-                                                                                    **kwargs)
+                                                                             req_object,
+                                                                             req_conditional,
+                                                                             req_temporal,
+                                                                             **kwargs)
+
+                            req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                                                                                       req_object,
+                                                                                       req_conditional,
+                                                                                       req_temporal,
+                                                                                       **kwargs)
 
                             if sequence_ratio_list:
                                 similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
@@ -179,14 +184,9 @@ def check_add_text(p_text_str_list, **kwargs):
                                                 f"text (confidence factor: "
                                                 f"{sequence_ratio_list[similar_requirement_name]})")
                             else:
-                                req_allocated_object_list = check_requirement_relationship(req_subject_object,
-                                                                                           req_object,
-                                                                                           req_conditional,
-                                                                                           req_temporal,
-                                                                                           **kwargs)
                                 text_list.append([requirement, text_str.lstrip(' '),
-                                                         req_subject_object,
-                                                         req_allocated_object_list])
+                                                  req_subject_object,
+                                                  req_allocated_object_list])
                             # Else do nothing
                         # Else do nothing
                     # Else do nothing
@@ -983,7 +983,8 @@ def analyze_requirement(**kwargs):
                 # Else do nothing
 
                 if req_subject_type is None:
-                    req_subject_type, _ = handler_question.question_to_user(f'What is the type of "{req_subject_name}" ?')
+                    req_subject_type, _ = handler_question.question_to_user(f'What is the type '
+                                                                            f'of "{req_subject_name}" ?')
                 # Else do nothing
 
                 # Create_specific_obj_by_type

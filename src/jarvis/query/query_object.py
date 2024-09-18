@@ -56,3 +56,7 @@ def query_object_attribute_properties_list(p_object, **kwargs):
 
 def query_object_is_parent_recursively(p_object_parent, p_object_child):
     return orchestrator_object.check_object_is_parent_recursively(p_object_parent, p_object_child)
+
+
+def query_object_type_requirement_list(p_object, **kwargs):
+    return orchestrator_object.retrieve_object_type_requirement_list(p_object, **kwargs)

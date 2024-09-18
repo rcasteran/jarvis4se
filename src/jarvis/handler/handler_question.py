@@ -72,12 +72,40 @@ def question_object_info(p_object_str, **kwargs):
                     info_obj += '\n' + f'"{wanted_object.name}" {wanted_object_attribute[0]} is ' \
                                        f'{wanted_object_attribute[1]}'
 
+            wanted_object_type_requirement_list = query_object.query_object_type_requirement_list(wanted_object,
+                                                                                                  **kwargs)
+            if len(wanted_object_type_requirement_list) > 1:
+                info_obj += f'\n"{wanted_object.name}" has {len(wanted_object_type_requirement_list)} ' \
+                            f'inherited requirements:\n'
+                for item in wanted_object_type_requirement_list:
+                    info_obj += f' - requirement {item.name}\n'
+                info_obj = info_obj[:-1]
+            elif len(wanted_object_type_requirement_list) == 1:
+                info_obj += f'\n"{wanted_object.name}" has one inherited requirement:\n'
+                for item in wanted_object_type_requirement_list:
+                    info_obj += f' - requirement {item.name})\n'
+                info_obj = info_obj[:-1]
+            else:
+                info_obj += f'\n"{wanted_object.name}" has no inherited requirement.'
+
             info_obj_format = ANSWER_FORMAT_STRING
         else:
             wanted_object_attribute_dict = {}
             wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
             for wanted_object_attribute in wanted_object_attribute_list:
                 wanted_object_attribute_dict[wanted_object_attribute[0]] = wanted_object_attribute[1]
+
+            wanted_object_type_requirement_list = query_object.query_object_type_requirement_list(wanted_object,
+                                                                                                  **kwargs)
+            if len(wanted_object_type_requirement_list) > 0:
+                wanted_object_attribute_dict['inherited requirement list'] = ''
+                for wanted_object_type_requirement in wanted_object_type_requirement_list:
+                    wanted_object_attribute_dict['inherited requirement list'] \
+                        += f'{wanted_object_type_requirement.name}\n'
+                wanted_object_attribute_dict['inherited requirement list'] =\
+                    wanted_object_attribute_dict['inherited requirement list'][:-1]
+            else:
+                wanted_object_attribute_dict['inherited requirement list'] = 'none'
 
             info_obj = {'title': f"Object {wanted_object.name}:",
                         'data': {**wanted_object.info()[0], **wanted_object_attribute_dict},

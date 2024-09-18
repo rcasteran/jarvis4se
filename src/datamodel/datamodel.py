@@ -1540,7 +1540,6 @@ class PhysicalInterface:
                     ]
 
 
-
 class Type:
     """@ingroup datamodel
     @anchor Type
@@ -1561,11 +1560,15 @@ class Type:
         @var base
         Type base\n
         Must be @ref BaseType value
+
+        @var allocated_req_list
+        allocated requirement list
         """
         self.id = p_id
         self.name = p_name
         self.alias = p_alias
         self.base = p_base
+        self.allocated_req_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1599,17 +1602,25 @@ class Type:
         """
         self.base = p_base
 
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
     def __str__(self):
         """Return a string representation of the class instance
         @param[in] self this class instance
         @return string
         """
         rep = f'"{self.name}" is a type (id: {self.id}).\n'
-        rep += util.str_alias(self)
+        rep += util.str_alias(self) + '\n'
         # Type cannot be specialized
         # Type has no parent
         # Type has no children
-        # Type has no allocated requirement
+        rep += util.str_allocated_req(self)
         # Type has no allocated data
 
         # No display of base type
@@ -1621,14 +1632,15 @@ class Type:
         @param[in] self this class instance
         @return dict
         """
-        return {**util.info_alias(self)
+        return {**util.info_alias(self),
                 # Type cannot be specialized
                 # Type has no parent
                 # Type has no children
-                # Type has no allocated requirement
+                **util.info_allocated_req(self)
                 # Type has no allocated data
                 # No display of base type
-                }, [util.INFO_KEY_ALIAS
+                }, [util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_REQUIREMENT_LIST
                     ]
 
 
@@ -1741,11 +1753,10 @@ class Requirement:
         rep += util.str_alias(self) + '\n'
         # Requirement cannot be specialized
         rep += util.str_parent(self) + '\n'
-        rep += util.str_child_list(self)
+        rep += util.str_child_list(self) + '\n'
         # Requirement has no allocated requirement
         # Requirement has no allocated data
-
-        # No display of description
+        rep += util.str_text(self)
 
         return rep
 
@@ -1758,14 +1769,15 @@ class Requirement:
                 **util.info_alias(self),
                 # Requirement cannot be specialized
                 **util.info_parent(self),
-                **util.info_child_list(self)
+                **util.info_child_list(self),
                 # Requirement has no allocated requirement
                 # Requirement has no allocated data
-                # No display of description
+                **util.info_text(self)
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_PARENT,
-                    util.INFO_KEY_CHILD_LIST
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_TEXT
                     ]
 
 

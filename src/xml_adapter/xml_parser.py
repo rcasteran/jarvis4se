@@ -616,6 +616,15 @@ class XmlParser3SE:
                                       p_base=xml_type.get('base'))
             type_list.add(type_obj)
 
+            # Looking for allocated requirements and add them to the type
+            xml_allocated_requirement_list = xml_type.iter('allocatedRequirement')
+            for xml_allocated_requirement in xml_allocated_requirement_list:
+                type_obj.add_allocated_requirement(xml_allocated_requirement.get("id"))
+
+                Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"type [{type_obj.id}, {type_obj.name}]")
+
         # Update base type depending if it is a 3SE base type or if it is a custom one
         for obj_type in type_list:
             if any(obj_type.base in a for a in [str(i) for i in datamodel.BaseType]):
