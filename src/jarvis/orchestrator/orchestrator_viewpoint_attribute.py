@@ -160,10 +160,10 @@ def add_attribute_requirement(attribute, **kwargs):
 
     for xml_requirement in xml_requirement_list:
         req_subject_object = orchestrator_viewpoint_requirement.retrieve_req_subject_object(
-            xml_requirement.description, **kwargs)
+            xml_requirement.text, **kwargs)
 
         req_object_object_list = orchestrator_viewpoint_requirement.retrieve_req_object_object_list(
-            xml_requirement.description, **kwargs)
+            xml_requirement.text, **kwargs)
 
         if req_subject_object is not None and len(req_object_object_list) > 0:
             for req_object_object in req_object_object_list:

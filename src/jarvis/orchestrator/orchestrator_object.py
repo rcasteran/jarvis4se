@@ -439,27 +439,25 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
                     print("Data for Functional interface")
             elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
                 # Check if value of the attribute is in relationship context
-                is_value_defined = False
-                for described_object, value in p_object_dest.described_item_list:
-                    if described_object == p_object_src:
-                        is_value_defined = True
+                for described_object_id, value in p_object_dest.described_item_list:
+                    if described_object_id == p_object_src.id:
+                        is_relationship = True
                         if value in p_context:
                             Logger.set_info(__name__,
                                             f"{object_dest_type} {p_object_dest.name} of "
                                             f"{object_src_type} {p_object_src.name} has a value {value}")
-                            is_relationship = True
-                            break
-                        # Else do nothing
+                        else:
+                            Logger.set_warning(__name__,
+                                               f"Value of {object_dest_type} {p_object_dest.name} "
+                                               f"for {object_src_type} {p_object_src.name} is not defined "
+                                               f"by the relationship")
+                        break
+                    # Else do nothing
 
                 if not is_relationship:
-                    if not is_value_defined:
-                        Logger.set_warning(__name__,
-                                           f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
-                                           f"{object_src_type} {p_object_src.name}")
-                    else:
-                        Logger.set_warning(__name__,
-                                           f"Value of {object_dest_type} {p_object_dest.name} is different from the one "
-                                           f"given for {object_src_type} {p_object_src.name}")
+                    Logger.set_warning(__name__,
+                                       f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
+                                       f"{object_src_type} {p_object_src.name}")
                 # Else do nothing
             elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
                 if object_src_type == datamodel.BaseType.FUNCTION:
@@ -518,10 +516,27 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
                                        f"{object_dest_type} {p_object_dest.name} is not allocated to "
                                        f"{object_src_type} {p_object_src.name}")
             elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                # TODO: relationship between fun_elem and attribute
-                print(f"Relationship detected between {object_src_type}: {p_object_src.name} and "
-                      f"{object_dest_type}: {p_object_dest.name}")
-                print("Attribute case")
+                # Check if value of the attribute is in relationship context
+                for described_object_id, value in p_object_dest.described_item_list:
+                    if described_object_id == p_object_src.id:
+                        is_relationship = True
+                        if value in p_context:
+                            Logger.set_info(__name__,
+                                            f"{object_dest_type} {p_object_dest.name} of "
+                                            f"{object_src_type} {p_object_src.name} has a value {value}")
+                        else:
+                            Logger.set_warning(__name__,
+                                               f"Value of {object_dest_type} {p_object_dest.name} "
+                                               f"for {object_src_type} {p_object_src.name} is not defined "
+                                               f"by the relationship")
+                        break
+                    # Else do nothing
+
+                if not is_relationship:
+                    Logger.set_warning(__name__,
+                                       f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
+                                       f"{object_src_type} {p_object_src.name}")
+                # Else do nothing
             elif object_dest_type == datamodel.BaseType.DATA:
                 for allocated_fun_id in p_object_src.allocated_function_list:
                     for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
@@ -588,6 +603,39 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
                 print("State case")
             else:
                 # Warn about improper relationship between source type and destination type
+                print("Not supported")
+        elif object_src_type == datamodel.BaseType.ATTRIBUTE:
+            if object_dest_type == datamodel.BaseType.FUNCTION or \
+                    object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE or \
+                    object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT or \
+                    object_dest_type == datamodel.BaseType.PHYSICAL_INTERFACE or \
+                    object_dest_type == datamodel.BaseType.PHYSICAL_ELEMENT or \
+                    object_dest_type == datamodel.BaseType.STATE:
+                # Check if value of the attribute is in relationship context
+                for described_object_id, value in p_object_src.described_item_list:
+                    if described_object_id == p_object_dest.id:
+                        is_relationship = True
+                        if value in p_context:
+                            Logger.set_info(__name__,
+                                            f"{object_src_type} {p_object_src.name} of "
+                                            f"{object_dest_type} {p_object_dest.name} has a value {value}")
+                        else:
+                            Logger.set_warning(__name__,
+                                               f"Value of {object_src_type} {p_object_src.name} "
+                                               f"for {object_dest_type} {p_object_dest.name} is not defined "
+                                               f"by the relationship")
+                        break
+                    # Else do nothing
+
+                if not is_relationship:
+                    Logger.set_warning(__name__,
+                                       f"Value of {object_src_type} {p_object_src.name} is not defined for "
+                                       f"{object_dest_type} {p_object_dest.name}")
+                # Else do nothing
+            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                is_relationship = True
+            else:
+                # TODO: Warn about improper relationship between source type and destination type
                 print("Not supported")
         else:
             # Warn about improper object source type

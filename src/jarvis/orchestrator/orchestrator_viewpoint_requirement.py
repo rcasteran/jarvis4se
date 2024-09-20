@@ -53,21 +53,17 @@ def check_add_requirement(p_str_list, **kwargs):
                                                                                         desc_after_modal)
 
             # Retrieve the subject in object list
-            req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject,
-                                                                                p_is_subject=True,
-                                                                                **kwargs)
+            req_subject_object_list, is_error = retrieve_req_proper_noun_object_list(req_subject,
+                                                                                     **kwargs)
 
             if not is_error:
-                req_subject_object = None
-                for obj in req_subject_object_list:
-                    if obj:
-                        req_subject_object = obj
-                    # Else do nothing
-
-                if req_subject_object:
+                if len(req_subject_object_list) > 0:
+                    # Take the last one in case of requirement about attribute ( XXX of YYY shall)
+                    req_subject_object = req_subject_object_list[-1]
                     Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
                                               f"{desc_before_modal} shall {desc_after_modal}")
                 else:
+                    req_subject_object = None
                     Logger.set_info(__name__, f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
                     Logger.set_warning(__name__,
                                        f'Subject "{req_subject}" of the requirement is unknown')
@@ -79,7 +75,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                                  req_temporal,
                                                                  **kwargs)
 
-                req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                req_allocated_object_list = check_requirement_relationship(req_subject_object_list,
                                                                            req_object,
                                                                            req_conditional,
                                                                            req_temporal,
@@ -101,7 +97,7 @@ def check_add_requirement(p_str_list, **kwargs):
                                                      f"{answer} already exists")
                                 else:
                                     requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
-                                                             req_subject_object,
+                                                             req_subject_object_list,
                                                              req_allocated_object_list])
                             else:
                                 if str(existing_object.type.name) != "Requirement":
@@ -110,11 +106,11 @@ def check_add_requirement(p_str_list, **kwargs):
                                                      f"{answer} already exists")
                                 else:
                                     requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
-                                                             req_subject_object,
+                                                             req_subject_object_list,
                                                              req_allocated_object_list])
                         else:
                             requirement_list.append([answer, f"{desc_before_modal} shall {desc_after_modal}",
-                                                     req_subject_object, req_allocated_object_list])
+                                                     req_subject_object_list, req_allocated_object_list])
                     else:
                         Logger.set_error(__name__, "No name entered for identified requirement")
             # Else do nothing
@@ -146,20 +142,17 @@ def check_add_text(p_text_str_list, **kwargs):
                             detect_req_pattern(text_str.lstrip(' '))
 
                         # Retrieve the subject in object list
-                        req_subject_object_list, is_error = retrieve_req_proper_noun_object(req_subject,
-                                                                                            p_is_subject=True,
-                                                                                            **kwargs)
+                        req_subject_object_list, is_error = retrieve_req_proper_noun_object_list(req_subject,
+                                                                                                 **kwargs)
 
                         if not is_error:
-                            req_subject_object = None
-                            for obj in req_subject_object_list:
-                                if obj:
-                                    req_subject_object = obj
-
-                            if req_subject_object:
+                            if len(req_subject_object_list) > 0:
+                                # Take the last one in case of requirement about attribute ( XXX of YYY shall)
+                                req_subject_object = req_subject_object_list[-1]
                                 Logger.set_info(__name__, f"Requirement {requirement.name} is about "
                                                           f"{req_subject_object.name}")
                             else:
+                                req_subject_object = None
                                 Logger.set_warning(__name__,
                                                    f'Subject "{req_subject}" of the requirement {requirement.name} '
                                                    f'is unknown')
@@ -171,7 +164,7 @@ def check_add_text(p_text_str_list, **kwargs):
                                                                              req_temporal,
                                                                              **kwargs)
 
-                            req_allocated_object_list = check_requirement_relationship(req_subject_object,
+                            req_allocated_object_list = check_requirement_relationship(req_subject_object_list,
                                                                                        req_object,
                                                                                        req_conditional,
                                                                                        req_temporal,
@@ -283,13 +276,14 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     return req_subject.strip(), req_object.strip(), req_conditional.strip(), req_temporal.strip()
 
 
-def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
+def check_requirement_relationship(p_req_subject_object_list, p_req_object, p_req_conditional, p_req_temporal,
+                                   **kwargs):
     """@ingroup orchestrator
     @anchor check_requirement_relationship
     Check requirement relationship between the object related to the requirement subject and the potential objects
     related to requirement object, conditional or temporal parts
 
-    @param[in] p_req_subject_object : object related to the requirement subject
+    @param[in] p_req_subject_object_list : list of object related to the requirement subject
     @param[in] p_req_object : requirement object string
     @param[in] req_conditional : requirement conditional string
     @param[in] req_temporal : requirement temporal string
@@ -297,19 +291,21 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
     """
     # Check requirement object content
     implicit_object_list = []
-    req_object_list, _ = retrieve_req_proper_noun_object(p_req_object, **kwargs)
-    if p_req_subject_object:
+    req_object_list, _ = retrieve_req_proper_noun_object_list(p_req_object, **kwargs)
+    if p_req_subject_object_list:
         for req_object_object in req_object_list.copy():
-            if req_object_object:
-                if not orchestrator_object.check_object_relationship(p_req_subject_object,
+            for req_subject_object in p_req_subject_object_list:
+                if not orchestrator_object.check_object_relationship(req_subject_object,
                                                                      req_object_object,
                                                                      p_req_object,
                                                                      **kwargs):
                     # No relationship found in the datamodel between requirement subject and requirement
                     # object. Remove it from the list.
-                    req_object_list.remove(req_object_object)
+                    if req_object_object in req_object_list:
+                        req_object_list.remove(req_object_object)
+                    # ELse do nothing
                 else:
-                    implicit_object = orchestrator_object.retrieve_implicit_object_relationship(p_req_subject_object,
+                    implicit_object = orchestrator_object.retrieve_implicit_object_relationship(req_subject_object,
                                                                                                 req_object_object,
                                                                                                 p_req_object,
                                                                                                 req_object_list,
@@ -320,19 +316,18 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
                             implicit_object_list.append(implicit_object)
                         # Else do nothing
                     # Else do nothing
-            else:
-                req_object_list.remove(req_object_object)
 
         for implicit_object in implicit_object_list:
             req_object_list.append(implicit_object)
+    # Else do nothing
 
     # Check requirement conditional part if any
     if len(p_req_conditional) > 0:
-        req_conditional_object_list, _ = retrieve_req_proper_noun_object(p_req_conditional, **kwargs)
-        if p_req_subject_object:
-            for req_conditional_object in req_conditional_object_list.copy():
-                if req_conditional_object:
-                    if orchestrator_object.check_object_relationship(p_req_subject_object,
+        req_conditional_object_list, _ = retrieve_req_proper_noun_object_list(p_req_conditional, **kwargs)
+        if p_req_subject_object_list:
+            for req_conditional_object in req_conditional_object_list:
+                for req_subject_object in p_req_subject_object_list:
+                    if orchestrator_object.check_object_relationship(req_subject_object,
                                                                      req_conditional_object,
                                                                      p_req_conditional,
                                                                      **kwargs):
@@ -340,15 +335,16 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
                         # object. Add it to the allocated object list.
                         req_object_list.append(req_conditional_object)
                     # Else do nothing
-                # Else do nothing
+        # Else do nothing
+    # Else do nothing
 
     # Check requirement temporal part if any
     if len(p_req_temporal) > 0:
-        req_temporal_object_list, _ = retrieve_req_proper_noun_object(p_req_temporal, **kwargs)
-        if p_req_subject_object:
-            for req_temporal_object in req_temporal_object_list.copy():
-                if req_temporal_object:
-                    if orchestrator_object.check_object_relationship(p_req_subject_object,
+        req_temporal_object_list, _ = retrieve_req_proper_noun_object_list(p_req_temporal, **kwargs)
+        if p_req_subject_object_list:
+            for req_temporal_object in req_temporal_object_list:
+                for req_subject_object in p_req_subject_object_list:
+                    if orchestrator_object.check_object_relationship(req_subject_object,
                                                                      req_temporal_object,
                                                                      p_req_temporal,
                                                                      **kwargs):
@@ -356,7 +352,8 @@ def check_requirement_relationship(p_req_subject_object, p_req_object, p_req_con
                         # object. Add it to the allocated object list.
                         req_object_list.append(req_temporal_object)
                     # Else do nothing
-                # Else do nothing
+        # Else do nothing
+    # Else do nothing
 
     return req_object_list
 
@@ -390,13 +387,14 @@ def add_requirement(p_requirement_list, **kwargs):
             # alias is 'none' by default
             new_requirement_list.append(new_requirement)
 
-            # Test if allocated object is identified in the requirement subject
+            # Test if any allocated object is identified in the requirement subject
             if requirement_item[2]:
-                requirement_item[2].add_allocated_requirement(new_requirement.id)
-                new_allocation_list.append([requirement_item[2], new_requirement])
+                for item in requirement_item[2]:
+                    item.add_allocated_requirement(new_requirement.id)
+                    new_allocation_list.append([item, new_requirement])
             # Else do nothing
 
-            # Test if allocated object is identified in the requirement object or conditional part or temporal part
+            # Test if any allocated object is identified in the requirement object or conditional part or temporal part
             if requirement_item[3]:
                 for item in requirement_item[3]:
                     if item:
@@ -668,89 +666,141 @@ def check_add_derived(p_str_list, **kwargs):
     return update
 
 
-def retrieve_req_proper_noun_object(p_req_str, p_is_subject=False, **kwargs):
+def retrieve_req_proper_noun_object_list(p_req_str, **kwargs):
     """@ingroup orchestrator
-    @anchor retrieve_req_proper_noun_object
+    @anchor retrieve_req_proper_noun_object_list
     Retrieve list of objects named as proper nouns found in requirement text
 
-    @param[in] p_req_str : requirement text
-    @param[in] p_is_subject : indicate if list of objects named as proper nouns concern the requirement subject
-    only (TRUE) or not (FALSE)
+    @param[in] p_req_str : requirement string
     @param[in] kwargs : jarvis data structure
     @return list of objects
     """
-    req_string_object_list = []
+    req_object_list = []
+
+    # Try to retrieve the object with the whole requirement string
+    req_object = orchestrator_object.retrieve_object_by_name(p_req_str, **kwargs)
+
+    if req_object:
+        req_object_list.append(req_object)
+        is_error = False
+    else:
+        req_proper_noun_list, is_error = retrieve_req_proper_noun_list(p_req_str)
+
+        if not is_error:
+            for req_proper_noun in req_proper_noun_list:
+                req_object = orchestrator_object.retrieve_object_by_name(req_proper_noun, **kwargs)
+                if req_object:
+                    if req_object not in req_object_list:
+                        req_object_list.append(req_object)
+                    # Else do nothing
+                # Else do nothing
+        # ELse do nothing
+
+    return req_object_list, is_error
+
+
+def retrieve_req_proper_noun_list(p_req_str):
+    """@ingroup orchestrator
+    @anchor retrieve_req_proper_noun_list
+    Retrieve list of proper nouns found in requirement text
+
+    @param[in] p_req_str : requirement text
+    @param[in] kwargs : jarvis data structure
+    @return list of proper nouns
+    """
+    req_proper_noun_list = []
     is_error = False
 
-    # Try to retrieve the subject object as a whole
-    req_string_object = orchestrator_object.retrieve_object_by_name(p_req_str, **kwargs)
-
-    if req_string_object is None:
-        is_previous_proper_noun_singular_tag = False
-        is_previous_function_name = False
-        is_function_name = False
-        function_name_str = ''
-        token_list = nltk.word_tokenize(p_req_str)
-        tag_list = nltk.pos_tag(token_list)
-        index = 0
-        for tag in tag_list:
-            previous_tag_list = []
-            if index > 0:
-                for i in range(0, index):
-                    previous_tag_list.append(tag_list[i])
-            # Else do nothing
-
-            next_tag_list = []
-            if index < len(tag_list)-1:
-                for i in range(index+1, len(tag_list)):
-                    next_tag_list.append(tag_list[i])
-            # Else do nothing
-
-            Logger.set_debug(__name__, f'tag: {tag}')
-
-            is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error = (
-                check_proper_noun_tag(tag, previous_tag_list, next_tag_list, p_is_subject,
-                                      is_previous_proper_noun_singular_tag, is_function_name))
-
-            Logger.set_debug(__name__, f'previous_tag_list: {previous_tag_list}')
-            Logger.set_debug(__name__, f'next_tag_list: {next_tag_list}')
-            Logger.set_debug(__name__, f'is_proper_noun: {is_proper_noun}')
-            Logger.set_debug(__name__, f'is_previous_proper_noun_singular_tag: {is_previous_proper_noun_singular_tag}')
-            Logger.set_debug(__name__, f'is_function_name: {is_function_name}')
-            Logger.set_debug(__name__, f'is_error: {is_error}')
-
-            if is_error:
-                break
-            elif is_proper_noun:
-                req_string_object_list.append(orchestrator_object.retrieve_object_by_name(tag[0], **kwargs))
-            elif is_function_name:
-                is_previous_function_name = True
-                function_name_str = function_name_str + ' ' + tag[0]
-            # Else do nothing
-
-            if not is_function_name and is_previous_function_name:
-                Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-                req_string_object_list.append(
-                    orchestrator_object.retrieve_object_by_name(function_name_str[1:], **kwargs))
-                function_name_str = ''
-                is_previous_function_name = False
-
-            index = index+1
-        # Else do nothing
-
-        if is_function_name:
-            Logger.set_debug(__name__, f'function_name_str: {function_name_str[1:]}')
-            req_string_object_list.append(orchestrator_object.retrieve_object_by_name(function_name_str[1:], **kwargs))
-        # Else do nothing
-    else:
-        req_string_object_list.append(req_string_object)
-
-    return req_string_object_list, is_error
-
-
-def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subject,
-                          is_previous_proper_noun_singular_tag, is_function_name, p_is_silent=False):
+    is_previous_proper_noun_singular_tag = False
+    is_previous_proper_noun = False
     is_proper_noun = False
+    proper_noun_str = ''
+    is_previous_function_name = False
+    is_function_name = False
+    function_name_str = ''
+    token_list = nltk.word_tokenize(p_req_str)
+    tag_list = nltk.pos_tag(token_list)
+    index = 0
+    for tag in tag_list:
+        previous_tag_list = []
+        if index > 0:
+            for i in range(0, index):
+                previous_tag_list.append(tag_list[i])
+        # Else do nothing
+
+        next_tag_list = []
+        if index < len(tag_list) - 1:
+            for i in range(index + 1, len(tag_list)):
+                next_tag_list.append(tag_list[i])
+        # Else do nothing
+
+        Logger.set_debug(__name__, f'tag: {tag}')
+
+        is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error = (
+            check_proper_noun_tag(tag, previous_tag_list, next_tag_list, is_proper_noun,
+                                  is_previous_proper_noun_singular_tag, is_function_name))
+
+        Logger.set_debug(__name__, f'previous_tag_list: {previous_tag_list}')
+        Logger.set_debug(__name__, f'next_tag_list: {next_tag_list}')
+        Logger.set_debug(__name__, f'is_proper_noun: {is_proper_noun}')
+        Logger.set_debug(__name__, f'is_previous_proper_noun_singular_tag: {is_previous_proper_noun_singular_tag}')
+        Logger.set_debug(__name__, f'is_function_name: {is_function_name}')
+        Logger.set_debug(__name__, f'is_error: {is_error}')
+
+        if is_error:
+            break
+        elif is_proper_noun:
+            is_previous_proper_noun = True
+            proper_noun_str = proper_noun_str + ' ' + tag[0]
+        elif is_function_name:
+            is_previous_function_name = True
+            function_name_str = function_name_str + ' ' + tag[0]
+        # Else do nothing
+
+        if not is_proper_noun and is_previous_proper_noun:
+            proper_noun_str = proper_noun_str.strip().replace('( ', '(').replace(' )', ')') \
+                .replace('[ ', '[').replace(' ]', ']')
+            Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
+            req_proper_noun_list.append(proper_noun_str)
+
+            proper_noun_list = proper_noun_str.split(' ')
+            for proper_noun in proper_noun_list:
+                req_proper_noun_list.append(proper_noun)
+            proper_noun_str = ''
+            is_previous_proper_noun = False
+        # Else do nothing
+
+        if not is_function_name and is_previous_function_name:
+            Logger.set_debug(__name__, f'function_name_str: {function_name_str.strip()}')
+            req_proper_noun_list.append(function_name_str.strip())
+            function_name_str = ''
+            is_previous_function_name = False
+        # Else do nothing
+
+        index = index + 1
+    # Else do nothing
+
+    if is_proper_noun:
+        proper_noun_str = proper_noun_str.strip().replace('( ', '(').replace(' )', ')')\
+            .replace('[ ', '[').replace(' ]', ']')
+        Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
+        req_proper_noun_list.append(proper_noun_str)
+
+        proper_noun_list = proper_noun_str.split(' ')
+        for proper_noun in proper_noun_list:
+            req_proper_noun_list.append(proper_noun)
+    # Else do nothing
+
+    if is_function_name:
+        Logger.set_debug(__name__, f'function_name_str: {function_name_str.strip()}')
+        req_proper_noun_list.append(function_name_str.strip())
+    # Else do nothing
+
+    return req_proper_noun_list, is_error
+
+
+def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, is_proper_noun,
+                          is_previous_proper_noun_singular_tag, is_function_name, p_is_silent=False):
     is_error = False
 
     if p_tag[1] == PROPER_NOUN_SINGULAR_TAG or p_tag[1] == PRONOUN_PERSONAL_TAG:
@@ -760,9 +810,12 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
             is_previous_proper_noun_singular_tag = True
         # Else do nothing
     elif p_tag[1] == NOUN_SINGULAR_TAG or p_tag[1] == NOUN_PLURAL_TAG:
-        if not is_function_name:
-            is_proper_noun = not is_previous_proper_noun_singular_tag
-            is_previous_proper_noun_singular_tag = False
+        # sign '%' is tagged as NOUN_SINGULAR_TAG
+        if p_tag[0] != '%':
+            if not is_function_name:
+                is_proper_noun = not is_previous_proper_noun_singular_tag
+                is_previous_proper_noun_singular_tag = False
+            # Else do nothing
         # Else do nothing
     elif p_tag[1] == ADJECTIVE_TAG:
         is_previous_proper_noun_singular_tag = False
@@ -782,9 +835,11 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
             if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_previous_tag_list[-1][1] == NOUN_PLURAL_TAG:
                 if len(p_previous_tag_list) > 1:
                     if p_previous_tag_list[-2][1] != VERB_TAG and p_previous_tag_list[-2][1] != VERB_PAST_TAG:
+                        is_previous_proper_noun_singular_tag = False
                         is_function_name = True
                     # Else do nothing
                 else:
+                    is_previous_proper_noun_singular_tag = False
                     is_function_name = True
             else:
                 is_function_name = False
@@ -792,7 +847,7 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
     elif p_tag[1] == VERB_TAG:
         if len(p_tag[0]) > 1:
             if p_previous_tag_list:
-                if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_tag[-1][1] == NOUN_PLURAL_TAG:
+                if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_previous_tag_list[-1][1] == NOUN_PLURAL_TAG:
                     is_function_name = False
                 elif p_previous_tag_list[-1][1] == TO_TAG and not is_function_name:
                     # Could be a proper noun
@@ -800,8 +855,8 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
                     is_proper_noun = True
                 elif p_previous_tag_list[-1][1] != TO_TAG and not p_is_silent:
                     Logger.set_error(__name__,
-                                     f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '
-                                     f'nor a noun (tagged as "{p_tag[1]}")')
+                                     f'Requirement bad formatted: "{p_tag[0]}" is considered as a verb '
+                                     f'(tagged as "{p_tag[1]}")')
                     is_error = True
                 # Else do nothing
             # Else do nothing
@@ -809,16 +864,24 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, p_is_subj
             # Case of a single letter, so it is a proper noun instead of a verb
             is_previous_proper_noun_singular_tag = False
             is_proper_noun = True
-    elif is_function_name:
-        Logger.set_debug(__name__, f'Unknown tag {p_tag} detected in function name')
+    elif p_tag[1] == VERB_PAST_TAG:
+        if len(p_tag[0]) > 1:
+            if p_previous_tag_list:
+                if p_previous_tag_list[-1][1] == NOUN_SINGULAR_TAG or p_previous_tag_list[-1][1] == NOUN_PLURAL_TAG \
+                        or p_previous_tag_list[-1][1] == ADJECTIVE_TAG or p_previous_tag_list[-1][1] == DETERMINER_TAG:
+                    # Could be a proper noun
+                    is_previous_proper_noun_singular_tag = False
+                    is_proper_noun = True
+                # Else do nothing
+            # Else do nothing
+        else:
+            # Case of a single letter, so it is a proper noun instead of a verb
+            is_previous_proper_noun_singular_tag = False
+            is_proper_noun = True
+    elif p_tag[1] == SUBORDINATE_TAG or p_tag[1] == COORDINATE_TAG:
+        is_previous_proper_noun_singular_tag = False
+        is_proper_noun = False
         is_function_name = False
-    elif p_is_subject:
-        if not p_is_silent:
-            Logger.set_error(__name__,
-                             f'Requirement bad formatted: "{p_tag[0]}" is not a determiner nor an adjective '
-                             f'nor a noun (tagged as "{p_tag[1]}")')
-            is_error = True
-        # Else do nothing
     # Else do nothing
 
     return is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error
@@ -838,11 +901,12 @@ def retrieve_req_subject_object(p_req_str, **kwargs):
     req_subject, _, _, _ = detect_req_pattern(p_req_str)
 
     # Retrieve the subject in object list
-    req_subject_object_list, _ = retrieve_req_proper_noun_object(req_subject, p_is_subject=True, **kwargs)
+    req_subject_object_list, _ = retrieve_req_proper_noun_object_list(req_subject, **kwargs)
 
-    for obj in req_subject_object_list:
-        if obj:
-            req_subject_object = obj
+    if len(req_subject_object_list) > 0:
+        # Take the last one in case of requirement about attribute ( XXX of YYY shall)
+        req_subject_object = req_subject_object_list[-1]
+    # Else do nothing
 
     return req_subject_object
 
@@ -858,11 +922,7 @@ def retrieve_req_object_object_list(p_req_str, **kwargs):
     """
     _, req_object, _, _ = detect_req_pattern(p_req_str)
 
-    req_object_object_list, _ = retrieve_req_proper_noun_object(req_object, **kwargs)
-
-    for req_object_object in req_object_object_list.copy():
-        if req_object_object is None:
-            req_object_object_list.remove(req_object_object)
+    req_object_object_list, _ = retrieve_req_proper_noun_object_list(req_object, **kwargs)
 
     return req_object_object_list
 
@@ -878,11 +938,7 @@ def retrieve_req_condition_object_list(p_req_str, **kwargs):
     """
     _, _, req_condition, _ = detect_req_pattern(p_req_str)
 
-    req_object_object_list, _ = retrieve_req_proper_noun_object(req_condition, **kwargs)
-
-    for req_object_object in req_object_object_list.copy():
-        if req_object_object is None:
-            req_object_object_list.remove(req_object_object)
+    req_object_object_list, _ = retrieve_req_proper_noun_object_list(req_condition, **kwargs)
 
     return req_object_object_list
 
@@ -898,11 +954,7 @@ def retrieve_req_temporal_object_list(p_req_str, **kwargs):
     """
     _, _, _, req_temporal = detect_req_pattern(p_req_str)
 
-    req_object_object_list, _ = retrieve_req_proper_noun_object(req_temporal, **kwargs)
-
-    for req_object_object in req_object_object_list.copy():
-        if req_object_object is None:
-            req_object_object_list.remove(req_object_object)
+    req_object_object_list, _ = retrieve_req_proper_noun_object_list(req_temporal, **kwargs)
 
     return req_object_object_list
 
@@ -930,70 +982,40 @@ def analyze_requirement(**kwargs):
                                                           f"(id: {xml_requirement.id}) ? (Y/N)")
 
             if answer == "y":
-                req_subject, _, _, _ = detect_req_pattern(xml_requirement.text)
                 # Check if data type is in the requirement subject
-                req_subject_type = None
-                req_subject_name = None
-                token_list = nltk.word_tokenize(req_subject)
-                tag_list = nltk.pos_tag(token_list)
-                is_previous_proper_noun_singular_tag = False
-                is_function_name = False
-                function_name_str = ''
-                index = 0
-                for tag in tag_list:
-                    previous_tag_list = []
-                    if index > 0:
-                        for i in range(0, index):
-                            previous_tag_list.append(tag_list[i])
+                req_subject, _, _, _ = detect_req_pattern(xml_requirement.text)
+                req_proper_noun_list, is_error = retrieve_req_proper_noun_list(req_subject)
+
+                if not is_error:
+                    if len(req_proper_noun_list) > 0:
+                        req_subject_type = None
+                        req_subject_name = req_subject
+                        for req_proper_noun in req_proper_noun_list:
+                            specific_type, base_type = orchestrator_object.retrieve_type(req_proper_noun, True,
+                                                                                         **kwargs)
+                            if specific_type is not None:
+                                req_subject_type = specific_type
+                                req_subject_name = req_subject_name.replace(req_subject_type, "")
+                                break
+                            elif base_type is not None:
+                                req_subject_type = base_type
+                                req_subject_name = req_subject_name.replace(req_subject_type, "")
+                                break
+                            # Else do nothing
+
+                        if req_subject_type is None:
+                            req_subject_type, _ = handler_question.question_to_user(f'What is the type '
+                                                                                    f'of "{req_subject_name}" ?')
+                        # Else do nothing
+
+                        # Create_specific_obj_by_type
+                        update = orchestrator_object.check_add_specific_obj_by_type(
+                            [[req_subject_name, req_subject_type]],
+                            **kwargs)
+
+                        req_subject_object = orchestrator_object.retrieve_object_by_name(req_subject, **kwargs)
                     # Else do nothing
-
-                    next_tag_list = []
-                    if index < len(tag_list):
-                        for i in range(index + 1, len(tag_list) - 1):
-                            next_tag_list.append(tag_list[i])
-                    # Else do nothing
-
-                    is_proper_noun, is_previous_proper_noun_singular_tag, is_function_name, is_error =\
-                        (check_proper_noun_tag(tag, previous_tag_list, next_tag_list, True,
-                                               is_previous_proper_noun_singular_tag, is_function_name, True))
-
-                    if is_error:
-                        break
-                    elif is_proper_noun:
-                        req_subject_name = tag[0]
-
-                        specific_type, base_type = orchestrator_object.retrieve_type(req_subject_name, True, **kwargs)
-                        if specific_type is not None:
-                            req_subject_type = specific_type
-                        elif base_type is not None:
-                            req_subject_type = base_type
-                    elif is_function_name:
-                        function_name_str = function_name_str + ' ' + tag[0]
-
-                    index = index + 1
-
-                if len(function_name_str) > 0:
-                    req_subject_name = function_name_str[1:]
-
-                    specific_type, base_type = orchestrator_object.retrieve_type(req_subject_name, True, **kwargs)
-                    if specific_type is not None:
-                        req_subject_type = specific_type
-                    elif base_type is not None:
-                        req_subject_type = base_type
                 # Else do nothing
-
-                if req_subject_type is None:
-                    req_subject_type, _ = handler_question.question_to_user(f'What is the type '
-                                                                            f'of "{req_subject_name}" ?')
-                # Else do nothing
-
-                # Create_specific_obj_by_type
-                update = orchestrator_object.check_add_specific_obj_by_type(
-                    [[req_subject_name, req_subject_type]],
-                    **kwargs)
-                
-                req_subject_object = orchestrator_object.retrieve_object_by_name(req_subject_name, **kwargs)
-                
             elif answer == "q":
                 break
             else:
