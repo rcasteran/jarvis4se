@@ -671,8 +671,9 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                             output_xml.write_object_allocation([[obj, xml_requirement]])
 
                             Logger.set_info(__name__,
-                                            f"Requirement {xml_requirement.name} is satisfied by "
-                                            f"{obj.name}")
+                                            f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                            f"is satisfied by "
+                                            f"{obj.__class__.__name__} {obj.name}")
                         # Else do nothing
                     # Else do nothing
                 # Else do nothing
@@ -685,8 +686,9 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                                 output_xml.write_object_allocation([[obj, xml_requirement]])
 
                                 Logger.set_info(__name__,
-                                                f"Requirement {xml_requirement.name} is satisfied by "
-                                                f"{obj.name}")
+                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
                             # Else do nothing
                         # Else do nothing
                 # Else do nothing
@@ -699,8 +701,9 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                                 output_xml.write_object_allocation([[obj, xml_requirement]])
 
                                 Logger.set_info(__name__,
-                                                f"Requirement {xml_requirement.name} is satisfied by "
-                                                f"{obj.name}")
+                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
                             # Else do nothing
                         # Else do nothing
                 # Else do nothing
@@ -713,8 +716,9 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
                                 output_xml.write_object_allocation([[obj, xml_requirement]])
 
                                 Logger.set_info(__name__,
-                                                f"Requirement {xml_requirement.name} is satisfied by "
-                                                f"{obj.name}")
+                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
                             # Else do nothing
                         # Else do nothing
                 # Else do nothing

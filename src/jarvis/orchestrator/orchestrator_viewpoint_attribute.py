@@ -172,6 +172,6 @@ def add_attribute_requirement(attribute, **kwargs):
                     output_xml.write_object_allocation([[attribute[0], xml_requirement]])
 
                     Logger.set_info(__name__,
-                                    f"Requirement {xml_requirement.name} is satisfied by "
-                                    f"{attribute[0].name}")
+                                    f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
+                                    f"{attribute[0].__class__.__name__} {attribute[0].name}")
                 # Else do nothing

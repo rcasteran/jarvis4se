@@ -1618,11 +1618,11 @@ def input_test_function_requirement():
         b is a data
         y is a data
 
-        "To calculate y" shall calculate y as follows: y = a*x+b
-        F1 shall calculate y in less than 10 msec
-        If a is greater than 1, then F1 shall consider a as being equal to 1
-        When a is set to 0, F1 shall consider b as being equal to 10
-        When b is changed, if a is set to 0, then F1 shall consider b has unchanged
+        "To calculate y" shall calculate y as follows: y = a*x+b.
+        F1 shall calculate y in less than 10 msec.
+        If a is greater than 1, then F1 shall consider a as being equal to 1.
+        When a is set to 0, F1 shall consider b as being equal to 10.
+        When b is changed, if a is set to 0, then F1 shall consider b has unchanged.
     """
     first_part = "\n".join(['"To calculate y" is a function',
                             'The alias of "To calculate y" is F1',

@@ -31,6 +31,7 @@ PRONOUN_PERSONAL_TAG = "PRP"
 VERB_TAG = "VB"
 VERB_PAST_TAG = "VBN"
 TO_TAG = "TO"
+SEMICOLON_TAG = ":"
 
 
 def check_add_requirement(p_str_list, **kwargs):
@@ -241,15 +242,15 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     @return requirement subject, requirement object, requirement condition, requirement temporality
     """
     if p_str_after_modal is None:
-        pattern_shall = re.compile(r'([^. |\n][^.|\n]*) shall ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+        pattern_shall = re.compile(r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)", re.IGNORECASE).split(p_str_before_modal)
         p_str_before_modal = pattern_shall[1]
         p_str_after_modal = pattern_shall[2]
     # Else do nothing
 
     # Detect if...then pattern before the requirement subject
-    pattern_if = re.compile(r'if (.*?), then ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+    pattern_if = re.compile(r'if (.*?), then (([^.]|\n)*)', re.IGNORECASE).split(p_str_before_modal)
     # Detect when pattern before the requirement subject
-    pattern_when = re.compile(r'when (.*?), ([^.|\n]*)', re.IGNORECASE).split(p_str_before_modal)
+    pattern_when = re.compile(r'when (.*?), (([^.]|\n)*)', re.IGNORECASE).split(p_str_before_modal)
 
     req_object = p_str_after_modal
 
@@ -699,12 +700,13 @@ def retrieve_req_proper_noun_object_list(p_req_str, **kwargs):
     return req_object_list, is_error
 
 
-def retrieve_req_proper_noun_list(p_req_str):
+def retrieve_req_proper_noun_list(p_req_str, p_is_noun_split=True):
     """@ingroup orchestrator
     @anchor retrieve_req_proper_noun_list
     Retrieve list of proper nouns found in requirement text
 
     @param[in] p_req_str : requirement text
+    @param[in] p_is_noun_split : indicates if proper noun needs to be split (TRUE) or not (FALSE)
     @param[in] kwargs : jarvis data structure
     @return list of proper nouns
     """
@@ -763,9 +765,12 @@ def retrieve_req_proper_noun_list(p_req_str):
             Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
             req_proper_noun_list.append(proper_noun_str)
 
-            proper_noun_list = proper_noun_str.split(' ')
-            for proper_noun in proper_noun_list:
-                req_proper_noun_list.append(proper_noun)
+            if p_is_noun_split:
+                proper_noun_list = proper_noun_str.split(' ')
+                for proper_noun in proper_noun_list:
+                    req_proper_noun_list.append(proper_noun)
+            # Else do nothing
+
             proper_noun_str = ''
             is_previous_proper_noun = False
         # Else do nothing
@@ -786,9 +791,11 @@ def retrieve_req_proper_noun_list(p_req_str):
         Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
         req_proper_noun_list.append(proper_noun_str)
 
-        proper_noun_list = proper_noun_str.split(' ')
-        for proper_noun in proper_noun_list:
-            req_proper_noun_list.append(proper_noun)
+        if p_is_noun_split:
+            proper_noun_list = proper_noun_str.split(' ')
+            for proper_noun in proper_noun_list:
+                req_proper_noun_list.append(proper_noun)
+        # Else do nothing
     # Else do nothing
 
     if is_function_name:
@@ -819,6 +826,12 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, is_proper
         # Else do nothing
     elif p_tag[1] == ADJECTIVE_TAG:
         is_previous_proper_noun_singular_tag = False
+        if p_next_tag_list:
+            if p_next_tag_list[0][1] == NOUN_SINGULAR_TAG or p_next_tag_list[0][1] == NOUN_PLURAL_TAG:
+                # sign '%' is tagged as NOUN_SINGULAR_TAG
+                if p_tag[0] != '%':
+                    if not is_function_name:
+                        is_proper_noun = not is_previous_proper_noun_singular_tag
     elif p_tag[1] == DETERMINER_TAG:
         is_previous_proper_noun_singular_tag = False
         if p_tag[0] == 'a':
@@ -878,7 +891,7 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, is_proper
             # Case of a single letter, so it is a proper noun instead of a verb
             is_previous_proper_noun_singular_tag = False
             is_proper_noun = True
-    elif p_tag[1] == SUBORDINATE_TAG or p_tag[1] == COORDINATE_TAG:
+    elif p_tag[1] == SUBORDINATE_TAG or p_tag[1] == COORDINATE_TAG or p_tag[1] == SEMICOLON_TAG:
         is_previous_proper_noun_singular_tag = False
         is_proper_noun = False
         is_function_name = False
@@ -890,7 +903,7 @@ def check_proper_noun_tag(p_tag, p_previous_tag_list, p_next_tag_list, is_proper
 def retrieve_req_subject_object(p_req_str, **kwargs):
     """@ingroup orchestrator
     @anchor retrieve_req_subject_object
-    Retrieve list of objects named as proper nouns found for requirement subject
+    Retrieve the object named as proper noun found for requirement subject
 
     @param[in] p_req_str : requirement text
     @param[in] kwargs : jarvis data structure
@@ -975,13 +988,14 @@ def analyze_requirement(**kwargs):
         # Check if the requirement subject is known
         req_subject_object = retrieve_req_subject_object(xml_requirement.text, **kwargs)
 
+        req_subject_object_analyzed = None
         if req_subject_object is None:
             # Ask user to create the object in the jarvis data structure
             answer, _ = handler_question.question_to_user(f"Do you want to create an object for the subject of "
                                                           f"the requirement: {xml_requirement.text} "
-                                                          f"(id: {xml_requirement.id}) ? (Y/N)")
+                                                          f"(name: {xml_requirement.name}) ? (Y/N)")
 
-            if answer == "y":
+            if answer.lower() == "y":
                 # Check if data type is in the requirement subject
                 req_subject, _, _, _ = detect_req_pattern(xml_requirement.text)
                 req_proper_noun_list, is_error = retrieve_req_proper_noun_list(req_subject)
@@ -1004,44 +1018,151 @@ def analyze_requirement(**kwargs):
                             # Else do nothing
 
                         if req_subject_type is None:
+                            # Take the last one in case of requirement about attribute ( XXX of YYY shall)
+                            req_subject_name = req_proper_noun_list[-1]
                             req_subject_type, _ = handler_question.question_to_user(f'What is the type '
                                                                                     f'of "{req_subject_name}" ?')
                         # Else do nothing
 
-                        # Create_specific_obj_by_type
                         update = orchestrator_object.check_add_specific_obj_by_type(
                             [[req_subject_name, req_subject_type]],
                             **kwargs)
 
-                        req_subject_object = orchestrator_object.retrieve_object_by_name(req_subject, **kwargs)
+                        req_subject_object_analyzed = orchestrator_object.retrieve_object_by_name(req_subject, **kwargs)
                     # Else do nothing
                 # Else do nothing
             elif answer == "q":
                 break
             else:
                 Logger.set_warning(__name__,
-                                   f"Subject of requirement: {xml_requirement.text} (id: {xml_requirement.id}) "
+                                   f"Subject of requirement: {xml_requirement.text} (name: {xml_requirement.name}) "
                                    f"is not defined in the system analysis")
         # Else do nothing
 
         # Check if user does not abort (answer == "q")
-        if req_subject_object is not None:
-            if xml_requirement.id not in req_subject_object.allocated_req_list:
-                req_subject_object.add_allocated_requirement(xml_requirement.id)
-                output_xml.write_object_allocation([[req_subject_object, xml_requirement]])
+        if req_subject_object_analyzed is not None:
+            if xml_requirement.id not in req_subject_object_analyzed.allocated_req_list:
+                req_subject_object_analyzed.add_allocated_requirement(xml_requirement.id)
+                output_xml.write_object_allocation([[req_subject_object_analyzed, xml_requirement]])
 
                 Logger.set_info(__name__,
                                 f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
-                                f"{req_subject_object.__class__.__name__} {req_subject_object.name}")
+                                f"{req_subject_object_analyzed.__class__.__name__} {req_subject_object_analyzed.name}")
 
                 # Check for potential req parent in allocated obj parent
-                if hasattr(req_subject_object, 'parent'):
-                    if req_subject_object.parent:
-                        if hasattr(req_subject_object.parent, 'allocated_req_list'):
-                            update_requirement_link(req_subject_object.parent, xml_requirement, **kwargs)
+                if hasattr(req_subject_object_analyzed, 'parent'):
+                    if req_subject_object_analyzed.parent:
+                        if hasattr(req_subject_object_analyzed.parent, 'allocated_req_list'):
+                            update_requirement_link(req_subject_object_analyzed.parent, xml_requirement, **kwargs)
 
                 update = 1
             # Else do nothing
         # Else do nothing
 
+        # Check if objects are already identified in requirement object
+        # Always ask user to create objects (even if there are some already identified)
+        req_object_object_list = retrieve_req_object_object_list(xml_requirement.text, **kwargs)
+        for req_object_object in req_object_object_list:
+            Logger.set_info(__name__,
+                            f'{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by '
+                            f'{req_object_object.__class__.__name__} {req_object_object.name}')
+
+        req_object_list = []
+        # Ask user to create the object in the jarvis data structure
+        answer, _ = handler_question.question_to_user(f"Do you want to create object(s) for the object of "
+                                                      f"the requirement: {xml_requirement.text} "
+                                                      f"(name: {xml_requirement.name}) ? (Y/N)")
+
+        if answer.lower() == "y":
+            # Check if data type is in the requirement object
+            _, req_object, _, _ = detect_req_pattern(xml_requirement.text)
+            req_proper_noun_list, is_error = retrieve_req_proper_noun_list(req_object, False)
+
+            if not is_error:
+                if len(req_proper_noun_list) > 0:
+                    type_name_list = []
+                    for idx_req_proper_noun in range(0, len(req_proper_noun_list)):
+                        req_proper_noun_split = req_proper_noun_list[idx_req_proper_noun].split(" ")
+                        for idx_req_proper_noun_split in range(0, len(req_proper_noun_split)):
+                            specific_type, base_type = orchestrator_object.retrieve_type(
+                                req_proper_noun_split[idx_req_proper_noun_split],
+                                True,
+                                **kwargs)
+                            # If we have a type, then next proper noun is the object name related to the type
+                            if specific_type is not None:
+                                if idx_req_proper_noun_split < len(req_proper_noun_split):
+                                    type_name_list.append([specific_type,
+                                                           req_proper_noun_split[idx_req_proper_noun_split + 1]])
+                                    req_proper_noun_split.remove(
+                                        req_proper_noun_split[idx_req_proper_noun_split + 1])
+                                elif idx_req_proper_noun < len(req_proper_noun_list):
+                                    type_name_list.append([specific_type, req_proper_noun_list[idx_req_proper_noun + 1]])
+                                    req_proper_noun_list.remove(req_proper_noun_list[idx_req_proper_noun + 1])
+                                # Else do nothing
+                            elif base_type is not None:
+                                if idx_req_proper_noun_split < len(req_proper_noun_split):
+                                    type_name_list.append([base_type,
+                                                           req_proper_noun_split[idx_req_proper_noun_split + 1]])
+                                    req_proper_noun_split.remove(
+                                        req_proper_noun_split[idx_req_proper_noun_split + 1])
+                                elif idx_req_proper_noun < len(req_proper_noun_list):
+                                    type_name_list.append([base_type, req_proper_noun_list[idx_req_proper_noun + 1]])
+                                    req_proper_noun_list.remove(req_proper_noun_list[idx_req_proper_noun + 1])
+                                # Else do nothing
+                            else:
+                                wanted_object = orchestrator_object.retrieve_object_by_name(
+                                    req_proper_noun_split[idx_req_proper_noun_split], **kwargs)
+                                if not wanted_object:
+                                    if idx_req_proper_noun_split == len(req_proper_noun_split)-1:
+                                        type_name_list.append([None, req_proper_noun_list[idx_req_proper_noun]])
+                                    # Else do nothing
+                                else:
+                                    # Continue with next proper noun
+                                    break
+                            # Else do nothing
+
+                    for type_name in type_name_list:
+                        if type_name[0] is None:
+                            req_object_type, _ = handler_question.question_to_user(f'What is the type '
+                                                                                   f'of "{type_name[1]}" ?')
+                        else:
+                            req_object_type = type_name[0]
+
+                        if req_object_type == "q":
+                            break
+                        else:
+                            update = orchestrator_object.check_add_specific_obj_by_type(
+                                [[type_name[1], req_object_type]],
+                                **kwargs)
+
+                            req_object_list.append(orchestrator_object.retrieve_object_by_name(type_name[1], **kwargs))
+                # Else do nothing
+            # Else do nothing
+        elif answer == "q":
+            break
+        else:
+            Logger.set_warning(__name__,
+                               f"Object of requirement: {xml_requirement.text} (name: {xml_requirement.name}) "
+                               f"is not defined in the system analysis")
+
+        # Check if user does not abort (answer == "q")
+        if len(req_object_list) > 0:
+            for req_object in req_object_list:
+                if xml_requirement.id not in req_object.allocated_req_list:
+                    req_object.add_allocated_requirement(xml_requirement.id)
+                    output_xml.write_object_allocation([[req_object, xml_requirement]])
+
+                    Logger.set_info(__name__,
+                                    f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
+                                    f"{req_object.__class__.__name__} {req_object.name}")
+
+                    # Check for potential req parent in allocated obj parent
+                    if hasattr(req_object, 'parent'):
+                        if req_object.parent:
+                            if hasattr(req_object.parent, 'allocated_req_list'):
+                                update_requirement_link(req_object.parent, xml_requirement, **kwargs)
+
+                    update = 1
+                # Else do nothing
+        # Else do nothing
     return update

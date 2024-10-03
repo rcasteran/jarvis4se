@@ -33,4 +33,8 @@ from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel
 from .datamodel import DesignAttributeLabel
 from .datamodel import InitialValueAttributeLabel
-from .datamodel import RequirementTextLabel
+from .datamodel import ObjectTextPropertyLabel
+from .datamodel import ObjectTypePropertyLabel
+from .datamodel import ObjectAliasPropertyLabel
+from .datamodel import ObjectSourcePropertyLabel
+from .datamodel import ObjectDestinationPropertyLabel

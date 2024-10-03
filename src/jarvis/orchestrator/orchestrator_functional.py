@@ -566,8 +566,8 @@ def check_condition_list_requirement(p_condition_list, **kwargs):
                         output_xml.write_object_allocation([[condition[0], xml_requirement]])
 
                         Logger.set_info(__name__,
-                                        f"Requirement {xml_requirement.name} is satisfied by "
-                                        f"{condition[0].name}")
+                                        f"{xml_requirement.__class__.__name__} {xml_requirement.name} is satisfied by "
+                                        f"{condition[0].__class__.__name__} {condition[0].name}")
                     # Else do nothing
                 # Else do nothing
             # Else do nothing

@@ -51,7 +51,7 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) imply ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
             (r"Condition for (.*?) is:([^.|\n]*)", orchestrator_functional.check_add_transition_condition),
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
-            (r"The " + datamodel.RequirementTextLabel + " of (.*?) is ([^.|\n]*)",
+            (r"The " + datamodel.ObjectTextPropertyLabel + " of (.*?) is ([^.|\n]*)",
              orchestrator_viewpoint_requirement.check_add_text),
             (r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)", orchestrator_viewpoint_requirement.check_add_requirement),
             (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
@@ -72,11 +72,19 @@ class CmdParser:
         ]
 
         self.attribute_command_list = [
-            (r'The ((?!type|alias|source|destination|' + datamodel.RequirementTextLabel
+            (r'The ((?!' + datamodel.ObjectTypePropertyLabel + '|'
+             + datamodel.ObjectAliasPropertyLabel + '|'
+             + datamodel.ObjectSourcePropertyLabel + '|'
+             + datamodel.ObjectDestinationPropertyLabel + '|'
+             + datamodel.ObjectTextPropertyLabel
              + ').*) of (.*?) is "((.|\n)*?)"',
              orchestrator_viewpoint_attribute.check_add_object_attribute),
-            (r"The ((?!type|alias|source|destination|" + datamodel.RequirementTextLabel
-             + ").*) of (.*?) is ([^.|\n]*)",
+            (r'The ((?!' + datamodel.ObjectTypePropertyLabel + '|'
+             + datamodel.ObjectAliasPropertyLabel + '|'
+             + datamodel.ObjectSourcePropertyLabel + '|'
+             + datamodel.ObjectDestinationPropertyLabel + '|'
+             + datamodel.ObjectTextPropertyLabel
+             + ').*) of (.*?) is ([^.|\n]*)',
              orchestrator_viewpoint_attribute.check_add_object_attribute)
         ]
 
