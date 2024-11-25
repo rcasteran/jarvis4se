@@ -34,9 +34,9 @@ setup(
         'ipython >= 7.27.0',
         'lxml >= 4.6.3',
         'notebook >= 6.4.3',
-        'plantuml == 0.3.0',
-        'pandas ~= 1.4.1',
+        'plantuml >= 0.3.0',
+        'pandas >= 1.4.1',
         'requests >= 2.31.0',
-        'nltk ~= 3.8.1'],
+        'nltk >= 3.9'],
     python_requires='>=3.8',
 )
