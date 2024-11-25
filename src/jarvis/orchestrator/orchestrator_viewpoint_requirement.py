@@ -751,38 +751,41 @@ def retrieve_req_proper_noun_list(p_req_str, p_is_noun_split=True):
 
         if is_error:
             break
-        elif is_proper_noun:
-            is_previous_proper_noun = True
-            proper_noun_str = proper_noun_str + ' ' + tag[0]
-        elif is_function_name:
-            is_previous_function_name = True
-            function_name_str = function_name_str + ' ' + tag[0]
-        # Else do nothing
-
-        if not is_proper_noun and is_previous_proper_noun:
-            proper_noun_str = proper_noun_str.strip().replace('( ', '(').replace(' )', ')') \
-                .replace('[ ', '[').replace(' ]', ']')
-            Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
-            req_proper_noun_list.append(proper_noun_str)
-
-            if p_is_noun_split:
-                proper_noun_list = proper_noun_str.split(' ')
-                for proper_noun in proper_noun_list:
-                    req_proper_noun_list.append(proper_noun)
+        else:
+            if is_proper_noun:
+                is_previous_proper_noun = True
+                proper_noun_str = proper_noun_str + ' ' + tag[0]
             # Else do nothing
 
-            proper_noun_str = ''
-            is_previous_proper_noun = False
-        # Else do nothing
+            if is_function_name:
+                is_previous_function_name = True
+                function_name_str = function_name_str + ' ' + tag[0]
+            # Else do nothing
 
-        if not is_function_name and is_previous_function_name:
-            Logger.set_debug(__name__, f'function_name_str: {function_name_str.strip()}')
-            req_proper_noun_list.append(function_name_str.strip())
-            function_name_str = ''
-            is_previous_function_name = False
-        # Else do nothing
+            if not is_proper_noun and is_previous_proper_noun:
+                proper_noun_str = proper_noun_str.strip().replace('( ', '(').replace(' )', ')') \
+                    .replace('[ ', '[').replace(' ]', ']')
+                Logger.set_debug(__name__, f'proper_noun_str: {proper_noun_str.strip()}')
+                req_proper_noun_list.append(proper_noun_str)
 
-        index = index + 1
+                if p_is_noun_split:
+                    proper_noun_list = proper_noun_str.split(' ')
+                    for proper_noun in proper_noun_list:
+                        req_proper_noun_list.append(proper_noun)
+                # Else do nothing
+
+                proper_noun_str = ''
+                is_previous_proper_noun = False
+            # Else do nothing
+
+            if not is_function_name and is_previous_function_name:
+                Logger.set_debug(__name__, f'function_name_str: {function_name_str.strip()}')
+                req_proper_noun_list.append(function_name_str.strip())
+                function_name_str = ''
+                is_previous_function_name = False
+            # Else do nothing
+
+            index = index + 1
     # Else do nothing
 
     if is_proper_noun:
@@ -1096,7 +1099,8 @@ def analyze_requirement(**kwargs):
                                     req_proper_noun_split.remove(
                                         req_proper_noun_split[idx_req_proper_noun_split + 1])
                                 elif idx_req_proper_noun < len(req_proper_noun_list):
-                                    type_name_list.append([specific_type, req_proper_noun_list[idx_req_proper_noun + 1]])
+                                    type_name_list.append([specific_type,
+                                                           req_proper_noun_list[idx_req_proper_noun + 1]])
                                     req_proper_noun_list.remove(req_proper_noun_list[idx_req_proper_noun + 1])
                                 # Else do nothing
                             elif base_type is not None:
