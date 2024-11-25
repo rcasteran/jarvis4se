@@ -66,5 +66,9 @@ The installation of OpenModelica executable and related Python packages is only 
 * Start IPython: `python -m IPython`
 * Load jarvis extension for JARVIS4SE: `%load_ext jarvis`
 
+{% hint style="info" %}
+PlantUML diagrams are not rendered when using IPython from a command line interface.
+{% endhint %}
+
 
 
