@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
-    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from . import orchestrator_shared, orchestrator_object
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
+    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+from . import orchestrator_shared, orchestrator_object, orchestrator_object_allocation
 from jarvis import util
 from tools import Logger
 
@@ -29,7 +29,7 @@ def add_view(p_str_list, **kwargs):
             Returns:
                 1 if update, else 0
         """
-    xml_view_list = kwargs[XML_DICT_KEY_10_VIEW_LIST]
+    xml_view_list = kwargs[XML_DICT_KEY_11_VIEW_LIST]
     output_xml = kwargs['output_xml']
     view_list = []
     update = 0
@@ -84,13 +84,12 @@ def check_get_consider(consider_str_list, **kwargs):
     Returns:
         update ([0/1]) : 1 if update, else 0
     """
+    update = 0
+
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    xml_view_list = kwargs[XML_DICT_KEY_10_VIEW_LIST]
-    output_xml = kwargs['output_xml']
 
-    allocated_item_list = []
     # Create lists with all object names/aliases already in the xml
     xml_fun_elem_name_list = orchestrator_object.check_object_name_in_list(xml_fun_elem_list)
     xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
@@ -105,26 +104,6 @@ def check_get_consider(consider_str_list, **kwargs):
                                f"Object {consider_str} does not exist, available object types are : "
                                f"Functional Element, Function and Data")
         else:
-            result_function = any(item == consider_str for item in xml_function_name_list)
-            result_fun_elem = any(item == consider_str for item in xml_fun_elem_name_list)
-            result_data = any(item == consider_str for item in xml_data_name_list)
-
-            if result_function:
-                allocated_fun = orchestrator_shared.check_add_allocated_item(
-                    consider_str, xml_function_list, xml_view_list)
-                if allocated_fun:
-                    allocated_item_list.append(allocated_fun)
-            elif result_fun_elem:
-                allocated_fun_elem = orchestrator_shared.check_add_allocated_item(
-                    consider_str, xml_fun_elem_list, xml_view_list)
-                if allocated_fun_elem:
-                    allocated_item_list.append(allocated_fun_elem)
-            elif result_data:
-                allocated_data = orchestrator_shared.check_add_allocated_item(
-                    consider_str, xml_data_list, xml_view_list)
-                if allocated_data:
-                    allocated_item_list.append(allocated_data)
-
-    update = orchestrator_shared.add_allocation({5: allocated_item_list}, **kwargs)
+            update = orchestrator_object_allocation.check_add_allocated_item_to_view(consider_str, **kwargs)
 
     return update

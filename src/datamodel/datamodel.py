@@ -25,8 +25,9 @@ class BaseType(Enum):
     STATE = 6
     TRANSITION = 7
     REQUIREMENT = 8
-    ATTRIBUTE = 9
-    VIEW = 10
+    ACTIVITY = 9
+    ATTRIBUTE = 10
+    VIEW = 11
 
     def __str__(self):
         """ Get the string representation for an enum value
@@ -50,6 +51,8 @@ class BaseType(Enum):
             type_str = 'State'
         elif self == self.TRANSITION:
             type_str = 'Transition'
+        elif self == self.ACTIVITY:
+            type_str = 'Activity'
         elif self == self.ATTRIBUTE:
             type_str = 'Attribute'
         elif self == self.VIEW:
@@ -83,6 +86,8 @@ class BaseType(Enum):
             enum_type = cls.STATE
         elif obj_type == 'Transition':
             enum_type = cls.TRANSITION
+        elif obj_type == 'Activity':
+            enum_type = cls.ACTIVITY
         elif obj_type == 'Attribute':
             enum_type = cls.ATTRIBUTE
         elif obj_type == 'View':
@@ -91,6 +96,115 @@ class BaseType(Enum):
             enum_type = cls.REQUIREMENT
         
         return enum_type
+
+
+class Activity:
+    """@ingroup datamodel
+    @anchor Activity
+    Basic type representing an activity
+
+    An activity is a defined body of work to be performed to achieve a goal, including its required incoming and
+    outgoing exchanges.
+    """
+
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.ACTIVITY, p_parent=None):
+        """
+        @var id
+        unique identifier
+
+        @var name
+        unique name
+
+        @var alias
+        unique alias
+
+        @var type
+        activity type\n
+        Could be @ref BaseType .ACTIVITY or a @ref Type based on @ref BaseType .ACTIVITY
+
+        @var parent
+        parent identifier
+        """
+
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.parent = p_parent
+        self.child_list = set()
+
+    def set_id(self, p_id):
+        """Set unique identifier
+        @param[in] self this class instance
+        @param[in] p_id unique identifier
+        @return None
+        """
+        self.id = p_id
+
+    def set_name(self, p_name):
+        """Set unique name
+        @param[in] self this class instance
+        @param[in] p_name unique name
+        @return None
+        """
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        """Set unique alias
+        @param[in] self this class instance
+        @param[in] p_alias unique alias
+        @return None
+        """
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        """Set type
+        @param[in] self this class instance
+        @param[in] p_type type
+        @return None
+        """
+        self.type = p_type
+
+    def set_parent(self, p_parent):
+        """Set parent
+        @param[in] self this class instance
+        @param[in] p_parent identifier of the parent
+        @return None
+        """
+        self.parent = p_parent
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # Activity cannot be derived
+        rep += util.str_parent(self) + '\n'
+        # Activity has no child
+        # Activity has no allocated requirement
+        # Activity has no allocated data
+
+        return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                # Activity cannot be derived
+                **util.info_parent(self)
+                # Activity has no child
+                # Activity has no allocated requirement
+                # Function has no allocated data
+                # No display of input_role and operand
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_PARENT
+                    ]
 
 
 class Function:
@@ -533,7 +647,6 @@ class State:
                     util.INFO_KEY_CHILD_LIST,
                     util.INFO_KEY_REQUIREMENT_LIST
                     ]
-
 
 
 class Transition:
@@ -1261,7 +1374,10 @@ class PhysicalElement:
         
         @var parent
         parent identifier
-        
+
+        @var allocated_activity_list
+        allocated activity list
+
         @var allocated_fun_elem_list
         allocated functional element list
         
@@ -1282,6 +1398,7 @@ class PhysicalElement:
         self.alias = p_alias
         self.type = p_type
         self.parent = p_parent
+        self.allocated_activity_list = set()
         self.allocated_fun_elem_list = set()
         self.exposed_interface_list = set()
         self.child_list = set()
@@ -1327,6 +1444,14 @@ class PhysicalElement:
         @return None
         """
         self.parent = p_parent
+
+    def add_allocated_activity(self, p_activity):
+        """Add allocated activity to allocated_activity_list
+        @param[in] self this class instance
+        @param[in] p_activity allocated activity
+        @return None
+        """
+        self.allocated_activity_list.add(p_activity)
 
     def add_allocated_fun_elem(self, p_fun_elem):
         """Add allocated functional element to allocated_fun_elem_list
@@ -1380,7 +1505,7 @@ class PhysicalElement:
         rep += util.str_allocated_req(self)
         # Physical element has no allocated data
 
-        # No display of allocated functional element list and exposed interface list
+        # No display of allocated activity, allocated functional element list and exposed interface list
 
         return rep
 
@@ -1396,7 +1521,7 @@ class PhysicalElement:
                 **util.info_child_list(self),
                 **util.info_allocated_req(self)
                 # Physical element has no allocated data
-                # No display of allocated functional element list and exposed interface list
+                # No display of allocated activity, allocated functional element list and exposed interface list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_DERIVED,

@@ -12,7 +12,7 @@ import datamodel
 from csv_adapter import CsvWriter3SE, CsvParser3SE
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
     orchestrator_viewpoint_attribute, orchestrator_viewpoint_requirement, orchestrator_object, \
-    orchestrator_viewpoint_type, orchestrator_dictionary
+    orchestrator_object_allocation, orchestrator_viewpoint_type, orchestrator_dictionary
 from jarvis.diagram import diagram_generator
 from jarvis.simulation import simulation_generator
 from jarvis.handler import handler_question, handler_list
@@ -42,9 +42,9 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) is an output of ([^.|\n]*)", orchestrator_functional.check_add_producer_function),
             (r"([^. |\n][^.|\n]*) exposes ([^.|\n]*)", orchestrator_functional.check_add_exposes),
             (r"([^. |\n][^.|\n]*) expose ([^.|\n]*)", orchestrator_functional.check_add_exposes),
-            (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)", orchestrator_shared.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", orchestrator_shared.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) allocates ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
             (r"^delete ([^.|\n]*)", orchestrator_shared.check_and_delete_object),
             (r"The type of (.*?) is ([^.|\n]*)", orchestrator_shared.check_set_object_type),
             (r"([^. |\n][^.|\n]*) implies ([^.|\n]*)", orchestrator_functional.check_add_predecessor),
@@ -54,10 +54,10 @@ class CmdParser:
             (r"The " + datamodel.ObjectTextPropertyLabel + " of (.*?) is ([^.|\n]*)",
              orchestrator_viewpoint_requirement.check_add_text),
             (r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)", orchestrator_viewpoint_requirement.check_add_requirement),
-            (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
             (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)",
-             orchestrator_viewpoint_requirement.check_add_allocation),
-            (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_allocation),
+             orchestrator_object_allocation.check_add_allocation),
+            (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
             (r"([^. |\n][^.|\n]*) derives from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"^show ([^.|\n]*)", self.matched_show),

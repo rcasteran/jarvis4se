@@ -2,6 +2,7 @@
 Module for 3SE datamodel
 
 Defines the following basic types that are manipulated by systems engineers:
+- For operational analysis: @ref Activity, @ref PhysicalElement and @ref PhysicalInterface
 - For functional analysis: @ref Function, @ref Data, @ref FunctionalElement and @ref FunctionalInterface
 - For state analysis: @ref State and @ref Transition
 - For physical analysis: @ref PhysicalElement and @ref PhysicalInterface
@@ -11,6 +12,7 @@ Defines the following basic types that are manipulated by systems engineers:
 """
 
 from .datamodel import Function
+from .datamodel import Activity
 from .datamodel import Data
 from .datamodel import State
 from .datamodel import Transition

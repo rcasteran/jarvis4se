@@ -35,11 +35,12 @@ class XmlParser3SE:
                          util.XML_DICT_KEY_6_STATE_LIST: set(),
                          util.XML_DICT_KEY_7_TRANSITION_LIST: set(),
                          util.XML_DICT_KEY_8_REQUIREMENT_LIST: set(),
-                         util.XML_DICT_KEY_9_ATTRIBUTE_LIST: set(),
-                         util.XML_DICT_KEY_10_VIEW_LIST: set(),
-                         util.XML_DICT_KEY_11_TYPE_LIST: set(),
-                         util.XML_DICT_KEY_12_FUN_CONS_LIST: [],
-                         util.XML_DICT_KEY_13_FUN_PROD_LIST: []
+                         util.XML_DICT_KEY_9_ACTIVITY_LIST: set(),
+                         util.XML_DICT_KEY_10_ATTRIBUTE_LIST: set(),
+                         util.XML_DICT_KEY_11_VIEW_LIST: set(),
+                         util.XML_DICT_KEY_12_TYPE_LIST: set(),
+                         util.XML_DICT_KEY_13_FUN_CONS_LIST: [],
+                         util.XML_DICT_KEY_14_FUN_PROD_LIST: []
                          }
         self.root = None
 
@@ -57,21 +58,22 @@ class XmlParser3SE:
         # Check xml root tag
         if self.check_xml():
             # First retrieve extended types
-            self.xml_dict[util.XML_DICT_KEY_11_TYPE_LIST] = self.parse_type_list()
+            self.xml_dict[util.XML_DICT_KEY_12_TYPE_LIST] = self.parse_type_list()
+            self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST] = self.parse_activity_list()
             self.xml_dict[util.XML_DICT_KEY_1_FUNCTION_LIST] = self.parse_function_list()
             self.xml_dict[util.XML_DICT_KEY_6_STATE_LIST] = self.parse_state_list()
             self.xml_dict[util.XML_DICT_KEY_7_TRANSITION_LIST] = self.parse_transition_list()
             self.xml_dict[util.XML_DICT_KEY_2_FUN_ELEM_LIST] = self.parse_functional_element_list()
-            self.xml_dict[util.XML_DICT_KEY_10_VIEW_LIST] = self.parse_view_list()
-            self.xml_dict[util.XML_DICT_KEY_9_ATTRIBUTE_LIST] = self.parse_attribute_list()
+            self.xml_dict[util.XML_DICT_KEY_11_VIEW_LIST] = self.parse_view_list()
+            self.xml_dict[util.XML_DICT_KEY_10_ATTRIBUTE_LIST] = self.parse_attribute_list()
             self.xml_dict[util.XML_DICT_KEY_3_FUN_INTF_LIST] = self.parse_functional_interface_list()
             self.xml_dict[util.XML_DICT_KEY_4_PHY_ELEM_LIST] = self.parse_physical_element_list()
             self.xml_dict[util.XML_DICT_KEY_5_PHY_INTF_LIST] = self.parse_physical_interface_list()
             self.xml_dict[util.XML_DICT_KEY_8_REQUIREMENT_LIST] = self.parse_requirement_list()
 
             # Then create data(and set predecessors), consumers, producers lists
-            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_13_FUN_PROD_LIST], \
-                self.xml_dict[util.XML_DICT_KEY_12_FUN_CONS_LIST] = self.parse_data_list()
+            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_14_FUN_PROD_LIST], \
+                self.xml_dict[util.XML_DICT_KEY_13_FUN_CONS_LIST] = self.parse_data_list()
 
             # Finally update object types
             self.update_object_type()
@@ -132,6 +134,27 @@ class XmlParser3SE:
                 if elem.derived == derived.id:
                     elem.derived = derived
                     break
+
+    def parse_activity_list(self):
+        """Parse XML activity list
+        @return activity list
+        """
+        activity_list = set()
+        parent_list = {}
+        xml_activity_list = self.root.iter('activity')
+        for xml_activity in xml_activity_list:
+            # Instantiate activities and add them to a list
+            activity = datamodel.Activity(p_id=xml_activity.get('id'),
+                                          p_name=util.denormalize_xml_string(xml_activity.get('name')),
+                                          p_alias=xml_activity.get('alias'),
+                                          p_type=xml_activity.get('type'))
+
+            activity_list.add(activity)
+
+        # Loop to set parent and child relationship
+        self.update_parental_relationship(parent_list, activity_list)
+
+        return activity_list
 
     def parse_function_list(self):
         """Parse XML function list
@@ -525,7 +548,15 @@ class XmlParser3SE:
             for xml_part in xml_physical_part_list:
                 parent_list[xml_part.get('id')] = phy_elem.id
 
-            # Looking for allocated functions and add them to the functional element
+            # Looking for allocated activities and add them to the physical element
+            xml_allocated_activity_list = xml_phy_elem.iter('allocatedActivity')
+            for xml_activity in xml_allocated_activity_list:
+                phy_elem.add_allocated_activity(xml_activity.get("id"))
+                Logger.set_debug(__name__, f"Activity [{xml_activity.get('id')}]"
+                                           f" is allocated to "
+                                           f"physical element [{phy_elem.id}, {phy_elem.name}]")
+
+            # Looking for allocated functional elements and add them to the physical element
             xml_allocated_fun_elem_list = xml_phy_elem.iter('allocatedFunctionalElement')
             for xml_fun_elem in xml_allocated_fun_elem_list:
                 phy_elem.add_allocated_fun_elem(xml_fun_elem.get("id"))
@@ -648,8 +679,8 @@ class XmlParser3SE:
         @return None
         """
         # Following lists does not contain any type definition
-        unwanted_xml_list = (util.XML_DICT_KEY_11_TYPE_LIST, util.XML_DICT_KEY_12_FUN_CONS_LIST,
-                             util.XML_DICT_KEY_13_FUN_PROD_LIST)
+        unwanted_xml_list = (util.XML_DICT_KEY_12_TYPE_LIST, util.XML_DICT_KEY_13_FUN_CONS_LIST,
+                             util.XML_DICT_KEY_14_FUN_PROD_LIST)
         for key, xml_list in self.xml_dict.items():
             if key not in unwanted_xml_list:
                 for obj in xml_list:
@@ -659,7 +690,7 @@ class XmlParser3SE:
                     except KeyError:
                         # Extended types are defined in xml_type_list with their ids
                         is_found = False
-                        for type_obj in self.xml_dict[util.XML_DICT_KEY_11_TYPE_LIST]:
+                        for type_obj in self.xml_dict[util.XML_DICT_KEY_12_TYPE_LIST]:
                             if obj.type == type_obj.id:
                                 obj.type = type_obj
                                 is_found = True
@@ -711,6 +742,7 @@ XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
                             util.XML_DICT_KEY_6_STATE_LIST,
                             util.XML_DICT_KEY_7_TRANSITION_LIST,
                             util.XML_DICT_KEY_8_REQUIREMENT_LIST,
-                            util.XML_DICT_KEY_9_ATTRIBUTE_LIST,
-                            util.XML_DICT_KEY_10_VIEW_LIST,
-                            util.XML_DICT_KEY_11_TYPE_LIST]
+                            util.XML_DICT_KEY_9_ACTIVITY_LIST,
+                            util.XML_DICT_KEY_10_ATTRIBUTE_LIST,
+                            util.XML_DICT_KEY_11_VIEW_LIST,
+                            util.XML_DICT_KEY_12_TYPE_LIST]

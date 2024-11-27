@@ -31,7 +31,7 @@ class XmlWriter3SE:
         self.root = etree.Element("systemAnalysis")
 
         fun_arch = etree.SubElement(self.root, "funcArch")
-        fun_arch_tags = ['functionList', 'dataList', 'stateList', 'transitionList',
+        fun_arch_tags = ['activityList', 'functionList', 'dataList', 'stateList', 'transitionList',
                          'functionalElementList', 'functionalInterfaceList']
         for tag in fun_arch_tags:
             etree.SubElement(fun_arch, tag)
@@ -67,6 +67,28 @@ class XmlWriter3SE:
 
         return type_str
 
+    def write_activity(self, activity_list):
+        """Write activities from list of activities
+        @param[in] activity_list : list of activities
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        if root.find('.//activityList') is None:
+            etree.SubElement(root.find('./funcArch'), 'activityList')
+
+        for activity_list_tag in root.findall(".//activityList"):
+            for activity in activity_list:
+                activity_tag = etree.SubElement(activity_list_tag, "activity",
+                                                {'id': activity.id,
+                                                 'name': util.normalize_xml_string(activity.name),
+                                                 'type': self.check_object_type(activity.type),
+                                                 'alias': activity.alias})
+
+        Logger.set_debug(__name__, self.write_activity.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
     def write_function(self, function_list):
         """Write functions from list of functions
         @param[in] function_list : list of functions
@@ -76,7 +98,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//functionList') is None:
-            etree.SubElement(root, 'functionList')
+            etree.SubElement(root.find('./funcArch'), 'functionList')
 
         for function_list_tag in root.findall(".//functionList"):
             for function in function_list:
@@ -116,7 +138,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//dataList') is None:
-            etree.SubElement(root, 'dataList')
+            etree.SubElement(root.find('./funcArch'), 'dataList')
 
         for data_list_tag in root.findall('.//dataList'):
             for data in data_list:
@@ -283,7 +305,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//stateList') is None:
-            etree.SubElement(root, 'stateList')
+            etree.SubElement(root.find('./funcArch'), 'stateList')
 
         for state_list_tag in root.findall(".//stateList"):
             for state in state_list:
@@ -323,7 +345,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//transitionList') is None:
-            etree.SubElement(root, 'transitionList')
+            etree.SubElement(root.find('./funcArch'), 'transitionList')
 
         for transition_list_tag in root.findall(".//transitionList"):
             for transition in transition_list:
@@ -407,7 +429,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//functionalElementList') is None:
-            etree.SubElement(root, 'functionalElementList')
+            etree.SubElement(root.find('./funcArch'), 'functionalElementList')
 
         for functional_element_list_tag in root.findall(".//functionalElementList"):
             for functional_element in functional_element_list:
@@ -489,7 +511,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//viewList') is None:
-            etree.SubElement(root, 'viewList')
+            etree.SubElement(root.find('./viewPoint'), 'viewList')
 
         for view_list_tag in root.findall(".//viewList"):
             for view in view_list:
@@ -521,7 +543,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//attributeList') is None:
-            etree.SubElement(root, 'attributeList')
+            etree.SubElement(root.find('./viewPoint'), 'attributeList')
 
         for attribute_list_tag in root.findall(".//attributeList"):
             for attribute in attribute_list:
@@ -575,7 +597,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//functionalInterfaceList') is None:
-            etree.SubElement(root, 'functionalInterfaceList')
+            etree.SubElement(root.find('./funcArch'), 'functionalInterfaceList')
 
         for fun_interface_list_tag in root.findall(".//functionalInterfaceList"):
             for fun_interface in functional_interface_list:
@@ -616,7 +638,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//physicalElementList') is None:
-            etree.SubElement(root, 'physicalElementList')
+            etree.SubElement(root.find('./phyArch'), 'physicalElementList')
 
         for physical_element_list_tag in root.findall(".//physicalElementList"):
             for physical_element in physical_element_list:
@@ -638,6 +660,12 @@ class XmlWriter3SE:
                     _obj_element_part_tag = etree.SubElement(phy_elem_part_list_tag,
                                                              'physicalElementPart',
                                                              {'id': child.id})
+
+                allocated_activity_list_tag = etree.SubElement(physical_element_tag, "allocatedActivityList")
+                for allocated_activity_id in physical_element.allocated_activity_list:
+                    _allocated_obj_tag = etree.SubElement(allocated_activity_list_tag,
+                                                          'allocatedActivity',
+                                                          {'id': allocated_activity_id})
 
                 allocated_fun_elem_list_tag = etree.SubElement(physical_element_tag, "allocatedFunctionalElementList")
                 for allocated_fun_elem_id in physical_element.allocated_fun_elem_list:
@@ -669,7 +697,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//physicalInterfaceList') is None:
-            etree.SubElement(root, 'physicalInterfaceList')
+            etree.SubElement(root.find('./phyArch'), 'physicalInterfaceList')
 
         for phy_interface_list_tag in root.findall(".//physicalInterfaceList"):
             for phy_interface in physical_interface_list:
@@ -710,6 +738,8 @@ class XmlWriter3SE:
         elem_tag = None
         if isinstance(obj, datamodel.Data):
             elem_tag = "data"
+        elif isinstance(obj, datamodel.Activity):
+            elem_tag = "activity"
         elif isinstance(obj, datamodel.Function):
             elem_tag = "function"
         elif isinstance(obj, datamodel.FunctionalElement):
@@ -832,7 +862,9 @@ class XmlWriter3SE:
         @return XML tag (when retrieved) or None
         """
         elem_tag = None
-        if isinstance(obj, datamodel.Function):
+        if isinstance(obj, datamodel.Activity):
+            elem_tag = "allocatedActivity"
+        elif isinstance(obj, datamodel.Function):
             elem_tag = "allocatedFunction"
         elif isinstance(obj, datamodel.FunctionalElement):
             elem_tag = "allocatedFunctionalElement"
@@ -935,7 +967,7 @@ class XmlWriter3SE:
         root = self.tree.parse(self.file, parser)
 
         if root.find('.//requirementList') is None:
-            etree.SubElement(root, 'requirementList')
+            etree.SubElement(root.find('./viewPoint'), 'requirementList')
 
         for requirement_list_tag in root.findall(".//requirementList"):
             for requirement in requirement_list:

@@ -30,6 +30,7 @@ def test_template_xml():
         base_xml = "<?xml version='1.0' encoding='UTF-8'?>\n" \
                    "<systemAnalysis>\n" \
                    "  <funcArch>\n" \
+                   "    <activityList/>\n" \
                    "    <functionList/>\n" \
                    "    <dataList/>\n" \
                    "    <stateList/>\n" \

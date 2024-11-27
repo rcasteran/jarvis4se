@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
-    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
-from . import orchestrator_shared, orchestrator_object, orchestrator_viewpoint_requirement
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
+    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+from . import orchestrator_object, orchestrator_object_allocation, orchestrator_viewpoint_requirement
 from jarvis import util
 from tools import Logger
 
@@ -31,7 +31,6 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
             update ([0/1]) : 1 if update, else 0
     """
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    xml_view_list = kwargs[XML_DICT_KEY_10_VIEW_LIST]
     output_xml = kwargs['output_xml']
 
     data_predecessor_list = []
@@ -64,31 +63,23 @@ def check_add_predecessor(data_predecessor_str_set, **kwargs):
             predecessor = None
             selected_data = None
             existing_predecessor_id_list = []
+
             for data in xml_data_list:
                 if elem[0] == data.name:
                     selected_data = data
                     for existing_predecessor in data.predecessor_list:
                         existing_predecessor_id_list.append(existing_predecessor.id)
+
             for da in xml_data_list:
                 if elem[1] == da.name and da.id not in existing_predecessor_id_list:
                     predecessor = da
+
             if predecessor is not None and selected_data is not None:
                 data_predecessor_list.append([selected_data, predecessor])
-
-            allocation_chain_1 = orchestrator_shared.check_add_allocated_item(elem[0],
-                                                                              xml_data_list,
-                                                                              xml_view_list)
-            if allocation_chain_1:
-                allocated_item_list.append(allocation_chain_1)
-
-            allocation_chain_2 = orchestrator_shared.check_add_allocated_item(elem[1],
-                                                                              xml_data_list,
-                                                                              xml_view_list)
-            if allocation_chain_2:
-                allocated_item_list.append(allocation_chain_2)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], **kwargs)
 
     update = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
-    orchestrator_shared.add_allocation({5: allocated_item_list}, **kwargs)
 
     return update
 
@@ -145,8 +136,8 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
     output_xml = kwargs['output_xml']
@@ -222,7 +213,7 @@ def add_consumer_function(new_consumer_list, **kwargs):
     if not new_consumer_list:
         return 0
 
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
     output_xml = kwargs['output_xml']
     output_xml.write_data_consumer(new_consumer_list)
 
@@ -412,8 +403,8 @@ def check_add_producer_function(producer_str_list, **kwargs):
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
     output_xml = kwargs['output_xml']
@@ -488,7 +479,7 @@ def add_producer_function(new_producer_list, **kwargs):
     if not new_producer_list:
         return 0
 
-    xml_producer_function_list = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
     output_xml = kwargs['output_xml']
     output_xml.write_data_producer(new_producer_list)
 

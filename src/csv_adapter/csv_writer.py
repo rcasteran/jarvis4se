@@ -10,8 +10,8 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
-    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
+    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
 from . import util
 from tools import Logger
 
@@ -40,11 +40,12 @@ class CsvWriter3SE:
             6: self.write_state,
             7: self.write_transition,
             8: self.write_requirement,
-            9: self.write_attribute,
-            10: self.write_view,
-            11: self.write_type_element,
-            12: self.write_data_consumer,
-            13: self.write_data_producer,
+            9: self.write_activity,
+            10: self.write_attribute,
+            11: self.write_view,
+            12: self.write_type_element,
+            13: self.write_data_consumer,
+            14: self.write_data_producer,
         }
 
         self.file = output_filename
@@ -65,11 +66,12 @@ class CsvWriter3SE:
             6: kwargs[XML_DICT_KEY_6_STATE_LIST],
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
-            9: kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-            10: kwargs[XML_DICT_KEY_10_VIEW_LIST],
-            11: kwargs[XML_DICT_KEY_11_TYPE_LIST],
-            12: kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-            13: kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+            9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+            10: kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
+            11: kwargs[XML_DICT_KEY_11_VIEW_LIST],
+            12: kwargs[XML_DICT_KEY_12_TYPE_LIST],
+            13: kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+            14: kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
         }
 
         try:
@@ -95,6 +97,7 @@ class CsvWriter3SE:
                                  'function list',
                                  'state list',
                                  'interface list',
+                                 'activity list'
                                  'functional element list',
                                  'described element list',
                                  'view element list'
@@ -125,6 +128,40 @@ class CsvWriter3SE:
             type_str = obj.id
 
         return type_str
+
+    def write_activity(self, array, activity_list):
+        """Write activities from list of activities
+        @param[in] array : CSV object array
+        @param[in] activity_list : list of activities
+        @return updated CSV object array
+        """
+        for activity in activity_list:
+            array.append([activity.id,
+                          util.CSV_BASE_TAG_ACTIVITY,
+                          self.check_object_type(activity.type),
+                          activity.name,
+                          activity.alias,
+                          '',  # Description list
+                          '',  # Derived
+                          '',  # Source
+                          '',  # Dest
+                          '',  # Consumer list
+                          '',  # Producer list
+                          '',  # Predecessor list
+                          '',  # Children list
+                          '',  # Data list
+                          '',  # Condition list
+                          '',  # Function list
+                          '',  # State list
+                          '',  # Interface list
+                          '',  # Activity list
+                          '',  # Functional element list
+                          '',  # Described element list
+                          '',  # View element list
+                          ''  # Requirement list
+                          ])
+
+        return array
 
     def write_function(self, array, function_list):
         """Write functions from list of functions
@@ -164,6 +201,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -205,6 +243,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -296,6 +335,7 @@ class CsvWriter3SE:
                           allocated_function_id_list[:-1],  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -337,6 +377,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -395,6 +436,7 @@ class CsvWriter3SE:
                           allocated_function_id_list[:-1],  # Function list
                           allocated_state_id_list[:-1],  # State list
                           exposed_interface_id_list[:-1],  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -432,6 +474,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           allocated_element_id_list[:-1],  # View element list
@@ -474,6 +517,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           described_element_list[:-1],  # Described element list
                           '',  # View element list
@@ -520,6 +564,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -538,6 +583,10 @@ class CsvWriter3SE:
             children_id_list = ''
             for element_child in element.child_list:
                 children_id_list += element_child.id + util.CSV_MEMBER_SPLIT
+
+            allocated_activity_id_list = ''
+            for allocated_activity_id in element.allocated_activity_list:
+                allocated_activity_id_list += allocated_activity_id + util.CSV_MEMBER_SPLIT
 
             allocated_fun_elem_id_list = ''
             for allocated_fun_elem_id in element.allocated_fun_elem_list:
@@ -574,6 +623,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           exposed_interface_id_list[:-1],  # Interface list
+                          allocated_activity_id_list[:-1],  # Activity list
                           allocated_fun_elem_id_list[:-1],  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -620,6 +670,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           allocated_fun_intf_id_list[:-1],  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -653,6 +704,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
@@ -690,6 +742,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
+                          '',  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list

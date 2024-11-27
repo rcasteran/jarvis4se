@@ -697,8 +697,45 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
 
     # Write data flows
     string_obj.create_data_flow(data_flow_list)
+
+    # Write interfaces
     if interface_list:
         string_obj.create_interface(interface_list)
+    # Else do nothing
+
+    return string_obj.string
+
+
+def get_phy_elem_decomposition(main_phy_elem, phy_elem_list, xml_attribute_list, phy_inter_list):
+    """@ingroup plantuml_adapter
+    @anchor get_phy_elem_decomposition
+    Construct the PlantUml text for the physical element decomposition diagram
+    @param[in] main_phy_elem main physical element
+    @param[in] phy_elem_list physical element list
+    @param[in] xml_attribute_list xml list of attributes
+    @param[in] phy_inter_list physical interface list
+    @return PlantUml text of the diagram
+    """
+
+    string_obj = ObjDiagram()
+    interface_list = None
+
+    # Write functional element decompo recursively and add allocated functions
+    recursive_decomposition(string_obj, main_phy_elem, [], xml_attribute_list, first_iter=True)
+    string_obj.append_string('}\n')
+    string_obj.create_component_attribute(main_phy_elem, xml_attribute_list)
+
+    # Write external fun_elem
+    for elem in phy_elem_list:
+        if elem != main_phy_elem and elem.parent is None:
+            recursive_decomposition(string_obj, elem, [], xml_attribute_list, first_iter=True)
+            string_obj.append_string('}\n')
+            string_obj.create_component_attribute(elem, xml_attribute_list)
+
+    # Write interfaces
+    if interface_list:
+        string_obj.create_interface(interface_list)
+    # Else do nothing
 
     return string_obj.string
 

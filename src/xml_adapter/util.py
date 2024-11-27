@@ -17,11 +17,12 @@ XML_DICT_KEY_5_PHY_INTF_LIST = 'xml_phy_inter_list'
 XML_DICT_KEY_6_STATE_LIST = 'xml_state_list'
 XML_DICT_KEY_7_TRANSITION_LIST = 'xml_transition_list'
 XML_DICT_KEY_8_REQUIREMENT_LIST = 'xml_requirement_list'
-XML_DICT_KEY_9_ATTRIBUTE_LIST = 'xml_attribute_list'
-XML_DICT_KEY_10_VIEW_LIST = 'xml_view_list'
-XML_DICT_KEY_11_TYPE_LIST = 'xml_type_list'
-XML_DICT_KEY_12_FUN_CONS_LIST = 'xml_consumer_function_list'
-XML_DICT_KEY_13_FUN_PROD_LIST = 'xml_producer_function_list'
+XML_DICT_KEY_9_ACTIVITY_LIST = 'xml_activity_list'
+XML_DICT_KEY_10_ATTRIBUTE_LIST = 'xml_attribute_list'
+XML_DICT_KEY_11_VIEW_LIST = 'xml_view_list'
+XML_DICT_KEY_12_TYPE_LIST = 'xml_type_list'
+XML_DICT_KEY_13_FUN_CONS_LIST = 'xml_consumer_function_list'
+XML_DICT_KEY_14_FUN_PROD_LIST = 'xml_producer_function_list'
 
 
 # Functions

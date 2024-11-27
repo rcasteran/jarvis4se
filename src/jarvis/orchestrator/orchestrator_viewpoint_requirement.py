@@ -15,8 +15,8 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
-    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
+    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
 from . import orchestrator_object
 from tools import Logger
 from jarvis.handler import handler_question
@@ -482,78 +482,6 @@ def add_requirement_text(p_text_list, **kwargs):
                 # Else do nothing
 
         update = 1
-
-    return update
-
-
-def check_add_allocation(p_str_list, **kwargs):
-    """@ingroup orchestrator
-    @anchor check_add_allocation
-    Check list of requirement allocation declaration and add them to jarvis data structure
-
-    @param[in] p_str_list : list of requirement allocation declaration
-    @param[in] kwargs : jarvis data structure
-    @return jarvis data structure updated (1) or not (0)
-    """
-    allocation_list = []
-    cleaned_allocation_str_list = util.cut_tuple_list(p_str_list)
-    for elem in cleaned_allocation_str_list:
-        alloc_obj = orchestrator_object.retrieve_object_by_name(
-            elem[0],
-            **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-               XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
-               XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
-               XML_DICT_KEY_7_TRANSITION_LIST: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
-               XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-               XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-               XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST]
-               })
-
-        req_obj = orchestrator_object.retrieve_object_by_name(
-            elem[1],
-            **{XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
-               })
-
-        if not alloc_obj:
-            Logger.set_error(__name__, f"Object {elem[0]} not found or cannot satisfy a requirement, "
-                                       f"supported satisfactions are:\n"
-                                       f"(Function satisfies Requirement) OR\n"
-                                       f"(State satisfies Requirement) OR\n"
-                                       f"(Data satisfies Requirement) OR\n"
-                                       f"(Transition satisfies Requirement) OR\n"
-                                       f"(Functional element satisfies Requirement) OR\n"
-                                       f"(Functional interface satisfies Requirement) OR\n"
-                                       f"(Physical element satisfies Requirement) OR\n"
-                                       f"(Physical interface satisfies Requirement)")
-        elif not req_obj:
-            Logger.set_error(__name__, f"Requirement {elem[1]} not found")
-        else:
-            if not any(allocated_req_id == req_obj.id for allocated_req_id in alloc_obj.allocated_req_list):
-                alloc_obj.add_allocated_requirement(req_obj.id)
-                allocation_list.append([alloc_obj, req_obj])
-
-                # Check for potential req parent in allocated obj parent
-                if alloc_obj.parent:
-                    if hasattr(alloc_obj.parent, 'allocated_req_list'):
-                        update_requirement_link(alloc_obj.parent, req_obj, **kwargs)
-            else:
-                Logger.set_info(__name__,
-                                f"{req_obj.__class__.__name__} {req_obj.name} already satisfied by "
-                                f"{alloc_obj.__class__.__name__} {alloc_obj.name}")
-
-    if allocation_list:
-        output_xml = kwargs['output_xml']
-        output_xml.write_object_allocation(allocation_list)
-
-        for elem in allocation_list:
-            Logger.set_info(__name__,
-                            f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
-                            f"{elem[0].__class__.__name__} {elem[0].name}")
-
-        update = 1
-    else:
-        update = 0
 
     return update
 

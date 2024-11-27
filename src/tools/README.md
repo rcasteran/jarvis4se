@@ -32,7 +32,7 @@ All SVG files are deleted when JARVIS4SE is initializing.
 
 By default, the diagram file storage is deactivated.
 
-## OpenModelica simulation
+## OpenModelica simulation option
 When the OpenModelica simulation is activated, JARVIS4SE will connect to the OpenModelica executable to run simulation and to plot simulation results.
 
 All simulation files are stored under the folder "./simulations/".

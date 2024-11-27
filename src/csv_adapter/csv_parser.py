@@ -26,20 +26,21 @@ class CsvParser3SE:
         Array of CSV rows
         """
 
-        self.csv_dict = {'csv_function_list': set(),
-                         'csv_consumer_function_list': [],
-                         'csv_producer_function_list': [],
-                         'csv_data_list': set(),
-                         'csv_state_list': set(),
-                         'csv_transition_list': set(),
+        self.csv_dict = {'csv_data_list': set(),
+                         'csv_function_list': set(),
                          'csv_fun_elem_list': set(),
-                         'csv_view_list': set(),
-                         'csv_attribute_list': set(),
                          'csv_fun_inter_list': set(),
                          'csv_phy_elem_list': set(),
                          'csv_phy_inter_list': set(),
+                         'csv_state_list': set(),
+                         'csv_transition_list': set(),
+                         'csv_requirement_list': set(),
+                         'csv_activity_list': set(),
+                         'csv_attribute_list': set(),
+                         'csv_view_list': set(),
                          'csv_type_list': set(),
-                         'csv_requirement_list': set()
+                         'csv_consumer_function_list': [],
+                         'csv_producer_function_list': []
                          }
 
         self.array = []
@@ -70,6 +71,7 @@ class CsvParser3SE:
                 # CSV file is a 3SE CSV format
                 # First retrieve extended types
                 self.csv_dict['csv_type_list'] = self.parse_type_list()
+                self.csv_dict['csv_activity_list'] = self.parse_activity_list()
                 self.csv_dict['csv_function_list'] = self.parse_function_list()
                 self.csv_dict['csv_state_list'] = self.parse_state_list()
                 self.csv_dict['csv_transition_list'] = self.parse_transition_list()
@@ -127,6 +129,28 @@ class CsvParser3SE:
                                      f"Unknown type {obj_type.name} found when parsing csv")
 
         return type_list
+
+    def parse_activity_list(self):
+        """Parse CSV activity list
+        @return activity list
+        """
+        activity_list = set()
+        parent_list = {}
+        for row in self.array:
+            if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_ACTIVITY:
+                # Instantiate activities and add them to a list
+                activity = datamodel.Activity(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                              p_name=row[util.CSV_NAME_IDX],
+                                              p_alias=row[util.CSV_ALIAS_IDX],
+                                              p_type=row[util.CSV_EXTENSION_IDX])
+
+                activity_list.add(activity)
+            # Else do nothing
+
+        # Loop to set parent and child relationship
+        util.update_parental_relationship(parent_list, activity_list)
+
+        return activity_list
 
     def parse_function_list(self):
         """Parse CSV function list
@@ -497,7 +521,17 @@ class CsvParser3SE:
                         parent_list[csv_part_id] = phy_elem.id
                 # Else do nothing
 
-                # Looking for allocated functions and add them to the functional element
+                # Looking for allocated activities and add them to the physical element
+                if len(row[util.CSV_ACTIVITY_LIST_IDX]) > 0:
+                    csv_activity_id_list = row[util.CSV_ACTIVITY_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_activity_id in csv_activity_id_list:
+                        phy_elem.add_allocated_activity(csv_activity_id)
+                        Logger.set_debug(__name__, f"Activity [{csv_activity_id}]"
+                                                   f" is allocated to "
+                                                   f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                # Else do nothing
+
+                # Looking for allocated functional elements and add them to the physical element
                 if len(row[util.CSV_FUN_ELEM_LIST_IDX]) > 0:
                     csv_fun_elem_id_list = row[util.CSV_FUN_ELEM_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
                     for csv_fun_elem_id in csv_fun_elem_id_list:

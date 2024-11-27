@@ -10,13 +10,14 @@ from datamodel import FunctionalElement
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ATTRIBUTE_LIST, XML_DICT_KEY_10_VIEW_LIST, XML_DICT_KEY_11_TYPE_LIST, \
-    XML_DICT_KEY_12_FUN_CONS_LIST, XML_DICT_KEY_13_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
+    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
 from jarvis.query import query_object, question_answer, query_inheritance
 from jarvis import util as jarvis_util
 from . import diagram_generator_chain
 from . import diagram_generator_farch
 from . import diagram_generator_fana
+from . import diagram_generator_parch
 from . import util
 from tools import Logger
 
@@ -68,9 +69,9 @@ def case_function_diagram(**kwargs):
         plantuml_string = diagram_generator_farch.show_fun_elem_function(kwargs['diagram_object_str'],
                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                         kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-                                                                         kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
-                                                                         kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
+                                                                         kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+                                                                         kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
+                                                                         kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST])
 
     else:
         Logger.set_warning(__name__,
@@ -86,37 +87,37 @@ def case_context_diagram(**kwargs):
     if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
         consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-            kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
             **kwargs
         )
         produced_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-            kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+            kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
             **kwargs
         )
         child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
         )
         attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
 
         plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
                                                                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                       kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-                                                                       kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                       kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+                                                                       kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
                                                                        kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                       kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                       kwargs[XML_DICT_KEY_11_TYPE_LIST])
+                                                                       kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
+                                                                       kwargs[XML_DICT_KEY_12_TYPE_LIST])
 
         query_inheritance.query_inheritance_remove_inherited_object(
             consumed_flow_inheritance,
-            kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+            kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
             **kwargs
         )
         query_inheritance.query_inheritance_remove_inherited_object(
             produced_flow_inheritance,
-            kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+            kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
             **kwargs
         )
         query_inheritance.query_inheritance_remove_inherited_object_children(
@@ -124,7 +125,7 @@ def case_context_diagram(**kwargs):
             derived_child_id=child_inheritance[2]
         )
         query_inheritance.query_inheritance_remove_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             attribute_inheritance
         )
 
@@ -140,7 +141,7 @@ def case_context_diagram(**kwargs):
             level=None
         )
         attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
             kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
             kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]
@@ -159,9 +160,9 @@ def case_context_diagram(**kwargs):
         plantuml_string = diagram_generator_farch.show_fun_elem_context(kwargs['diagram_object_str'],
                                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-                                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
-                                                                        kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                        kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+                                                                        kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
+                                                                        kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
                                                                         kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                                         kwargs[XML_DICT_KEY_0_DATA_LIST])
 
@@ -171,7 +172,7 @@ def case_context_diagram(**kwargs):
             derived_child_id=child_inheritance[2]
         )
         query_inheritance.query_inheritance_remove_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             attribute_inheritance
         )
         query_inheritance.query_inheritance_remove_inherited_object(
@@ -212,21 +213,21 @@ def case_decomposition_diagram(**kwargs):
         diagram_object_str = kwargs['diagram_object_str']
         diagram_level = None
 
-    v_inheritance = query_inheritance.query_inheritance_add_inherited_view(kwargs[XML_DICT_KEY_10_VIEW_LIST],
+    v_inheritance = query_inheritance.query_inheritance_add_inherited_view(kwargs[XML_DICT_KEY_11_VIEW_LIST],
                                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                                            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
 
     # Check view if activated and filter allocated item
     function_list = util.get_object_list_from_view(diagram_object_str,
                                                    kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                   kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                   kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
     if len(function_list) > 0:
         _, consumer_list, producer_list = \
             util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                        kwargs[XML_DICT_KEY_10_VIEW_LIST],
-                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                        kwargs[XML_DICT_KEY_11_VIEW_LIST],
+                                                        kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+                                                        kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
                                                         function_list)
     else:
         consumer_list = []
@@ -238,7 +239,7 @@ def case_decomposition_diagram(**kwargs):
             level=diagram_level
         )
         attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             function_list
         )
 
@@ -246,8 +247,8 @@ def case_decomposition_diagram(**kwargs):
                                                                              function_list,
                                                                              consumer_list,
                                                                              producer_list,
-                                                                             kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
-                                                                             kwargs[XML_DICT_KEY_11_TYPE_LIST],
+                                                                             kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
+                                                                             kwargs[XML_DICT_KEY_12_TYPE_LIST],
                                                                              diagram_level=diagram_level)
 
         query_inheritance.query_inheritance_remove_inherited_object_children(
@@ -255,13 +256,13 @@ def case_decomposition_diagram(**kwargs):
             derived_child_id=child_inheritance[2]
         )
         query_inheritance.query_inheritance_remove_inherited_attribute(
-            kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+            kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
             attribute_inheritance
         )
     elif diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         fun_elem_list = util.get_object_list_from_view(diagram_object_str,
                                                        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                       kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                       kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
         if len(fun_elem_list) > 0:
             child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
@@ -270,7 +271,7 @@ def case_decomposition_diagram(**kwargs):
                 level=diagram_level
             )
             attribute_inheritance = query_inheritance.query_inheritance_add_inherited_attribute(
-                kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
                 function_list,
                 fun_elem_list,
                 kwargs[XML_DICT_KEY_3_FUN_INTF_LIST]
@@ -291,7 +292,7 @@ def case_decomposition_diagram(**kwargs):
                                                                                   consumer_list,
                                                                                   producer_list,
                                                                                   fun_elem_list,
-                                                                                  kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                                                                                  kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
                                                                                   kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                                                   kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                                                                                   diagram_level)
@@ -302,7 +303,7 @@ def case_decomposition_diagram(**kwargs):
                 derived_child_id=child_inheritance[2]
             )
             query_inheritance.query_inheritance_remove_inherited_attribute(
-                kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST],
+                kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
                 attribute_inheritance
             )
             query_inheritance.query_inheritance_remove_inherited_object(
@@ -315,12 +316,25 @@ def case_decomposition_diagram(**kwargs):
                 None,
                 **kwargs
             )
+        # Else do nothing
+    elif diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]):
+        phy_elem_list = util.get_object_list_from_view(diagram_object_str,
+                                                       kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                       kwargs[XML_DICT_KEY_11_VIEW_LIST])
+
+        if len(phy_elem_list) > 0:
+            plantuml_string = diagram_generator_parch.show_phy_elem_decomposition(diagram_object_str,
+                                                                                  phy_elem_list,
+                                                                                  kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
+                                                                                  kwargs[XML_DICT_KEY_5_PHY_INTF_LIST])
+        # Else do nothing
+
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the object {diagram_object_str}"
                            f"(i.e. it is not a function, nor a functional element)")
 
-    query_inheritance.query_inheritance_remove_inherited_view(kwargs[XML_DICT_KEY_10_VIEW_LIST], v_inheritance)
+    query_inheritance.query_inheritance_remove_inherited_view(kwargs[XML_DICT_KEY_11_VIEW_LIST], v_inheritance)
 
     return plantuml_string
 
@@ -344,43 +358,43 @@ def case_chain_diagram(**kwargs):
         if result_function:
             function_list = util.get_object_list_from_view(object_list_str,
                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                           kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                           kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
             if len(function_list) > 0:
                 consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
                     function_list,
-                    kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                    kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
                     **kwargs
                 )
                 produced_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
                     function_list,
-                    kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                    kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
                     **kwargs
                 )
                 _, consumer_list, producer_list = \
                     util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                kwargs[XML_DICT_KEY_10_VIEW_LIST],
+                                                                kwargs[XML_DICT_KEY_11_VIEW_LIST],
                                                                 kwargs[
-                                                                    XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                                    XML_DICT_KEY_13_FUN_CONS_LIST],
                                                                 kwargs[
-                                                                    XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                    XML_DICT_KEY_14_FUN_PROD_LIST],
                                                                 function_list)
 
                 plantuml_string = diagram_generator_chain.show_function_chain(object_list_str,
                                                                               function_list,
                                                                               consumer_list,
                                                                               producer_list,
-                                                                              kwargs[XML_DICT_KEY_11_TYPE_LIST],
-                                                                              kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
+                                                                              kwargs[XML_DICT_KEY_12_TYPE_LIST],
+                                                                              kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST])
 
                 query_inheritance.query_inheritance_remove_inherited_object(
                     consumed_flow_inheritance,
-                    kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
+                    kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
                     **kwargs
                 )
                 query_inheritance.query_inheritance_remove_inherited_object(
                     produced_flow_inheritance,
-                    kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                    kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
                     **kwargs
                 )
             else:
@@ -389,7 +403,7 @@ def case_chain_diagram(**kwargs):
         elif result_fun_elem:
             fun_elem_list_from_view = util.get_object_list_from_view(object_list_str,
                                                                      kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                                     kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                                     kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
             if len(fun_elem_list_from_view) > 0:
                 fun_elem_list = set()
@@ -397,7 +411,7 @@ def case_chain_diagram(**kwargs):
 
                 function_list_from_view = util.get_object_list_from_view(object_list_str,
                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                         kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                                         kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
                 for i in object_list_str:
                     for fun_elem in fun_elem_list_from_view:
@@ -415,11 +429,11 @@ def case_chain_diagram(**kwargs):
 
                 new_function_list, consumer_list, producer_list = \
                     util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                kwargs[XML_DICT_KEY_10_VIEW_LIST],
+                                                                kwargs[XML_DICT_KEY_11_VIEW_LIST],
                                                                 kwargs[
-                                                                    XML_DICT_KEY_12_FUN_CONS_LIST],
+                                                                    XML_DICT_KEY_13_FUN_CONS_LIST],
                                                                 kwargs[
-                                                                    XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                                    XML_DICT_KEY_14_FUN_PROD_LIST],
                                                                 function_list)
 
                 plantuml_string = diagram_generator_chain.show_fun_elem_chain(object_list_str,
@@ -427,19 +441,19 @@ def case_chain_diagram(**kwargs):
                                                                               consumer_list,
                                                                               producer_list,
                                                                               fun_elem_list,
-                                                                              kwargs[XML_DICT_KEY_11_TYPE_LIST],
-                                                                              kwargs[XML_DICT_KEY_9_ATTRIBUTE_LIST])
+                                                                              kwargs[XML_DICT_KEY_12_TYPE_LIST],
+                                                                              kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST])
             else:
                 Logger.set_warning(__name__,
                                    f"Nothing to display for the selected view")
         elif result_state:
             state_list = util.get_object_list_from_view(object_list_str,
                                                         kwargs[XML_DICT_KEY_6_STATE_LIST],
-                                                        kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                        kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
             if len(state_list) > 0:
                 transition_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
-                                                                       kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                                       kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
                 plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
             else:
@@ -471,20 +485,20 @@ def case_sequence_diagram(**kwargs):
             # if not activated then no item filtered
             # if not any item under view return string
             xml_data_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                 kwargs[XML_DICT_KEY_10_VIEW_LIST])
+                                                                 kwargs[XML_DICT_KEY_11_VIEW_LIST])
 
             if len(xml_data_list) > 0:
                 if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
                        for i in object_list_str):
 
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
-                        xml_cons = [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                        xml_cons = [i for i in kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
-                        xml_prod = [i for i in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+                        xml_prod = [i for i in kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
                     else:
-                        xml_cons = kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
-                        xml_prod = kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+                        xml_cons = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
+                        xml_prod = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
 
                     plantuml_string = show_functions_sequence(object_list_str,
                                                               kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
@@ -495,11 +509,11 @@ def case_sequence_diagram(**kwargs):
                 elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
                          for i in object_list_str):
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
-                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST] = \
-                            [i for i in kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                        kwargs[XML_DICT_KEY_13_FUN_CONS_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
                              if any(a == i[0] for a in [d for d in xml_data_list])]
-                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST] = \
-                            [i for i in kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+                        kwargs[XML_DICT_KEY_14_FUN_PROD_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
                              if any(a == i[0] for a in [d for d in xml_data_list])]
                     kwargs[XML_DICT_KEY_0_DATA_LIST] = xml_data_list
                     plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
@@ -539,8 +553,8 @@ def case_state_sequence_diagram(**kwargs):
         plantuml_string = show_state_allocated_function(kwargs['diagram_object_str'],
                                                         kwargs[XML_DICT_KEY_6_STATE_LIST],
                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                        kwargs[XML_DICT_KEY_12_FUN_CONS_LIST],
-                                                        kwargs[XML_DICT_KEY_13_FUN_PROD_LIST],
+                                                        kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
+                                                        kwargs[XML_DICT_KEY_14_FUN_PROD_LIST],
                                                         kwargs[XML_DICT_KEY_0_DATA_LIST])
     else:
         Logger.set_error(__name__,
@@ -810,7 +824,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
 
         if isinstance(fun_elem.derived, FunctionalElement):
             get_derived_if_in_view = util.filter_allocated_item_from_view(
-                {fun_elem.derived}, kwargs[XML_DICT_KEY_10_VIEW_LIST]
+                {fun_elem.derived}, kwargs[XML_DICT_KEY_11_VIEW_LIST]
             )
             # If type(list) has been returned from activated View()
             # then add it's allocated func
@@ -829,12 +843,12 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
             for fun in temp_fun_set:
                 new_consumer_list.extend(
                     get_fun_elem_for_cons_prod_lists(
-                        fun_elem, fun, kwargs[XML_DICT_KEY_12_FUN_CONS_LIST]
+                        fun_elem, fun, kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
                     )
                 )
                 new_producer_list.extend(
                     get_fun_elem_for_cons_prod_lists(
-                        fun_elem, fun, kwargs[XML_DICT_KEY_13_FUN_PROD_LIST]
+                        fun_elem, fun, kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
                     )
                 )
 

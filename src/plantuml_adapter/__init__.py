@@ -21,6 +21,7 @@ from .plantuml_adapter import get_function_diagrams
 from .plantuml_adapter import get_sequence_diagram
 from .plantuml_adapter import get_state_machine_diagram
 from .plantuml_adapter import get_fun_elem_decomposition
+from .plantuml_adapter import get_phy_elem_decomposition
 from .plantuml_adapter import get_fun_elem_context_diagram
 from .plantuml_connector import PlantUmlPicoServer
 from .plantuml_connector import PlantUmlConnector
