@@ -210,8 +210,10 @@ class ObjDiagram:
                 "'id: ", str(function.id), '\nobject "', function.name, '" as ', function_ref,
                 ' <<', function_type_str, '>>')
 
-        if function.operand:
-            operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'
+        if hasattr(function, "operand"):
+            if function.operand:
+                operand_str = str(function.operand) + ' : ' + str(function.input_role) + '\n'
+
         attribute_str = self.create_object_attributes(function, attribute_list)
 
         if len(attribute_str) > 1 or len(operand_str) > 1:

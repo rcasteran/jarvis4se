@@ -24,56 +24,63 @@ def get_cons_or_prod_paired(function_list, xml_flow_list, xml_opposite_flow_list
     return new_flow_list
 
 
-def get_cons_prod_from_allocated_functions(allocated_function_list,
-                                           xml_producer_function_list,
-                                           xml_consumer_function_list,
-                                           with_external_functions=True):
+def get_cons_prod_from_allocated_elements(allocated_elem_list,
+                                          xml_producer_elem_list,
+                                          xml_consumer_elem_list,
+                                          with_external_elements=True):
     """Get consumers/producers from function's allocated to main_fun_elem (and its descendant)"""
     new_producer_list = []
     new_consumer_list = []
-    for allocated_function in allocated_function_list:
-        allocated_function.child_list.clear()
-        allocated_function.parent = None
-        for elem in xml_producer_function_list:
-            if allocated_function in elem:
-                new_producer_list.append(elem)
-        for elem in xml_consumer_function_list:
-            if allocated_function in elem:
-                new_consumer_list.append(elem)
+    for allocated_elem in allocated_elem_list:
+        if hasattr(allocated_elem, "child_list"):
+            allocated_elem.child_list.clear()
+        # Else do nothing
 
-    if with_external_functions:
-        external_function_list, new_consumer_list, new_producer_list = get_ext_cons_prod(
+        allocated_elem.parent = None
+
+        for xml_producer_elem in xml_producer_elem_list:
+            if allocated_elem in xml_producer_elem:
+                new_producer_list.append(xml_producer_elem)
+            # Else do nothing
+
+        for xml_consumer_elem in xml_consumer_elem_list:
+            if allocated_elem in xml_consumer_elem:
+                new_consumer_list.append(xml_consumer_elem)
+            # Else do nothing
+
+    if with_external_elements:
+        external_elem_list, new_consumer_list, new_producer_list = get_ext_cons_prod(
             new_producer_list,
             new_consumer_list,
-            xml_producer_function_list,
-            xml_consumer_function_list)
+            xml_producer_elem_list,
+            xml_consumer_elem_list)
     else:
-        external_function_list = None
+        external_elem_list = None
 
-    return external_function_list, new_consumer_list, new_producer_list
+    return external_elem_list, new_consumer_list, new_producer_list
 
 
-def get_ext_cons_prod(producer_list, consumer_list, xml_producer_function_list,
-                      xml_consumer_function_list):
-    """Get external cons/prod associated to main_fun_elem allocated functions"""
-    external_function_list = set()
+def get_ext_cons_prod(producer_list, consumer_list, xml_producer_elem_list,
+                      xml_consumer_elem_list):
+    """Get external cons/prod associated to considered element"""
+    external_elem_list = set()
     for elem in consumer_list:
         if not any(elem[0] in s for s in producer_list):
-            for prod in xml_producer_function_list:
+            for prod in xml_producer_elem_list:
                 if prod[0] == elem[0] and prod[1].parent is None:
-                    external_function_list.add(prod[1])
+                    external_elem_list.add(prod[1])
                     if prod not in producer_list:
                         producer_list.append(prod)
 
     for elem in producer_list:
         if not any(elem[0] in s for s in consumer_list):
-            for cons in xml_consumer_function_list:
+            for cons in xml_consumer_elem_list:
                 if cons[0] == elem[0] and cons[1].parent is None:
-                    external_function_list.add(cons[1])
+                    external_elem_list.add(cons[1])
                     if cons not in consumer_list:
                         consumer_list.append(cons)
 
-    return external_function_list, consumer_list, producer_list
+    return external_elem_list, consumer_list, producer_list
 
 
 def get_allocated_function_context_lists(allocated_function_list,
@@ -271,7 +278,7 @@ def filter_fun_elem_with_level(main_fun_elem, diagram_level, xml_function_list, 
 
 
 def get_level_0_function(fun_elem, function_list, level_0_function_list):
-    """Recursively get functions allocated to main_fun_elem and its descendant"""
+    """Recursively get functions allocated to fun_elem and its descendant"""
     for function_id in fun_elem.allocated_function_list:
         for function in function_list:
             if function.id == function_id and function not in level_0_function_list:
@@ -297,6 +304,18 @@ def get_level_0_function(fun_elem, function_list, level_0_function_list):
         get_level_0_function(child, function_list, level_0_function_list)
 
 
+def get_level_0_activity(phy_elem, activity_list, level_0_activity_list):
+    """Recursively get activities allocated to phy_elem and its descendant"""
+    for activity_id in phy_elem.allocated_activity_list:
+        for activity in activity_list:
+            if activity.id == activity_id and activity not in level_0_activity_list:
+                level_0_activity_list.add(activity)
+            # Else do nothing
+
+    for child in phy_elem.child_list:
+        get_level_0_activity(child, activity_list, level_0_activity_list)
+
+
 def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
     """Returns current object's list by checking view"""
     filtered_item_list = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
@@ -316,12 +335,14 @@ def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
                     filtered_item_list.append(obj)
 
     for new_obj in filtered_item_list:
-        child_list = set()
-        for child in new_obj.child_list:
-            if child in filtered_item_list:
-                child_list.add(child)
-        new_obj.child_list.clear()
-        new_obj.child_list = child_list
+        if hasattr(new_obj, "child_list"):
+            child_list = set()
+            for child in new_obj.child_list:
+                if child in filtered_item_list:
+                    child_list.add(child)
+            new_obj.child_list.clear()
+            new_obj.child_list = child_list
+        # Else do nothing
 
     return filtered_item_list
 
@@ -421,46 +442,45 @@ def get_external_flow_with_level(main_flow_list, main_function_list, main_fun, x
     return ext_flow_fun_list, ext_flow_list, ext_flow_parent_dict
 
 
-def get_cons_prod_from_view_allocated_data(xml_data_list, xml_view_list, xml_consumer_function_list,
-                                           xml_producer_function_list, function_list):
+def get_cons_prod_from_view_allocated_flow(xml_flow_list, xml_view_list, xml_consumer_elem_list,
+                                           xml_producer_elem_list, elem_list):
     """If a view is activated, returns filtered consumer/producer lists"""
-    new_function_list = []
+    new_elem_list = []
     new_consumer_list = []
     new_producer_list = []
-    new_data_list = filter_allocated_item_from_view(xml_data_list, xml_view_list)
+    new_flow_list = filter_allocated_item_from_view(xml_flow_list, xml_view_list)
 
-    if len(new_data_list) == len(xml_data_list):
-        for prod in xml_producer_function_list:
-            if any(item == prod[1] for item in function_list):
+    if len(new_flow_list) == len(xml_flow_list):
+        for prod in xml_producer_elem_list:
+            if any(item == prod[1] for item in elem_list):
                 new_producer_list.append(prod)
-                if prod[1] not in new_function_list:
-                    new_function_list.append(prod[1])
+                if prod[1] not in new_elem_list:
+                    new_elem_list.append(prod[1])
 
-        for cons in xml_consumer_function_list:
-            if any(item == cons[1] for item in function_list):
+        for cons in xml_consumer_elem_list:
+            if any(item == cons[1] for item in elem_list):
                 new_consumer_list.append(cons)
-                if cons[1] not in new_function_list:
-                    new_function_list.append(cons[1])
-
+                if cons[1] not in new_elem_list:
+                    new_elem_list.append(cons[1])
     else:
-        for cons in xml_consumer_function_list:
-            if any(item == cons[0] for item in new_data_list) and \
-                    any(item == cons[1] for item in function_list):
+        for cons in xml_consumer_elem_list:
+            if any(item == cons[0] for item in new_flow_list) and \
+                    any(item == cons[1] for item in elem_list):
                 new_consumer_list.append(cons)
-                if cons[1] not in new_function_list:
-                    new_function_list.append(cons[1])
+                if cons[1] not in new_elem_list:
+                    new_elem_list.append(cons[1])
 
-        for prod in xml_producer_function_list:
-            if any(item == prod[0] for item in new_data_list) and \
-                    any(item == prod[1] for item in function_list):
+        for prod in xml_producer_elem_list:
+            if any(item == prod[0] for item in new_flow_list) and \
+                    any(item == prod[1] for item in elem_list):
                 new_producer_list.append(prod)
-                if prod[1] not in new_function_list:
-                    new_function_list.append(prod[1])
+                if prod[1] not in new_elem_list:
+                    new_elem_list.append(prod[1])
 
     if len(new_consumer_list) == 0 and len(new_producer_list) == 0:
-        new_function_list = function_list
+        new_elem_list = elem_list
 
-    return new_function_list, new_consumer_list, new_producer_list
+    return new_elem_list, new_consumer_list, new_producer_list
 
 
 def get_parent_dict(element, element_list, parent_dict):

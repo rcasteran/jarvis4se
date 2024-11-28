@@ -72,10 +72,10 @@ def show_fun_elem_chain(fun_elem_list_str, xml_function_list, xml_consumer_funct
                         parent_child_dict[allocated_function_id] = fun_elem.id
 
     external_function_list, new_consumer_list, new_producer_list = \
-        util.get_cons_prod_from_allocated_functions(xml_function_list,
-                                                    xml_producer_function_list,
-                                                    xml_consumer_function_list,
-                                                    False)
+        util.get_cons_prod_from_allocated_elements(xml_function_list,
+                                                   xml_producer_function_list,
+                                                   xml_consumer_function_list,
+                                                   False)
 
     Logger.set_debug(__name__, f'list of allocated functions to element: {xml_function_list}')
     Logger.set_debug(__name__, f'list of external functions to element: {external_function_list}')

@@ -583,51 +583,62 @@ def check_is_fun_inter(p_interface, p_interface_list, is_decomposition=True):
     return is_fun_inter
 
 
-def check_child_allocation(string_obj, fun_elem, function_list, xml_attribute_list):
+def check_child_allocation(string_obj, main_elem, elem_list, xml_attribute_list):
     """@ingroup plantuml_adapter
-    Check for each function allocated to a functional element if not allocated to any
-    functional element child: in that case => write function object string.
+    Check for each function/activity allocated to a functional/physical element if not allocated to any
+    functional/physical element child: in that case => write function object string.
     @param[in,out] string_obj current PlantUml text
-    @param[in] fun_elem functional element to check
-    @param[in] function_list list of functions
+    @param[in] main_elem functional/physical element to check
+    @param[in] elem_list list of functions/activities
     @param[in] xml_attribute_list xml list of attributes
     @return None
     """
+    if isinstance(main_elem, datamodel.FunctionalElement):
+        allocated_elem_list = main_elem.allocated_function_list
+    elif isinstance(main_elem, datamodel.PhysicalElement):
+        allocated_elem_list = main_elem.allocated_activity_list
+    else:
+        allocated_elem_list = ()
 
-    for function in function_list:
-        if function.id in fun_elem.allocated_function_list:
-            fun_elem_child_allocated_function_list = []
-            for c in fun_elem.child_list:
-                for j in c.allocated_function_list:
-                    fun_elem_child_allocated_function_list.append(j)
+    for elem in elem_list:
+        if elem.id in allocated_elem_list:
+            fun_elem_child_allocated_elem_list = []
+            for child in main_elem.child_list:
+                if isinstance(child, datamodel.FunctionalElement):
+                    for allocated_function in child.allocated_function_list:
+                        fun_elem_child_allocated_elem_list.append(allocated_function)
+                elif isinstance(child, datamodel.PhysicalElement):
+                    for allocated_activity in child.allocated_activity_list:
+                        fun_elem_child_allocated_elem_list.append(allocated_activity)
+                # Else do nothing
 
-            if not any(s == function.id for s in fun_elem_child_allocated_function_list):
-                write_function_object(string_obj, function, [], [], False, xml_attribute_list)
+            if not any(s == elem.id for s in fun_elem_child_allocated_elem_list):
+                write_function_object(string_obj, elem, [], [], False, xml_attribute_list)
 
 
-def recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attribute_list,
+def recursive_decomposition(string_obj, main_elem, elem_list, xml_attribute_list,
                             first_iter=False):
     """@ingroup plantuml_adapter
     Create PlantUml text for functional elements recursively
     @param[in,out] string_obj current PlantUml text
-    @param[in] main_fun_elem
-    @param[in] function_list list of functions
+    @param[in] main_elem main functional/physical element
+    @param[in] elem_list list of functions/activities
     @param[in] xml_attribute_list xml list of attributes
     @param[in] first_iter
     @return None
     """
 
     if first_iter is True:
-        string_obj.create_component(main_fun_elem)
-        check_child_allocation(string_obj, main_fun_elem, function_list, xml_attribute_list)
-        if main_fun_elem.child_list:
-            recursive_decomposition(string_obj, main_fun_elem, function_list, xml_attribute_list)
+        string_obj.create_component(main_elem)
+        check_child_allocation(string_obj, main_elem, elem_list, xml_attribute_list)
+        if main_elem.child_list:
+            recursive_decomposition(string_obj, main_elem, elem_list, xml_attribute_list)
     else:
-        for c in main_fun_elem.child_list:
+        for c in main_elem.child_list:
             string_obj.create_component(c)
-            check_child_allocation(string_obj, c, function_list, xml_attribute_list)
+            check_child_allocation(string_obj, c, elem_list, xml_attribute_list)
             if c.child_list:
-                recursive_decomposition(string_obj, c, function_list, xml_attribute_list)
+                recursive_decomposition(string_obj, c, elem_list, xml_attribute_list)
             string_obj.append_string('}\n')
             string_obj.create_component_attribute(c, xml_attribute_list)
 
@@ -687,6 +698,7 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
                             first_iter=True)
     string_obj.append_string('}\n')
     string_obj.create_component_attribute(main_fun_elem, xml_attribute_list)
+
     # Write external fun_elem
     for elem in fun_elem_list:
         if elem != main_fun_elem and elem.parent is None:
@@ -706,12 +718,16 @@ def get_fun_elem_decomposition(main_fun_elem, fun_elem_list, allocated_function_
     return string_obj.string
 
 
-def get_phy_elem_decomposition(main_phy_elem, phy_elem_list, xml_attribute_list, phy_inter_list):
+def get_phy_elem_decomposition(main_phy_elem, phy_elem_list, allocated_activity_list, consumer_list,
+                               producer_list, external_activity_list, xml_attribute_list, phy_inter_list):
     """@ingroup plantuml_adapter
     @anchor get_phy_elem_decomposition
     Construct the PlantUml text for the physical element decomposition diagram
     @param[in] main_phy_elem main physical element
     @param[in] phy_elem_list physical element list
+    @param[in] allocated_activity_list list of allocated activities to main physical element
+    @param[in] consumer_list filtered consumers list
+    @param[in] producer_list filtered producers list
     @param[in] xml_attribute_list xml list of attributes
     @param[in] phy_inter_list physical interface list
     @return PlantUml text of the diagram
@@ -720,17 +736,37 @@ def get_phy_elem_decomposition(main_phy_elem, phy_elem_list, xml_attribute_list,
     string_obj = ObjDiagram()
     interface_list = None
 
+    # Filter consumers and producers list in order to create data flow
+    data_flow_list = get_exchanged_flows(consumer_list, producer_list, {}, concatenate=True)
+
+    # Write external activities that are not already allocated to external components
+    external_activity_not_allocated_list = []
+    for activity in external_activity_list:
+        is_external = True
+        for phy_elem in phy_elem_list:
+            if any(a == activity.id for a in phy_elem.allocated_activity_list):
+                is_external = False
+
+        if is_external:
+            external_activity_not_allocated_list.append(activity)
+
+    for activity in external_activity_not_allocated_list:
+        string_obj.create_object(activity, xml_attribute_list)
+
     # Write functional element decompo recursively and add allocated functions
-    recursive_decomposition(string_obj, main_phy_elem, [], xml_attribute_list, first_iter=True)
+    recursive_decomposition(string_obj, main_phy_elem, allocated_activity_list, xml_attribute_list, first_iter=True)
     string_obj.append_string('}\n')
     string_obj.create_component_attribute(main_phy_elem, xml_attribute_list)
 
     # Write external fun_elem
     for elem in phy_elem_list:
         if elem != main_phy_elem and elem.parent is None:
-            recursive_decomposition(string_obj, elem, [], xml_attribute_list, first_iter=True)
+            recursive_decomposition(string_obj, elem, external_activity_list, xml_attribute_list, first_iter=True)
             string_obj.append_string('}\n')
             string_obj.create_component_attribute(elem, xml_attribute_list)
+
+    # Write data flows
+    string_obj.create_data_flow(data_flow_list)
 
     # Write interfaces
     if interface_list:

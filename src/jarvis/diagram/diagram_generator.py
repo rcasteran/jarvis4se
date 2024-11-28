@@ -224,15 +224,30 @@ def case_decomposition_diagram(**kwargs):
                                                    kwargs[XML_DICT_KEY_12_VIEW_LIST])
 
     if len(function_list) > 0:
-        _, consumer_list, producer_list = \
-            util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+        _, consumer_function_list, producer_function_list = \
+            util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                         kwargs[XML_DICT_KEY_12_VIEW_LIST],
                                                         kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
                                                         kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
                                                         function_list)
     else:
-        consumer_list = []
-        producer_list = []
+        consumer_function_list = []
+        producer_function_list = []
+
+    activity_list = util.get_object_list_from_view(diagram_object_str,
+                                                   kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                                                   kwargs[XML_DICT_KEY_12_VIEW_LIST])
+
+    if len(activity_list) > 0:
+        _, consumer_activity_list, producer_activity_list = \
+            util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+                                                        kwargs[XML_DICT_KEY_12_VIEW_LIST],
+                                                        kwargs[XML_DICT_KEY_16_ACT_CONS_LIST],
+                                                        kwargs[XML_DICT_KEY_17_ACT_PROD_LIST],
+                                                        activity_list)
+    else:
+        consumer_activity_list = []
+        producer_activity_list = []
 
     if diagram_object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
         child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
@@ -246,8 +261,8 @@ def case_decomposition_diagram(**kwargs):
 
         plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_object_str,
                                                                              function_list,
-                                                                             consumer_list,
-                                                                             producer_list,
+                                                                             consumer_function_list,
+                                                                             producer_function_list,
                                                                              kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
                                                                              kwargs[XML_DICT_KEY_13_TYPE_LIST],
                                                                              diagram_level=diagram_level)
@@ -290,8 +305,8 @@ def case_decomposition_diagram(**kwargs):
 
             plantuml_string = diagram_generator_farch.show_fun_elem_decomposition(diagram_object_str,
                                                                                   function_list,
-                                                                                  consumer_list,
-                                                                                  producer_list,
+                                                                                  consumer_function_list,
+                                                                                  producer_function_list,
                                                                                   fun_elem_list,
                                                                                   kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
                                                                                   kwargs[XML_DICT_KEY_0_DATA_LIST],
@@ -325,6 +340,9 @@ def case_decomposition_diagram(**kwargs):
 
         if len(phy_elem_list) > 0:
             plantuml_string = diagram_generator_parch.show_phy_elem_decomposition(diagram_object_str,
+                                                                                  activity_list,
+                                                                                  consumer_activity_list,
+                                                                                  producer_activity_list,
                                                                                   phy_elem_list,
                                                                                   kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
                                                                                   kwargs[XML_DICT_KEY_5_PHY_INTF_LIST])
@@ -373,7 +391,7 @@ def case_chain_diagram(**kwargs):
                     **kwargs
                 )
                 _, consumer_list, producer_list = \
-                    util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                    util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                                 kwargs[XML_DICT_KEY_12_VIEW_LIST],
                                                                 kwargs[
                                                                     XML_DICT_KEY_14_FUN_CONS_LIST],
@@ -429,7 +447,7 @@ def case_chain_diagram(**kwargs):
                                                 f"No function allocated to {fun_elem.name} (no display)")
 
                 new_function_list, consumer_list, producer_list = \
-                    util.get_cons_prod_from_view_allocated_data(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                    util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                                 kwargs[XML_DICT_KEY_12_VIEW_LIST],
                                                                 kwargs[
                                                                     XML_DICT_KEY_14_FUN_CONS_LIST],

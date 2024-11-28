@@ -54,10 +54,10 @@ def show_fun_elem_function(fun_elem_str, xml_fun_elem_list, xml_function_list,
         return plantuml_text
 
     external_function_list, new_consumer_list, new_producer_list = \
-        util.get_cons_prod_from_allocated_functions(new_function_list,
-                                                    xml_producer_function_list,
-                                                    xml_consumer_function_list,
-                                                    False)
+        util.get_cons_prod_from_allocated_elements(new_function_list,
+                                                   xml_producer_function_list,
+                                                   xml_consumer_function_list,
+                                                   False)
 
     Logger.set_debug(__name__, f'list of allocated functions to element: {new_function_list}')
     Logger.set_debug(__name__, f'list of external functions to element: {external_function_list}')
@@ -171,8 +171,8 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
     @param[in] fun_elem_str: name of the functional element
     @param[in] xml_fun_elem_list: list of all functional elements
     @param[in] xml_function_list: list of all functions
-    @param[in] xml_consumer_function_list: list of [[flow name, consumer function]]
-    @param[in] xml_producer_function_list: list of [[flow name, producer function]]
+    @param[in] xml_consumer_function_list: list of [[flow, consumer function]]
+    @param[in] xml_producer_function_list: list of [[flow, producer function]]
     @param[in] xml_attribute_list: list of all attributes
     @param[in] xml_fun_inter_list: list of all functional interfaces
     @param[in] xml_data_list: list of all data
@@ -198,7 +198,7 @@ def show_fun_elem_decomposition(fun_elem_str, xml_function_list, xml_consumer_fu
 
     if allocated_function_list != set():
         external_function_list, new_consumer_list, new_producer_list = \
-            util.get_cons_prod_from_allocated_functions(
+            util.get_cons_prod_from_allocated_elements(
                 allocated_function_list,
                 xml_producer_function_list,
                 xml_consumer_function_list)
