@@ -10,8 +10,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from . import util
 from tools import Logger
 
@@ -41,11 +42,14 @@ class CsvWriter3SE:
             7: self.write_transition,
             8: self.write_requirement,
             9: self.write_activity,
-            10: self.write_attribute,
-            11: self.write_view,
-            12: self.write_type_element,
-            13: self.write_data_consumer,
-            14: self.write_data_producer,
+            10: self.write_information,
+            11: self.write_attribute,
+            12: self.write_view,
+            13: self.write_type_element,
+            14: self.write_data_consumer,
+            15: self.write_data_producer,
+            16: self.write_information_consumer,
+            17: self.write_information_producer
         }
 
         self.file = output_filename
@@ -67,11 +71,14 @@ class CsvWriter3SE:
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
             9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
-            10: kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
-            11: kwargs[XML_DICT_KEY_11_VIEW_LIST],
-            12: kwargs[XML_DICT_KEY_12_TYPE_LIST],
-            13: kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
-            14: kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
+            10: kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+            11: kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
+            12: kwargs[XML_DICT_KEY_12_VIEW_LIST],
+            13: kwargs[XML_DICT_KEY_13_TYPE_LIST],
+            14: kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
+            15: kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
+            16: kwargs[XML_DICT_KEY_16_ACT_CONS_LIST],
+            17: kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
         }
 
         try:
@@ -254,7 +261,7 @@ class CsvWriter3SE:
 
     @staticmethod
     def write_data_consumer(array, consumer_list):
-        """Write consumers by list [data_name, function]
+        """Write consumers by list [data, function]
         @param[in] array : CSV object array
         @param[in] consumer_list : list of consumers
         @return updated CSV object array
@@ -282,7 +289,81 @@ class CsvWriter3SE:
 
     @staticmethod
     def write_data_producer(array, producer_list):
-        """Write producers by list [data_name, function]
+        """Write producers by list [data, function]
+        @param[in] array : CSV object array
+        @param[in] producer_list : list of producers
+        @return updated CSV object array
+        """
+        for producer in producer_list:
+            for row in array:
+                if row[util.CSV_NAME_IDX] == producer[0].name:
+                    if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
+                        row[util.CSV_PRODUCER_LIST_IDX] += util.CSV_MEMBER_SPLIT + producer[1].id
+                    else:
+                        row[util.CSV_PRODUCER_LIST_IDX] += producer[1].id
+                # Else do nothing
+
+        return array
+
+    def write_information(self, array, information_list):
+        """Write data from list of data
+        @param[in] array : CSV object array
+        @param[in] information_list : list of information
+        @return updated CSV object array
+        """
+        for information in information_list:
+            predecessor_id_list = ''
+            for predecessor in information.predecessor_list:
+                predecessor_id_list += predecessor.id + util.CSV_MEMBER_SPLIT
+
+            array.append([information.id,
+                          util.CSV_BASE_TAG_INFORMATION,
+                          self.check_object_type(information.type),
+                          information.name,
+                          '',  # Alias
+                          '',  # Description list
+                          '',  # Derived
+                          '',  # Source
+                          '',  # Dest
+                          '',  # Consumer list
+                          '',  # Producer list
+                          predecessor_id_list[:-1],  # Predecessor list
+                          '',  # Children list
+                          '',  # Data list
+                          '',  # Condition list
+                          '',  # Function list
+                          '',  # State list
+                          '',  # Interface list
+                          '',  # Activity list
+                          '',  # Functional element list
+                          '',  # Described element list
+                          '',  # View element list
+                          ''  # Requirement list
+                          ])
+
+        return array
+
+    @staticmethod
+    def write_information_consumer(array, consumer_list):
+        """Write consumers by list [information, activity]
+        @param[in] array : CSV object array
+        @param[in] consumer_list : list of consumers
+        @return updated CSV object array
+        """
+        for consumer in consumer_list:
+            for row in array:
+                if row[util.CSV_NAME_IDX] == consumer[0].name:
+                    if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
+                        row[util.CSV_CONSUMER_LIST_IDX] += util.CSV_MEMBER_SPLIT + consumer[1].id
+                    else:
+                        row[util.CSV_CONSUMER_LIST_IDX] += consumer[1].id
+                # Else do nothing
+
+        return array
+
+    @staticmethod
+    def write_information_producer(array, producer_list):
+        """Write producers by list [information, activity]
         @param[in] array : CSV object array
         @param[in] producer_list : list of producers
         @return updated CSV object array

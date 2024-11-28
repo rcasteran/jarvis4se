@@ -8,8 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_object_allocation, orchestrator_viewpoint_requirement
 from jarvis import util
 from tools import Logger
@@ -116,67 +117,59 @@ def add_predecessor(predecessor_list, xml_data_list, output_xml):
     return 1
 
 
-def check_add_consumer_function(consumer_str_list, **kwargs):
+def check_add_consumer_elem(consumer_str_list, **kwargs):
     """
     Check if each string in consumer_str_list are corresponding to an actual object, create new
-    [data, consumer] objects list for object's type : Function.
-    Send lists to add_consumer_function() to write them within xml and then returns update_list
+    [data, function] or [information, activity].
+    Send lists to add_consumer_elem() to write them within xml and then returns update_list
     from it.
 
         Parameters:
             consumer_str_list ([str]) : Lists of string from jarvis cell
-            xml_consumer_function_list ([Data, Function]) : Data and consumer's
-            function list from xml
-            xml_producer_function_list ([Data, Function]) : Data and producer's
-            function list from xml
-            xml_function_list ([Function]) : Function list from xml parsing
-            xml_data_list ([Data]) : Data list from xml parsing
-            output_xml (XmlWriter3SE object) : XML's file object
-
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
-    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
-    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+    update = 0
+    new_consumer_list = []
     output_xml = kwargs['output_xml']
 
-    new_consumer_list = []
+    # [data, function] case
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+
+    # [information, activity] case
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+
     # Create object names/aliases list and data's name
     xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
     xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
+    xml_activity_name_list = orchestrator_object.check_object_name_in_list(xml_activity_list)
+    xml_information_name_list = orchestrator_object.check_object_name_in_list(xml_information_list)
+
     # Loop to filter consumer and create a new list
     # elem = [data_name, consumer_function_name]
     for elem in consumer_str_list:
-        data_name = elem[0].replace('"', "")
-        consumer_function_name = elem[1].replace('"', "")
+        flow_name = elem[0].replace('"', "")
+        consumer_elem_name = elem[1].replace('"', "")
 
-        is_elem_found = True
-        if not any(item == consumer_function_name for item in xml_function_name_list) and \
-                not any(item == data_name for item in xml_data_name_list):
-            is_elem_found = False
-            Logger.set_error(__name__,
-                             f"{consumer_function_name} and {data_name} do not exist")
-        elif not any(item == consumer_function_name for item in xml_function_name_list) or \
-                not any(item == data_name for item in xml_data_name_list):
-            is_elem_found = False
-            if any(item == consumer_function_name for item in xml_function_name_list) and \
-                    not any(item == data_name for item in xml_data_name_list):
-                Logger.set_error(__name__,
-                                 f"{data_name} does not exist")
-            elif any(item == data_name for item in xml_data_name_list) and \
-                    not any(item == consumer_function_name for item in xml_function_name_list):
-                Logger.set_error(__name__,
-                                 f"{consumer_function_name} does not exist")
+        is_data_function_found = (any(item == consumer_elem_name for item in xml_function_name_list) and
+                                  any(item == flow_name for item in xml_data_name_list))
 
-        if is_elem_found:
-            Logger.set_debug(__name__, f"[{data_name}, {consumer_function_name}] check")
+        is_information_activity_found = (any(item == consumer_elem_name for item in xml_activity_name_list) and
+                                         any(item == flow_name for item in xml_information_name_list))
+
+        if is_data_function_found:
+            Logger.set_debug(__name__, f"[{flow_name}, {consumer_elem_name}] checked as [data, function]")
             # Loop to filter consumer and create a new list
             for function in xml_function_list:
-                if consumer_function_name == function.name or consumer_function_name == function.alias:
+                if consumer_elem_name == function.name or consumer_elem_name == function.alias:
                     for data in xml_data_list:
-                        if data_name == data.name:
+                        if flow_name == data.name:
                             is_warned, _ = check_opposite(data, xml_producer_function_list, "consumer", False)
                             if [data, function] not in xml_consumer_function_list:
                                 add_producer_consumer_flow_recursively(data,
@@ -188,262 +181,312 @@ def check_add_consumer_function(consumer_str_list, **kwargs):
                                                                        "consumer",
                                                                        is_warned)
                                 break
+                            # Else do nothing
                         # Else do nothing
                 # Else do nothing
-        # Else do nothing
+        elif is_information_activity_found:
+            Logger.set_debug(__name__, f"[{flow_name}, {consumer_elem_name}] checked as [information, activity]")
+            # Loop to filter consumer and create a new list
+            for activity in xml_activity_list:
+                if consumer_elem_name == activity.name or consumer_elem_name == activity.alias:
+                    for information in xml_information_list:
+                        if flow_name == information.name:
+                            is_warned, _ = check_opposite(information, xml_producer_activity_list, "consumer", False)
+                            if [information, activity] not in xml_consumer_activity_list:
+                                add_producer_consumer_flow_recursively(information,
+                                                                       activity,
+                                                                       xml_consumer_activity_list,
+                                                                       xml_producer_activity_list,
+                                                                       new_consumer_list,
+                                                                       output_xml,
+                                                                       "consumer",
+                                                                       is_warned)
+                                break
+                            # Else do nothing
+                        # Else do nothing
+                # Else do nothing
+        elif any(item == consumer_elem_name for item in xml_function_name_list) and \
+                not any(item == flow_name for item in xml_data_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Data")
+        elif not any(item == consumer_elem_name for item in xml_function_name_list) and \
+                any(item == flow_name for item in xml_data_name_list):
+            Logger.set_error(__name__, f"{consumer_elem_name} does not exist as Function")
+        elif any(item == consumer_elem_name for item in xml_activity_name_list) and \
+                not any(item == flow_name for item in xml_information_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Information")
+        elif not any(item == consumer_elem_name for item in xml_activity_name_list) and \
+                any(item == flow_name for item in xml_information_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Activity")
+        else:
+            Logger.set_error(__name__, f"{consumer_elem_name} and {flow_name} do not exist")
 
-    Logger.set_debug(__name__, f"{consumer_str_list}: {new_consumer_list}")
-    update = add_consumer_function(new_consumer_list, **kwargs)
+    if len(new_consumer_list) > 0:
+        Logger.set_debug(__name__, f"{consumer_str_list}: {new_consumer_list}")
+        update = add_consumer_elem(new_consumer_list, **kwargs)
+    # Else do nothing
 
     return update
 
 
-def add_consumer_function(new_consumer_list, **kwargs):
+def add_consumer_elem(new_consumer_list, **kwargs):
     """
     Check if input list is not empty, write in xml for each element and return update list if some
     updates has been made
 
         Parameters:
-            new_consumer_list ([Data, Function]) : Data and consumer's function list
+            new_consumer_list : Flow and consumer's function list
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-
-    if not new_consumer_list:
-        return 0
-
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
+    update = 0
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
     output_xml = kwargs['output_xml']
-    output_xml.write_data_consumer(new_consumer_list)
 
     # Warn the user once added within xml
     for consumer in new_consumer_list:
-        xml_consumer_function_list.append(consumer)
-        orchestrator_object.check_object_instance_list_requirement(consumer, **kwargs)
+        if isinstance(consumer[1], datamodel.Function):
+            output_xml.write_data_consumer([consumer])
+            xml_consumer_function_list.append(consumer)
+            orchestrator_object.check_object_instance_list_requirement(consumer, **kwargs)
+            Logger.set_info(__name__, f'Function "{consumer[1].name}" consumes data "{consumer[0].name}"')
+            update = 1
+        elif isinstance(consumer[1], datamodel.Activity):
+            output_xml.write_information_consumer([consumer])
+            xml_consumer_activity_list.append(consumer)
+            Logger.set_info(__name__, f'Activity "{consumer[1].name}" consumes information "{consumer[0].name}"')
+            update = 1
+        # Else do nothing
 
-        Logger.set_info(__name__,
-                        f"{consumer[1].name} consumes {consumer[0].name}")
-
-    return 1
+    return update
 
 
-def add_producer_consumer_flow_recursively(flow, function, current_list, opposite_list, new_list, output_xml,
+def add_producer_consumer_flow_recursively(flow, elem, current_list, opposite_list, new_list, output_xml,
                                            relationship_str, is_warned):
     """
     Recursive method to add producer / consumer function for a flow.
         Parameters:
-            flow (Data) : Data
-            function (Function) : Current function's parent
-            current_list ([Data_name_str, function_name_str]) : 'Current' list (producer/consumer)
-            opposite_list ([Data_name_str, function_name_str]) : Opposite list from current
-            new_list ([Data_name_str, Function]) : Data's name and consumer/producer's function list
+            flow : Data or Information
+            elem : Function or Activity
+            current_list : 'Current' list (producer/consumer)
+            opposite_list : Opposite list from current
+            new_list : Data's name and consumer/producer's function list
             output_xml (XmlWriter3SE object) : XML's file object
             relationship_str (str) : "consumer" or "producer"
-            out (bool) : List for recursivity
-        Returns:
-            elem ([data, Function]) : Return parent
-
     """
     # Prevent function.parent to be added twice
-    if [flow, function] not in new_list and [flow, function] not in current_list:
-        new_list.append([flow, function])
-        Logger.set_debug(__name__, f"[{flow.name}, {function.name}] added")
+    if [flow, elem] not in new_list and [flow, elem] not in current_list:
+        new_list.append([flow, elem])
+        Logger.set_debug(__name__, f"[{flow.name}, {elem.name}] added")
 
         # Check that parent opposite flow is present (if any)
-        is_warned, opposite_function = check_opposite(flow, opposite_list, relationship_str, is_warned)
-        if opposite_function:
-            if opposite_function == function.parent:
-                if any([flow, child_f] in opposite_list for child_f in opposite_function.child_list):
-                    remove_producer_consumer_opposite(flow, opposite_function, opposite_list, output_xml,
-                                                      relationship_str)
-                else:
-                    if relationship_str == 'consumer':
-                        Logger.set_error(__name__, f'{opposite_function.name} is a producer of {flow.name} '
-                                                   f'but one of its child is a {relationship_str}')
+        is_warned, opposite_elem = check_opposite(flow, opposite_list, relationship_str, is_warned)
+        if opposite_elem:
+            if opposite_elem == elem.parent:
+                if hasattr(opposite_elem, 'child_list'):
+                    if any([flow, child_f] in opposite_list for child_f in opposite_elem.child_list):
+                        remove_producer_consumer_opposite(flow, opposite_elem, opposite_list, output_xml,
+                                                          relationship_str)
                     else:
-                        Logger.set_error(__name__, f'{opposite_function.name} is a consumer of {flow.name} '
-                                                   f'but one of its child is a {relationship_str}')
-            elif opposite_function.parent is not None and opposite_function.parent != function and \
-                    opposite_function.parent != function.parent:
-                if [flow, opposite_function.parent] not in opposite_list:
-                    add_producer_consumer_opposite(flow, opposite_function.parent, opposite_list, output_xml,
+                        if relationship_str == 'consumer':
+                            Logger.set_error(__name__, f'{opposite_elem.name} is a producer of {flow.name} '
+                                                       f'but one of its child is a {relationship_str}')
+                        else:
+                            Logger.set_error(__name__, f'{opposite_elem.name} is a consumer of {flow.name} '
+                                                       f'but one of its child is a {relationship_str}')
+                # Else do nothing
+            elif opposite_elem.parent is not None and opposite_elem.parent != elem and \
+                    opposite_elem.parent != elem.parent:
+                if [flow, opposite_elem.parent] not in opposite_list:
+                    add_producer_consumer_opposite(flow, opposite_elem.parent, opposite_list, output_xml,
                                                    relationship_str)
                 # Else do nothing
             # Else do nothing
         # Else do nothing
 
-    if function.parent is not None:
-        parent_child_list, parent_child_dict = orchestrator_object.retrieve_object_children_recursively(function.parent)
+    if elem.parent is not None:
+        parent_child_list, parent_child_dict = orchestrator_object.retrieve_object_children_recursively(elem.parent)
 
         if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
-            add_producer_consumer_flow_recursively(flow, function.parent, current_list, opposite_list, new_list,
+            add_producer_consumer_flow_recursively(flow, elem.parent, current_list, opposite_list, new_list,
                                                    output_xml,
                                                    relationship_str,
                                                    is_warned)
-        elif [flow, function.parent] in opposite_list:
+        elif [flow, elem.parent] in opposite_list:
             # Check that no other function needs the flow before removing it
-            ext_function_list = []
-            for [current_flow, current_function] in current_list:
+            ext_elem_list = []
+            for [current_flow, current_elem] in current_list:
                 if current_flow == flow:
-                    Logger.set_debug(__name__, f"[{current_flow.name}, {current_function.name}] "
-                                               f"added in external function list")
-                    ext_function_list.append([current_flow, current_function])
+                    Logger.set_debug(__name__, f"[{current_flow.name}, {current_elem.name}] "
+                                               f"added in external element list")
+                    ext_elem_list.append([current_flow, current_elem])
 
             for parent_child in parent_child_list:
-                if [flow, parent_child] in ext_function_list:
-                    ext_function_list.remove([flow, parent_child])
+                if [flow, parent_child] in ext_elem_list:
+                    ext_elem_list.remove([flow, parent_child])
 
-            if len(ext_function_list) == 0:
-                remove_producer_consumer_opposite(flow, function.parent, opposite_list, output_xml, relationship_str)
+            if len(ext_elem_list) == 0:
+                remove_producer_consumer_opposite(flow, elem.parent, opposite_list, output_xml, relationship_str)
             else:
-                Logger.set_debug(__name__, f"[{flow.name}, {function.parent.name}] still needed")
+                Logger.set_debug(__name__, f"[{flow.name}, {elem.parent.name}] still needed")
+        # Else do nothing
 
 
 def check_opposite(flow, opposite_list, relationship_str, is_warned):
     # Check that parent opposite flow is present (if any)
-    opposite_flow_function = None
-    for [opposite_flow, opposite_function] in opposite_list:
+    opposite_flow_elem = None
+    for [opposite_flow, opposite_elem] in opposite_list:
         if opposite_flow == flow:
-            opposite_flow_function = opposite_function
+            opposite_flow_elem = opposite_elem
             break
         # Else do nothing
 
-    if not opposite_flow_function and not is_warned:
+    if not opposite_flow_elem and not is_warned:
         is_warned = True
         if relationship_str == "consumer":
             Logger.set_warning(__name__, f"No producer found for {flow.name}")
         elif relationship_str == "producer":
             Logger.set_warning(__name__, f"No consumer found for {flow.name}")
         else:
-            Logger.set_error(__name__, f"Unsupported data relationship type: {relationship_str}")
+            Logger.set_error(__name__, f"Unsupported relationship type: {relationship_str}")
     # Else do nothing
 
-    return is_warned, opposite_flow_function
+    return is_warned, opposite_flow_elem
 
 
-def add_producer_consumer_opposite(flow, function, flow_function_list, output_xml, relationship_type):
+def add_producer_consumer_opposite(flow, elem, flow_elem_list, output_xml, relationship_type):
     """
     Add specific consumer/producer relationship within xml's file.
 
         Parameters:
-            flow (Data) : Data
-            function (Function) : Current Function object
-            flow_function_list : list of [flow, function]
+            flow : Data or Information
+            elem : Function or Activity
+            flow_elem_list : list of [flow, elem]
             output_xml (XmlWriter3SE object) : XML's file object
             relationship_type (str) : Type of relationship (i.e. consumer or producer)
         Returns:
             None
     """
-    flow_function_list.append([flow, function])
+    flow_elem_list.append([flow, elem])
 
     if relationship_type == "producer":
-        output_xml.write_data_relationship([flow, function],
-                                           "consumer")
-        Logger.set_info(__name__,
-                        f"{function.name} consumes {flow.name} due to one of its children")
+        if isinstance(flow, datamodel.Data):
+            output_xml.write_data_relationship([flow, elem], "consumer")
+            Logger.set_info(__name__,
+                            f'Function "{elem.name}" consumes data "{flow.name}" due to one of its children')
+        elif isinstance(flow, datamodel.Information):
+            output_xml.write_information_relationship([flow, elem], "consumer")
+            Logger.set_info(__name__,
+                            f'Activity "{elem.name}" consumes information "{flow.name}" due to one of its children')
+        # Else do nothing
     elif relationship_type == "consumer":
+        if isinstance(flow, datamodel.Data):
+            output_xml.write_data_relationship([flow, elem], "producer")
+            Logger.set_info(__name__,
+                            f'Function "{elem.name}" produces data "{flow.name}" due to one of its children')
+        elif isinstance(flow, datamodel.Information):
+            output_xml.write_information_relationship([flow, elem], "producer")
+            Logger.set_info(__name__,
+                            f'Activity "{elem.name}" produces information "{flow.name}" due to one of its children')
+        # Else do nothing
+    # Else do nothing
 
-        output_xml.write_data_relationship([flow, function],
-                                           "producer")
-        Logger.set_info(__name__,
-                        f"{function.name} produces {flow.name} due to one of its children")
-
-    if function.parent:
-        add_producer_consumer_opposite(flow, function.parent, flow_function_list, output_xml, relationship_type)
+    if elem.parent:
+        add_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+    # Else do nothing
 
 
-def remove_producer_consumer_opposite(flow, function, flow_function_list, output_xml, relationship_type):
+def remove_producer_consumer_opposite(flow, elem, flow_elem_list, output_xml, relationship_type):
     """
     Delete specific consumer/producer relationship within xml's file.
 
         Parameters:
-            flow (Data) : Data
-            function (Function) : Current Function object
-            flow_function_list : list of [flow, function]
+            flow : Data or Information
+            elem : Function or Activity
+            flow_elem_list : list of [flow, elem]
             output_xml (XmlWriter3SE object) : XML's file object
             relationship_type (str) : Type of relationship (i.e. consumer or producer)
         Returns:
             None
     """
-    flow_function_list.remove([flow, function])
+    flow_elem_list.remove([flow, elem])
 
     if relationship_type == "producer":
-        output_xml.delete_data_relationship([flow, function],
-                                            "consumer")
-        Logger.set_info(__name__,
-                        f"{function.name} does not consume {flow.name} anymore")
+        if isinstance(flow, datamodel.Data):
+            output_xml.delete_data_relationship([flow, elem], "consumer")
+            Logger.set_info(__name__, f'Function "{elem.name}" does not consume data "{flow.name}" anymore')
+        elif isinstance(flow, datamodel.Information):
+            output_xml.delete_information_relationship([flow, elem], "consumer")
+            Logger.set_info(__name__, f'Activity "{elem.name}" does not consume information "{flow.name}" anymore')
+        # Else do nothing
     elif relationship_type == "consumer":
+        if isinstance(flow, datamodel.Data):
+            output_xml.delete_data_relationship([flow, elem], "producer")
+            Logger.set_info(__name__, f'Function "{elem.name}" does not produce data "{flow.name}" anymore')
+        elif isinstance(flow, datamodel.Information):
+            output_xml.delete_information_relationship([flow, elem], "producer")
+            Logger.set_info(__name__, f'Activity "{elem.name}" does not produce information "{flow.name}" anymore')
+        # Else do nothing
+    # Else do nothing
 
-        output_xml.delete_data_relationship([flow, function],
-                                            "producer")
-        Logger.set_info(__name__,
-                        f"{function.name} does not produce {flow.name} anymore")
-
-    if function.parent and [flow, function.parent] in flow_function_list:
-        remove_producer_consumer_opposite(flow, function.parent, flow_function_list, output_xml, relationship_type)
+    if elem.parent and [flow, elem.parent] in flow_elem_list:
+        remove_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+    # Else do nothing
 
 
-def check_add_producer_function(producer_str_list, **kwargs):
+def check_add_producer_elem(producer_str_list, **kwargs):
     """
     Check if each string in consumer_str_list are corresponding to an actual object, create new
-    [data, producer] objects list for object's type : Function.
-    Send list to add_producer_function() to write them within xml and then returns update.
+    [data, function] or [information, activity].
+    Send list to add_producer_elem() to write them within xml and then returns update.
 
         Parameters:
             producer_str_list ([str]) : List of string from jarvis cell
-            xml_consumer_function_list ([Data_name_str, Function]) : Data's name and consumer's
-            function list from xml
-            xml_producer_function_list ([Data_name_str, Function]) : Data's name and producer's
-            function list from xml
-            xml_function_list ([Function]) : Function list from xml parsing
-            xml_data_list ([Data]) : Data list from xml parsing
-            output_xml (XmlWriter3SE object) : XML's file object
-
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
-    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
-    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+    update = 0
+    new_producer_list = []
     output_xml = kwargs['output_xml']
 
-    new_producer_list = []
+    # [data, function] case
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+
+    # [information, activity] case
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+
     # Create object names/aliases list
     xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
     xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
+    xml_activity_name_list = orchestrator_object.check_object_name_in_list(xml_activity_list)
+    xml_information_name_list = orchestrator_object.check_object_name_in_list(xml_information_list)
+
     # Loop to filter producer and create a new list
     # elem = [data_name, producer_function_name]
     for elem in producer_str_list:
-        data_name = elem[0].replace('"', "")
-        producer_function_name = elem[1].replace('"', "")
+        flow_name = elem[0].replace('"', "")
+        producer_elem_name = elem[1].replace('"', "")
 
-        is_elem_found = True
-        if not any(item == producer_function_name for item in xml_function_name_list) and \
-                not any(item == data_name for item in xml_data_name_list):
-            is_elem_found = False
-            Logger.set_error(__name__,
-                             f"{producer_function_name} and {data_name} do not exist")
-        elif not any(item == producer_function_name for item in xml_function_name_list) or \
-                not any(item == data_name for item in xml_data_name_list):
-            is_elem_found = False
-            if any(item == producer_function_name for item in xml_function_name_list) and \
-                    not any(item == data_name for item in xml_data_name_list):
-                Logger.set_error(__name__,
-                                 f"{data_name} does not exist")
-            elif any(item == data_name for item in xml_data_name_list) and \
-                    not any(item == producer_function_name for item in xml_function_name_list):
-                Logger.set_error(__name__,
-                                 f"{producer_function_name} does not exist")
+        is_data_function_found = (any(item == producer_elem_name for item in xml_function_name_list) and
+                                  any(item == flow_name for item in xml_data_name_list))
 
-        if is_elem_found:
-            Logger.set_debug(__name__, f"[{data_name}, {elem[1]}] check")
+        is_information_activity_found = (any(item == producer_elem_name for item in xml_activity_name_list) and
+                                         any(item == flow_name for item in xml_information_name_list))
+
+        if is_data_function_found:
+            Logger.set_debug(__name__, f"[{flow_name}, {producer_elem_name}] checked as [data, function]")
             # Loop to filter consumer and create a new list
             for function in xml_function_list:
-                if producer_function_name == function.name or producer_function_name == function.alias:
+                if producer_elem_name == function.name or producer_elem_name == function.alias:
                     for data in xml_data_list:
-                        if data_name == data.name:
+                        if flow_name == data.name:
                             is_warned, _ = check_opposite(data, xml_consumer_function_list, "producer", False)
                             if [data, function] not in xml_producer_function_list:
                                 add_producer_consumer_flow_recursively(data,
@@ -455,42 +498,85 @@ def check_add_producer_function(producer_str_list, **kwargs):
                                                                        "producer",
                                                                        is_warned)
                                 break
+                            # Else do nothing
                         # Else do nothing
                 # Else do nothing
-        # Else do nothing
+        elif is_information_activity_found:
+            Logger.set_debug(__name__, f"[{flow_name}, {producer_elem_name}] checked as [information, activity]")
+            # Loop to filter consumer and create a new list
+            for activity in xml_activity_list:
+                if producer_elem_name == activity.name or producer_elem_name == activity.alias:
+                    for information in xml_information_list:
+                        if flow_name == information.name:
+                            is_warned, _ = check_opposite(information, xml_consumer_activity_list, "producer", False)
+                            if [information, activity] not in xml_producer_activity_list:
+                                add_producer_consumer_flow_recursively(information,
+                                                                       activity,
+                                                                       xml_producer_function_list,
+                                                                       xml_consumer_function_list,
+                                                                       new_producer_list,
+                                                                       output_xml,
+                                                                       "producer",
+                                                                       is_warned)
+                                break
+                            # Else do nothing
+                        # Else do nothing
+                # Else do nothing
+        elif any(item == producer_elem_name for item in xml_function_name_list) and \
+                not any(item == flow_name for item in xml_data_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Data")
+        elif not any(item == producer_elem_name for item in xml_function_name_list) and \
+                any(item == flow_name for item in xml_data_name_list):
+            Logger.set_error(__name__, f"{producer_elem_name} does not exist as Function")
+        elif any(item == producer_elem_name for item in xml_activity_name_list) and \
+                not any(item == flow_name for item in xml_information_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Information")
+        elif not any(item == producer_elem_name for item in xml_activity_name_list) and \
+                any(item == flow_name for item in xml_information_name_list):
+            Logger.set_error(__name__, f"{flow_name} does not exist as Activity")
+        else:
+            Logger.set_error(__name__, f"{producer_elem_name} and {flow_name} do not exist")
 
-    Logger.set_debug(__name__, f"{producer_str_list}: {new_producer_list}")
-    update = add_producer_function(new_producer_list, **kwargs)
+    if len(new_producer_list) > 0:
+        Logger.set_debug(__name__, f"{producer_str_list}: {new_producer_list}")
+        update = add_producer_elem(new_producer_list, **kwargs)
+    # Else do nothing
 
     return update
 
 
-def add_producer_function(new_producer_list, **kwargs):
+def add_producer_elem(new_producer_list, **kwargs):
     """
     Check if input list is not empty, write in xml for each element and return update list if some
     updates has been made
 
         Parameters:
-            new_producer_list ([Data_name_str, Function]) : Data's name and producer's function list
+            new_producer_list : Flow's name and producer's function list
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
-    if not new_producer_list:
-        return 0
-
-    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
+    update = 0
+    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
     output_xml = kwargs['output_xml']
-    output_xml.write_data_producer(new_producer_list)
 
     # Warn the user once added within xml
     for producer in new_producer_list:
-        xml_producer_function_list.append(producer)
-        orchestrator_object.check_object_instance_list_requirement(producer, **kwargs)
+        if isinstance(producer[1], datamodel.Function):
+            output_xml.write_data_producer([producer])
+            xml_producer_function_list.append(producer)
+            orchestrator_object.check_object_instance_list_requirement(producer, **kwargs)
+            Logger.set_info(__name__, f'Function "{producer[1].name}" produces data "{producer[0].name}"')
+            update = 1
+        elif isinstance(producer[1], datamodel.Activity):
+            output_xml.write_information_producer([producer])
+            xml_producer_activity_list.append(producer)
+            Logger.set_info(__name__, f'Activity "{producer[1].name}" produces information "{producer[0].name}"')
+            update = 1
+        # Else do nothing
 
-        Logger.set_info(__name__,
-                        f"{producer[1].name} produces {producer[0].name}")
-    return 1
+    return update
 
 
 # TODO: Check condition_str on data and (add LogicalType, ArithmeticType in datamodel.py)

@@ -36,11 +36,14 @@ class CsvParser3SE:
                          'csv_transition_list': set(),
                          'csv_requirement_list': set(),
                          'csv_activity_list': set(),
+                         'csv_information_list': set(),
                          'csv_attribute_list': set(),
                          'csv_view_list': set(),
                          'csv_type_list': set(),
                          'csv_consumer_function_list': [],
-                         'csv_producer_function_list': []
+                         'csv_producer_function_list': [],
+                         'csv_consumer_activity_list': [],
+                         'csv_producer_activity_list': []
                          }
 
         self.array = []
@@ -83,9 +86,13 @@ class CsvParser3SE:
                 self.csv_dict['csv_phy_inter_list'] = self.parse_physical_interface_list()
                 self.csv_dict['csv_requirement_list'] = self.parse_requirement_list()
 
-                # Then create data(and set predecessors), consumers, producers lists
+                # Then create data and set predecessors, consumers, producers lists
                 self.csv_dict['csv_data_list'], self.csv_dict['csv_producer_function_list'], self.csv_dict[
                     'csv_consumer_function_list'] = self.parse_data_list()
+
+                # Then create information and set predecessors, consumers, producers lists
+                self.csv_dict['csv_information_list'], self.csv_dict['csv_producer_activity_list'], self.csv_dict[
+                    'csv_consumer_activity_list'] = self.parse_information_list()
 
                 # Finally update object types
                 self.update_object_type()
@@ -695,7 +702,7 @@ class CsvParser3SE:
                                                    f"data [{data.id}, {data.name}]")
                 # Else do nothing
 
-                # looking for all elements with tag "consumer" and create a list [flow_name, consumer_function]
+                # looking for all elements with tag "consumer" and create a list [data, consumer_function]
                 if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
                     csv_consumer_list = row[util.CSV_CONSUMER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
                     for csv_consumer in csv_consumer_list:
@@ -714,7 +721,7 @@ class CsvParser3SE:
                                     function.set_input_role(None)
                 # Else do nothing
 
-                # looking for all elements with tag "producer" and create a list [flow_name, producer_function]
+                # looking for all elements with tag "producer" and create a list [data, producer_function]
                 if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
                     csv_producer_id_list = row[util.CSV_PRODUCER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
                     for csv_producer_id in csv_producer_id_list:
@@ -746,12 +753,74 @@ class CsvParser3SE:
 
         return data_list, producer_function_list, consumer_function_list
 
+    def parse_information_list(self):
+        """Parse CSV information list
+        @return information list, producer activity list, consumer activity list
+        """
+        information_list = set()
+        consumer_activity_list = []
+        producer_activity_list = []
+
+        for row in self.array:
+            if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_DATA:
+                # Instantiate information and add it to a list
+                information = datamodel.Information(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                                    p_name=row[util.CSV_NAME_IDX],
+                                                    p_type=row[util.CSV_EXTENSION_IDX])
+                information_list.add(information)
+
+                # looking for all elements with tag "consumer" and create a list [information, consumer_activity]
+                if len(row[util.CSV_CONSUMER_LIST_IDX]) > 0:
+                    csv_consumer_list = row[util.CSV_CONSUMER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_consumer in csv_consumer_list:
+                        csv_consumer_attribute = csv_consumer.split(util.CSV_MEMBER_ATTRIBUTE_SPLIT)
+                        for activity in self.csv_dict['csv_activity_list']:
+                            if csv_consumer_attribute[0] == activity.id:
+                                consumer_activity_list.append([information, activity])
+                                Logger.set_debug(__name__, f"Information [{information.id}, {information.name}] "
+                                                           f"is consumed by "
+                                                           f"activity [{activity.id}, {activity.name}]")
+                # Else do nothing
+
+                # looking for all elements with tag "producer" and create a list [information, producer_function]
+                if len(row[util.CSV_PRODUCER_LIST_IDX]) > 0:
+                    csv_producer_id_list = row[util.CSV_PRODUCER_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_producer_id in csv_producer_id_list:
+                        for activity in self.csv_dict['csv_function_list']:
+                            if csv_producer_id == activity.id:
+                                producer_activity_list.append([information, activity])
+                                Logger.set_debug(__name__, f"Data [{information.id}, {information.name}] "
+                                                           f"is produced by "
+                                                           f"activity [{activity.id}, {activity.name}]")
+                # Else do nothing
+
+        # Loop on the data_list once created to find the predecessor and add it to list
+        for object_data in information_list:
+            for row in self.array:
+                if row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_DATA:
+                    if row[util.CSV_ID_IDX] == object_data.id:
+                        # looking for all elements with tag "predecessor"
+                        if len(row[util.CSV_PREDECESSOR_LIST_IDX]) > 0:
+                            csv_predecessor_id_list = row[util.CSV_PREDECESSOR_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                            for csv_predecessor_id in csv_predecessor_id_list:
+                                for information in information_list:
+                                    if csv_predecessor_id == information.id:
+                                        object_data.add_predecessor(information)
+
+                                        Logger.set_debug(__name__, f"Information [{information.id, information.name}]"
+                                                                   f" is predecessor of "
+                                                                   f"information [{object_data.id, object_data.name}]")
+                        # Else do nothing
+
+        return information_list, producer_activity_list, consumer_activity_list
+
     def update_object_type(self):
         """Update objects in the dictionary with their types.
         @return None
         """
         # Following lists does not contain any type definition
-        unwanted_csv_list = ('csv_type_list', 'csv_consumer_function_list', 'csv_producer_function_list')
+        unwanted_csv_list = ('csv_type_list', 'csv_consumer_function_list', 'csv_producer_function_list',
+                             'csv_consumer_activity_list', 'csv_producer_activity_list')
         for key, csv_list in self.csv_dict.items():
             if key not in unwanted_csv_list:
                 for obj in csv_list:

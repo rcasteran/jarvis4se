@@ -10,15 +10,16 @@ from xml_adapter import XmlDictKeyListForObjects
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from jarvis import util
 from . import orchestrator_viewpoint_requirement
 from tools import Logger
 
 
 class ObjectInstanceList(list):
-    nb_object_instance_base_type = 10
+    nb_object_instance_base_type = 11
 
     def __init__(self, p_base_type_idx):
         super().__init__()
@@ -38,6 +39,7 @@ class ObjectInstanceList(list):
             7: kwargs['output_xml'].write_transition,
             8: kwargs['output_xml'].write_requirement,
             9: kwargs['output_xml'].write_activity,
+            10: kwargs['output_xml'].write_information,
         }
         call = object_write_routine_list.get(self.base_type_idx)
         call(self)
@@ -54,7 +56,8 @@ class ObjectInstance:
         6: datamodel.State,
         7: datamodel.Transition,
         8: datamodel.Requirement,
-        9: datamodel.Activity
+        9: datamodel.Activity,
+        10: datamodel.Information
     }
 
     def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
@@ -86,7 +89,8 @@ class ObjectInstance:
             6: kwargs[XML_DICT_KEY_6_STATE_LIST].add,
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST].add,
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST].add,
-            9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST].add
+            9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST].add,
+            10: kwargs[XML_DICT_KEY_10_INFORMATION_LIST].add
         }
         call = object_dictionary_list.get(self.base_type_idx)
         call(self.object_instance)
@@ -160,7 +164,7 @@ def retrieve_type(p_type_str, p_is_silent=False, **kwargs):
                           if i == p_type_str.capitalize()))
     else:
         specific_type = retrieve_object_by_name(p_type_str,
-                                                **{XML_DICT_KEY_12_TYPE_LIST: kwargs[XML_DICT_KEY_12_TYPE_LIST]})
+                                                **{XML_DICT_KEY_13_TYPE_LIST: kwargs[XML_DICT_KEY_13_TYPE_LIST]})
         if specific_type is None:
             if not p_is_silent:
                 Logger.set_error(__name__,
@@ -412,8 +416,8 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
             # Relationship with DATA, ATTRIBUTE, FUNCTIONAL_ELEMENT
             if object_dest_type == datamodel.BaseType.DATA:
                 if object_src_type == datamodel.BaseType.FUNCTION:
-                    xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
-                    xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
+                    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+                    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
 
                     for xml_consumer_function in xml_consumer_function_list:
                         if xml_consumer_function[0] == p_object_dest and xml_consumer_function[1] == p_object_src:
@@ -544,8 +548,8 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
                 for allocated_fun_id in p_object_src.allocated_function_list:
                     for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
                         if allocated_fun_id == xml_function.id:
-                            if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_13_FUN_CONS_LIST] or
-                                    [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]):
+                            if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST] or
+                                    [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]):
                                 is_relationship = True
                                 break
                             # Else do nothing

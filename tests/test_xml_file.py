@@ -31,6 +31,7 @@ def test_template_xml():
                    "<systemAnalysis>\n" \
                    "  <funcArch>\n" \
                    "    <activityList/>\n" \
+                   "    <informationList/>\n" \
                    "    <functionList/>\n" \
                    "    <dataList/>\n" \
                    "    <stateList/>\n" \

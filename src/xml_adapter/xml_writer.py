@@ -3,7 +3,6 @@ Module for 3SE xml parsing and writing
 """
 # Libraries
 from lxml import etree
-import os
 
 # Modules
 import datamodel
@@ -31,7 +30,7 @@ class XmlWriter3SE:
         self.root = etree.Element("systemAnalysis")
 
         fun_arch = etree.SubElement(self.root, "funcArch")
-        fun_arch_tags = ['activityList', 'functionList', 'dataList', 'stateList', 'transitionList',
+        fun_arch_tags = ['activityList', 'informationList', 'functionList', 'dataList', 'stateList', 'transitionList',
                          'functionalElementList', 'functionalInterfaceList']
         for tag in fun_arch_tags:
             etree.SubElement(fun_arch, tag)
@@ -249,7 +248,7 @@ class XmlWriter3SE:
     def write_data_relationship(self, flow_function, relationship_type):
         """Write data relationship (either consumer or producer or predecessor)
 
-        @param[in] object : [flow, function] to be deleted
+        @param[in] flow_function : [flow, function] to be deleted
         @param[in] relationship_type : "consumer" or "producer" or "predecessor"
         @return None
         """
@@ -268,7 +267,7 @@ class XmlWriter3SE:
     def delete_data_relationship(self, flow_function, relationship_type):
         """Delete data relationship (either consumer or producer or predecessor)
 
-        @param[in] object : [flow, function] to be deleted
+        @param[in] flow_function : [flow, function] to be deleted
         @param[in] relationship_type : "consumer" or "producer" or "predecessor"
         @return None
         """
@@ -283,6 +282,158 @@ class XmlWriter3SE:
                                 + relationship_type
                                 + "[@id='"
                                 + flow_function[1].id
+                                + "']"):
+            tag.getparent().remove(tag)
+
+        Logger.set_debug(__name__, self.delete_data_relationship.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_information(self, information_list):
+        """Write information from list of information
+        @param[in] information_list : list of information
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        if root.find('.//informationList') is None:
+            etree.SubElement(root.find('./funcArch'), 'informationList')
+
+        for data_list_tag in root.findall('.//informationList'):
+            for information in information_list:
+                information_tag = etree.SubElement(data_list_tag, "information",
+                                            {'name': util.normalize_xml_string(information.name),
+                                             'type': self.check_object_type(information.type),
+                                             'id': information.id})
+
+                # Consumer list is handled in a separate dictionary
+                _consumer_list_tag = etree.SubElement(information_tag, "consumerList")
+
+                # Producer list is handled in a separate dictionary
+                _producer_list_tag = etree.SubElement(information_tag, "producerList")
+
+                predecessor_list_tag = etree.SubElement(information_tag, "predecessorList")
+                for predecessor in information.predecessor_list:
+                    _predecessor_tag = etree.SubElement(predecessor_list_tag,
+                                                        "predecessor",
+                                                        {'id': predecessor.id})
+
+        Logger.set_debug(__name__, self.write_data.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_information_consumer(self, consumer_list):
+        """Write consumers by list [information, activity]
+        @param[in] consumer_list : list of consumers
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for consumer in consumer_list:
+            for xml_element in root.findall(".//informationList/information[@name='"
+                                            + util.normalize_xml_string(consumer[0].name)
+                                            + "']"):
+                if xml_element.find('consumerList') is None:
+                    etree.SubElement(xml_element, 'consumerList')
+                    if xml_element.find('producerList') is None:
+                        etree.SubElement(xml_element, 'producerList')
+
+            for consumer_list_tag in root.findall(".//informationList/information[@name='"
+                                                  + util.normalize_xml_string(consumer[0].name)
+                                                  + "']/consumerList"):
+                _consumer_tag = etree.SubElement(consumer_list_tag, "consumer",
+                                                 {'id': consumer[1].id})
+
+        Logger.set_debug(__name__, self.write_information_consumer.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_information_producer(self, producer_list):
+        """Write producers by list [information, activity]
+        @param[in] producer_list : list of producers
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for producer in producer_list:
+            for xml_element in root.findall(".//informationList/information[@name='"
+                                            + util.normalize_xml_string(producer[0].name)
+                                            + "']"):
+                if xml_element.find('producerList') is None:
+                    etree.SubElement(xml_element, 'producerList')
+                    if xml_element.find('consumerList') is None:
+                        etree.SubElement(xml_element, 'consumerList')
+
+            for producer_list_tag in root.findall(".//informationList/information[@name='"
+                                                  + util.normalize_xml_string(producer[0].name)
+                                                  + "']/producerList"):
+                _producer_tag = etree.SubElement(producer_list_tag, "producer", {'id': producer[1].id})
+
+        Logger.set_debug(__name__, self.write_information_producer.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_information_predecessor(self, predecessor_list):
+        """Write predecessors by list [information, predecessor]
+        @param[in] predecessor_list : list of predecessors
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for predecessor in predecessor_list:
+            for xml_element in root.findall(".//informationList/information[@name='"
+                                            + util.normalize_xml_string(predecessor[0].name)
+                                            + "']"):
+                if xml_element.find('predecessorList') is None:
+                    etree.SubElement(xml_element, 'predecessorList')
+
+            for predecessor_list_tag in root.findall(".//informationList/information[@name='"
+                                                     + util.normalize_xml_string(predecessor[0].name)
+                                                     + "']/predecessorList"):
+                _predecessor_tag = etree.SubElement(predecessor_list_tag, "predecessor",
+                                                    {'id': predecessor[1].id})
+
+        Logger.set_debug(__name__, self.write_information_predecessor.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_information_relationship(self, information_activity, relationship_type):
+        """Write information relationship (either consumer or producer or predecessor)
+
+        @param[in] information_activity : [information, activity] to be deleted
+        @param[in] relationship_type : "consumer" or "producer" or "predecessor"
+        @return None
+        """
+        information_activity_list = [information_activity]
+
+        Logger.set_debug(__name__, self.write_information_relationship.__name__)
+
+        if relationship_type == "consumer":
+            self.write_information_consumer(information_activity_list)
+        elif relationship_type == "producer":
+            self.write_information_producer(information_activity_list)
+        elif relationship_type == "predecessor":
+            self.write_information_predecessor(information_activity_list)
+        else:
+            Logger.set_error(__name__, f"Unknown information relationship type: {relationship_type}")
+
+    def delete_information_relationship(self, information_activity, relationship_type):
+        """Delete data relationship (either consumer or producer or predecessor)
+
+        @param[in] information_activity : [information, activity] to be deleted
+        @param[in] relationship_type : "consumer" or "producer" or "predecessor"
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for tag in root.findall(".//information[@name='"
+                                + util.normalize_xml_string(information_activity[0].name)
+                                + "']/"
+                                + relationship_type
+                                + "List/"
+                                + relationship_type
+                                + "[@id='"
+                                + information_activity[1].id
                                 + "']"):
             tag.getparent().remove(tag)
 
@@ -738,6 +889,8 @@ class XmlWriter3SE:
         elem_tag = None
         if isinstance(obj, datamodel.Data):
             elem_tag = "data"
+        elif isinstance(obj, datamodel.Information):
+            elem_tag = "information"
         elif isinstance(obj, datamodel.Activity):
             elem_tag = "activity"
         elif isinstance(obj, datamodel.Function):
@@ -972,10 +1125,10 @@ class XmlWriter3SE:
         for requirement_list_tag in root.findall(".//requirementList"):
             for requirement in requirement_list:
                 requirement_tag = etree.SubElement(requirement_list_tag, "requirement",
-                                                 {'id': requirement.id,
-                                                  'name': util.normalize_xml_string(requirement.name),
-                                                  'type': self.check_object_type(requirement.type),
-                                                  'alias': requirement.alias})
+                                                   {'id': requirement.id,
+                                                    'name': util.normalize_xml_string(requirement.name),
+                                                    'type': self.check_object_type(requirement.type),
+                                                    'alias': requirement.alias})
 
                 text_tag = etree.SubElement(requirement_tag, "text")
                 text_tag.text = requirement.text

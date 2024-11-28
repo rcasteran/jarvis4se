@@ -8,8 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from . import orchestrator_object
 from . import orchestrator_object_allocation
 from jarvis import util
@@ -101,8 +102,8 @@ def add_child(parent_child_lists, **kwargs):
 
                         if object_type == datamodel.TypeWithChildListFunctionIndex:
                             # Considering function allocation
-                            xml_consumer_function_list = kwargs[XML_DICT_KEY_13_FUN_CONS_LIST]
-                            xml_producer_function_list = kwargs[XML_DICT_KEY_14_FUN_PROD_LIST]
+                            xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+                            xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
 
                             for (flow, function) in xml_consumer_function_list:
                                 if obj[1].id == function.id and [flow, obj[0]] not in xml_consumer_function_list:
@@ -286,18 +287,18 @@ def check_function(object_to_del, **kwargs):
                         f"{object_to_del.name} has allocation relationship(s)")
 
     check_list[3] = check_object_not_in_prod_cons(object_to_del,
-                                                  kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
-                                                  kwargs[XML_DICT_KEY_14_FUN_PROD_LIST])
+                                                  kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
+                                                  kwargs[XML_DICT_KEY_15_FUN_PROD_LIST])
     if not check_list[3]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has production/consumption relationship(s)")
 
-    check_list[4] = check_object_no_attribute(object_to_del, kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST])
+    check_list[4] = check_object_no_attribute(object_to_del, kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST])
     if not check_list[4]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has attribute(s) set")
 
-    check_list[5] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_11_VIEW_LIST])
+    check_list[5] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_12_VIEW_LIST])
     if not check_list[5]:
         Logger.set_info(__name__, f"{object_to_del.name} has chain relationship(s)")
 
@@ -312,13 +313,13 @@ def check_data(object_to_del, **kwargs):
     check = False
     check_list = [False] * 3
     check_list[0] = check_object_not_in_prod_cons(object_to_del.name,
-                                                  kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
-                                                  kwargs[XML_DICT_KEY_14_FUN_PROD_LIST])
+                                                  kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
+                                                  kwargs[XML_DICT_KEY_15_FUN_PROD_LIST])
     if not check_list[0]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has production/consumption relationship(s)")
 
-    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_11_VIEW_LIST])
+    check_list[1] = check_object_not_allocated(object_to_del, kwargs[XML_DICT_KEY_12_VIEW_LIST])
     if not check_list[1]:
         Logger.set_info(__name__,
                         f"{object_to_del.name} has chain relationship(s)")
@@ -418,7 +419,7 @@ def check_chain(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs[XML_DICT_KEY_11_VIEW_LIST].remove(object_to_del)
+        kwargs[XML_DICT_KEY_12_VIEW_LIST].remove(object_to_del)
 
     return check
 
@@ -435,7 +436,7 @@ def check_attribute(object_to_del, **kwargs):
 
     if all(check_list):
         check = True
-        kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST].remove(object_to_del)
+        kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST].remove(object_to_del)
 
     return check
 
@@ -560,7 +561,7 @@ def check_set_object_type(type_str_list, **kwargs):
             continue
         if object_to_set.type == type_name:
             continue
-        check, base_type_idx = check_new_type(object_to_set, type_name, kwargs[XML_DICT_KEY_12_TYPE_LIST])
+        check, base_type_idx = check_new_type(object_to_set, type_name, kwargs[XML_DICT_KEY_13_TYPE_LIST])
         if check:
             object_type_lists[base_type_idx].append(object_to_set)
 
@@ -582,7 +583,7 @@ def check_new_type(object_to_set, type_name, xml_type_list):
             object_to_set.set_type(obj_base_type)
         elif any(t == type_name for t in orchestrator_object.check_object_name_in_list(xml_type_list)):
             obj_type = orchestrator_object.retrieve_object_by_name(type_name,
-                                                                   **{XML_DICT_KEY_12_TYPE_LIST: xml_type_list})
+                                                                   **{XML_DICT_KEY_13_TYPE_LIST: xml_type_list})
             check = check_type_recursively(obj_type)
             if not check:
                 Logger.set_info(__name__,

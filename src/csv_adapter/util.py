@@ -27,6 +27,7 @@ CSV_BASE_TAG_PHY_ELEM = "physical element"
 CSV_BASE_TAG_PHY_INTF = "physical interface"
 CSV_BASE_TAG_REQ = "requirement"
 CSV_BASE_TAG_DATA = "data"
+CSV_BASE_TAG_INFORMATION = "information"
 CSV_EXTENSION_IDX = 2
 CSV_NAME_IDX = 3
 CSV_ALIAS_IDX = 4

@@ -26,8 +26,9 @@ class BaseType(Enum):
     TRANSITION = 7
     REQUIREMENT = 8
     ACTIVITY = 9
-    ATTRIBUTE = 10
-    VIEW = 11
+    INFORMATION = 10
+    ATTRIBUTE = 11
+    VIEW = 12
 
     def __str__(self):
         """ Get the string representation for an enum value
@@ -53,6 +54,8 @@ class BaseType(Enum):
             type_str = 'Transition'
         elif self == self.ACTIVITY:
             type_str = 'Activity'
+        elif self == self.INFORMATION:
+            type_str = 'Information'
         elif self == self.ATTRIBUTE:
             type_str = 'Attribute'
         elif self == self.VIEW:
@@ -88,6 +91,8 @@ class BaseType(Enum):
             enum_type = cls.TRANSITION
         elif obj_type == 'Activity':
             enum_type = cls.ACTIVITY
+        elif obj_type == 'Information':
+            enum_type = cls.INFORMATION
         elif obj_type == 'Attribute':
             enum_type = cls.ATTRIBUTE
         elif obj_type == 'View':
@@ -387,13 +392,123 @@ class Function:
                     ]
 
 
+class Information:
+    """@ingroup datamodel
+    @anchor Information
+    Basic type representing an Information
+
+    An information is an output produced by an activity and consumed by another activity.
+    It can be functional (representation of knowledge element acquired by human beings) or
+    physical (representation of a flow which follows the physical laws of nature - flow of energy, particles...)
+    """
+
+    def __init__(self, p_id='', p_name='', p_type=BaseType.INFORMATION):
+        """
+        @var id
+        unique identifier
+
+        @var name
+        unique name
+
+        @var type
+        data type\n
+        Could be @ref BaseType .DATA or a @ref Type based on @ref BaseType .INFORMATION
+
+        @var predecessor_list
+        data predecessor list
+
+        @var allocated_req_list
+        allocated requirement list
+        """
+        self.id = p_id
+        self.name = p_name
+        self.type = p_type
+        self.predecessor_list = set()
+        self.allocated_req_list = set()
+
+    def set_id(self, p_id):
+        """Set unique identifier
+        @param[in] self this class instance
+        @param[in] p_id unique identifier
+        @return None
+        """
+        self.id = p_id
+
+    def set_name(self, p_name):
+        """Set unique name
+        @param[in] self this class instance
+        @param[in] p_name unique name
+        @return None
+        """
+        self.name = p_name
+
+    def set_type(self, p_type):
+        """Set type
+        @param[in] self this class instance
+        @param[in] p_type type
+        @return None
+        """
+        self.type = p_type
+
+    def add_predecessor(self, p_predecessor):
+        """Add data predecessor to predecessor_list.
+        @param[in] self this class instance
+        @param[in] p_predecessor data predecessor
+        @return None
+        """
+        self.predecessor_list.add(p_predecessor)
+
+    def add_allocated_requirement(self, p_req):
+        """Add allocated requirement to allocated_req_list
+        @param[in] self this class instance
+        @param[in] p_req allocated requirement
+        @return None
+        """
+        self.allocated_req_list.add(p_req)
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        rep = util.str_type(self) + '\n'
+        # Information has no alias
+        # Information cannot be specialized
+        # Information has no parent
+        # Information has no children
+        rep += util.str_allocated_req(self)
+        # Information has no allocated data
+
+        # No display of predecessor list
+
+        return rep
+
+    def info(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        return {**util.info_type(self),
+                # Information has no alias
+                # Information cannot be specialized
+                # Information has no parent
+                # Information has no children
+                **util.info_allocated_req(self)
+                # Information has no allocated data
+                # No display of predecessor list
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_REQUIREMENT_LIST
+                    ]
+
+
 class Data:
     """@ingroup datamodel
     @anchor Data
     Basic type representing a data
     
     A data is an output produced by a function and consumed by another function.
-    It can be functional (information) or physical (flow of energy, particles...)
+    It can be functional (participating in the definition of a functional information) or
+    physical (participating in the definition of a physical information)
     """
     
     def __init__(self, p_id='', p_name='', p_type=BaseType.DATA):

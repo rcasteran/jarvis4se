@@ -8,8 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from . import orchestrator_object
 from jarvis import util
 from tools import Logger
@@ -29,7 +30,7 @@ def check_add_type_extension(extends_str_list, **kwargs):
             update ([0/1]) : 1 if update, else 0
     """
     update = 0
-    xml_type_list = kwargs[XML_DICT_KEY_12_TYPE_LIST]
+    xml_type_list = kwargs[XML_DICT_KEY_13_TYPE_LIST]
     output_xml = kwargs['output_xml']
     new_type_list = []
 
@@ -85,7 +86,7 @@ def check_get_type_to_extend(type_str, xml_type_list):
         return datamodel.BaseType[formatted_type_str]
 
     if any(a == type_str for a in orchestrator_object.check_object_name_in_list(xml_type_list)):
-        check = orchestrator_object.retrieve_object_by_name(type_str, **{XML_DICT_KEY_12_TYPE_LIST: xml_type_list})
+        check = orchestrator_object.retrieve_object_by_name(type_str, **{XML_DICT_KEY_13_TYPE_LIST: xml_type_list})
         return check
 
     return check

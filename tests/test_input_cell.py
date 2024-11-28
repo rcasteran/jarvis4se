@@ -166,11 +166,11 @@ def test_function_output_auto_in(capsys, input_test_function_output_auto_decompo
                 "F is composed of F2\n",
                 "[WARNING] No producer found for a\n",
                 "[WARNING] No producer found for a\n"
-                "F2 consumes a\n",
-                "F consumes a\n",
-                "F does not consume a anymore\n",
-                "F produces a\n",
-                "F1 produces a\n",
+                'Function "F2" consumes data "a"\n',
+                'Function "F" consumes data "a"\n',
+                'Function "F" does not consume data "a" anymore\n',
+                'Function "F" produces data "a"\n',
+                'Function "F1" produces data "a"\n',
                 f"{file_name}.xml updated\n"]
 
     # Get last part from capsys
@@ -203,8 +203,8 @@ def test_function_output_auto_splitted_in(capsys, input_test_function_output_aut
     captured = capsys.readouterr()
     expected = ["F2 is a Function\n",
                 "F is composed of F2\n",
-                "F does not produce a anymore\n",
-                "F2 consumes a\n",
+                'Function "F" does not produce data "a" anymore\n',
+                'Function "F2" consumes data "a"\n',
                 f"{file_name}.xml updated\n"]
 
     # Get last part from capsys
@@ -239,8 +239,8 @@ def test_function_output_auto_external_in(capsys, input_test_function_output_aut
 
     captured = capsys.readouterr()
     expected = ["FE is a Function\n",
-                "F produces a due to one of its children\n",
-                "FE consumes a\n",
+                'Function "F" produces data "a" due to one of its children\n',
+                'Function "FE" consumes data "a"\n',
                 f"{file_name}.xml updated\n"]
 
     # Get last part from capsys

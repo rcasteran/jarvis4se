@@ -8,8 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from jarvis.orchestrator import orchestrator_viewpoint_requirement, orchestrator_object
 from jarvis import util
 from tools import Logger
@@ -29,7 +30,7 @@ def add_attribute(attribute_str_list, **kwargs):
         Returns:
             1 if update, else 0
     """
-    xml_attribute_list = kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST]
+    xml_attribute_list = kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST]
     output_xml = kwargs['output_xml']
 
     new_attribute_list = []
@@ -91,7 +92,7 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
                })
         attribute_wanted = orchestrator_object.retrieve_object_by_name(
             attribute_name,
-            **{XML_DICT_KEY_10_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_10_ATTRIBUTE_LIST],
+            **{XML_DICT_KEY_11_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
                })
         if obj_to_set is None or attribute_wanted is None:
             Logger.set_warning(__name__,

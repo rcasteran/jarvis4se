@@ -8,8 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_ATTRIBUTE_LIST, XML_DICT_KEY_11_VIEW_LIST, \
-    XML_DICT_KEY_12_TYPE_LIST, XML_DICT_KEY_13_FUN_CONS_LIST, XML_DICT_KEY_14_FUN_PROD_LIST
+    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
+    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_viewpoint_requirement
 from jarvis.handler import handler_question
 from jarvis import util
@@ -230,7 +231,7 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    xml_view_list = kwargs[XML_DICT_KEY_11_VIEW_LIST]
+    xml_view_list = kwargs[XML_DICT_KEY_12_VIEW_LIST]
 
     new_allocation_dict = {
         OBJ_ALLOCATION_TO_VIEW_IDX: []  # [Function/Functional Element/Data, View]
@@ -371,8 +372,8 @@ def check_fun_inter_allocation(fun_inter, data, **kwargs):
             data, fun_inter,
             kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-            kwargs[XML_DICT_KEY_13_FUN_CONS_LIST],
-            kwargs[XML_DICT_KEY_14_FUN_PROD_LIST])
+            kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
+            kwargs[XML_DICT_KEY_15_FUN_PROD_LIST])
         if all(i for i in check_fe):
             out = [fun_inter, data]
             fun_inter.add_allocated_data(data.id)

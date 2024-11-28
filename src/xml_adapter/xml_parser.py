@@ -36,11 +36,14 @@ class XmlParser3SE:
                          util.XML_DICT_KEY_7_TRANSITION_LIST: set(),
                          util.XML_DICT_KEY_8_REQUIREMENT_LIST: set(),
                          util.XML_DICT_KEY_9_ACTIVITY_LIST: set(),
-                         util.XML_DICT_KEY_10_ATTRIBUTE_LIST: set(),
-                         util.XML_DICT_KEY_11_VIEW_LIST: set(),
-                         util.XML_DICT_KEY_12_TYPE_LIST: set(),
-                         util.XML_DICT_KEY_13_FUN_CONS_LIST: [],
-                         util.XML_DICT_KEY_14_FUN_PROD_LIST: []
+                         util.XML_DICT_KEY_10_INFORMATION_LIST: set(),
+                         util.XML_DICT_KEY_11_ATTRIBUTE_LIST: set(),
+                         util.XML_DICT_KEY_12_VIEW_LIST: set(),
+                         util.XML_DICT_KEY_13_TYPE_LIST: set(),
+                         util.XML_DICT_KEY_14_FUN_CONS_LIST: [],
+                         util.XML_DICT_KEY_15_FUN_PROD_LIST: [],
+                         util.XML_DICT_KEY_16_ACT_CONS_LIST: [],
+                         util.XML_DICT_KEY_17_ACT_PROD_LIST: []
                          }
         self.root = None
 
@@ -58,22 +61,26 @@ class XmlParser3SE:
         # Check xml root tag
         if self.check_xml():
             # First retrieve extended types
-            self.xml_dict[util.XML_DICT_KEY_12_TYPE_LIST] = self.parse_type_list()
+            self.xml_dict[util.XML_DICT_KEY_13_TYPE_LIST] = self.parse_type_list()
             self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST] = self.parse_activity_list()
             self.xml_dict[util.XML_DICT_KEY_1_FUNCTION_LIST] = self.parse_function_list()
             self.xml_dict[util.XML_DICT_KEY_6_STATE_LIST] = self.parse_state_list()
             self.xml_dict[util.XML_DICT_KEY_7_TRANSITION_LIST] = self.parse_transition_list()
             self.xml_dict[util.XML_DICT_KEY_2_FUN_ELEM_LIST] = self.parse_functional_element_list()
-            self.xml_dict[util.XML_DICT_KEY_11_VIEW_LIST] = self.parse_view_list()
-            self.xml_dict[util.XML_DICT_KEY_10_ATTRIBUTE_LIST] = self.parse_attribute_list()
+            self.xml_dict[util.XML_DICT_KEY_12_VIEW_LIST] = self.parse_view_list()
+            self.xml_dict[util.XML_DICT_KEY_11_ATTRIBUTE_LIST] = self.parse_attribute_list()
             self.xml_dict[util.XML_DICT_KEY_3_FUN_INTF_LIST] = self.parse_functional_interface_list()
             self.xml_dict[util.XML_DICT_KEY_4_PHY_ELEM_LIST] = self.parse_physical_element_list()
             self.xml_dict[util.XML_DICT_KEY_5_PHY_INTF_LIST] = self.parse_physical_interface_list()
             self.xml_dict[util.XML_DICT_KEY_8_REQUIREMENT_LIST] = self.parse_requirement_list()
 
-            # Then create data(and set predecessors), consumers, producers lists
-            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_14_FUN_PROD_LIST], \
-                self.xml_dict[util.XML_DICT_KEY_13_FUN_CONS_LIST] = self.parse_data_list()
+            # Then create data and set predecessors, consumers, producers lists
+            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_15_FUN_PROD_LIST], \
+                self.xml_dict[util.XML_DICT_KEY_14_FUN_CONS_LIST] = self.parse_data_list()
+
+            # Then create information and set predecessors, consumers, producers lists
+            self.xml_dict[util.XML_DICT_KEY_10_INFORMATION_LIST], self.xml_dict[util.XML_DICT_KEY_17_ACT_PROD_LIST], \
+                self.xml_dict[util.XML_DICT_KEY_16_ACT_CONS_LIST] = self.parse_information_list()
 
             # Finally update object types
             self.update_object_type()
@@ -235,7 +242,7 @@ class XmlParser3SE:
                         consumer_function_list.append([data, function])
                         Logger.set_debug(__name__, f"Data [{data.id}, {data.name}]"
                                                    f" is consumed by "
-                                                   f"data [{function.id}, {function.name}]")
+                                                   f"function [{function.id}, {function.name}]")
 
                         if xml_consumer.get('role') != 'none':
                             function.set_input_role(util.denormalize_xml_string(xml_data.get('name')))
@@ -270,6 +277,61 @@ class XmlParser3SE:
                                                            f"data [{object_data.id, object_data.name}]")
 
         return data_list, producer_function_list, consumer_function_list
+
+    def parse_information_list(self):
+        """Parse XML information list
+        @return information list, producer activity list, consumer activity list
+        """
+        information_list = set()
+        consumer_activity_list = []
+        producer_activity_list = []
+
+        xml_information_list = self.root.iter('information')
+        for xml_information in xml_information_list:
+            # Instantiate information and add it to a list
+            information = datamodel.Information(p_id=xml_information.get('id'),
+                                                p_name=util.denormalize_xml_string(xml_information.get('name')),
+                                                p_type=xml_information.get('type'))
+            information_list.add(information)
+
+            # looking for all elements with tag "consumer" and create a list [flow_name, consumer_activity]
+            xml_consumer_list = xml_information.iter('consumer')
+            for xml_consumer in xml_consumer_list:
+                for activity in self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST]:
+                    if xml_consumer.get('id') == activity.id:
+                        consumer_activity_list.append([information, activity])
+                        Logger.set_debug(__name__, f"Information [{information.id}, {information.name}]"
+                                                   f" is consumed by "
+                                                   f"activity [{activity.id}, {activity.name}]")
+                    # Else do nothing
+
+            # looking for all elements with tag "producer" and create a list [flow_name, producer_activity]
+            xml_producer_list = xml_information.iter('producer')
+            for xml_producer in xml_producer_list:
+                for activity in self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST]:
+                    if xml_producer.get('id') == activity.id:
+                        producer_activity_list.append([information, activity])
+                        Logger.set_debug(__name__, f"Information [{information.id}, {information.name}]"
+                                                   f" is produced by "
+                                                   f"function [{activity.id}, {activity.name}]")
+
+        # Loop on the information_list once created to find the predecessor and add it to list
+        for object_information in information_list:
+            xml_information_list = self.root.iter('information')
+            for xml_information in xml_information_list:
+                if xml_information.get('id') == object_information.id:
+                    # looking for all elements with tag "predecessor"
+                    xml_predecessor_list = xml_information.iter('predecessor')
+                    for xml_predecessor in xml_predecessor_list:
+                        for dodo in information_list:
+                            if xml_predecessor.get('id') == dodo.id:
+                                object_information.add_predecessor(dodo)
+
+                                Logger.set_debug(__name__, f"Information [{dodo.id, dodo.name}]"
+                                                           f" is predecessor of "
+                                                           f"information [{object_information.id, object_information.name}]")
+
+        return information_list, producer_activity_list, consumer_activity_list
 
     def parse_state_list(self):
         """Parse XML state list
@@ -679,8 +741,9 @@ class XmlParser3SE:
         @return None
         """
         # Following lists does not contain any type definition
-        unwanted_xml_list = (util.XML_DICT_KEY_12_TYPE_LIST, util.XML_DICT_KEY_13_FUN_CONS_LIST,
-                             util.XML_DICT_KEY_14_FUN_PROD_LIST)
+        unwanted_xml_list = (util.XML_DICT_KEY_13_TYPE_LIST, util.XML_DICT_KEY_14_FUN_CONS_LIST,
+                             util.XML_DICT_KEY_15_FUN_PROD_LIST, util.XML_DICT_KEY_16_ACT_CONS_LIST,
+                             util.XML_DICT_KEY_17_ACT_PROD_LIST)
         for key, xml_list in self.xml_dict.items():
             if key not in unwanted_xml_list:
                 for obj in xml_list:
@@ -690,7 +753,7 @@ class XmlParser3SE:
                     except KeyError:
                         # Extended types are defined in xml_type_list with their ids
                         is_found = False
-                        for type_obj in self.xml_dict[util.XML_DICT_KEY_12_TYPE_LIST]:
+                        for type_obj in self.xml_dict[util.XML_DICT_KEY_13_TYPE_LIST]:
                             if obj.type == type_obj.id:
                                 obj.type = type_obj
                                 is_found = True
@@ -743,6 +806,7 @@ XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
                             util.XML_DICT_KEY_7_TRANSITION_LIST,
                             util.XML_DICT_KEY_8_REQUIREMENT_LIST,
                             util.XML_DICT_KEY_9_ACTIVITY_LIST,
-                            util.XML_DICT_KEY_10_ATTRIBUTE_LIST,
-                            util.XML_DICT_KEY_11_VIEW_LIST,
-                            util.XML_DICT_KEY_12_TYPE_LIST]
+                            util.XML_DICT_KEY_10_INFORMATION_LIST,
+                            util.XML_DICT_KEY_11_ATTRIBUTE_LIST,
+                            util.XML_DICT_KEY_12_VIEW_LIST,
+                            util.XML_DICT_KEY_13_TYPE_LIST]
