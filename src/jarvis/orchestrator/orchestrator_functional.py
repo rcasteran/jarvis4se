@@ -16,105 +16,122 @@ from jarvis import util
 from tools import Logger
 
 
-def check_add_predecessor(data_predecessor_str_set, **kwargs):
+def check_add_predecessor(flow_predecessor_str_set, **kwargs):
     """
     Check if each string in data_predecessor_str_set is corresponding to an actual Data object,
     create new [Data, predecessor] objects lists for object's type : Data.
     Send lists to add_predecessor() to write them within xml and then returns update_list from it.
 
         Parameters:
-            data_predecessor_str_set ([str]) : Lists of string from jarvis cell
-            xml_data_list ([Data]) : Data list from xml parsing
-            xml_view_list ([View]) : View list from xml parsing
-            output_xml (XmlWriter3SE object) : XML's file object
-
+            flow_predecessor_str_set ([str]) : Lists of string from jarvis cell
         Returns:
             update ([0/1]) : 1 if update, else 0
     """
-    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    output_xml = kwargs['output_xml']
-
-    data_predecessor_list = []
-
-    allocated_item_list = []
+    update = 0
+    flow_predecessor_list = []
     # Filter input string
-    data_predecessor_str_list = util.cut_tuple_list(data_predecessor_str_set)
+    flow_predecessor_str_list = util.cut_tuple_list(flow_predecessor_str_set)
+
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
 
     # Create data names list already in xml
     xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
+    xml_information_name_list = orchestrator_object.check_object_name_in_list(xml_information_list)
 
-    for elem in data_predecessor_str_list:
-        is_elem_found = True
-        if elem[0] not in xml_data_name_list:
-            is_elem_found = False
-            if elem[1] not in xml_data_name_list:
-                Logger.set_error(__name__,
-                                 f"{elem[0]} and {elem[1]} do not exist")
-            else:
-                Logger.set_error(__name__,
-                                 f"{elem[0]} does not exist")
+    for elem in flow_predecessor_str_list:
+        is_data_found = (elem[0] in xml_data_name_list and elem[1] in xml_data_name_list)
+        is_information_found = (elem[0] in xml_information_name_list and elem[1] in xml_information_name_list)
 
-        if elem[0] in xml_data_name_list:
-            if elem[1] not in xml_data_name_list:
-                is_elem_found = False
-                Logger.set_error(__name__,
-                                 f"{elem[1]} does not exist")
-
-        if is_elem_found:
+        if is_data_found:
             predecessor = None
             selected_data = None
             existing_predecessor_id_list = []
 
-            for data in xml_data_list:
-                if elem[0] == data.name:
-                    selected_data = data
-                    for existing_predecessor in data.predecessor_list:
+            for xml_data in xml_data_list:
+                if elem[0] == xml_data.name:
+                    selected_data = xml_data
+                    for existing_predecessor in xml_data.predecessor_list:
                         existing_predecessor_id_list.append(existing_predecessor.id)
 
-            for da in xml_data_list:
-                if elem[1] == da.name and da.id not in existing_predecessor_id_list:
-                    predecessor = da
+            for xml_data in xml_data_list:
+                if elem[1] == xml_data.name and xml_data.id not in existing_predecessor_id_list:
+                    predecessor = xml_data
 
             if predecessor is not None and selected_data is not None:
-                data_predecessor_list.append([selected_data, predecessor])
+                flow_predecessor_list.append([selected_data, predecessor])
                 orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], **kwargs)
                 orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], **kwargs)
+        elif is_information_found:
+            predecessor = None
+            selected_information = None
+            existing_predecessor_id_list = []
 
-    update = add_predecessor(data_predecessor_list, xml_data_list, output_xml)
+            for xml_information in xml_information_list:
+                if elem[0] == xml_information.name:
+                    selected_information = xml_information
+                    for existing_predecessor in xml_information.predecessor_list:
+                        existing_predecessor_id_list.append(existing_predecessor.id)
+
+            for xml_information in xml_information_list:
+                if elem[1] == xml_information.name and xml_information.id not in existing_predecessor_id_list:
+                    predecessor = xml_information
+
+            if predecessor is not None and selected_information is not None:
+                flow_predecessor_list.append([selected_information, predecessor])
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], **kwargs)
+        elif elem[0] not in xml_data_name_list and elem[1] in xml_data_name_list:
+            Logger.set_error(__name__, f"{elem[0]} does not exist as Data")
+        elif elem[0] in xml_data_name_list and elem[1] not in xml_data_name_list:
+            Logger.set_error(__name__, f"{elem[1]} does not exist as Data")
+        elif elem[0] not in xml_information_name_list and elem[1] in xml_information_name_list:
+            Logger.set_error(__name__, f"{elem[0]} does not exist as Information")
+        elif elem[0] in xml_information_name_list and elem[1] not in xml_information_name_list:
+            Logger.set_error(__name__, f"{elem[1]} does not exist as Information")
+        else:
+            Logger.set_error(__name__, f"{elem[0]} and {elem[1]} do not exist")
+
+    if len(flow_predecessor_list) > 0:
+        update = add_predecessor(flow_predecessor_list, **kwargs)
+    # Else do nothing
 
     return update
 
 
-def add_predecessor(predecessor_list, xml_data_list, output_xml):
+def add_predecessor(flow_predecessor_list, **kwargs):
     """
     Check if input lists is not empty, write in xml for each list and return update list if some
     updates has been made
 
         Parameters:
-            predecessor_list ([Data, Data(predecessor)]) : Data object to set new predessor and
+            flow_predecessor_list ([Data, Data(predecessor)]) : Data object to set new predessor and
             predecessor Data
-            xml_data_list ([Data]) : Data list from xml parsing
             output_xml (XmlWriter3SE object) : XML's file object
 
         Returns:
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
 
-    if not predecessor_list:
-        return 0
+    update = 0
+    output_xml = kwargs['output_xml']
 
-    output_xml.write_data_predecessor(predecessor_list)
+    for flow_predecessor in flow_predecessor_list:
+        if isinstance(flow_predecessor[0], datamodel.Data):
+            flow_predecessor[0].add_predecessor(flow_predecessor[1])
+            output_xml.write_data_predecessor([flow_predecessor])
+            Logger.set_info(__name__, f'Data "{flow_predecessor[1].name}" predecessor of '
+                                      f'data "{flow_predecessor[0].name}"')
+            update = 1
+        elif isinstance(flow_predecessor[0], datamodel.Information):
+            flow_predecessor[0].add_predecessor(flow_predecessor[1])
+            output_xml.write_information_predecessor([flow_predecessor])
+            Logger.set_info(__name__, f'Information "{flow_predecessor[1].name}" predecessor of '
+                                      f'information "{flow_predecessor[0].name}"')
+            update = 1
+        # Else do nothing
 
-    for data_predecessor in predecessor_list:
-        for d in xml_data_list:
-            if data_predecessor[0].id == d.id:
-                d.add_predecessor(data_predecessor[1])
-
-        Logger.set_info(__name__,
-                        f"{data_predecessor[1].name} predecessor for "
-                        f"{data_predecessor[0].name}")
-
-    return 1
+    return update
 
 
 def check_add_consumer_elem(consumer_str_list, **kwargs):

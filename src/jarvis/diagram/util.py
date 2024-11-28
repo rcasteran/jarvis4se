@@ -350,21 +350,24 @@ def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
 def filter_allocated_item_from_view(xml_item_list, xml_view_list):
     """For a type of item from xml, check if a View is activated and if the item is in its
     allocated item's list"""
-    if not any(j.activated for j in xml_view_list):
-        return xml_item_list
+    if any(j.activated for j in xml_view_list):
+        filtered_item_list = []
+        activated_view_name = ''
+        for view in xml_view_list:
+            if view.activated:
+                activated_view_name = view.name
+                for item in xml_item_list:
+                    if item.id in view.allocated_item_list:
+                        filtered_item_list.append(item)
+                break
+            # Else do nothing
 
-    filtered_item_list = []
-    activated_view = ''
-    for view in xml_view_list:
-        if view.activated:
-            activated_view = view.name
-            for item in xml_item_list:
-                if item.id in view.allocated_item_list:
-                    filtered_item_list.append(item)
-
-    if not filtered_item_list:
-        Logger.set_debug(__name__,
-                         f"The requested elements are not allocated to the view {activated_view}")
+        if not filtered_item_list:
+            Logger.set_warning(__name__,
+                               f"The view {activated_view_name} has no allocated elements")
+        # Else do nothing
+    else:
+        filtered_item_list = xml_item_list
 
     return filtered_item_list
 

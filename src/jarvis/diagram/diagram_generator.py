@@ -506,10 +506,12 @@ def case_sequence_diagram(**kwargs):
             xml_data_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_0_DATA_LIST],
                                                                  kwargs[XML_DICT_KEY_12_VIEW_LIST])
 
-            if len(xml_data_list) > 0:
-                if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
-                       for i in object_list_str):
+            xml_information_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+                                                                        kwargs[XML_DICT_KEY_12_VIEW_LIST])
 
+            if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+                   for i in object_list_str):
+                if len(xml_data_list) > 0:
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         xml_cons = [i for i in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
@@ -524,9 +526,12 @@ def case_sequence_diagram(**kwargs):
                                                               xml_cons,
                                                               xml_prod,
                                                               xml_data_list)
-
-                elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
-                         for i in object_list_str):
+                else:
+                    Logger.set_warning(__name__,
+                                       f"There are no data defined for the requested elements")
+            elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
+                     for i in object_list_str):
+                if len(xml_data_list) > 0:
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         kwargs[XML_DICT_KEY_14_FUN_CONS_LIST] = \
                             [i for i in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
@@ -536,14 +541,31 @@ def case_sequence_diagram(**kwargs):
                              if any(a == i[0] for a in [d for d in xml_data_list])]
                     kwargs[XML_DICT_KEY_0_DATA_LIST] = xml_data_list
                     plantuml_string = get_fun_elem_sequence_diagram(object_list_str, **kwargs)
-
                 else:
-                    Logger.set_error(__name__,
-                                     f"{kwargs['diagram_object_str']} is not a valid sequence, available sequences "
-                                     f"are:\n"
-                                     f"- show sequence Function_A, Function_B, ...\n"
-                                     f"- show sequence Functional_element_A, Functional_element_B, ...\n"
-                                     f"- show sequence Functional_interface\n")
+                    Logger.set_warning(__name__,
+                                       f"There are no data defined for the requested elements")
+            elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST])
+                     for i in object_list_str):
+                if len(xml_information_list) > 0:
+                    if len(xml_information_list) != len(kwargs[XML_DICT_KEY_10_INFORMATION_LIST]):
+                        kwargs[XML_DICT_KEY_16_ACT_CONS_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+                             if any(a == i[0] for a in [d for d in xml_information_list])]
+                        kwargs[XML_DICT_KEY_17_ACT_PROD_LIST] = \
+                            [i for i in kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+                             if any(a == i[0] for a in [d for d in xml_information_list])]
+                    kwargs[XML_DICT_KEY_10_INFORMATION_LIST] = xml_information_list
+                    plantuml_string = get_phy_elem_sequence_diagram(object_list_str, **kwargs)
+                else:
+                    Logger.set_warning(__name__,
+                                       f"There are no information defined for the requested elements")
+            else:
+                Logger.set_error(__name__,
+                                 f"{kwargs['diagram_object_str']} is not a valid sequence, available sequences "
+                                 f"are:\n"
+                                 f"- show sequence Function_A, Function_B, ...\n"
+                                 f"- show sequence Functional_element_A, Functional_element_B, ...\n"
+                                 f"- show sequence Functional_interface\n")
 
     return plantuml_string
 
@@ -764,6 +786,7 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
     Returns:
         plantuml_text (str) : plantuml text
     """
+    plantuml_text = None
     new_consumer_list = []
     new_producer_list = []
     new_fun_elem_list = set()
@@ -808,11 +831,13 @@ def get_fun_inter_sequence_diagram(fun_inter_str, **kwargs):
                                                               {},
                                                               kwargs[XML_DICT_KEY_0_DATA_LIST])
 
-        return plantuml_text
-
+        Logger.set_info(__name__,
+                        "Sequence Diagram " + str(fun_inter_str) + " generated")
     else:
         Logger.set_warning(__name__,
                            f"No data found for {fun_inter.name}")
+
+    return plantuml_text
 
 
 def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
@@ -826,6 +851,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     Returns:
         plantuml_text (str) : plantuml_text
     """
+    plantuml_text = None
     new_consumer_list = []
     new_producer_list = []
 
@@ -861,12 +887,12 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
         if temp_fun_set is not None:
             for fun in temp_fun_set:
                 new_consumer_list.extend(
-                    get_fun_elem_for_cons_prod_lists(
+                    get_main_elem_for_cons_prod_lists(
                         fun_elem, fun, kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
                     )
                 )
                 new_producer_list.extend(
-                    get_fun_elem_for_cons_prod_lists(
+                    get_main_elem_for_cons_prod_lists(
                         fun_elem, fun, kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
                     )
                 )
@@ -891,21 +917,107 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
                                                               {},
                                                               kwargs[XML_DICT_KEY_0_DATA_LIST])
 
-        return plantuml_text
-
+        Logger.set_info(__name__,
+                        "Sequence Diagram " + str(", ".join(fun_elem_str)) + " generated")
     else:
         Logger.set_warning(__name__,
                            f"Not any data allocated to interfaces exposed by {', '.join(fun_elem_str)}")
 
+    return plantuml_text
 
-def get_fun_elem_for_cons_prod_lists(fun_elem, func_obj, cons_or_prod_list):
+
+def get_phy_elem_sequence_diagram(phy_elem_str, **kwargs):
+    """
+    Check and get all "show sequence Phy_elem_A, Phy_elem_B, ..." strings, find objects and
+    then get/filter needed lists for plantuml_adapter.
+    Args:
+        phy_elem_str: functional elements name/alias from input cell
+        **kwargs: dict with whole lists/sets
+
+    Returns:
+        plantuml_text (str) : plantuml_text
+    """
+    plantuml_text = None
+    new_consumer_list = []
+    new_producer_list = []
+
+    new_phy_elem_list = {
+        query_object.query_object_by_name(i, **{XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]})
+        for i in phy_elem_str
+    }
+
+    for phy_elem in new_phy_elem_list:
+        temp_activity_set = question_answer.get_allocation_object(
+            phy_elem,
+            kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+            **kwargs
+        )
+
+        if isinstance(phy_elem.derived, FunctionalElement):
+            get_derived_if_in_view = util.filter_allocated_item_from_view(
+                {phy_elem.derived}, kwargs[XML_DICT_KEY_12_VIEW_LIST]
+            )
+            # If type(list) has been returned from activated View()
+            # then add it's allocated func
+
+            # TODO not used in the code
+            if isinstance(get_derived_if_in_view, list):
+                alloc_derived_func_set = question_answer.get_allocation_object(
+                    phy_elem.derived,
+                    kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                    **kwargs
+                )
+                # if alloc_derived_func_set is not None and temp_fun_set is not None:
+                # allocated_fun_set.update(alloc_derived_func_set)
+
+        if temp_activity_set is not None:
+            for activity in temp_activity_set:
+                new_consumer_list.extend(
+                    get_main_elem_for_cons_prod_lists(
+                        phy_elem, activity, kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+                    )
+                )
+                new_producer_list.extend(
+                    get_main_elem_for_cons_prod_lists(
+                        phy_elem, activity, kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+                    )
+                )
+
+        phy_elem.child_list.clear()
+        phy_elem.parent = None
+
+    if new_consumer_list and new_producer_list:
+        for i in new_consumer_list:
+            if not any(i[0] in s for s in new_producer_list):
+                new_consumer_list.remove(i)
+
+        for j in new_producer_list:
+            if not any(j[0] in s for s in new_consumer_list):
+                new_producer_list.remove(j)
+
+    if new_consumer_list and new_producer_list:
+        plantuml_text = plantuml_adapter.get_sequence_diagram(new_phy_elem_list,
+                                                              new_consumer_list,
+                                                              new_producer_list,
+                                                              {},
+                                                              kwargs[XML_DICT_KEY_10_INFORMATION_LIST])
+        Logger.set_info(__name__,
+                        "Sequence Diagram " + str(", ".join(phy_elem_str)) + " generated")
+    else:
+        Logger.set_warning(__name__,
+                           f"Not any data allocated to interfaces exposed by {', '.join(phy_elem_str)}")
+
+    return plantuml_text
+
+
+def get_main_elem_for_cons_prod_lists(main_elem, elem_obj, cons_or_prod_list):
     """
     From cons or prod list [[data_1, function_1_str], [data_2, function_2_str], ...]
     returns [[data_1, Function(1)], [data_2, Function(2)], ...]
     """
     output = []
     for cons_or_prod in cons_or_prod_list:
-        if cons_or_prod[1] == func_obj:
-            output.append([cons_or_prod[0], fun_elem])
+        if cons_or_prod[1] == elem_obj:
+            output.append([cons_or_prod[0], main_elem])
 
     return output

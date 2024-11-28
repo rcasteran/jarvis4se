@@ -358,6 +358,11 @@ def retrieve_allocated_object_list(wanted_object, object_list, **kwargs):
             if any(s == function.id for s in wanted_object.allocated_function_list):
                 allocation_set.add(function)
             # Else do nothing
+    elif object_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+        for activity in object_list:
+            if any(s == activity.id for s in wanted_object.allocated_activity_list):
+                allocation_set.add(activity)
+            # Else do nothing
     # Else do nothing
 
     if len(allocation_set) == 0:
