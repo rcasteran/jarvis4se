@@ -7,7 +7,7 @@ From a methodological point of view, the definition of an activity can be justif
 * The documentation of a goal specifying the related <mark style="color:blue;">operational situation</mark>;
 * The identification of a new <mark style="color:blue;">data</mark> to be created / transformed during the functional analysis.
 
-## Exchange creation
+## Information creation
 
 ### Definition
 
@@ -19,9 +19,9 @@ From a methodological point of view, the definition of an activity can be justif
 
 ### Attributes
 
-### Exchange consumption
+### Information consumption
 
-### Exchange production
+### Information production
 
 ### Context visualization
 

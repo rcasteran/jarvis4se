@@ -4,9 +4,9 @@ Requirement analysis is the systematic examination of a [goal](broken-reference)
 
 From a methodological point of view:
 
-* A goal is achieved by an [activity](broken-reference) that can be performed by the [system](broken-reference), an [actor](broken-reference) or an [enabling system](broken-reference). If the goal cannot be achieved by a single activity, then it can be refined into different subgoals up to identify an activity for each subgoal in the [operational analysis](operational-analysis.md).A goal is satisfied if all subgoals are satisfied (AND-decomposition) or if at least one subgoal is satisfied (OR-decomposition)
+* A goal is achieved by an [activity](broken-reference) that can be performed by the [system](broken-reference), an [actor](broken-reference) or an [enabling system](broken-reference). If the goal cannot be achieved by a single activity, then it can be refined into different subgoals up to identify an activity for each subgoal in the [operational analysis](operational-analysis.md). A goal is satisfied if all subgoals are satisfied (AND-decomposition) or if at least one subgoal is satisfied (OR-decomposition)
 * A goal can be in conflict with another goal: in this case only one of the two goals can be achieved by an activity
-* A requirement is specifying a behavior or a quality of the activity to be perfomed to achieve a goal. A requirement that specifies a behavior or a quality of an activity performed by the system can be derived into different subrequirements up to identify a system element in the [physical architecture definition](physical-architecture-definition.md).
+* A requirement is specifying a behavior or a quality of the activity to be perfomed to achieve a goal. A requirement that specifies a behavior or a quality of an activity performed by the system can be derived into different sub-requirements up to identify a system element in the [physical architecture definition](physical-architecture-definition.md).
 
 ## Goal creation
 
