@@ -361,11 +361,6 @@ def filter_allocated_item_from_view(xml_item_list, xml_view_list):
                         filtered_item_list.append(item)
                 break
             # Else do nothing
-
-        if not filtered_item_list:
-            Logger.set_warning(__name__,
-                               f"The view {activated_view_name} has no allocated elements")
-        # Else do nothing
     else:
         filtered_item_list = xml_item_list
 

@@ -37,10 +37,12 @@ def test_issue_9_in(capsys, input_test_issue_9):
     captured = capsys.readouterr()
     expected = [f"{file_name}.xml parsed\n",
                 "test_view is a view\n",
-                "[WARNING] Object toto does not exist, available object types are : "
-                "Functional Element, Function and Data\n",
-                "[WARNING] Object tata does not exist, available object types are : "
-                "Functional Element, Function and Data\n",
+                "[WARNING] Object toto does not exist, available object types are:\n"
+                "- Functional Element, Function and Data\n",
+                "- Physical Element, Activity and Information\n",
+                "[WARNING] Object tata does not exist, available object types are:\n"
+                "- Functional Element, Function and Data\n",
+                "- Physical Element, Activity and Information\n",
                 "Function F1 is allocated to View test_view\n",
                 "Data a is allocated to View test_view\n",
                 "FunctionalElement Fun_elem is allocated to View test_view\n",

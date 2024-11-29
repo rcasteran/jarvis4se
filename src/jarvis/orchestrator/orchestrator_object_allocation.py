@@ -222,19 +222,23 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
     allocated and returns corresponding [View, Object].
     Args:
         p_item_name_str (string): Object's name/alias from user's input
-        xml_item_list ([Object]): List of xml's item (same type as item)
-        xml_view_list ([View]) : View list from xml parsing
-
     Returns:
         [View, Object]
     """
+    xml_view_list = kwargs[XML_DICT_KEY_12_VIEW_LIST]
+
+    # [data, function, fun_elem] case
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    xml_view_list = kwargs[XML_DICT_KEY_12_VIEW_LIST]
+
+    # [information, activity, phy_elem] case
+    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
 
     new_allocation_dict = {
-        OBJ_ALLOCATION_TO_VIEW_IDX: []  # [Function/Functional Element/Data, View]
+        OBJ_ALLOCATION_TO_VIEW_IDX: []  # [Function/Functional Element/Data/Activity/Physical Element/Information, View]
     }
 
     if any(s.activated for s in xml_view_list):
@@ -276,8 +280,47 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                                 activated_view.add_allocated_item(xml_fun_elem.id)
                                 new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view, xml_fun_elem])
                             # Else do nothing
+                            is_allocated = True
                             break
                         # Else do nothing
+
+                    if not is_allocated:
+                        for xml_information in xml_information_list:
+                            if p_item_name_str == xml_information.name:
+                                if xml_information.id not in activated_view.allocated_item_list:
+                                    activated_view.add_allocated_item(xml_information.id)
+                                    new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view,
+                                                                                            xml_information])
+                                # Else do nothing
+                                is_allocated = True
+                                break
+                            # Else do nothing
+
+                        if not is_allocated:
+                            for xml_activity in xml_activity_list:
+                                if p_item_name_str == xml_activity.name or p_item_name_str == xml_activity.alias:
+                                    if xml_activity.id not in activated_view.allocated_item_list:
+                                        activated_view.add_allocated_item(xml_activity.id)
+                                        new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view,
+                                                                                                xml_activity])
+                                    # Else do nothing
+                                    is_allocated = True
+                                    break
+                                # Else do nothing
+
+                            if not is_allocated:
+                                for xml_phy_elem in xml_phy_elem_list:
+                                    if p_item_name_str == xml_phy_elem.name or p_item_name_str == xml_phy_elem.alias:
+                                        if xml_phy_elem.id not in activated_view.allocated_item_list:
+                                            activated_view.add_allocated_item(xml_phy_elem.id)
+                                            new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                                                [activated_view, xml_phy_elem])
+                                        # Else do nothing
+                                        break
+                                    # Else do nothing
+                            # Else do nothing
+                        # Else do nothing
+                    # Else do nothing
                 # Else do nothing
             # Else do nothing
         # Else do nothing

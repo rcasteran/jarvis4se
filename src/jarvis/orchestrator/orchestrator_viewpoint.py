@@ -87,24 +87,39 @@ def check_get_consider(consider_str_list, **kwargs):
     """
     update = 0
 
+    # [data, function, fun_elem] case
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
-    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+
+    # [information, activity, phy_elem] case
+    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
 
     # Create lists with all object names/aliases already in the xml
-    xml_fun_elem_name_list = orchestrator_object.check_object_name_in_list(xml_fun_elem_list)
-    xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
     xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
+    xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
+    xml_fun_elem_name_list = orchestrator_object.check_object_name_in_list(xml_fun_elem_list)
+    xml_information_name_list = orchestrator_object.check_object_name_in_list(xml_information_list)
+    xml_activity_name_list = orchestrator_object.check_object_name_in_list(xml_activity_list)
+    xml_phy_elem_name_list = orchestrator_object.check_object_name_in_list(xml_phy_elem_list)
 
     consider_str_list = util.cut_chain_from_string_list(consider_str_list)
 
     for consider_str in consider_str_list:
-        if consider_str not in [*xml_fun_elem_name_list, *xml_function_name_list,
-                                *xml_data_name_list]:
-            Logger.set_warning(__name__,
-                               f"Object {consider_str} does not exist, available object types are : "
-                               f"Functional Element, Function and Data")
-        else:
+        is_data_related = (consider_str in [*xml_fun_elem_name_list, *xml_function_name_list,
+                                            *xml_data_name_list])
+        is_information_related = (consider_str in [*xml_phy_elem_name_list, *xml_activity_name_list,
+                                                   *xml_information_name_list])
+        if is_data_related:
             update = orchestrator_object_allocation.check_add_allocated_item_to_view(consider_str, **kwargs)
+        elif is_information_related:
+            update = orchestrator_object_allocation.check_add_allocated_item_to_view(consider_str, **kwargs)
+        else:
+            Logger.set_warning(__name__,
+                               f'Object {consider_str} does not exist, available object types are:\n'
+                               f'- Functional Element, Function and Data\n'
+                               f'- Physical Element, Activity and Information')
 
     return update
