@@ -146,17 +146,18 @@ def write_function_object(string_obj, function, input_flow_list, output_flow_lis
     for p in input_flow_list:
         if compo_diagram:
             if p[0][0] == function.name.lower():
-                string_obj.create_port(input_flow_list, "in")
+                string_obj.create_port([p], "in")
         else:
             if p[0][0] == function.name.lower() or p[0][1] == function.name.lower():
-                string_obj.create_port(input_flow_list, "in")
+                string_obj.create_port([p], "in")
+
     for q in output_flow_list:
         if compo_diagram:
             if q[0][0] == function.name.lower():
-                string_obj.create_port(output_flow_list, "out")
+                string_obj.create_port([q], "out")
         else:
             if q[0][0] == function.name.lower() or q[0][1] == function.name.lower():
-                string_obj.create_port(output_flow_list, "out")
+                string_obj.create_port([q], "out")
 
 
 def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, producer_function_list,
@@ -228,7 +229,7 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
                                         check_function = False
                                         for f in function_list:
                                             if any(a == f.id for a in fun_elem_child.allocated_function_list):
-                                                if len(fun_elem.allocated_function_list) > 1:
+                                                if len(fun_elem_child.allocated_function_list) > 1:
                                                     check_function = False
                                                 else:
                                                     check_function = True
@@ -238,7 +239,7 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
 
                                         if not check_function:
                                             string_obj.append_string('}\n')
-                                            string_obj.create_component_attribute(fun_elem_child, xml_attribute_list)
+                                        string_obj.create_component_attribute(fun_elem_child, xml_attribute_list)
 
                                 check_function = False
                                 if not is_fun_elem_child:
@@ -281,6 +282,130 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
     string_obj.create_input_flow(input_flow_list)
     string_obj.create_output_flow(output_flow_list)
     string_obj.create_data_flow(data_flow_list)
+
+    return string_obj.string
+
+
+def get_activity_diagrams(activity_list, phy_elem_list, consumer_activity_list, producer_activity_list,
+                          parent_child_dict, information_list, xml_type_list, xml_attribute_list):
+    """@ingroup plantuml_adapter
+    @anchor get_activity_diagrams
+    Construct the PlantUml text and url for the requested diagram between one of the following:
+    - context of activity
+    - chain of activity
+    @param[in] activity_list
+    @param[in] consumer_activity_list
+    @param[in] producer_activity_list
+    @param[in] parent_child_dict
+    @param[in] data_list
+    @param[in] xml_type_list
+    @param[in] xml_attribute_list
+    @return PlantUml text and url of the diagram
+    """
+
+    string_obj = ObjDiagram()
+    # Filter output flows
+    output_flow_list = get_output_flows(consumer_activity_list, producer_activity_list,
+                                        concatenate=True)
+    # Filter input flows
+    input_flow_list = get_input_flows(consumer_activity_list, producer_activity_list,
+                                      concatenate=True)
+
+    # Filter consumers and producers list in order to create data flow
+    information_flow_list = get_exchanged_flows(consumer_activity_list, producer_activity_list,
+                                                parent_child_dict, concatenate=True)
+
+    Logger.set_debug(__name__, f"Output flows list: {output_flow_list}")
+    Logger.set_debug(__name__, f"Input flows list: {input_flow_list}")
+    Logger.set_debug(__name__, f'Exchanged flows list: {information_flow_list}')
+
+    if information_list:
+        per_message_data_flow_list = get_exchanged_flows(consumer_activity_list,
+                                                         producer_activity_list,
+                                                         parent_child_dict)
+        if len(information_list) == len(per_message_data_flow_list):
+            ordered_function_list, ordered_message_list = order_list(per_message_data_flow_list,
+                                                                     information_list)
+            if per_message_data_flow_list != ordered_message_list:
+                for idx, i in enumerate(ordered_message_list):
+                    for j in information_flow_list:
+                        for k in j[1]:
+                            if i[2] == k and i[3]:
+                                new = str(idx + 1) + ":" + k
+                                j[1].remove(k)
+                                j[1].append(new)
+
+    # Loop in order to filter functions and write in output's file, see write_function_child()
+    if parent_child_dict:
+        if phy_elem_list:
+            for phy_elem in phy_elem_list:
+                if phy_elem.id not in parent_child_dict.keys():
+                    if phy_elem.id in parent_child_dict.values():
+                        # Phy elem is a parent
+                        string_obj.create_component(phy_elem)
+                        check_activity = False
+                        for key, value in parent_child_dict.items():
+                            if value == phy_elem.id:
+                                is_phy_elem_child = False
+                                for phy_elem_child in phy_elem_list:
+                                    if phy_elem_child.id == key:
+                                        is_phy_elem_child = True
+                                        string_obj.create_component(phy_elem_child)
+                                        check_activity = False
+                                        for activity in activity_list:
+                                            if any(a == activity.id for a in phy_elem_child.allocated_activity_list):
+                                                if len(phy_elem_child.allocated_activity_list) > 1:
+                                                    check_activity = False
+                                                else:
+                                                    check_activity = True
+                                                write_function_object(string_obj, activity, input_flow_list,
+                                                                      output_flow_list, check_activity,
+                                                                      xml_attribute_list, component_obj=phy_elem_child)
+
+                                        if not check_activity:
+                                            string_obj.append_string('}\n')
+                                        string_obj.create_component_attribute(phy_elem_child, xml_attribute_list)
+
+                                check_activity = False
+                                if not is_phy_elem_child:
+                                    for activity in activity_list:
+                                        if any(a == activity.id for a in phy_elem.allocated_activity_list):
+                                            if activity.id == key:
+                                                if len(phy_elem.allocated_activity_list) > 1:
+                                                    check_activity = False
+                                                else:
+                                                    check_activity = True
+                                                write_function_object(string_obj, activity, input_flow_list,
+                                                                      output_flow_list, check_activity,
+                                                                      xml_attribute_list, component_obj=phy_elem)
+
+                        if not check_activity:
+                            string_obj.append_string('}\n')
+                        string_obj.create_component_attribute(phy_elem, xml_attribute_list)
+                    # Else do nothing : done as children of phy elem parent
+                # Else do nothing : done as children of phy elem parent
+        else:
+            for activity in activity_list:
+                if activity.id not in parent_child_dict.keys():
+                    if activity.id in parent_child_dict.values():
+                        # Activity is a parent
+                        string_obj.create_component(activity)
+                        write_function_child(string_obj, activity, input_flow_list, output_flow_list,
+                                             xml_attribute_list)
+                        string_obj.create_component_attribute(activity, xml_attribute_list)
+                    else:
+                        # Activity is not a parent:
+                        write_function_object(string_obj, activity, input_flow_list, output_flow_list,
+                                              False, xml_attribute_list, compo_diagram=True)
+                # Else do nothing : done as children of activity parent
+    else:
+        for activity in activity_list:
+            write_function_object(string_obj, activity, input_flow_list, output_flow_list, False,
+                                  xml_attribute_list)
+
+    string_obj.create_input_flow(input_flow_list)
+    string_obj.create_output_flow(output_flow_list)
+    string_obj.create_data_flow(information_flow_list)
 
     return string_obj.string
 

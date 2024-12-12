@@ -374,6 +374,9 @@ def case_chain_diagram(**kwargs):
         xml_fun_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
         result_fun_elem = all(t in xml_fun_elem_name_list for t in object_list_str)
 
+        xml_phy_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST])
+        result_phy_elem = all(t in xml_phy_elem_name_list for t in object_list_str)
+
         if result_function:
             function_list = util.get_object_list_from_view(object_list_str,
                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
@@ -418,7 +421,7 @@ def case_chain_diagram(**kwargs):
                 )
             else:
                 Logger.set_warning(__name__,
-                                   f"Nothing to display for the selected view")
+                                   f"No function to display for the selected view")
         elif result_fun_elem:
             fun_elem_list_from_view = util.get_object_list_from_view(object_list_str,
                                                                      kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
@@ -440,8 +443,11 @@ def case_chain_diagram(**kwargs):
                             if len(fun_elem.allocated_function_list) > 0:
                                 for allocated_function_id in fun_elem.allocated_function_list:
                                     for function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
-                                        if function.id == allocated_function_id and function in function_list_from_view:
-                                            util.get_fun_elem_function_list(function, function_list, fun_elem)
+                                        if function.id == allocated_function_id:
+                                            if len(function_list_from_view) == 0 or function in function_list_from_view:
+                                                util.get_fun_elem_function_list(function, function_list, fun_elem)
+                                            # Else do nothing
+                                        # Else do nothing
                             else:
                                 Logger.set_info(__name__,
                                                 f"No function allocated to {fun_elem.name} (no display)")
@@ -464,7 +470,56 @@ def case_chain_diagram(**kwargs):
                                                                               kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST])
             else:
                 Logger.set_warning(__name__,
-                                   f"Nothing to display for the selected view")
+                                   f"No functional element to display for the selected view")
+        elif result_phy_elem:
+            phy_elem_list_from_view = util.get_object_list_from_view(object_list_str,
+                                                                     kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
+                                                                     kwargs[XML_DICT_KEY_12_VIEW_LIST])
+
+            if len(phy_elem_list_from_view) > 0:
+                phy_elem_list = set()
+                activity_list = set()
+
+                activity_list_from_view = util.get_object_list_from_view(object_list_str,
+                                                                         kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                                                                         kwargs[XML_DICT_KEY_12_VIEW_LIST])
+
+                for i in object_list_str:
+                    for phy_elem in phy_elem_list_from_view:
+                        if i == phy_elem.name or i == phy_elem.alias:
+                            phy_elem_list.add(phy_elem)
+
+                            if len(phy_elem.allocated_activity_list) > 0:
+                                for allocated_activity_id in phy_elem.allocated_activity_list:
+                                    for activity in kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]:
+                                        if activity.id == allocated_activity_id:
+                                            if len(activity_list_from_view) == 0 or activity in activity_list_from_view:
+                                                activity_list.add(activity)
+                                            # Else do nothing
+                                        # Else do nothing
+                            else:
+                                Logger.set_info(__name__,
+                                                f"No activity allocated to {phy_elem.name} (no display)")
+
+                new_activity_list, consumer_list, producer_list = \
+                    util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+                                                                kwargs[XML_DICT_KEY_12_VIEW_LIST],
+                                                                kwargs[
+                                                                    XML_DICT_KEY_16_ACT_CONS_LIST],
+                                                                kwargs[
+                                                                    XML_DICT_KEY_17_ACT_PROD_LIST],
+                                                                activity_list)
+
+                plantuml_string = diagram_generator_chain.show_phy_elem_chain(object_list_str,
+                                                                              new_activity_list,
+                                                                              consumer_list,
+                                                                              producer_list,
+                                                                              phy_elem_list,
+                                                                              kwargs[XML_DICT_KEY_13_TYPE_LIST],
+                                                                              kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST])
+            else:
+                Logger.set_warning(__name__,
+                                   f"No physical element to display for the selected view")
         elif result_state:
             state_list = util.get_object_list_from_view(object_list_str,
                                                         kwargs[XML_DICT_KEY_6_STATE_LIST],
@@ -477,11 +532,12 @@ def case_chain_diagram(**kwargs):
                 plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
             else:
                 Logger.set_warning(__name__,
-                                   f"Nothing to display for the selected view")
+                                   f"No state to display for the selected view")
         else:
             Logger.set_warning(__name__,
                                f"Jarvis does not know the object(s): {kwargs['diagram_object_str']}"
-                               f"(i.e. it is not a function, nor a functional element, nor a state)")
+                               f"(i.e. it is not a function, nor a functional element, "
+                               f"nor a physical element, nor a state)")
     else:
         Logger.set_error(__name__,
                          f"{kwargs['diagram_object_str']} is not a valid chain")
@@ -554,7 +610,10 @@ def case_sequence_diagram(**kwargs):
                         kwargs[XML_DICT_KEY_17_ACT_PROD_LIST] = \
                             [i for i in kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
                              if any(a == i[0] for a in [d for d in xml_information_list])]
+                    # Else do nothing
+
                     kwargs[XML_DICT_KEY_10_INFORMATION_LIST] = xml_information_list
+
                     plantuml_string = get_phy_elem_sequence_diagram(object_list_str, **kwargs)
                 else:
                     Logger.set_warning(__name__,
@@ -987,13 +1046,17 @@ def get_phy_elem_sequence_diagram(phy_elem_str, **kwargs):
         phy_elem.parent = None
 
     if new_consumer_list and new_producer_list:
-        for i in new_consumer_list:
-            if not any(i[0] in s for s in new_producer_list):
-                new_consumer_list.remove(i)
+        for new_consumer in new_consumer_list:
+            if not any(new_consumer[0] in s for s in new_producer_list):
+                Logger.set_info(__name__,
+                                f'{new_consumer[0].name} not produced by any elements in the sequence')
+                new_consumer_list.remove(new_consumer)
 
-        for j in new_producer_list:
-            if not any(j[0] in s for s in new_consumer_list):
-                new_producer_list.remove(j)
+        for new_producer in new_producer_list:
+            if not any(new_producer[0] in s for s in new_consumer_list):
+                Logger.set_info(__name__,
+                                f'{new_producer[0].name} not consumed by any elements in the sequence')
+                new_producer_list.remove(new_producer)
 
     if new_consumer_list and new_producer_list:
         plantuml_text = plantuml_adapter.get_sequence_diagram(new_phy_elem_list,

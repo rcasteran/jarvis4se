@@ -2,6 +2,7 @@
 Plantuml adapter module
 
 Defines the different functions and classes used by Jarvis to call Plantuml as a diagram generator:
+- function to construct the PlantUml text and url for the activities diagram: @ref get_activity_diagrams
 - function to construct the PlantUml text and url for the functions diagram: @ref get_function_diagrams
 - function to construct the PlantUml text for the sequence diagrams: @ref get_sequence_diagram
 - function to construct the PlantUml text and url for state machine diagrams:
@@ -17,6 +18,7 @@ Defines the different functions and classes used by Jarvis to call Plantuml as a
 - class to encode PlantUml text for object diagram : @ref ObjDiagram
 """
 
+from .plantuml_adapter import get_activity_diagrams
 from .plantuml_adapter import get_function_diagrams
 from .plantuml_adapter import get_sequence_diagram
 from .plantuml_adapter import get_state_machine_diagram

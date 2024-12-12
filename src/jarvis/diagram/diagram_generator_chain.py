@@ -95,3 +95,43 @@ def show_fun_elem_chain(fun_elem_list_str, xml_function_list, xml_consumer_funct
                     f'Chain Diagram {str(", ".join(fun_elem_list_str))} generated')
 
     return plantuml_text
+
+
+def show_phy_elem_chain(phy_elem_list_str, xml_activity_list, xml_consumer_activity_list, xml_producer_activity_list,
+                        xml_phy_elem_list, xml_type_list, xml_attribute_list):
+    parent_child_dict = {}
+
+    for i in phy_elem_list_str:
+        for phy_elem in xml_phy_elem_list.copy():
+            if i == phy_elem.name or i == phy_elem.alias:
+                if phy_elem.parent:
+                    xml_phy_elem_list.add(phy_elem.parent)
+                    parent_child_dict[phy_elem.id] = phy_elem.parent.id
+                if len(phy_elem.allocated_activity_list) > 0:
+                    for allocated_activity_id in phy_elem.allocated_activity_list:
+                        parent_child_dict[allocated_activity_id] = phy_elem.id
+
+    external_activity_list, new_consumer_list, new_producer_list = \
+        util.get_cons_prod_from_allocated_elements(xml_activity_list,
+                                                   xml_producer_activity_list,
+                                                   xml_consumer_activity_list,
+                                                   False)
+
+    Logger.set_debug(__name__, f'list of allocated functions to element: {xml_activity_list}')
+    Logger.set_debug(__name__, f'list of external functions to element: {external_activity_list}')
+    Logger.set_debug(__name__, f'list of consumer list: {new_consumer_list}')
+    Logger.set_debug(__name__, f'list of producer list: {new_producer_list}')
+
+    plantuml_text = plantuml_adapter.get_activity_diagrams(activity_list=xml_activity_list,
+                                                           phy_elem_list=xml_phy_elem_list,
+                                                           consumer_activity_list=new_consumer_list,
+                                                           producer_activity_list=new_producer_list,
+                                                           parent_child_dict=parent_child_dict,
+                                                           information_list=None,
+                                                           xml_type_list=None,
+                                                           xml_attribute_list=xml_attribute_list)
+
+    Logger.set_info(__name__,
+                    f'Chain Diagram {str(", ".join(phy_elem_list_str))} generated')
+
+    return plantuml_text
