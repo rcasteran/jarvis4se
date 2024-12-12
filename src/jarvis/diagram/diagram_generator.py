@@ -129,12 +129,18 @@ def case_context_diagram(**kwargs):
             kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
             attribute_inheritance
         )
-
+    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]):
+        plantuml_string = diagram_generator_fana.show_activity_context(kwargs['diagram_object_str'],
+                                                                       kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                                                                       kwargs[XML_DICT_KEY_16_ACT_CONS_LIST],
+                                                                       kwargs[XML_DICT_KEY_17_ACT_PROD_LIST],
+                                                                       kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+                                                                       kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
+                                                                       kwargs[XML_DICT_KEY_13_TYPE_LIST])
     elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST]):
         plantuml_string = show_states_chain([kwargs['diagram_object_str']],
                                             kwargs[XML_DICT_KEY_6_STATE_LIST],
                                             kwargs[XML_DICT_KEY_7_TRANSITION_LIST])
-
     elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
@@ -188,7 +194,7 @@ def case_context_diagram(**kwargs):
         Logger.set_warning(__name__,
                            f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
                            f"{kwargs['diagram_object_str']} is not a valid "
-                           f"Function/State/Functional Element name/alias")
+                           f"Activity/Function/State/Functional Element name/alias")
 
     return plantuml_string
 
@@ -365,6 +371,9 @@ def case_chain_diagram(**kwargs):
     object_list_str = jarvis_util.cut_string(kwargs['diagram_object_str'])
 
     if len(object_list_str) > 0:
+        xml_activity_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_9_ACTIVITY_LIST])
+        result_activity = all(t in xml_activity_name_list for t in object_list_str)
+
         xml_function_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
         result_function = all(t in xml_function_name_list for t in object_list_str)
 
@@ -377,7 +386,27 @@ def case_chain_diagram(**kwargs):
         xml_phy_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST])
         result_phy_elem = all(t in xml_phy_elem_name_list for t in object_list_str)
 
-        if result_function:
+        if result_activity:
+            activity_list = util.get_object_list_from_view(object_list_str,
+                                                           kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                                                           kwargs[XML_DICT_KEY_12_VIEW_LIST])
+
+            _, consumer_list, producer_list = \
+                util.get_cons_prod_from_view_allocated_flow(kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+                                                            kwargs[XML_DICT_KEY_12_VIEW_LIST],
+                                                            kwargs[
+                                                                XML_DICT_KEY_16_ACT_CONS_LIST],
+                                                            kwargs[
+                                                                XML_DICT_KEY_17_ACT_PROD_LIST],
+                                                            activity_list)
+
+            plantuml_string = diagram_generator_chain.show_activity_chain(object_list_str,
+                                                                          activity_list,
+                                                                          consumer_list,
+                                                                          producer_list,
+                                                                          kwargs[XML_DICT_KEY_13_TYPE_LIST],
+                                                                          kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST])
+        elif result_function:
             function_list = util.get_object_list_from_view(object_list_str,
                                                            kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                            kwargs[XML_DICT_KEY_12_VIEW_LIST])
@@ -565,8 +594,28 @@ def case_sequence_diagram(**kwargs):
             xml_information_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
                                                                         kwargs[XML_DICT_KEY_12_VIEW_LIST])
 
-            if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
-                   for i in object_list_str):
+            if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_9_ACTIVITY_LIST])
+                     for i in object_list_str):
+                if len(xml_information_list) > 0:
+                    if len(xml_information_list) != len(kwargs[XML_DICT_KEY_10_INFORMATION_LIST]):
+                        xml_cons = [i for i in kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+                                    if any(a == i[0] for a in [d for d in xml_information_list])]
+                        xml_prod = [i for i in kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+                                    if any(a == i[0] for a in [d for d in xml_information_list])]
+                    else:
+                        xml_cons = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+                        xml_prod = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+
+                    plantuml_string = show_functions_sequence(object_list_str,
+                                                              kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+                                                              xml_cons,
+                                                              xml_prod,
+                                                              xml_information_list)
+                else:
+                    Logger.set_warning(__name__,
+                                       f"There are no information defined for the requested elements")
+            elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
+                     for i in object_list_str):
                 if len(xml_data_list) > 0:
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         xml_cons = [i for i in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
@@ -624,6 +673,7 @@ def case_sequence_diagram(**kwargs):
                                  f"are:\n"
                                  f"- show sequence Function_A, Function_B, ...\n"
                                  f"- show sequence Functional_element_A, Functional_element_B, ...\n"
+                                 f"- show sequence Physical_element_A, Physical_element_B, ...\n"
                                  f"- show sequence Functional_interface\n")
 
     return plantuml_string
