@@ -76,7 +76,7 @@ Below an example of a context visualization for a functional element E which exp
 show context E
 </code></pre>
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The interface I is not shown until it allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
@@ -117,7 +117,7 @@ E is composed of E1, E2
 show decomposition E
 ```
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The interfaces I and I1 are not shown until they allocated at least one data. Please refer to the chapter [#data-allocation](functional-architecture-definition.md#data-allocation "mention")
@@ -399,7 +399,7 @@ E allocates F
 show decomposition E
 ```
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ### Allocation to functional element state
 
@@ -442,7 +442,7 @@ I allocates x
 show context E
 ```
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 Please note that JARVIS4SE will warn you in case one functional element exposing the interface has a functional element child that exposes it, suggesting you to allocate the related function to this child.
@@ -480,7 +480,7 @@ show chain <functional element 1 name>, <functional element 2 name>
 
 Below an example of a chain visualization with the previous functional element E and EE1:
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Sequence visualization
 
@@ -492,7 +492,7 @@ show sequence <functional element 1 name>, <functional element 2 name>
 
 Below an example of a sequence visualization with the previous E and EE1 functional elements:
 
-<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 JARVIS4SE allows to visualize also a chain of functional elements that expose a functional interface named _\<functional interface name>_ as a sequence of functional elements throught the following command:
 

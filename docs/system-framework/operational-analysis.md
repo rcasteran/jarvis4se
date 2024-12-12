@@ -11,26 +11,134 @@ From a methodological point of view, the definition of an activity can be justif
 
 ### Definition
 
+JARVIS4SE allows to define a new information named _\<information name>_ through the following command:
+
+```
+<information name> is an information
+```
+
 ### Attributes
+
+JARVIS4SE allows to define an attribute named _\<attribute name>_ for an information named _\<information name>_ through the following commands:
+
+```
+<attribute name> is an attribute
+The <attribute name> of <information name> is <attribute value>
+```
+
+The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the information.
+
+{% hint style="info" %}
+The first command is only required when the attribute does not exist
+{% endhint %}
 
 ## Activity creation
 
 ### Definition
 
+JARVIS4SE allows to define a new activity named _\<activity name>_ through the following command:
+
+```
+<activity name> is an activity
+```
+
 ### Attributes
+
+JARVIS4SE allows to define an attribute named _\<attribute name>_ for an activity named _\<activity name>_ through the following commands:
+
+```
+<attribute name> is an attribute
+The <attribute name> of <activity name> is <attribute value>
+```
+
+The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the activity.
+
+{% hint style="info" %}
+The first command is only required when the attribute does not exist
+{% endhint %}
 
 ### Information consumption
 
+JARVIS4SE allows to indicate that an information named _\<information name>_ is consumed by an activity named _\<activity name>_ through the following command:
+
+```
+<activity name> consumes <information name>
+```
+
 ### Information production
+
+JARVIS4SE allows to indicate that an information named _\<information name>_ is produced by an activity named _\<activity name>_ through the following command:
+
+```
+<activity name> produces <information name>
+```
 
 ### Context visualization
 
+JARVIS4SE allows to visualize the context of an activity named _\<activity name>_ through the following command:
 
+```
+show context <activity name>
+```
+
+Below an example of a context visualization for an activity A defined as followed: info\_b = A(info\_a) with PlantUML:
+
+<pre><code>A is an activity
+<strong>info_a is an information
+</strong>A consumes info_a
+info_b is an information
+A produces info_b
+show context A
+</code></pre>
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+## Activity decomposition
+
+{% hint style="info" %}
+An activity cannot be decomposed
+{% endhint %}
 
 ## Goal satisfaction
+
+
 
 ## Operational chain
 
 ### Chain visualization
 
+JARVIS4SE allows to visualize a chain of activities named _\<activity i name>,_ linked together by the information they produce/consume, through the following command:
+
+```
+show chain <activity 1 name>, <activity 2 name>
+```
+
+Below an example of a chain visualization with the previous activity A and a new activity B:
+
+```
+B is an activity
+B consumes info_b
+
+info_c is an information
+B produces info_c
+
+show chain A, B
+```
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
 ### Sequence visualization
+
+JARVIS4SE allows to visualize a chain of activities named _\<activity i name>,_ linked together by the information they produce/consume, as a sequence of activities, through the following command:
+
+```
+show sequence <activity 1 name>, <activity 2 name>
+```
+
+Below an example of a sequence visualization with the previous A and B activities:
+
+```
+show sequence A, B
+```
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
