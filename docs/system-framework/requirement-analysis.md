@@ -82,7 +82,7 @@ JARVIS4SE allows to structure the text _\<requirement\_text>_ to define conditio
 
 ### Child definition
 
-JARVIS4SE allows to derive a requirement named _\<requirement name>_ into derived requirements named _\<devreq i name>_ through the following commands:
+JARVIS4SE allows to derive a requirement named _\<requirement name>_ into derived requirements named _\<devreq i name>_ through one of the following commands:
 
 ```
 <requirement name> is derived into <devreq 1 name>, <devreq 2 name>

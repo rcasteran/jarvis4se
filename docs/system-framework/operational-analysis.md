@@ -59,18 +59,26 @@ The first command is only required when the attribute does not exist
 
 ### Information consumption
 
-JARVIS4SE allows to indicate that an information named _\<information name>_ is consumed by an activity named _\<activity name>_ through the following command:
+JARVIS4SE allows to indicate that an information named _\<information name>_ is consumed by an activity named _\<activity name>_ through one of the following commands:
 
 ```
 <activity name> consumes <information name>
 ```
 
+```
+<information name> is an input of <activity name>
+```
+
 ### Information production
 
-JARVIS4SE allows to indicate that an information named _\<information name>_ is produced by an activity named _\<activity name>_ through the following command:
+JARVIS4SE allows to indicate that an information named _\<information name>_ is produced by an activity named _\<activity name>_ through one of the following commands:
 
 ```
 <activity name> produces <information name>
+```
+
+```
+<information name> is an output of <activity name>
 ```
 
 ### Context visualization

@@ -70,11 +70,12 @@ show context <functional element name>
 
 Below an example of a context visualization for a functional element E which exposes an interface I with PlantUML:
 
-<pre><code>E is a functional element
-<strong>I is a functional interface
-</strong>E exposes I
+```
+E is a functional element
+I is a functional interface
+E exposes I
 show context E
-</code></pre>
+```
 
 <figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -86,10 +87,18 @@ The interface I is not shown until it allocated at least one data. Please refer 
 
 ### Child definition
 
-JARVIS4SE allows to decompose a functional element named _\<functional element name>_ into functional subelements named _\<functional subelement i name>_ through the following command:
+JARVIS4SE allows to decompose a functional element named _\<functional element name>_ into functional subelements named _\<functional subelement i name>_ through one of the following commands:
 
 ```
 <functional element name> is composed of <functional subelement 1 name>, <functional subelement 2 name>
+```
+
+```
+<functional subelement 1 name> composes <functional element name>
+```
+
+```
+<functional subelement 1 name>, <functional subelement 2 name> compose <functional element name>
 ```
 
 {% hint style="info" %}
@@ -291,10 +300,18 @@ show chain S1, S2
 
 ### Child definition
 
-JARVIS4SE allows to decompose a state named \<state name> into substates named _\<substate i name>_ through the following command:
+JARVIS4SE allows to decompose a state named \<state name> into substates named _\<substate i name>_ through one of the following commands:
 
 ```
 <state name> is composed of <substate 1 name>, <substate 2 name>
+```
+
+```
+<substate 1 name> composes <state name>
+```
+
+```
+<substate 1 name>, <substate 2 name> compose <state name>
 ```
 
 {% hint style="info" %}
@@ -322,14 +339,21 @@ S1 is composed of S11, S12
 show decomposition S1
 ```
 
-<mark style="color:red;">This function is not yet available.</mark> Please refer to [https://github.com/rcasteran/jarvis4se/issues/88](https://github.com/rcasteran/jarvis4se/issues/88)
+{% hint style="danger" %}
+This function is not yet available.\
+Please refer to [https://github.com/rcasteran/jarvis4se/issues/88](https://github.com/rcasteran/jarvis4se/issues/88)
+{% endhint %}
 
 ## Functional element state allocation
 
-JARVIS4SE allows to allocate a state named \<state name> to a functional element named \<functional element name> through the following command:
+JARVIS4SE allows to allocate a state named \<state name> to a functional element named \<functional element name> through one of the following commands:
 
 ```
 <functional element name> allocates <state name>
+```
+
+```
+ <state name> is allocated to <functional element name>
 ```
 
 {% hint style="info" %}
@@ -376,10 +400,14 @@ show state E
 
 ### Allocation to functional element
 
-JARVIS4SE allows to allocate a function named \<function name> to a functional element named \<functional element name> through the following command:
+JARVIS4SE allows to allocate a function named \<function name> to a functional element named \<functional element name> through one of the following commands:
 
 ```
 <functional element name> allocates <function name>
+```
+
+```
+<function name> is allocated to <functional element name>
 ```
 
 {% hint style="info" %}
@@ -403,10 +431,14 @@ show decomposition E
 
 ### Allocation to functional element state
 
-JARVIS4SE allows to allocate a function named \<function name> to a state named \<state name> through the following command:
+JARVIS4SE allows to allocate a function named \<function name> to a state named \<state name> through one of the following commands:
 
 ```
 <state name> allocates <function name>
+```
+
+```
+<function name> is allocated to <state name>
 ```
 
 {% hint style="danger" %}
@@ -417,10 +449,14 @@ Reversewise, when allocating a function to a state, if the state is allocated to
 
 ## Data allocation
 
-JARVIS4SE allows to allocate a data named \<data name> to a functional interface named \<functional interface name> through the following command:
+JARVIS4SE allows to allocate a data named \<data name> to a functional interface named \<functional interface name> through one of the following commands:
 
 ```
 <functional interface name> allocates <data name>
+```
+
+```
+<data name> is allocated to <functional interface name>
 ```
 
 {% hint style="info" %}
@@ -454,18 +490,26 @@ In the previous example, JARVIS4SE will warn you that functional element E1 is a
 
 ### Requirement satisfied by a functional element
 
-JARVIS4SE allows to indicate that a functional element named \<functional element name> satisfies a requirement named \<requirement name> through the following command:
+JARVIS4SE allows to indicate that a functional element named \<functional element name> satisfies a requirement named \<requirement name> through one of the following commands:
 
 ```
 <functional element name> satisfies <requirement name>
 ```
 
+```
+<requirement name> is satisfied by <functional element name>
+```
+
 ### Requirement satisfied by a functional interface
 
-JARVIS4SE allows to indicate that a functional interface named \<functional interface name> satisfies a requirement named \<requirement name> through the following command:
+JARVIS4SE allows to indicate that a functional interface named \<functional interface name> satisfies a requirement named \<requirement name> through one of the following commands:
 
 ```
 <functional interface name> satisfies <requirement name>
+```
+
+```
+<requirement name> is satisfied by <functional interface name>
 ```
 
 ## Functional architecture chain

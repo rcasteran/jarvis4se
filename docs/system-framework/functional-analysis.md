@@ -60,18 +60,26 @@ The first command is only required when the attribute does not exist
 
 ### Data consumption
 
-JARVIS4SE allows to indicate that a data named _\<data name>_ is consumed by a function named _\<function name>_ through the following command:
+JARVIS4SE allows to indicate that a data named _\<data name>_ is consumed by a function named _\<function name>_ through one of the following commands:
 
 ```
 <function name> consumes <data name>
 ```
 
+```
+<data name> is an input of <function name>
+```
+
 ### Data production
 
-JARVIS4SE allows to indicate that a data named _\<data name>_ is produced by a function named _\<function name>_ through the following command:
+JARVIS4SE allows to indicate that a data named _\<data name>_ is produced by a function named _\<function name>_ through one of the following commands:
 
 ```
 <function name> produces <data name>
+```
+
+```
+<data name> is an output of <function name>
 ```
 
 ### Context visualization
@@ -99,10 +107,18 @@ show context F
 
 ### Child definition
 
-JARVIS4SE allows to decompose a function named _\<function name>_ into subfunctions named _\<subfunction i name>_ through the following command:
+JARVIS4SE allows to decompose a function named _\<function name>_ into subfunctions named _\<subfunction i name>_ through one of the following commands:
 
 ```
 <function name> is composed of <subfunction 1 name>, <subfunction 2 name>
+```
+
+```
+<subfunction 1 name> composes <function name>
+```
+
+```
+<subfunction 1 name>, <subfunction 2 name> compose <function name>
 ```
 
 {% hint style="info" %}
@@ -135,28 +151,40 @@ show decomposition F
 
 ## Activity allocation
 
-JARVIS4SE allows to allocate an activity named \<activity name> to a function named \<function name> through the following command:
+JARVIS4SE allows to allocate an activity named \<activity name> to a function named \<function name> through one of the following commands:
 
 ```
 <function name> allocates <activity name>
+```
+
+```
+<activity name> is allocated to <function name>
 ```
 
 ## Requirement satisfaction
 
 ### Requirement satisfied by a function
 
-JARVIS4SE allows to indicate that a function named \<function name> satisfies a requirement named \<requirement name> through the following command:
+JARVIS4SE allows to indicate that a function named \<function name> satisfies a requirement named \<requirement name> through one of the following commands:
 
 ```
 <function name> satisfies <requirement name>
 ```
 
+```
+<requirement name> is satisfied by <function name>
+```
+
 ### Requirement satisfied by a data
 
-JARVIS4SE allows to indicate that a data named \<data name> satisfies a requirement named \<requirement name> through the following command:
+JARVIS4SE allows to indicate that a data named \<data name> satisfies a requirement named \<requirement name> through one of the following commands:
 
 ```
 <data name> satisfies <requirement name>
+```
+
+```
+<requirement name> is satisfied by <data name>
 ```
 
 ## Functional chain
