@@ -59,18 +59,26 @@ The first command is only required when the attribute does not exist
 
 ### Information consumption
 
-JARVIS4SE allows to indicate that an information named _\<information name>_ is consumed by an activity named _\<activity name>_ through the following command:
+JARVIS4SE allows to indicate that an information named _\<information name>_ is consumed by an activity named _\<activity name>_ through one of the following commands:
 
 ```
 <activity name> consumes <information name>
 ```
 
+```
+<information name> is an input of <activity name>
+```
+
 ### Information production
 
-JARVIS4SE allows to indicate that an information named _\<information name>_ is produced by an activity named _\<activity name>_ through the following command:
+JARVIS4SE allows to indicate that an information named _\<information name>_ is produced by an activity named _\<activity name>_ through one of the following commands:
 
 ```
 <activity name> produces <information name>
+```
+
+```
+<information name> is an output of <activity name>
 ```
 
 ### Context visualization
@@ -83,13 +91,14 @@ show context <activity name>
 
 Below an example of a context visualization for an activity A defined as followed: info\_b = A(info\_a) with PlantUML:
 
-<pre><code>A is an activity
-<strong>info_a is an information
-</strong>A consumes info_a
+```
+A is an activity
+info_a is an information
+A consumes info_a
 info_b is an information
 A produces info_b
 show context A
-</code></pre>
+```
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 

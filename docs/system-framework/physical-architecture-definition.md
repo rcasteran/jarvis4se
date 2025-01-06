@@ -58,10 +58,14 @@ The first command is only required when the attribute does not exist.
 
 ### Physical interface exposure
 
-JARVIS4SE allows to indicate that a physical interface named _\<physical interface name>_ is exposed by a physical element named _\<physical element name>_ through the following command:
+JARVIS4SE allows to indicate that a physical interface named _\<physical interface name>_ is exposed by a physical element named _\<physical element name>_ through one of the following commands:
 
 ```
 <physical element name> exposes <physical interface name>
+```
+
+```
+<physical interface name> is exposed by <physical element name>
 ```
 
 ### Context visualization
@@ -85,10 +89,18 @@ show context E
 
 ### Child definition
 
-JARVIS4SE allows to decompose a physical element named _\<physical element name>_ into physical subelements named _\<physical subelement i name>_ through the following command:
+JARVIS4SE allows to decompose a physical element named _\<physical element name>_ into physical subelements named _\<physical subelement i name>_ through one of the following commands:
 
 ```
 <physical element name> is composed of <physical subelement 1 name>, <physical subelement 2 name>
+```
+
+```
+<physical subelement 1 name> composes <physical element name>
+```
+
+```
+<physical subelement 1 name>, <physical subelement 2 name> compose <physical element name> 
 ```
 
 {% hint style="info" %}

@@ -69,7 +69,40 @@ Therefore:
 The text of a requirement must be a sentence containing the modal "shall".
 {% endhint %}
 
+JARVIS4SE allows to structure the text _\<requirement\_text>_ to define conditions and temporality of the requirement as follows:
+
+| Requirement                     | Boilerplate                                                                                     | Example                                                                                                               |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Simple                          | _\<subject>_ **shall** _\<object>_.                                                             | The system **shall** open the door.                                                                                   |
+| With conditions                 | **If** _\<condition list>_, **then** _\<subject>_ shall _\<object>_.                            | **If** the system detects an emergency stop, **then** the system **shall** open the door.                             |
+| With temporality only           | **When** _\<temporality>_, _\<subject>_ **shall** _\<object>_.                                  | **When** the system is stopped, the system **shall** open the door.                                                   |
+| With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject>_ shall _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system shall open the door. |
+
 ## Requirement decomposition
+
+### Child definition
+
+JARVIS4SE allows to derive a requirement named _\<requirement name>_ into derived requirements named _\<devreq i name>_ through one of the following commands:
+
+```
+<requirement name> is derived into <devreq 1 name>, <devreq 2 name>
+```
+
+```
+<devreq 1 name> derives from <requirement name>
+<devreq 1 name>, <devreq 2 name> derive from <requirement name>
+```
+
+{% hint style="info" %}
+The derived requirements must be created before as requirements. Please refer to the chapter [#requirement-creation](requirement-analysis.md#requirement-creation "mention")
+{% endhint %}
+
+### Decomposition visualization
+
+{% hint style="danger" %}
+This function is not yet implemented.\
+Please refer to [https://github.com/rcasteran/jarvis4se/issues/100](https://github.com/rcasteran/jarvis4se/issues/100)
+{% endhint %}
 
 ## Requirement import/export
 
