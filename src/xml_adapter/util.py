@@ -31,8 +31,21 @@ XML_DICT_KEY_17_ACT_PROD_LIST = 'xml_producer_activity_list'
 # Functions
 def normalize_xml_string(p_str):
     # Using XML character encoding rather than escape string
-    return str(p_str).replace("&", "#38;").replace("'", "#39;").replace("<", "#60;").replace(">", "#62;")
+    if p_str:
+        p_str_normalized = str(p_str).replace("&", "#38;").replace("'", "#39;").replace("<", "#60;")\
+            .replace(">", "#62;")
+    else:
+        p_str_normalized = ''
+
+    return p_str_normalized
 
 
 def denormalize_xml_string(p_str):
-    return str(p_str).replace("#38;", "&").replace("#39;", "'").replace("#60;", "<").replace("#62;", ">")
+    # Using XML character encoding rather than escape string
+    if p_str:
+        p_str_denormalized = str(p_str).replace("#38;", "&").replace("#39;", "'").replace("#60;", "<")\
+            .replace("#62;", ">")
+    else:
+        p_str_denormalized = p_str
+
+    return p_str_denormalized
