@@ -83,13 +83,14 @@ show context <activity name>
 
 Below an example of a context visualization for an activity A defined as followed: info\_b = A(info\_a) with PlantUML:
 
-<pre><code>A is an activity
-<strong>info_a is an information
-</strong>A consumes info_a
+```
+A is an activity
+info_a is an information
+A consumes info_a
 info_b is an information
 A produces info_b
 show context A
-</code></pre>
+```
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
