@@ -33,6 +33,7 @@ from .datamodel import TypeWithChildListStateIndex
 from .datamodel import TypeWithChildListFunctionalElementIndex
 from .datamodel import TypeWithChildListPhysicalElementIndex
 from .datamodel import TypeWithChildListRequirementIndex
+from .datamodel import TypeWithAllocatedReqList
 from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel
 from .datamodel import DesignAttributeLabel

@@ -2028,6 +2028,8 @@ TypeWithChildListStateIndex = 1
 TypeWithChildListFunctionalElementIndex = 2
 TypeWithChildListPhysicalElementIndex = 3
 TypeWithChildListRequirementIndex = 4
+TypeWithAllocatedReqList = (Function, Information, Data, State, Transition, FunctionalElement, Attribute,
+                            FunctionalInterface, PhysicalElement, PhysicalInterface, Type)
 EntryStateLabel = 'entry'
 ExitStateLabel = 'exit'
 DesignAttributeLabel = 'design'

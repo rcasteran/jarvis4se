@@ -54,7 +54,7 @@ def check_add_requirement(p_str_list, **kwargs):
         desc_before_modal = p_str[0].replace('"', "")
         desc_after_modal = p_str[1].replace('"', "")
 
-        if not desc_before_modal.startswith("The text of "):
+        if not desc_before_modal.startswith(f'The {datamodel.ObjectTextPropertyLabel} of '):
             req_subject, req_object, req_conditional, req_temporal = detect_req_pattern(desc_before_modal,
                                                                                         desc_after_modal)
 
@@ -65,9 +65,16 @@ def check_add_requirement(p_str_list, **kwargs):
             if not is_error:
                 if len(req_subject_object_list) > 0:
                     # Take the last one in case of requirement about attribute ( XXX of YYY shall)
-                    req_subject_object = req_subject_object_list[-1]
-                    Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
-                                              f"{desc_before_modal} shall {desc_after_modal}")
+                    if isinstance(req_subject_object_list[-1], datamodel.TypeWithAllocatedReqList):
+                        req_subject_object = req_subject_object_list[-1]
+                        Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
+                                                  f"{desc_before_modal} shall {desc_after_modal}")
+                    else:
+                        req_subject_object = None
+                        Logger.set_info(__name__,
+                                        f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
+                        Logger.set_warning(__name__,
+                                           f'Subject "{req_subject}" of the requirement is unknown')
                 else:
                     req_subject_object = None
                     Logger.set_info(__name__, f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
@@ -154,9 +161,15 @@ def check_add_text(p_text_str_list, **kwargs):
                         if not is_error:
                             if len(req_subject_object_list) > 0:
                                 # Take the last one in case of requirement about attribute ( XXX of YYY shall)
-                                req_subject_object = req_subject_object_list[-1]
-                                Logger.set_info(__name__, f"Requirement {requirement.name} is about "
-                                                          f"{req_subject_object.name}")
+                                if isinstance(req_subject_object_list[-1], datamodel.TypeWithAllocatedReqList):
+                                    req_subject_object = req_subject_object_list[-1]
+                                    Logger.set_info(__name__, f"Requirement {requirement.name} is about "
+                                                              f"{req_subject_object.name}")
+                                else:
+                                    req_subject_object = None
+                                    Logger.set_warning(__name__,
+                                                       f'Subject "{req_subject}" of the requirement {requirement.name} '
+                                                       f'is unknown')
                             else:
                                 req_subject_object = None
                                 Logger.set_warning(__name__,
@@ -196,7 +209,10 @@ def check_add_text(p_text_str_list, **kwargs):
             Logger.set_error(__name__,
                              f"text bad formatted: {text_str}")
 
-    update = add_requirement_text(text_list, **kwargs)
+    if text_list:
+        update = add_requirement_text(text_list, **kwargs)
+    else:
+        update = 0
 
     return update
 

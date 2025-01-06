@@ -60,6 +60,7 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
             (r"([^. |\n][^.|\n]*) derives from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
+            (r"([^. |\n][^.|\n]*) is derived into ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"^show ([^.|\n]*)", self.matched_show),
             (r"^(.*?)\?", self.matched_question_mark),
             (r"^list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
@@ -95,7 +96,8 @@ class CmdParser:
                                      r"([^. |\n][^.|\n]*) is allocated to ([^.|\n]*)",
                                      r"([^. |\n][^.|\n]*) are allocated to ([^.|\n]*)",
                                      r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)",
-                                     r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)")
+                                     r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)",
+                                     r"([^. |\n][^.|\n]*) is derived into ([^.|\n]*)")
 
         self.question_list = [
             (r"What is (.*)", handler_question.question_object_info),

@@ -1905,3 +1905,44 @@ def input_test_fun_elem_with_internal_interfaces_plantuml_decomposition():
                       'fun_elem_a2 exposes I_A2_A3',
                       'fun_elem_a3 exposes I_A2_A3',
                       'I_A2_A3 allocates C'])
+
+
+@pytest.fixture
+def input_test_requirement():
+    """@ingroup test_requirement
+    @anchor input_test_requirement
+    Defines input fixture for @ref test_requirement_with_id and @ref test_requirement_with_text
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+        REQ1 is a requirement
+
+        The text of REQ1 is "The system shall open the door"
+
+        REQ2 is a requirement
+        The text of REQ2 is "If the system detects an emergency stop, then the system shall open the door."
+
+        REQ3 is a requirement
+        The text of REQ3 is "When the system is stopped, if the system detects an emergency stop, then the system
+        shall open the door."
+    """
+    first_part = "\n".join(['REQ1 is a requirement',
+                            ""])
+
+    second_part = "\n".join(['The text of REQ1 is "The system shall open the door"',
+                             ""])
+
+    third_part = "\n".join(['REQ2 is a requirement',
+                            'The text of REQ2 is "If the system detects an emergency stop, '
+                            'then the system shall open the door."',
+                            'REQ2 derives from REQ1',
+                            ""])
+
+    fourth_part = "\n".join(['REQ3 is a requirement',
+                             'The text of REQ3 is "When the system is stopped, if the system detects an emergency '
+                             'stop, then the system shall open the door."',
+                             'REQ1 is derived into REQ3',
+                             ""])
+
+    return first_part, second_part, third_part, fourth_part
