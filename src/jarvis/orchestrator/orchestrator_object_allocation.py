@@ -47,7 +47,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
     """
     new_allocation_dict = {
         OBJ_ALLOCATION_TO_DATA_IDX: [], # [Data, Requirement]
-        OBJ_ALLOCATION_TO_FUNCTION_IDX: [],  # [Function, Requirement]
+        OBJ_ALLOCATION_TO_FUNCTION_IDX: [],  # [Function, Activity/Requirement]
         OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX: [],  # [FunctionalElement, Function/State/Requirement]
         OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX: [],  # [State, Function/Requirement]
         OBJ_ALLOCATION_TO_TRANSITION_IDX: [], # [Transition, Requirement]
@@ -99,7 +99,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_DATA_IDX
             if isinstance(alloc_obj, datamodel.Data):
                 if isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_DATA_IDX].append(pair)
                     else:
@@ -109,7 +109,13 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_FUNCTION_IDX
             elif isinstance(alloc_obj, datamodel.Function):
                 if isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
+                    if pair:
+                        new_allocation_dict[OBJ_ALLOCATION_TO_FUNCTION_IDX].append(pair)
+                    else:
+                        is_req_already_allocated = True
+                elif isinstance(obj_to_alloc, datamodel.Activity):
+                    pair = check_allocation_to_function(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_FUNCTION_IDX].append(pair)
                     else:
@@ -119,12 +125,12 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX
             elif isinstance(alloc_obj, datamodel.FunctionalElement):
                 if isinstance(obj_to_alloc, (datamodel.Function, datamodel.State)):
-                    pair = check_fun_elem_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                     **kwargs)
+                    pair = check_allocation_to_fun_elem(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                        **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX].append(pair)
                 elif isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX].append(pair)
                     else:
@@ -134,11 +140,12 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX
             elif isinstance(alloc_obj, datamodel.State):
                 if isinstance(obj_to_alloc, datamodel.Function):
-                    pair = check_state_allocation(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_6_STATE_LIST], **kwargs)
+                    pair = check_allocation_to_state(alloc_obj, obj_to_alloc, kwargs[XML_DICT_KEY_6_STATE_LIST],
+                                                     **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX].append(pair)
                 elif isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX].append(pair)
                     else:
@@ -148,7 +155,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_TRANSITION_IDX
             elif isinstance(alloc_obj, datamodel.Transition):
                 if isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_TRANSITION_IDX].append(pair)
                     else:
@@ -158,11 +165,11 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_FUN_INTF_IDX
             elif isinstance(alloc_obj, datamodel.FunctionalInterface):
                 if isinstance(obj_to_alloc, datamodel.Data):
-                    pair = check_fun_inter_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_to_fun_inter(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_FUN_INTF_IDX].append(pair)
                 elif isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_FUN_INTF_IDX].append(pair)
                     else:
@@ -172,11 +179,11 @@ def check_add_allocation(allocation_str_list, **kwargs):
             # case OBJ_ALLOCATION_TO_PHY_ELEM_IDX
             elif isinstance(alloc_obj, datamodel.PhysicalElement):
                 if isinstance(obj_to_alloc, (datamodel.Activity, datamodel.FunctionalElement)):
-                    pair = check_phy_elem_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_to_phy_elem(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_PHY_ELEM_IDX].append(pair)
                 elif isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_PHY_ELEM_IDX].append(pair)
                     else:
@@ -189,7 +196,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
                     # TODO Functional interface allocation to physical interface
                     print("Functional interface allocation case")
                 elif isinstance(obj_to_alloc, datamodel.Requirement):
-                    pair = check_requirement_allocation(alloc_obj, obj_to_alloc, **kwargs)
+                    pair = check_allocation_requirement(alloc_obj, obj_to_alloc, **kwargs)
                     if pair:
                         new_allocation_dict[OBJ_ALLOCATION_TO_PHY_INTF_IDX].append(pair)
                     else:
@@ -214,6 +221,20 @@ def check_add_allocation(allocation_str_list, **kwargs):
     update = add_allocation(new_allocation_dict, **kwargs)
 
     return update
+
+
+def check_allocation_to_function(alloc_obj, obj_to_alloc, **kwargs):
+    pair = None
+
+    if isinstance(obj_to_alloc, datamodel.Activity):
+        if not any(allocated_activity_id == obj_to_alloc.id
+                   for allocated_activity_id in alloc_obj.allocated_activity_list):
+            alloc_obj.add_allocated_activity(obj_to_alloc.id)
+            pair = [alloc_obj, obj_to_alloc]
+        # Else do nothing
+    # Else do nothing
+
+    return pair
 
 
 def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
@@ -331,7 +352,7 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
     return update
 
 
-def check_phy_elem_allocation(alloc_obj, obj_to_alloc, **kwargs):
+def check_allocation_to_phy_elem(alloc_obj, obj_to_alloc, **kwargs):
     # TODO Functional element allocation to physical element
     pair = None
 
@@ -346,7 +367,7 @@ def check_phy_elem_allocation(alloc_obj, obj_to_alloc, **kwargs):
     return pair
 
 
-def check_requirement_allocation(p_obj, p_req, **kwargs):
+def check_allocation_requirement(p_obj, p_req, **kwargs):
     pair = None
 
     if not any(allocated_req_id == p_req.id for allocated_req_id in p_obj.allocated_req_list):
@@ -366,7 +387,7 @@ def check_requirement_allocation(p_obj, p_req, **kwargs):
     return pair
 
 
-def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
+def check_allocation_to_fun_elem(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
     """Check allocation rules for fun_elem then returns objects if check"""
     count = None
     out = None
@@ -388,7 +409,7 @@ def check_fun_elem_allocation(fun_elem, obj_to_alloc, fun_elem_list, **kwargs):
     return out
 
 
-def check_state_allocation(state, function, state_list, **kwargs):
+def check_allocation_to_state(state, function, state_list, **kwargs):
     """Check allocation rules for state then returns objects if check"""
     out = None
     check_allocation = orchestrator_object.retrieve_allocated_object_list(function, state_list, **kwargs)
@@ -403,7 +424,7 @@ def check_state_allocation(state, function, state_list, **kwargs):
     return out
 
 
-def check_fun_inter_allocation(fun_inter, data, **kwargs):
+def check_allocation_to_fun_inter(fun_inter, data, **kwargs):
     """Check allocation rules for fun_inter then returns objects if check"""
     out = None
     check_allocation_fun_inter = orchestrator_object.retrieve_allocated_object_list(

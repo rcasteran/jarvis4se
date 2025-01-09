@@ -185,6 +185,10 @@ class CsvWriter3SE:
             for allocated_requirement_id in function.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
+            allocated_activity_id_list = ''
+            for allocated_activity_id in function.allocated_activity_list:
+                allocated_activity_id_list += allocated_activity_id + util.CSV_MEMBER_SPLIT
+
             if function.derived is not None:
                 function_derived = function.derived.id
             else:
@@ -208,7 +212,7 @@ class CsvWriter3SE:
                           '',  # Function list
                           '',  # State list
                           '',  # Interface list
-                          '',  # Activity list
+                          allocated_activity_id_list[:-1],  # Activity list
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list

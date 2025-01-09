@@ -160,7 +160,7 @@ def write_function_object(string_obj, function, input_flow_list, output_flow_lis
                 string_obj.create_port([q], "out")
 
 
-def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, producer_function_list,
+def get_function_diagrams(function_list, activity_list, fun_elem_list, consumer_function_list, producer_function_list,
                           parent_child_dict, data_list, xml_type_list, xml_attribute_list):
     """@ingroup plantuml_adapter
     @anchor get_function_diagrams
@@ -266,6 +266,12 @@ def get_function_diagrams(function_list, fun_elem_list, consumer_function_list, 
                     if function.id in parent_child_dict.values():
                         # Function is a parent
                         string_obj.create_component(function)
+                        for allocated_activity_id in function.allocated_activity_list:
+                            for activity in activity_list:
+                                if activity.id == allocated_activity_id:
+                                    write_function_object(string_obj, activity, input_flow_list, output_flow_list,
+                                                          False, xml_attribute_list, compo_diagram=True)
+                                # Else do nothing
                         write_function_child(string_obj, function, input_flow_list, output_flow_list,
                                              xml_attribute_list)
                         string_obj.create_component_attribute(function, xml_attribute_list)

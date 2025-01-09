@@ -27,6 +27,7 @@ def show_activity_context(diagram_activity_str, xml_activity_list, xml_consumer_
         xml_producer_activity_list)
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           activity_list=None,
                                                            fun_elem_list=None,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,
@@ -41,9 +42,18 @@ def show_activity_context(diagram_activity_str, xml_activity_list, xml_consumer_
     return plantuml_text
 
 
-def show_function_context(diagram_function_str, xml_function_list, xml_consumer_function_list,
-                          xml_producer_function_list, xml_data_list, xml_attribute_list,
-                          xml_type_list):
+def show_function_context(diagram_function_str, **kwargs):
+    xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
+
+    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+
+    xml_attribute_list = kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST]
+    xml_type_list = kwargs[XML_DICT_KEY_13_TYPE_LIST]
 
     new_function_list, new_consumer_list, new_producer_list = util.get_function_context_lists(
         diagram_function_str,
@@ -51,11 +61,38 @@ def show_function_context(diagram_function_str, xml_function_list, xml_consumer_
         xml_consumer_function_list,
         xml_producer_function_list)
 
+    allocated_activity_list = set()
+    parent_child_dict = {}
+    for new_function in new_function_list:
+        for allocated_activity_id in new_function.allocated_activity_list:
+            for xml_activity in xml_activity_list:
+                if xml_activity.id == allocated_activity_id:
+                    allocated_activity_list.add(xml_activity)
+                    parent_child_dict[xml_activity.id] = new_function.id
+                # Else do nothing
+
+    print(parent_child_dict)
+
+    new_activity_list, new_activity_consumer_list, new_activity_producer_list = \
+        util.get_allocated_function_context_lists(allocated_activity_list,
+                                                  xml_consumer_activity_list,
+                                                  xml_producer_activity_list)
+
+    for new_activity in new_activity_list:
+        new_function_list.add(new_activity)
+
+    for new_activity_consumer in new_activity_consumer_list:
+        new_consumer_list.append(new_activity_consumer)
+
+    for new_activity_producer in new_activity_producer_list:
+        new_producer_list.append(new_activity_producer)
+
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           activity_list=allocated_activity_list,
                                                            fun_elem_list=None,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,
-                                                           parent_child_dict={},
+                                                           parent_child_dict=parent_child_dict,
                                                            data_list=xml_data_list,
                                                            xml_type_list=xml_type_list,
                                                            xml_attribute_list=xml_attribute_list)
@@ -138,6 +175,7 @@ def show_function_decomposition(diagram_function_str, xml_function_list, xml_con
                     function.child_list.remove(j)
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           activity_list=None,
                                                            fun_elem_list=None,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,

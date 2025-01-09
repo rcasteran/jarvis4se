@@ -10,6 +10,7 @@ INFO_KEY_DERIVED = 'derived from object'
 INFO_KEY_CHILD_LIST = 'child list'
 INFO_KEY_REQUIREMENT_LIST = 'requirement list'
 INFO_KEY_DATA_LIST = 'allocated data list'
+INFO_KEY_ACTIVITY_LIST = 'allocated activity list'
 INFO_KEY_TEXT = 'text'
 
 
@@ -323,6 +324,48 @@ def info_allocated_data(p_obj):
         info_dict = {INFO_KEY_DATA_LIST: data_id_list}
     else:
         info_dict = {INFO_KEY_DATA_LIST: 'none'}
+
+    return info_dict
+
+
+def str_allocated_activity(p_obj):
+    """@ingroup datamodel
+    @anchor str_allocated_activity
+    Return a string representation of the allocated activity list of a class instance
+    @param[in] p_obj class instance
+    @return string
+    """
+    if len(p_obj.allocated_activity_list) > 1:
+        rep = f'"{p_obj.name}" has {len(p_obj.allocated_activity_list)} allocated activity:\n'
+        for item in p_obj.allocated_activity_list:
+            rep += f' - activity with identifier {item}\n'
+        rep = rep[:-1]
+    elif len(p_obj.allocated_activity_list) == 1:
+        rep = f'"{p_obj.name}" has one allocated activity:\n'
+        for item in p_obj.allocated_activity_list:
+            rep += f' - activity with identifier {item}\n'
+        rep = rep[:-1]
+    else:
+        rep = f'"{p_obj.name}" has no allocated activity.'
+
+    return rep
+
+
+def info_allocated_activity(p_obj):
+    """@ingroup datamodel
+    @anchor info_allocated_activity
+    Return a dict representation of the allocated activity list of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if len(p_obj.allocated_activity_list) > 0:
+        activity_id_list = ''
+        for item in p_obj.allocated_activity_list:
+            activity_id_list += f'{item}\n'
+        activity_id_list = activity_id_list[:-1]
+        info_dict = {INFO_KEY_ACTIVITY_LIST: activity_id_list}
+    else:
+        info_dict = {INFO_KEY_ACTIVITY_LIST: 'none'}
 
     return info_dict
 

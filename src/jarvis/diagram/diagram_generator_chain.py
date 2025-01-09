@@ -91,6 +91,7 @@ def show_function_chain(function_list_str, xml_function_list, xml_consumer_funct
     Logger.set_debug(__name__, f"parent list: {new_parent_dict}")
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
+                                                           activity_list=None,
                                                            fun_elem_list=None,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,
@@ -131,6 +132,7 @@ def show_fun_elem_chain(fun_elem_list_str, xml_function_list, xml_consumer_funct
     Logger.set_debug(__name__, f'list of producer list: {new_producer_list}')
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=xml_function_list,
+                                                           activity_list=None,
                                                            fun_elem_list=xml_fun_elem_list,
                                                            consumer_function_list=new_consumer_list,
                                                            producer_function_list=new_producer_list,

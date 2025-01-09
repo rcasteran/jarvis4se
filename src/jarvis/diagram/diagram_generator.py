@@ -104,12 +104,7 @@ def case_context_diagram(**kwargs):
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
 
         plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
-                                                                       kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-                                                                       kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
-                                                                       kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
-                                                                       kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                       kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
-                                                                       kwargs[XML_DICT_KEY_13_TYPE_LIST])
+                                                                       **kwargs)
 
         query_inheritance.query_inheritance_remove_inherited_object(
             consumed_flow_inheritance,

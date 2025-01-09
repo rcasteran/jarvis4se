@@ -192,6 +192,15 @@ class XmlParser3SE:
             for xml_part in xml_part_list:
                 parent_list[xml_part.get('id')] = function.id
 
+            # Looking for allocated activities and add them to the function
+            xml_allocated_activity_list = xml_function.iter('allocatedActivity')
+            for xml_allocated_activity in xml_allocated_activity_list:
+                function.add_allocated_activity(xml_allocated_activity.get("id"))
+
+                Logger.set_debug(__name__, f"Activity [{xml_allocated_activity.get('id')}]"
+                                           f" is allocated to "
+                                           f"function [{function.id}, {function.name}]")
+
             # Looking for allocated requirements and add them to the function
             xml_allocated_requirement_list = xml_function.iter('allocatedRequirement')
             for xml_allocated_requirement in xml_allocated_requirement_list:

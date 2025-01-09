@@ -190,6 +190,7 @@ class Activity:
         # Activity has no child
         # Activity has no allocated requirement
         # Activity has no allocated data
+        # Activity has no allocated activity
 
         return rep
 
@@ -204,7 +205,8 @@ class Activity:
                 **util.info_parent(self)
                 # Activity has no child
                 # Activity has no allocated requirement
-                # Function has no allocated data
+                # Activity has no allocated data
+                # Activity has no allocated activity
                 # No display of input_role and operand
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -254,6 +256,9 @@ class Function:
 
         @var allocated_req_list
         allocated requirement list
+
+        @var allocated_activity_list
+        allocated requirement list
         """
 
         self.id = p_id
@@ -266,6 +271,7 @@ class Function:
         self.operand = p_operand
         self.derived = p_derived
         self.allocated_req_list = set()
+        self.allocated_activity_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -353,6 +359,14 @@ class Function:
         """
         self.allocated_req_list.add(p_req)
 
+    def add_allocated_activity(self, p_activity):
+        """Add allocated activity to allocated_activity_list
+        @param[in] self this class instance
+        @param[in] p_activity allocated activity
+        @return None
+        """
+        self.allocated_activity_list.add(p_activity)
+
     def __str__(self):
         """Return a string representation of the class instance
         @param[in] self this class instance
@@ -363,8 +377,9 @@ class Function:
         rep += util.str_derived(self) + '\n'
         rep += util.str_parent(self) + '\n'
         rep += util.str_child_list(self) + '\n'
-        rep += util.str_allocated_req(self)
+        rep += util.str_allocated_req(self) + '\n'
         # Function has no allocated data
+        rep += util.str_allocated_activity(self) + '\n'
 
         # No display of input_role and operand
 
@@ -380,15 +395,17 @@ class Function:
                 **util.info_derived(self),
                 **util.info_parent(self),
                 **util.info_child_list(self),
-                **util.info_allocated_req(self)
+                **util.info_allocated_req(self),
                 # Function has no allocated data
+                **util.info_allocated_activity(self)
                 # No display of input_role and operand
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_DERIVED,
                     util.INFO_KEY_PARENT,
                     util.INFO_KEY_CHILD_LIST,
-                    util.INFO_KEY_REQUIREMENT_LIST
+                    util.INFO_KEY_REQUIREMENT_LIST,
+                    util.INFO_KEY_ACTIVITY_LIST
                     ]
 
 
@@ -478,6 +495,7 @@ class Information:
         # Information has no children
         rep += util.str_allocated_req(self)
         # Information has no allocated data
+        # Information has no allocated activity
 
         # No display of predecessor list
 
@@ -495,6 +513,7 @@ class Information:
                 # Information has no children
                 **util.info_allocated_req(self)
                 # Information has no allocated data
+                # Information has no allocated activity
                 # No display of predecessor list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_REQUIREMENT_LIST
@@ -587,6 +606,7 @@ class Data:
         # Data has no children
         rep += util.str_allocated_req(self)
         # Data has no allocated data
+        # Data has no allocated activity
 
         # No display of predecessor list
 
@@ -604,6 +624,7 @@ class Data:
                 # Data has no children
                 **util.info_allocated_req(self)
                 # Data has no allocated data
+                # Data has no allocated activity
                 # No display of predecessor list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_REQUIREMENT_LIST
@@ -738,6 +759,7 @@ class State:
         rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
         # State has no allocated data
+        # State has no allocated activity
 
         # No display of allocated function list
 
@@ -755,6 +777,7 @@ class State:
                 **util.str_child_list(self),
                 **util.str_allocated_req(self)
                 # State has no allocated data
+                # State has no allocated activity
                 # No display of allocated function list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -885,6 +908,7 @@ class Transition:
         # Transition has no children
         rep += util.str_allocated_req(self)
         # Transition has no allocated data
+        # Transition has no allocated activity
 
         # No display of source, destination and condition_list
 
@@ -902,6 +926,7 @@ class Transition:
                 # Transition has no children
                 **util.info_allocated_req(self)
                 # Transition has no allocated data
+                # Transition has no allocated activity
                 # No display of source, destination and condition_list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1082,6 +1107,7 @@ class FunctionalElement:
         rep += util.str_child_list(self) + '\n'
         rep += util.str_allocated_req(self)
         # Functional element has no allocated data
+        # Functional element has no allocated activity
 
         # No display of allocated function, allocated state and exposed interface
 
@@ -1099,6 +1125,7 @@ class FunctionalElement:
                 **util.info_child_list(self),
                 **util.info_allocated_req(self)
                 # Functional element has no allocated data
+                # Functional element has no allocated activity
                 # No display of allocated function, allocated state and exposed interface
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1191,6 +1218,7 @@ class View:
         # View has no children
         # View has no allocated requirement
         # View has no allocated data
+        # View has no allocated activity
 
         # No display of allocated item list
 
@@ -1208,6 +1236,7 @@ class View:
                 # View has no children
                 # View has no allocated requirement
                 # View has no allocated data
+                # View has no allocated activity
                 # No display of allocated item list
                 }, [util.INFO_KEY_TYPE
                     ]
@@ -1307,6 +1336,7 @@ class Attribute:
         # Attribute has no children
         rep += util.str_allocated_req(self)
         # Attribute has no allocated data
+        # Attribute has no allocated activity
 
         # No display of described item list
 
@@ -1324,6 +1354,7 @@ class Attribute:
                 # Attribute has no children
                 **util.info_allocated_req(self)
                 # Attribute has no allocated data
+                # Attribute has no allocated activity
                 # No display of described item list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1440,6 +1471,7 @@ class FunctionalInterface:
         # Functional interface has no children
         rep += util.str_allocated_req(self) + '\n'
         rep += util.str_allocated_data(self)
+        # Functional interface has no allocated activity
 
         return rep
 
@@ -1455,6 +1487,7 @@ class FunctionalInterface:
                 # Functional interface has no children
                 **util.info_allocated_req(self),
                 **util.info_allocated_data(self)
+                # Funtional interface has no allocated activity
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_DERIVED,
@@ -1617,8 +1650,9 @@ class PhysicalElement:
         rep += util.str_derived(self) + '\n'
         rep += util.str_parent(self) + '\n'
         rep += util.str_child_list(self) + '\n'
-        rep += util.str_allocated_req(self)
+        rep += util.str_allocated_req(self) + '\n'
         # Physical element has no allocated data
+        rep += util.str_allocated_activity(self)
 
         # No display of allocated activity, allocated functional element list and exposed interface list
 
@@ -1634,15 +1668,17 @@ class PhysicalElement:
                 **util.info_derived(self),
                 **util.info_parent(self),
                 **util.info_child_list(self),
-                **util.info_allocated_req(self)
+                **util.info_allocated_req(self),
                 # Physical element has no allocated data
+                **util.info_allocated_activity(self)
                 # No display of allocated activity, allocated functional element list and exposed interface list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_DERIVED,
                     util.INFO_KEY_PARENT,
                     util.INFO_KEY_CHILD_LIST,
-                    util.INFO_KEY_REQUIREMENT_LIST
+                    util.INFO_KEY_REQUIREMENT_LIST,
+                    util.INFO_KEY_ACTIVITY_LIST
                     ]
 
 
@@ -1755,6 +1791,7 @@ class PhysicalInterface:
         # Physical interface has no children
         rep += util.str_allocated_req(self)
         # Physical interface has no allocated data
+        # Physical interface has no allocated activity
 
         # No display of allocated functional interface list
 
@@ -1772,6 +1809,7 @@ class PhysicalInterface:
                 # Physical interface has no children
                 **util.info_allocated_req(self)
                 # Physical interface has no allocated data
+                # Physical interface has no allocated activity
                 # No display of allocated functional interface list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1862,6 +1900,7 @@ class Type:
         # Type has no children
         rep += util.str_allocated_req(self)
         # Type has no allocated data
+        # Type has no allocated activity
 
         # No display of base type
 
@@ -1878,6 +1917,7 @@ class Type:
                 # Type has no children
                 **util.info_allocated_req(self)
                 # Type has no allocated data
+                # Type has no allocated activity
                 # No display of base type
                 }, [util.INFO_KEY_ALIAS,
                     util.INFO_KEY_REQUIREMENT_LIST
@@ -1996,6 +2036,7 @@ class Requirement:
         rep += util.str_child_list(self) + '\n'
         # Requirement has no allocated requirement
         # Requirement has no allocated data
+        # Requirement has no allocated activity
         rep += util.str_text(self)
 
         return rep
@@ -2012,6 +2053,7 @@ class Requirement:
                 **util.info_child_list(self),
                 # Requirement has no allocated requirement
                 # Requirement has no allocated data
+                # Requirement has no allocated activity
                 **util.info_text(self)
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,

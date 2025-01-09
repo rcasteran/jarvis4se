@@ -191,6 +191,17 @@ class CsvParser3SE:
                         parent_list[csv_part_id] = function.id
                 # Else do nothing
 
+                # Looking for allocated activities and add them to the function
+                if len(row[util.CSV_ACTIVITY_LIST_IDX]) > 0:
+                    csv_allocated_activity_id_list = row[util.CSV_ACTIVITY_LIST_IDX].split("|")
+                    for csv_allocated_activity_id in csv_allocated_activity_id_list:
+                        function.add_allocated_activity(csv_allocated_activity_id)
+
+                        Logger.set_debug(__name__, f"Activity [{csv_allocated_activity_id}]"
+                                                   f" is allocated to "
+                                                   f"function [{function.id}, {function.name}]")
+                # Else do nothing
+
                 # Looking for allocated requirements and add them to the function
                 if len(row[util.CSV_REQ_LIST_IDX]) > 0:
                     csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split("|")
