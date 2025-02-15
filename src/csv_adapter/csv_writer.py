@@ -104,10 +104,11 @@ class CsvWriter3SE:
                                  'function list',
                                  'state list',
                                  'interface list',
-                                 'activity list'
+                                 'activity list',
                                  'functional element list',
                                  'described element list',
-                                 'view element list'
+                                 'view element list',
+                                 'information list',
                                  'requirement list'])
 
                 array = []
@@ -165,6 +166,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           ''  # Requirement list
                           ])
 
@@ -216,6 +218,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -231,6 +234,10 @@ class CsvWriter3SE:
             predecessor_id_list = ''
             for predecessor in data.predecessor_list:
                 predecessor_id_list += predecessor.id + util.CSV_MEMBER_SPLIT
+
+            allocated_information_id_list = ''
+            for allocated_info_id in data.allocated_info_list:
+                allocated_information_id_list += allocated_info_id + util.CSV_MEMBER_SPLIT
 
             allocated_requirement_id_list = ''
             for allocated_requirement_id in data.allocated_req_list:
@@ -258,6 +265,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          allocated_information_id_list[:-1],  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -342,6 +350,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           ''  # Requirement list
                           ])
 
@@ -424,6 +433,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -466,6 +476,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -525,6 +536,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -563,6 +575,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           allocated_element_id_list[:-1],  # View element list
+                          '',  # Information list
                           ''  # Requirement list
                           ])
 
@@ -606,6 +619,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           described_element_list[:-1],  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -653,6 +667,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -712,6 +727,7 @@ class CsvWriter3SE:
                           allocated_fun_elem_id_list[:-1],  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -759,6 +775,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           allocated_requirement_id_list[:-1]  # Requirement list
                           ])
 
@@ -793,6 +810,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           ''  # Requirement list
                           ])
 
@@ -831,6 +849,7 @@ class CsvWriter3SE:
                           '',  # Functional element list
                           '',  # Described element list
                           '',  # View element list
+                          '',  # Information list
                           ''  # Requirement list
                           ])
 

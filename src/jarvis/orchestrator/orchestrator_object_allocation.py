@@ -77,6 +77,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
                XML_DICT_KEY_9_ACTIVITY_LIST: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
                XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
                XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
+               XML_DICT_KEY_10_INFORMATION_LIST: kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
                XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
@@ -104,6 +105,11 @@ def check_add_allocation(allocation_str_list, **kwargs):
                         new_allocation_dict[OBJ_ALLOCATION_TO_DATA_IDX].append(pair)
                     else:
                         is_req_already_allocated = True
+                elif isinstance(obj_to_alloc, datamodel.Information):
+                    pair = check_allocation_information(alloc_obj, obj_to_alloc, **kwargs)
+                    if pair:
+                        new_allocation_dict[OBJ_ALLOCATION_TO_DATA_IDX].append(pair)
+                    # Else do nothing
                 else:
                     is_improper_allocation = True
             # case OBJ_ALLOCATION_TO_FUNCTION_IDX
@@ -493,6 +499,38 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
                                                f'allocate the Function {function.name} to it.')
 
     return [is_consumer, is_producer]
+
+
+def check_allocation_information(p_obj, p_information, **kwargs):
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    pair = None
+
+    if not any(allocated_info_id == p_information.id for allocated_info_id in p_obj.allocated_info_list):
+        for xml_consumer_function in xml_consumer_function_list:
+            if xml_consumer_function[0] == p_obj:
+                for allocated_activity_id in xml_consumer_function[1].allocated_activity_list:
+                    for xml_consumer_activity in xml_consumer_activity_list:
+                        if xml_consumer_activity[1].id == allocated_activity_id and xml_consumer_activity[0] == p_information:
+                            pair = [p_obj, p_information]
+                        # Else do nothing
+            #Else do nothing
+
+        if not pair:
+            for xml_producer_function in xml_producer_function_list:
+                if xml_producer_function[0] == p_obj:
+                    for allocated_activity_id in xml_producer_function[1].allocated_activity_list:
+                        for xml_producer_activity in xml_producer_activity_list:
+                            if xml_producer_activity[1].id == allocated_activity_id and xml_producer_activity[0] == p_information:
+                                pair = [p_obj, p_information]
+                            # Else do nothing
+                # Else do nothing
+        # Else do nothing
+    # Else do nothing
+
+    return pair
 
 
 def add_allocation(allocation_dict, **kwargs):

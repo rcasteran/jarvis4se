@@ -11,6 +11,7 @@ INFO_KEY_CHILD_LIST = 'child list'
 INFO_KEY_REQUIREMENT_LIST = 'requirement list'
 INFO_KEY_DATA_LIST = 'allocated data list'
 INFO_KEY_ACTIVITY_LIST = 'allocated activity list'
+INFO_KEY_INFORMATION_LIST = 'allocated information list'
 INFO_KEY_TEXT = 'text'
 
 
@@ -370,10 +371,52 @@ def info_allocated_activity(p_obj):
     return info_dict
 
 
+def str_allocated_information(p_obj):
+    """@ingroup datamodel
+    @anchor str_allocated_information
+    Return a string representation of the allocated information of a class instance
+    @param[in] p_obj class instance
+    @return string
+    """
+    if len(p_obj.allocated_info_list) > 1:
+        rep = f'"{p_obj.name}" has {len(p_obj.allocated_info_list)} allocated information:\n'
+        for item in p_obj.allocated_info_list:
+            rep += f' - information with identifier {item}\n'
+        rep = rep[:-1]
+    elif len(p_obj.allocated_info_list) == 1:
+        rep = f'"{p_obj.name}" has one allocated information:\n'
+        for item in p_obj.allocated_info_list:
+            rep += f' - information with identifier {item}\n'
+        rep = rep[:-1]
+    else:
+        rep = f'"{p_obj.name}" has no allocated information.'
+
+    return rep
+
+
+def info_allocated_information(p_obj):
+    """@ingroup datamodel
+    @anchor info_allocated_information
+    Return a dict representation of the allocated information of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if len(p_obj.allocated_info_list) > 0:
+        information_id_list = ''
+        for item in p_obj.allocated_info_list:
+            information_id_list += f'{item}\n'
+        information_id_list = information_id_list[:-1]
+        info_dict = {INFO_KEY_INFORMATION_LIST: information_id_list}
+    else:
+        info_dict = {INFO_KEY_INFORMATION_LIST: 'none'}
+
+    return info_dict
+
+
 def str_text(p_obj):
     """@ingroup datamodel
     @anchor str_text
-    Return a string representation of the test of a class instance
+    Return a string representation of the text of a class instance
     @param[in] p_obj class instance
     @return string
     """

@@ -160,9 +160,15 @@ class XmlWriter3SE:
 
                 allocated_req_list_tag = etree.SubElement(data_tag, "allocatedRequirementList")
                 for allocated_req_id in data.allocated_req_list:
-                    _allocated_obj_tag = etree.SubElement(allocated_req_list_tag,
+                    _allocated_req_tag = etree.SubElement(allocated_req_list_tag,
                                                           'allocatedRequirement',
                                                           {'id': str(allocated_req_id)})
+
+                allocated_information_list_tag = etree.SubElement(data_tag, "allocatedInformationList")
+                for allocated_information_id in data.allocated_info_list:
+                    _allocated_info_tag = etree.SubElement(allocated_information_list_tag,
+                                                           'allocatedInformation',
+                                                           {'id': str(allocated_information_id)})
 
         Logger.set_debug(__name__, self.write_data.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
@@ -1031,6 +1037,8 @@ class XmlWriter3SE:
             elem_tag = "allocatedItem"
         elif isinstance(obj, datamodel.Requirement):
             elem_tag = "allocatedRequirement"
+        elif isinstance(obj, datamodel.Information):
+            elem_tag = "allocatedInformation"
         else:
             Logger.set_error(__name__, f"Unsupported type for object {obj.id} allocation")
 

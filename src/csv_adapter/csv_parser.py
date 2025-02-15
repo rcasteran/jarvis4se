@@ -703,6 +703,17 @@ class CsvParser3SE:
                 data_list.add(data)
 
                 # Looking for allocated requirements and add them to the data
+                if len(row[util.CSV_INFO_LIST_IDX]) > 0:
+                    csv_allocated_info_id_list = row[util.CSV_INFO_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_info_id in csv_allocated_info_id_list:
+                        data.add_allocated_information(csv_allocated_info_id)
+
+                        Logger.set_debug(__name__, f"Information [{csv_allocated_info_id}]"
+                                                   f" is allocated to "
+                                                   f"data [{data.id}, {data.name}]")
+                # Else do nothing
+
+                # Looking for allocated requirements and add them to the data
                 if len(row[util.CSV_REQ_LIST_IDX]) > 0:
                     csv_allocated_requirement_id_list = row[util.CSV_REQ_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
                     for csv_allocated_requirement_id in csv_allocated_requirement_id_list:

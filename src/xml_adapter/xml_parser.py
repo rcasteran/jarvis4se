@@ -234,6 +234,15 @@ class XmlParser3SE:
                                   p_type=xml_data.get('type'))
             data_list.add(data)
 
+            # Looking for allocated informations and add them to the data
+            xml_allocated_information_list = xml_data.iter('allocatedInformation')
+            for xml_allocated_information in xml_allocated_information_list:
+                data.add_allocated_information(xml_allocated_information.get("id"))
+
+                Logger.set_debug(__name__, f"Information [{xml_allocated_information.get('id')}]"
+                                           f" is allocated to "
+                                           f"data [{data.id}, {data.name}]")
+
             # Looking for allocated requirements and add them to the data
             xml_allocated_requirement_list = xml_data.iter('allocatedRequirement')
             for xml_allocated_requirement in xml_allocated_requirement_list:

@@ -4,6 +4,7 @@ Jarvis diagram module
 # Libraries
 
 # Modules
+import datamodel
 import plantuml_adapter
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
@@ -76,14 +77,79 @@ def show_function_context(diagram_function_str, **kwargs):
                                                   xml_consumer_activity_list,
                                                   xml_producer_activity_list)
 
-    for new_activity in new_activity_list:
-        new_function_list.add(new_activity)
-
     for new_activity_consumer in new_activity_consumer_list:
-        new_consumer_list.append(new_activity_consumer)
+        is_allocated = False
+        for new_consumer in new_consumer_list:
+            if isinstance(new_consumer[0], datamodel.Data):
+                for allocated_info_id in new_consumer[0].allocated_info_list:
+                    if new_activity_consumer[0].id == allocated_info_id:
+                        is_allocated = True
+                        break
+                    # Else do nothing
+            # Else do nothing
+
+        if not is_allocated:
+            for new_producer in new_producer_list:
+                if isinstance(new_producer[0], datamodel.Data):
+                    for allocated_info_id in new_producer[0].allocated_info_list:
+                        if new_activity_consumer[0].id == allocated_info_id:
+                            is_allocated = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+        # Else do nothing
+
+        if not is_allocated:
+            new_consumer_list.append(new_activity_consumer)
+        # Else do nothing
 
     for new_activity_producer in new_activity_producer_list:
-        new_producer_list.append(new_activity_producer)
+        is_allocated = False
+        for new_producer in new_producer_list:
+            if isinstance(new_producer[0], datamodel.Data):
+                for allocated_info_id in new_producer[0].allocated_info_list:
+                    if new_activity_producer[0].id == allocated_info_id:
+                        is_allocated = True
+                        break
+                    # Else do nothing
+            # Else do nothing
+
+        if not is_allocated:
+            for new_consumer in new_consumer_list:
+                if isinstance(new_consumer[0], datamodel.Data):
+                    for allocated_info_id in new_consumer[0].allocated_info_list:
+                        if new_activity_producer[0].id == allocated_info_id:
+                            is_allocated = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+        # Else do nothing
+
+        if not is_allocated:
+            new_producer_list.append(new_activity_producer)
+        # Else do nothing
+
+    for new_activity in new_activity_list:
+        is_consumer = False
+        is_producer = False
+        for new_consumer in new_consumer_list:
+            if new_activity == new_consumer[1]:
+                is_consumer = True
+                break
+            # Else do nothing
+
+        if not is_consumer:
+            for new_producer in new_producer_list:
+                if new_activity == new_producer[1]:
+                    is_producer = True
+                    break
+                # Else do nothing
+        # Else do nothing
+
+        if is_consumer or is_producer:
+            new_function_list.add(new_activity)
+        # Else do nothing
+
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
                                                            activity_list=allocated_activity_list,
@@ -193,6 +259,58 @@ def show_function_decomposition(diagram_function_str, function_list, consumer_fu
                                                       xml_consumer_activity_list,
                                                       xml_producer_activity_list)
 
+        for new_activity_consumer in new_activity_consumer_list:
+            is_allocated = False
+            for new_consumer in new_consumer_list:
+                if isinstance(new_consumer[0], datamodel.Data):
+                    for allocated_info_id in new_consumer[0].allocated_info_list:
+                        if new_activity_consumer[0].id == allocated_info_id:
+                            is_allocated = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+
+            if not is_allocated:
+                for new_producer in new_producer_list:
+                    if isinstance(new_producer[0], datamodel.Data):
+                        for allocated_info_id in new_producer[0].allocated_info_list:
+                            if new_activity_consumer[0].id == allocated_info_id:
+                                is_allocated = True
+                                break
+                            # Else do nothing
+                    # Else do nothing
+            # Else do nothing
+
+            if not is_allocated:
+                new_consumer_list.append(new_activity_consumer)
+            # Else do nothing
+
+        for new_activity_producer in new_activity_producer_list:
+            is_allocated = False
+            for new_producer in new_producer_list:
+                if isinstance(new_producer[0], datamodel.Data):
+                    for allocated_info_id in new_producer[0].allocated_info_list:
+                        if new_activity_producer[0].id == allocated_info_id:
+                            is_allocated = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+
+            if not is_allocated:
+                for new_consumer in new_consumer_list:
+                    if isinstance(new_consumer[0], datamodel.Data):
+                        for allocated_info_id in new_consumer[0].allocated_info_list:
+                            if new_activity_producer[0].id == allocated_info_id:
+                                is_allocated = True
+                                break
+                            # Else do nothing
+                    # Else do nothing
+            # Else do nothing
+
+            if not is_allocated:
+                new_producer_list.append(new_activity_producer)
+            # Else do nothing
+
         for new_activity in new_activity_list:
             is_allocated = False
             for allocated_activity in allocated_activity_list:
@@ -202,11 +320,26 @@ def show_function_decomposition(diagram_function_str, function_list, consumer_fu
                 # Else do nothing
 
             if not is_allocated:
-                new_function_list.add(new_activity)
-            # Else do nothing
+                is_consumer = False
+                is_producer = False
+                for new_consumer in new_consumer_list:
+                    if new_activity == new_consumer[1]:
+                        is_consumer = True
+                        break
+                    # Else do nothing
 
-        new_consumer_list = new_consumer_list + new_activity_consumer_list
-        new_producer_list = new_producer_list + new_activity_producer_list
+                if not is_consumer:
+                    for new_producer in new_producer_list:
+                        if new_activity == new_producer[1]:
+                            is_producer = True
+                            break
+                        # Else do nothing
+                # Else do nothing
+
+                if is_consumer or is_producer:
+                    new_function_list.add(new_activity)
+                # Else do nothing
+            # Else do nothing
     # Else do nothing
 
     plantuml_text = plantuml_adapter.get_function_diagrams(function_list=new_function_list,
