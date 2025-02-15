@@ -260,13 +260,12 @@ def case_decomposition_diagram(**kwargs):
             function_list
         )
 
-        plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_object_str,
-                                                                             function_list,
-                                                                             consumer_function_list,
-                                                                             producer_function_list,
-                                                                             kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
-                                                                             kwargs[XML_DICT_KEY_13_TYPE_LIST],
-                                                                             diagram_level=diagram_level)
+        plantuml_string = diagram_generator_fana.show_function_decomposition(diagram_function_str=diagram_object_str,
+                                                                             function_list=function_list,
+                                                                             consumer_function_list=consumer_function_list,
+                                                                             producer_function_list=producer_function_list,
+                                                                             diagram_level=diagram_level,
+                                                                             **kwargs)
 
         query_inheritance.query_inheritance_remove_inherited_object_children(
             function_list,

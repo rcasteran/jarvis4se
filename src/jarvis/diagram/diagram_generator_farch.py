@@ -145,8 +145,9 @@ def show_fun_elem_context(fun_elem_str, xml_fun_elem_list, xml_function_list,
     if main_fun_elem.parent:
         if main_fun_elem.parent in fun_elem_list:
             fun_elem_list.remove(main_fun_elem.parent)
+            for main_fun_elem_parent_child in main_fun_elem.parent.child_list:
+                main_fun_elem_parent_child.parent = None
         # Else do nothing
-        main_fun_elem.parent = None
 
     plantuml_text = plantuml_adapter.get_fun_elem_context_diagram(new_function_list,
                                                                   new_consumer_list,
