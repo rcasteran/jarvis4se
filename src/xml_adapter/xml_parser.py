@@ -35,15 +35,16 @@ class XmlParser3SE:
                          util.XML_DICT_KEY_6_STATE_LIST: set(),
                          util.XML_DICT_KEY_7_TRANSITION_LIST: set(),
                          util.XML_DICT_KEY_8_REQUIREMENT_LIST: set(),
-                         util.XML_DICT_KEY_9_ACTIVITY_LIST: set(),
-                         util.XML_DICT_KEY_10_INFORMATION_LIST: set(),
-                         util.XML_DICT_KEY_11_ATTRIBUTE_LIST: set(),
-                         util.XML_DICT_KEY_12_VIEW_LIST: set(),
-                         util.XML_DICT_KEY_13_TYPE_LIST: set(),
-                         util.XML_DICT_KEY_14_FUN_CONS_LIST: [],
-                         util.XML_DICT_KEY_15_FUN_PROD_LIST: [],
-                         util.XML_DICT_KEY_16_ACT_CONS_LIST: [],
-                         util.XML_DICT_KEY_17_ACT_PROD_LIST: []
+                         util.XML_DICT_KEY_9_GOAL_LIST: set(),
+                         util.XML_DICT_KEY_10_ACTIVITY_LIST: set(),
+                         util.XML_DICT_KEY_11_INFORMATION_LIST: set(),
+                         util.XML_DICT_KEY_12_ATTRIBUTE_LIST: set(),
+                         util.XML_DICT_KEY_13_VIEW_LIST: set(),
+                         util.XML_DICT_KEY_14_TYPE_LIST: set(),
+                         util.XML_DICT_KEY_15_FUN_CONS_LIST: [],
+                         util.XML_DICT_KEY_16_FUN_PROD_LIST: [],
+                         util.XML_DICT_KEY_17_ACT_CONS_LIST: [],
+                         util.XML_DICT_KEY_18_ACT_PROD_LIST: []
                          }
         self.root = None
 
@@ -61,26 +62,27 @@ class XmlParser3SE:
         # Check xml root tag
         if self.check_xml():
             # First retrieve extended types
-            self.xml_dict[util.XML_DICT_KEY_13_TYPE_LIST] = self.parse_type_list()
-            self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST] = self.parse_activity_list()
+            self.xml_dict[util.XML_DICT_KEY_14_TYPE_LIST] = self.parse_type_list()
+            self.xml_dict[util.XML_DICT_KEY_10_ACTIVITY_LIST] = self.parse_activity_list()
             self.xml_dict[util.XML_DICT_KEY_1_FUNCTION_LIST] = self.parse_function_list()
             self.xml_dict[util.XML_DICT_KEY_6_STATE_LIST] = self.parse_state_list()
             self.xml_dict[util.XML_DICT_KEY_7_TRANSITION_LIST] = self.parse_transition_list()
             self.xml_dict[util.XML_DICT_KEY_2_FUN_ELEM_LIST] = self.parse_functional_element_list()
-            self.xml_dict[util.XML_DICT_KEY_12_VIEW_LIST] = self.parse_view_list()
-            self.xml_dict[util.XML_DICT_KEY_11_ATTRIBUTE_LIST] = self.parse_attribute_list()
+            self.xml_dict[util.XML_DICT_KEY_13_VIEW_LIST] = self.parse_view_list()
+            self.xml_dict[util.XML_DICT_KEY_12_ATTRIBUTE_LIST] = self.parse_attribute_list()
             self.xml_dict[util.XML_DICT_KEY_3_FUN_INTF_LIST] = self.parse_functional_interface_list()
             self.xml_dict[util.XML_DICT_KEY_4_PHY_ELEM_LIST] = self.parse_physical_element_list()
             self.xml_dict[util.XML_DICT_KEY_5_PHY_INTF_LIST] = self.parse_physical_interface_list()
             self.xml_dict[util.XML_DICT_KEY_8_REQUIREMENT_LIST] = self.parse_requirement_list()
+            self.xml_dict[util.XML_DICT_KEY_9_GOAL_LIST] = self.parse_goal_list()
 
             # Then create data and set predecessors, consumers, producers lists
-            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_15_FUN_PROD_LIST], \
-                self.xml_dict[util.XML_DICT_KEY_14_FUN_CONS_LIST] = self.parse_data_list()
+            self.xml_dict[util.XML_DICT_KEY_0_DATA_LIST], self.xml_dict[util.XML_DICT_KEY_16_FUN_PROD_LIST], \
+                self.xml_dict[util.XML_DICT_KEY_15_FUN_CONS_LIST] = self.parse_data_list()
 
             # Then create information and set predecessors, consumers, producers lists
-            self.xml_dict[util.XML_DICT_KEY_10_INFORMATION_LIST], self.xml_dict[util.XML_DICT_KEY_17_ACT_PROD_LIST], \
-                self.xml_dict[util.XML_DICT_KEY_16_ACT_CONS_LIST] = self.parse_information_list()
+            self.xml_dict[util.XML_DICT_KEY_11_INFORMATION_LIST], self.xml_dict[util.XML_DICT_KEY_18_ACT_PROD_LIST], \
+                self.xml_dict[util.XML_DICT_KEY_17_ACT_CONS_LIST] = self.parse_information_list()
 
             # Finally update object types
             self.update_object_type()
@@ -315,7 +317,7 @@ class XmlParser3SE:
             # looking for all elements with tag "consumer" and create a list [flow_name, consumer_activity]
             xml_consumer_list = xml_information.iter('consumer')
             for xml_consumer in xml_consumer_list:
-                for activity in self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST]:
+                for activity in self.xml_dict[util.XML_DICT_KEY_10_ACTIVITY_LIST]:
                     if xml_consumer.get('id') == activity.id:
                         consumer_activity_list.append([information, activity])
                         Logger.set_debug(__name__, f"Information [{information.id}, {information.name}]"
@@ -326,7 +328,7 @@ class XmlParser3SE:
             # looking for all elements with tag "producer" and create a list [flow_name, producer_activity]
             xml_producer_list = xml_information.iter('producer')
             for xml_producer in xml_producer_list:
-                for activity in self.xml_dict[util.XML_DICT_KEY_9_ACTIVITY_LIST]:
+                for activity in self.xml_dict[util.XML_DICT_KEY_10_ACTIVITY_LIST]:
                     if xml_producer.get('id') == activity.id:
                         producer_activity_list.append([information, activity])
                         Logger.set_debug(__name__, f"Information [{information.id}, {information.name}]"
@@ -759,9 +761,9 @@ class XmlParser3SE:
         @return None
         """
         # Following lists does not contain any type definition
-        unwanted_xml_list = (util.XML_DICT_KEY_13_TYPE_LIST, util.XML_DICT_KEY_14_FUN_CONS_LIST,
-                             util.XML_DICT_KEY_15_FUN_PROD_LIST, util.XML_DICT_KEY_16_ACT_CONS_LIST,
-                             util.XML_DICT_KEY_17_ACT_PROD_LIST)
+        unwanted_xml_list = (util.XML_DICT_KEY_14_TYPE_LIST, util.XML_DICT_KEY_15_FUN_CONS_LIST,
+                             util.XML_DICT_KEY_16_FUN_PROD_LIST, util.XML_DICT_KEY_17_ACT_CONS_LIST,
+                             util.XML_DICT_KEY_18_ACT_PROD_LIST)
         for key, xml_list in self.xml_dict.items():
             if key not in unwanted_xml_list:
                 for obj in xml_list:
@@ -771,7 +773,7 @@ class XmlParser3SE:
                     except KeyError:
                         # Extended types are defined in xml_type_list with their ids
                         is_found = False
-                        for type_obj in self.xml_dict[util.XML_DICT_KEY_13_TYPE_LIST]:
+                        for type_obj in self.xml_dict[util.XML_DICT_KEY_14_TYPE_LIST]:
                             if obj.type == type_obj.id:
                                 obj.type = type_obj
                                 is_found = True
@@ -789,7 +791,7 @@ class XmlParser3SE:
         parent_list = {}
         xml_requirement_list = self.root.iter('requirement')
         for xml_requirement in xml_requirement_list:
-            # Instantiate Attribute and add them to a list
+            # Instantiate Requirement and add it to a list
             requirement = datamodel.Requirement(p_id=xml_requirement.get('id'),
                                                 p_name=util.denormalize_xml_string(xml_requirement.get('name')),
                                                 p_alias=xml_requirement.get('alias'),
@@ -812,6 +814,37 @@ class XmlParser3SE:
 
         return requirement_list
 
+    def parse_goal_list(self):
+        """Parse XML goal list
+        @return goal list
+        """
+        goal_list = set()
+        parent_list = {}
+        xml_goal_list = self.root.iter('goal')
+        for xml_goal in xml_goal_list:
+            # Instantiate Goal and add it to a list
+            goal = datamodel.Goal(p_id=xml_goal.get('id'),
+                                  p_name=util.denormalize_xml_string(xml_goal.get('name')),
+                                  p_alias=xml_goal.get('alias'),
+                                  p_type=xml_goal.get('type'))
+
+            goal_list.add(goal)
+
+            # Looking for goal text
+            xml_text_list = xml_goal.iter('text')
+            for xml_text in xml_text_list:
+                goal.set_text(util.denormalize_xml_string(xml_text.text))
+
+            # Looking for goal child
+            xml_goal_part_list = xml_goal.iter('goalPart')
+            for xml_part in xml_goal_part_list:
+                parent_list[xml_part.get('id')] = goal.id
+
+        # Loop to set parent and child relationship
+        self.update_parental_relationship(parent_list, goal_list)
+
+        return goal_list
+
 
 # Global variables definition
 XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
@@ -823,8 +856,9 @@ XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
                             util.XML_DICT_KEY_6_STATE_LIST,
                             util.XML_DICT_KEY_7_TRANSITION_LIST,
                             util.XML_DICT_KEY_8_REQUIREMENT_LIST,
-                            util.XML_DICT_KEY_9_ACTIVITY_LIST,
-                            util.XML_DICT_KEY_10_INFORMATION_LIST,
-                            util.XML_DICT_KEY_11_ATTRIBUTE_LIST,
-                            util.XML_DICT_KEY_12_VIEW_LIST,
-                            util.XML_DICT_KEY_13_TYPE_LIST]
+                            util.XML_DICT_KEY_9_GOAL_LIST,
+                            util.XML_DICT_KEY_10_ACTIVITY_LIST,
+                            util.XML_DICT_KEY_11_INFORMATION_LIST,
+                            util.XML_DICT_KEY_12_ATTRIBUTE_LIST,
+                            util.XML_DICT_KEY_13_VIEW_LIST,
+                            util.XML_DICT_KEY_14_TYPE_LIST]

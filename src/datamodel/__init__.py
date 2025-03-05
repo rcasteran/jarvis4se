@@ -10,6 +10,8 @@ Defines the following basic types that are manipulated by systems engineers:
 - For attribute declaration: @ref Attribute
 - For view declaration: @ref View
 """
+from .datamodel import REQUIREMENT_PATTERN
+from .datamodel import GOAL_PATTERN
 
 from .datamodel import Function
 from .datamodel import Activity
@@ -26,6 +28,7 @@ from .datamodel import PhysicalInterface
 from .datamodel import Type
 from .datamodel import BaseType
 from .datamodel import Requirement
+from .datamodel import Goal
 
 from .datamodel import TypeWithChildList
 from .datamodel import TypeWithChildListFunctionIndex
@@ -33,6 +36,7 @@ from .datamodel import TypeWithChildListStateIndex
 from .datamodel import TypeWithChildListFunctionalElementIndex
 from .datamodel import TypeWithChildListPhysicalElementIndex
 from .datamodel import TypeWithChildListRequirementIndex
+from .datamodel import TypeWithChildListGoalIndex
 from .datamodel import TypeWithAllocatedReqList
 from .datamodel import EntryStateLabel
 from .datamodel import ExitStateLabel

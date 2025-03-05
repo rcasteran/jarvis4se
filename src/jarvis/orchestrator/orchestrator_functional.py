@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_object_allocation, orchestrator_viewpoint_requirement
 from jarvis import util
 from tools import Logger
@@ -33,7 +33,7 @@ def check_add_predecessor(flow_predecessor_str_set, **kwargs):
     flow_predecessor_str_list = util.cut_tuple_list(flow_predecessor_str_set)
 
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
-    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
 
     # Create data names list already in xml
     xml_data_name_list = orchestrator_object.check_object_name_in_list(xml_data_list)
@@ -151,16 +151,16 @@ def check_add_consumer_elem(consumer_str_list, **kwargs):
     output_xml = kwargs['output_xml']
 
     # [data, function] case
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
 
     # [information, activity] case
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
-    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
 
     # Create object names/aliases list and data's name
     xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
@@ -257,8 +257,8 @@ def add_consumer_elem(new_consumer_list, **kwargs):
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
     update = 0
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
     output_xml = kwargs['output_xml']
 
     # Warn the user once added within xml
@@ -468,16 +468,16 @@ def check_add_producer_elem(producer_str_list, **kwargs):
     output_xml = kwargs['output_xml']
 
     # [data, function] case
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
 
     # [information, activity] case
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
-    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
 
     # Create object names/aliases list
     xml_function_name_list = orchestrator_object.check_object_name_in_list(xml_function_list)
@@ -574,8 +574,8 @@ def add_producer_elem(new_producer_list, **kwargs):
             update_list ([0/1]) : Add 1 to list if any update, otherwise 0 is added
     """
     update = 0
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
     output_xml = kwargs['output_xml']
 
     # Warn the user once added within xml

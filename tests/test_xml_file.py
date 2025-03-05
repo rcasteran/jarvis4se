@@ -47,6 +47,7 @@ def test_template_xml():
                    "    <viewList/>\n" \
                    "    <attributeList/>\n" \
                    "    <requirementList/>\n" \
+                   "    <goalList/>\n" \
                    "    <typeList/>\n" \
                    "  </viewPoint>\n" \
                    "</systemAnalysis>\n"

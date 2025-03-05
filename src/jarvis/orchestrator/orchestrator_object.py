@@ -10,16 +10,16 @@ from xml_adapter import XmlDictKeyListForObjects
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from jarvis import util
-from . import orchestrator_viewpoint_requirement
+from . import orchestrator_viewpoint_requirement, orchestrator_viewpoint_goal
 from tools import Logger
 
 
 class ObjectInstanceList(list):
-    nb_object_instance_base_type = 11
+    nb_object_instance_base_type = 12
 
     def __init__(self, p_base_type_idx):
         super().__init__()
@@ -38,8 +38,9 @@ class ObjectInstanceList(list):
             6: kwargs['output_xml'].write_state,
             7: kwargs['output_xml'].write_transition,
             8: kwargs['output_xml'].write_requirement,
-            9: kwargs['output_xml'].write_activity,
-            10: kwargs['output_xml'].write_information,
+            9: kwargs['output_xml'].write_goal,
+            10: kwargs['output_xml'].write_activity,
+            11: kwargs['output_xml'].write_information,
         }
         call = object_write_routine_list.get(self.base_type_idx)
         call(self)
@@ -56,8 +57,9 @@ class ObjectInstance:
         6: datamodel.State,
         7: datamodel.Transition,
         8: datamodel.Requirement,
-        9: datamodel.Activity,
-        10: datamodel.Information
+        9: datamodel.Goal,
+        10: datamodel.Activity,
+        11: datamodel.Information
     }
 
     def __init__(self, obj_str, base_type, specific_obj_type=None, **kwargs):
@@ -89,8 +91,8 @@ class ObjectInstance:
             6: kwargs[XML_DICT_KEY_6_STATE_LIST].add,
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST].add,
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST].add,
-            9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST].add,
-            10: kwargs[XML_DICT_KEY_10_INFORMATION_LIST].add
+            9: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST].add,
+            10: kwargs[XML_DICT_KEY_11_INFORMATION_LIST].add
         }
         call = object_dictionary_list.get(self.base_type_idx)
         call(self.object_instance)
@@ -150,6 +152,9 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
                 # Check if any requirement related to the objects
                 check_object_instance_list_requirement(object_instance_list, **kwargs)
 
+                # Check if any goal related to the objects
+                check_object_instance_list_goal(object_instance_list, **kwargs)
+
                 check = 1
 
     return check
@@ -164,7 +169,7 @@ def retrieve_type(p_type_str, p_is_silent=False, **kwargs):
                           if i == p_type_str.capitalize()))
     else:
         specific_type = retrieve_object_by_name(p_type_str,
-                                                **{XML_DICT_KEY_13_TYPE_LIST: kwargs[XML_DICT_KEY_13_TYPE_LIST]})
+                                                **{XML_DICT_KEY_14_TYPE_LIST: kwargs[XML_DICT_KEY_14_TYPE_LIST]})
         if specific_type is None:
             if not p_is_silent:
                 Logger.set_error(__name__,
@@ -415,14 +420,14 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
             _, object_dest_type = retrieve_type(p_object_dest.type.name, True, **kwargs)
 
         Logger.set_debug(__name__,
-                         f"Relationship detected in requirement between {object_src_type} {p_object_src.name} and "
+                         f"Relationship detected in requirement/goal between {object_src_type} {p_object_src.name} and "
                          f"{object_dest_type} {p_object_dest.name}")
         if object_src_type == datamodel.BaseType.FUNCTION or object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
             # Relationship with DATA, ATTRIBUTE, FUNCTIONAL_ELEMENT
             if object_dest_type == datamodel.BaseType.DATA:
                 if object_src_type == datamodel.BaseType.FUNCTION:
-                    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-                    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+                    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+                    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
 
                     for xml_consumer_function in xml_consumer_function_list:
                         if xml_consumer_function[0] == p_object_dest and xml_consumer_function[1] == p_object_src:
@@ -553,8 +558,8 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
                 for allocated_fun_id in p_object_src.allocated_function_list:
                     for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
                         if allocated_fun_id == xml_function.id:
-                            if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST] or
-                                    [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]):
+                            if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST] or
+                                    [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]):
                                 is_relationship = True
                                 break
                             # Else do nothing
@@ -653,9 +658,12 @@ def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
             # Warn about improper object source type
             print(f"Relationship not supported between {object_src_type}: {p_object_src.name} and "
                   f"{object_dest_type}: {p_object_dest.name}")
-    else:
-        # At least one of the object is a type: the requirement itself is creating the relationship
+    elif hasattr(p_object_src, 'type') or hasattr(p_object_dest, 'type'):
+        # At least one of the object is a type: the requirement/goal itself is creating the relationship
         is_relationship = True
+    else:
+        # The two object are types: they cannot be related
+        is_relationship = False
 
     return is_relationship
 
@@ -678,61 +686,147 @@ def check_object_instance_list_requirement(object_instance_list, **kwargs):
 
                 if req_subject_object is not None:
                     if obj == req_subject_object:
-                        if xml_requirement.id not in obj.allocated_req_list:
-                            obj.add_allocated_requirement(xml_requirement.id)
-                            output_xml.write_object_allocation([[obj, xml_requirement]])
+                        if hasattr(obj, 'allocated_req_list'):
+                            if xml_requirement.id not in obj.allocated_req_list:
+                                obj.add_allocated_requirement(xml_requirement.id)
+                                output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                            Logger.set_info(__name__,
-                                            f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
-                                            f"is satisfied by "
-                                            f"{obj.__class__.__name__} {obj.name}")
-                        # Else do nothing
+                                Logger.set_info(__name__,
+                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
+                            # Else do nothing
+                        else:
+                            Logger.set_error(__name__,
+                                             f"{obj.__class__.__name__} {obj.name} cannot allocate requirements")
                     # Else do nothing
                 # Else do nothing
 
                 if len(req_object_object_list) > 0:
                     for req_object_object in req_object_object_list:
                         if obj == req_object_object:
-                            if xml_requirement.id not in obj.allocated_req_list:
-                                obj.add_allocated_requirement(xml_requirement.id)
-                                output_xml.write_object_allocation([[obj, xml_requirement]])
+                            if hasattr(obj, 'allocated_req_list'):
+                                if xml_requirement.id not in obj.allocated_req_list:
+                                    obj.add_allocated_requirement(xml_requirement.id)
+                                    output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                                Logger.set_info(__name__,
-                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
-                                                f"is satisfied by "
-                                                f"{obj.__class__.__name__} {obj.name}")
-                            # Else do nothing
+                                    Logger.set_info(__name__,
+                                                    f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                    f"is satisfied by "
+                                                    f"{obj.__class__.__name__} {obj.name}")
+                                # Else do nothing
+                            else:
+                                Logger.set_error(__name__,
+                                                 f"{obj.__class__.__name__} {obj.name} cannot allocate requirements")
                         # Else do nothing
                 # Else do nothing
 
                 if len(req_condition_object_list) > 0:
                     for req_condition_object in req_condition_object_list:
                         if obj == req_condition_object and obj != req_subject_object:
-                            if xml_requirement.id not in obj.allocated_req_list:
-                                obj.add_allocated_requirement(xml_requirement.id)
-                                output_xml.write_object_allocation([[obj, xml_requirement]])
+                            if hasattr(obj, 'allocated_req_list'):
+                                if xml_requirement.id not in obj.allocated_req_list:
+                                    obj.add_allocated_requirement(xml_requirement.id)
+                                    output_xml.write_object_allocation([[obj, xml_requirement]])
 
-                                Logger.set_info(__name__,
-                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
-                                                f"is satisfied by "
-                                                f"{obj.__class__.__name__} {obj.name}")
-                            # Else do nothing
+                                    Logger.set_info(__name__,
+                                                    f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                    f"is satisfied by "
+                                                    f"{obj.__class__.__name__} {obj.name}")
+                                # Else do nothing
+                            else:
+                                Logger.set_error(__name__,
+                                                 f"{obj.__class__.__name__} {obj.name} cannot allocate requirements")
                         # Else do nothing
                 # Else do nothing
 
                 if len(req_temporal_object_list) > 0:
                     for req_temporal_object in req_temporal_object_list:
                         if obj == req_temporal_object and obj != req_subject_object:
-                            if xml_requirement.id not in obj.allocated_req_list:
-                                obj.add_allocated_requirement(xml_requirement.id)
-                                output_xml.write_object_allocation([[obj, xml_requirement]])
+                            if hasattr(obj, 'allocated_req_list'):
+                                if xml_requirement.id not in obj.allocated_req_list:
+                                    obj.add_allocated_requirement(xml_requirement.id)
+                                    output_xml.write_object_allocation([[obj, xml_requirement]])
+
+                                    Logger.set_info(__name__,
+                                                    f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                    f"is satisfied by "
+                                                    f"{obj.__class__.__name__} {obj.name}")
+                                # Else do nothing
+                            else:
+                                Logger.set_error(__name__,
+                                                 f"{obj.__class__.__name__} {obj.name} cannot allocate requirements")
+                        # Else do nothing
+                # Else do nothing
+            # Else do nothing
+
+
+def check_object_instance_list_goal(object_instance_list, **kwargs):
+    xml_goal_list = kwargs[XML_DICT_KEY_9_GOAL_LIST]
+    output_xml = kwargs['output_xml']
+
+    for obj in object_instance_list:
+        for xml_goal in xml_goal_list:
+            if xml_goal.text:
+                req_subject_object = orchestrator_viewpoint_goal.retrieve_goal_subject_object(
+                    xml_goal.text, **kwargs)
+                req_actor_object = orchestrator_viewpoint_goal.retrieve_goal_actor_object(
+                    xml_goal.text, **kwargs)
+                req_activity_object = orchestrator_viewpoint_goal.retrieve_goal_activity_object(
+                    xml_goal.text, **kwargs)
+
+                if req_subject_object is not None:
+                    if obj == req_subject_object:
+                        if hasattr(obj, 'allocated_goal_list'):
+                            if xml_goal.id not in obj.allocated_goal_list:
+                                obj.add_allocated_goal(xml_goal.id)
+                                output_xml.write_object_allocation([[obj, xml_goal]])
 
                                 Logger.set_info(__name__,
-                                                f"{xml_requirement.__class__.__name__} {xml_requirement.name} "
+                                                f"{xml_goal.__class__.__name__} {xml_goal.name} "
                                                 f"is satisfied by "
                                                 f"{obj.__class__.__name__} {obj.name}")
                             # Else do nothing
-                        # Else do nothing
+                        else:
+                            Logger.set_error(__name__,
+                                             f"{obj.__class__.__name__} {obj.name} cannot allocate goals")
+                    # Else do nothing
+                # Else do nothing
+
+                if req_actor_object is not None:
+                    if obj == req_actor_object:
+                        if hasattr(obj, 'allocated_goal_list'):
+                            if xml_goal.id not in obj.allocated_goal_list:
+                                obj.add_allocated_goal(xml_goal.id)
+                                output_xml.write_object_allocation([[obj, xml_goal]])
+
+                                Logger.set_info(__name__,
+                                                f"{xml_goal.__class__.__name__} {xml_goal.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
+                            # Else do nothing
+                        else:
+                            Logger.set_error(__name__,
+                                             f"{obj.__class__.__name__} {obj.name} cannot allocate goals")
+                    # Else do nothing
+                # Else do nothing
+
+                if req_activity_object is not None:
+                    if obj == req_activity_object:
+                        if hasattr(obj, 'allocated_goal_list'):
+                            if xml_goal.id not in obj.allocated_goal_list:
+                                obj.add_allocated_goal(xml_goal.id)
+                                output_xml.write_object_allocation([[obj, xml_goal]])
+
+                                Logger.set_info(__name__,
+                                                f"{xml_goal.__class__.__name__} {xml_goal.name} "
+                                                f"is satisfied by "
+                                                f"{obj.__class__.__name__} {obj.name}")
+                            # Else do nothing
+                        else:
+                            Logger.set_error(__name__,
+                                             f"{obj.__class__.__name__} {obj.name} cannot allocate goals")
+                    # Else do nothing
                 # Else do nothing
             # Else do nothing
 

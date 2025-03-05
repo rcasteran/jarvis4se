@@ -15,9 +15,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import orchestrator_object
 from tools import Logger
 from jarvis.handler import handler_question
@@ -66,17 +66,14 @@ def check_add_requirement(p_str_list, **kwargs):
                 if len(req_subject_object_list) > 0:
                     # Take the last one in case of requirement about attribute ( XXX of YYY shall)
                     if isinstance(req_subject_object_list[-1], datamodel.TypeWithAllocatedReqList):
-                        req_subject_object = req_subject_object_list[-1]
-                        Logger.set_info(__name__, f"Requirement identified about {req_subject_object.name}: "
+                        Logger.set_info(__name__, f"Requirement identified about {req_subject_object_list[-1].name}: "
                                                   f"{desc_before_modal} shall {desc_after_modal}")
                     else:
-                        req_subject_object = None
                         Logger.set_info(__name__,
                                         f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
                         Logger.set_warning(__name__,
                                            f'Subject "{req_subject}" of the requirement is unknown')
                 else:
-                    req_subject_object = None
                     Logger.set_info(__name__, f"Requirement identified: {desc_before_modal} shall {desc_after_modal}")
                     Logger.set_warning(__name__,
                                        f'Subject "{req_subject}" of the requirement is unknown')
@@ -218,6 +215,17 @@ def check_add_text(p_text_str_list, **kwargs):
 
 
 def evaluate_text_similarities(p_req_subject, p_req_object, p_req_conditional, p_req_temporal, **kwargs):
+    """@ingroup orchestrator
+    @anchor evaluate_text_similarities
+    Evaluate similarities between two requirement declarations
+
+    @param[in] p_req_subject : subject part of requirement declaration
+    @param[in] p_req_object : object part of requirement declaration
+    @param[in] p_req_conditional : conditional part of requirement declaration
+    @param[in] p_req_temporal : temporal part of requirement declaration
+    @param[in] kwargs : Jarvis dictionaries
+    @return list of similarities ratio per requirements
+    """
     xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     sequence_ratio_list = {}
 
@@ -263,7 +271,7 @@ def detect_req_pattern(p_str_before_modal, p_str_after_modal=None):
     @return requirement subject, requirement object, requirement condition, requirement temporality
     """
     if p_str_after_modal is None:
-        pattern_shall = re.compile(r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)", re.IGNORECASE).split(p_str_before_modal)
+        pattern_shall = re.compile(datamodel.REQUIREMENT_PATTERN, re.IGNORECASE).split(p_str_before_modal)
         p_str_before_modal = pattern_shall[1]
         p_str_after_modal = pattern_shall[2]
     # Else do nothing

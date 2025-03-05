@@ -9,9 +9,9 @@ import plantuml_adapter
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from jarvis.query import query_object
 from . import util
 from tools import Logger
@@ -45,16 +45,16 @@ def show_activity_context(diagram_activity_str, xml_activity_list, xml_consumer_
 
 def show_function_context(diagram_function_str, **kwargs):
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
 
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
 
-    xml_attribute_list = kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST]
-    xml_type_list = kwargs[XML_DICT_KEY_13_TYPE_LIST]
+    xml_attribute_list = kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST]
+    xml_type_list = kwargs[XML_DICT_KEY_14_TYPE_LIST]
 
     new_function_list, new_consumer_list, new_producer_list = util.get_function_context_lists(
         diagram_function_str,
@@ -171,11 +171,11 @@ def show_function_context(diagram_function_str, **kwargs):
 #  objects?)
 def show_function_decomposition(diagram_function_str, function_list, consumer_function_list,
                                 producer_function_list, diagram_level, **kwargs):
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
-    xml_attribute_list = kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST]
-    xml_type_list = kwargs[XML_DICT_KEY_13_TYPE_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
+    xml_attribute_list = kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST]
+    xml_type_list = kwargs[XML_DICT_KEY_14_TYPE_LIST]
 
     """Create necessary lists then returns plantuml text for decomposition of function"""
     main_fun = query_object.query_object_by_name(diagram_function_str, **{XML_DICT_KEY_1_FUNCTION_LIST: function_list})

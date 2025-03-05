@@ -35,6 +35,7 @@ class CsvParser3SE:
                          'csv_state_list': set(),
                          'csv_transition_list': set(),
                          'csv_requirement_list': set(),
+                         'csv_goal_list': set(),
                          'csv_activity_list': set(),
                          'csv_information_list': set(),
                          'csv_attribute_list': set(),
@@ -85,6 +86,7 @@ class CsvParser3SE:
                 self.csv_dict['csv_phy_elem_list'] = self.parse_physical_element_list()
                 self.csv_dict['csv_phy_inter_list'] = self.parse_physical_interface_list()
                 self.csv_dict['csv_requirement_list'] = self.parse_requirement_list()
+                self.csv_dict['csv_goal_list'] = self.parse_goal_list()
 
                 # Then create data and set predecessors, consumers, producers lists
                 self.csv_dict['csv_data_list'], self.csv_dict['csv_producer_function_list'], self.csv_dict[
@@ -579,6 +581,17 @@ class CsvParser3SE:
                                                    f" is satisfied by "
                                                    f"physical element [{phy_elem.id}, {phy_elem.name}]")
                 # Else do nothing
+
+                # Looking for allocated goals and add them to the physical element
+                if len(row[util.CSV_GOAL_LIST_IDX]) > 0:
+                    csv_allocated_goal_id_list = row[util.CSV_GOAL_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_goal_id in csv_allocated_goal_id_list:
+                        phy_elem.add_allocated_goal(csv_allocated_goal_id)
+
+                        Logger.set_debug(__name__, f"Goal [{csv_allocated_goal_id}]"
+                                                   f" is satisfied by "
+                                                   f"physical element [{phy_elem.id}, {phy_elem.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship
@@ -648,21 +661,21 @@ class CsvParser3SE:
         for row in self.array:
             if p_data_column > 0:
                 if len(row) > p_data_column:
-                    if len(re.compile(r'([^. |\n][^.|\n]*) shall ([^.|\n]*)', re.IGNORECASE).split(row[p_data_column])) > 1:
-                        # Instantiate Requirement and add them to a list
+                    if len(re.compile(datamodel.REQUIREMENT_PATTERN, re.IGNORECASE).split(row[p_data_column])) > 1:
+                        # Instantiate requirement and add it to a list
                         requirement = datamodel.Requirement(p_id=util.check_uuid4(row[0]),
                                                             p_name=row[1])
 
                         requirement_list.add(requirement)
 
                         # Looking for requirement description
-                        requirement.set_description(row[p_data_column])
+                        requirement.set_text(row[p_data_column])
                     else:
                         Logger.set_warning(__name__,
                                        f"Following description is not a requirement: {row[p_data_column]}")
                 # Else do nothing
             elif row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_REQ:
-                # Instantiate Requirement and add them to a list
+                # Instantiate requirement and add it to a list
                 requirement = datamodel.Requirement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
                                                     p_name=row[util.CSV_NAME_IDX],
                                                     p_alias=row[util.CSV_ALIAS_IDX],
@@ -671,7 +684,7 @@ class CsvParser3SE:
                 requirement_list.add(requirement)
 
                 # Looking for requirement description
-                requirement.set_description(row[util.CSV_DESCRIPTION_LIST_IDX])
+                requirement.set_text(row[util.CSV_DESCRIPTION_LIST_IDX])
 
                 # Looking for requirement child
                 if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
@@ -685,6 +698,54 @@ class CsvParser3SE:
         util.update_parental_relationship(parent_list, requirement_list)
 
         return requirement_list
+
+    def parse_goal_list(self, p_data_column=0):
+        """Parse CSV goal list
+        @param[in] p_data_column : CSV column number where goals are defined
+        @return requirement list
+        """
+        goal_list = set()
+        parent_list = {}
+        for row in self.array:
+            if p_data_column > 0:
+                if len(row) > p_data_column:
+                    if len(re.compile(datamodel.GOAL_PATTERN, re.IGNORECASE).split(row[p_data_column])) > 1:
+                        # Instantiate goal and add it to a list
+                        goal = datamodel.Requirement(p_id=util.check_uuid4(row[0]),
+                                                     p_name=row[1])
+
+                        goal_list.add(goal)
+
+                        # Looking for goal description
+                        goal.set_text(row[p_data_column])
+                    else:
+                        Logger.set_warning(__name__,
+                                       f"Following description is not a goal: {row[p_data_column]}")
+                # Else do nothing
+            elif row[util.CSV_BASE_IDX] == util.CSV_BASE_TAG_GOAL:
+                # Instantiate goal and add it to a list
+                goal = datamodel.Requirement(p_id=util.check_uuid4(row[util.CSV_ID_IDX]),
+                                             p_name=row[util.CSV_NAME_IDX],
+                                             p_alias=row[util.CSV_ALIAS_IDX],
+                                             p_type=row[util.CSV_EXTENSION_IDX])
+
+                goal_list.add(goal)
+
+                # Looking for goal description
+                goal.set_text(row[util.CSV_DESCRIPTION_LIST_IDX])
+
+                # Looking for goal child
+                if len(row[util.CSV_CHILDREN_LIST_IDX]) > 0:
+                    csv_part_id_list = row[util.CSV_CHILDREN_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_part_id in csv_part_id_list:
+                        parent_list[csv_part_id] = goal.id
+                # Else do nothing
+            # Else do nothing
+
+        # Loop to set parent and child relationship
+        util.update_parental_relationship(parent_list, goal_list)
+
+        return goal_list
 
     def parse_data_list(self):
         """Parse CSV data list

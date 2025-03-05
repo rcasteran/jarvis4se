@@ -26,6 +26,7 @@ CSV_BASE_TAG_FUN_INTF = "functional interface"
 CSV_BASE_TAG_PHY_ELEM = "physical element"
 CSV_BASE_TAG_PHY_INTF = "physical interface"
 CSV_BASE_TAG_REQ = "requirement"
+CSV_BASE_TAG_GOAL = "goal"
 CSV_BASE_TAG_DATA = "data"
 CSV_BASE_TAG_INFORMATION = "information"
 CSV_EXTENSION_IDX = 2
@@ -50,6 +51,7 @@ CSV_DESCRIBED_ELEMENT_LIST_IDX = 20
 CSV_VIEW_ELEMENT_LIST_IDX = 21
 CSV_INFO_LIST_IDX = 21
 CSV_REQ_LIST_IDX = 22
+CSV_GOAL_LIST_IDX = 23
 
 
 def update_parental_relationship(parent_id_list, element_list):

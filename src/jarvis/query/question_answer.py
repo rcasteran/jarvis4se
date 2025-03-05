@@ -9,9 +9,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from jarvis.orchestrator import orchestrator_object
 from . import query_object
 from tools import Logger
@@ -68,10 +68,10 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                  'Last producer Function(s)': [],
                  'Last producer Functional element(s)': []}
 
-    for prod in kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]:
+    for prod in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]:
         if prod[0] == data and \
                 check_latest(prod[1], kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) == prod[1].name:
-            for cons in kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]:
+            for cons in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]:
                 cons_last_fun_elem = None
                 prod_last_fun_elem = None
                 if cons[0] == prod[0] and \
@@ -182,12 +182,12 @@ def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmer
     elif object_type == datamodel.BaseType.FUNCTION:
         if direction == 'output':
             in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
-                                                 kwargs[XML_DICT_KEY_14_FUN_CONS_LIST])
+                                                 kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
+                                                 kwargs[XML_DICT_KEY_15_FUN_CONS_LIST])
         else:
             in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
-                                                 kwargs[XML_DICT_KEY_15_FUN_PROD_LIST])
+                                                 kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+                                                 kwargs[XML_DICT_KEY_16_FUN_PROD_LIST])
 
     if in_or_out_list and not unmerged:
         in_or_out_list = merge_list_per_cons_prod(in_or_out_list)

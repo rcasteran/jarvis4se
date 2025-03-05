@@ -7,9 +7,9 @@ Jarvis orchestrator module
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from tools import Logger
 
 
@@ -24,15 +24,16 @@ def update_dictionaries(p_csv_dict, **kwargs):
         6: p_csv_dict['csv_state_list'],
         7: p_csv_dict['csv_transition_list'],
         8: p_csv_dict['csv_requirement_list'],
-        9: p_csv_dict['csv_activity_list'],
-        10: p_csv_dict['csv_information_list'],
-        11: p_csv_dict['csv_attribute_list'],
-        12: p_csv_dict['csv_view_list'],
-        13: p_csv_dict['csv_type_list'],
-        14: p_csv_dict['csv_consumer_function_list'],
-        15: p_csv_dict['csv_producer_function_list'],
-        16: p_csv_dict['csv_consumer_activity_list'],
-        17: p_csv_dict['csv_producer_activity_list']
+        9: p_csv_dict['csv_goal_list'],
+        10: p_csv_dict['csv_activity_list'],
+        11: p_csv_dict['csv_information_list'],
+        12: p_csv_dict['csv_attribute_list'],
+        13: p_csv_dict['csv_view_list'],
+        14: p_csv_dict['csv_type_list'],
+        15: p_csv_dict['csv_consumer_function_list'],
+        16: p_csv_dict['csv_producer_function_list'],
+        17: p_csv_dict['csv_consumer_activity_list'],
+        18: p_csv_dict['csv_producer_activity_list']
     }
     xml_dictionary_list = {
         0: kwargs[XML_DICT_KEY_0_DATA_LIST],
@@ -44,15 +45,16 @@ def update_dictionaries(p_csv_dict, **kwargs):
         6: kwargs[XML_DICT_KEY_6_STATE_LIST],
         7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
         8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
-        9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
-        10: kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
-        11: kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
-        12: kwargs[XML_DICT_KEY_12_VIEW_LIST],
-        13: kwargs[XML_DICT_KEY_13_TYPE_LIST],
-        14: kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
-        15: kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
-        16: kwargs[XML_DICT_KEY_16_ACT_CONS_LIST],
-        17: kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+        9: kwargs[XML_DICT_KEY_9_GOAL_LIST],
+        10: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
+        11: kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
+        12: kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST],
+        13: kwargs[XML_DICT_KEY_13_VIEW_LIST],
+        14: kwargs[XML_DICT_KEY_14_TYPE_LIST],
+        15: kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+        16: kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
+        17: kwargs[XML_DICT_KEY_17_ACT_CONS_LIST],
+        18: kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
     }
     output_xml_write_list = {
         0: kwargs['output_xml'].write_data,
@@ -64,15 +66,16 @@ def update_dictionaries(p_csv_dict, **kwargs):
         6: kwargs['output_xml'].write_state,
         7: kwargs['output_xml'].write_transition,
         8: kwargs['output_xml'].write_requirement,
-        9: kwargs['output_xml'].write_activity,
-        10: kwargs['output_xml'].write_information,
-        11: kwargs['output_xml'].write_attribute,
-        12: kwargs['output_xml'].write_view,
-        13: kwargs['output_xml'].write_type_element,
-        14: kwargs['output_xml'].write_data_consumer,
-        15: kwargs['output_xml'].write_data_producer,
-        16: kwargs['output_xml'].write_information_consumer,
-        17: kwargs['output_xml'].write_information_producer,
+        9: kwargs['output_xml'].write_goal,
+        10: kwargs['output_xml'].write_activity,
+        11: kwargs['output_xml'].write_information,
+        12: kwargs['output_xml'].write_attribute,
+        13: kwargs['output_xml'].write_view,
+        14: kwargs['output_xml'].write_type_element,
+        15: kwargs['output_xml'].write_data_consumer,
+        16: kwargs['output_xml'].write_data_producer,
+        17: kwargs['output_xml'].write_information_consumer,
+        18: kwargs['output_xml'].write_information_producer,
     }
 
     update = 0

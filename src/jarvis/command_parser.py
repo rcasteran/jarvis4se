@@ -12,7 +12,8 @@ import datamodel
 from csv_adapter import CsvWriter3SE, CsvParser3SE
 from jarvis.orchestrator import orchestrator_functional, orchestrator_shared, orchestrator_viewpoint, \
     orchestrator_viewpoint_attribute, orchestrator_viewpoint_requirement, orchestrator_object, \
-    orchestrator_object_allocation, orchestrator_viewpoint_type, orchestrator_dictionary
+    orchestrator_object_allocation, orchestrator_viewpoint_type, orchestrator_dictionary , \
+    orchestrator_viewpoint_goal
 from jarvis.diagram import diagram_generator
 from jarvis.simulation import simulation_generator
 from jarvis.handler import handler_question, handler_list
@@ -53,11 +54,12 @@ class CmdParser:
             (r"The (source|destination) of (.*?) is ([^.|\n]*)", orchestrator_functional.check_add_src_dest),
             (r"The " + datamodel.ObjectTextPropertyLabel + " of (.*?) is ([^.|\n]*)",
              orchestrator_viewpoint_requirement.check_add_text),
-            (r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)", orchestrator_viewpoint_requirement.check_add_requirement),
+            (datamodel.REQUIREMENT_PATTERN, orchestrator_viewpoint_requirement.check_add_requirement),
             (r"([^. |\n][^.|\n]*) is satisfied by ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
             (r"([^. |\n][^.|\n]*) are satisfied by ([^.|\n]*)",
              orchestrator_object_allocation.check_add_allocation),
             (r"([^. |\n][^.|\n]*) satisfies ([^.|\n]*)", orchestrator_object_allocation.check_add_allocation),
+            (datamodel.GOAL_PATTERN, orchestrator_viewpoint_goal.check_add_goal),
             (r"([^. |\n][^.|\n]*) derives from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"([^. |\n][^.|\n]*) derive from ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"([^. |\n][^.|\n]*) is derived into ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),

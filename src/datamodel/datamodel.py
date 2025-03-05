@@ -8,6 +8,10 @@ from enum import Enum
 # Modules
 from . import util
 
+# Constants
+REQUIREMENT_PATTERN = r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)"
+GOAL_PATTERN = r"As a (.*?), I want (.*?) to ([^.|\n]*)"
+
 # Type definition
 
 
@@ -25,10 +29,11 @@ class BaseType(Enum):
     STATE = 6
     TRANSITION = 7
     REQUIREMENT = 8
-    ACTIVITY = 9
-    INFORMATION = 10
-    ATTRIBUTE = 11
-    VIEW = 12
+    GOAL = 9
+    ACTIVITY = 10
+    INFORMATION = 11
+    ATTRIBUTE = 12
+    VIEW = 13
 
     def __str__(self):
         """ Get the string representation for an enum value
@@ -62,6 +67,8 @@ class BaseType(Enum):
             type_str = 'View'
         elif self == self.REQUIREMENT:
             type_str = 'Requirement'
+        elif self == self.GOAL:
+            type_str = 'Goal'
 
         return type_str
 
@@ -99,7 +106,9 @@ class BaseType(Enum):
             enum_type = cls.VIEW
         elif obj_type == 'Requirement':
             enum_type = cls.REQUIREMENT
-        
+        elif obj_type == 'Goal':
+            enum_type = cls.GOAL
+
         return enum_type
 
 
@@ -192,7 +201,7 @@ class Activity:
         # Activity has no allocated data
         # Activity has no allocated activity
         # Activity has no allocated information
-
+        # Activity has no allocated goal
         return rep
 
     def info(self):
@@ -209,6 +218,7 @@ class Activity:
                 # Activity has no allocated data
                 # Activity has no allocated activity
                 # Activity has no allocated information
+                # Activity has no allocated goal
                 # No display of input_role and operand
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -383,7 +393,7 @@ class Function:
         # Function has no allocated data
         rep += util.str_allocated_activity(self)
         # Function has no allocated information
-
+        # Function has no allocated goal
         # No display of input_role and operand
 
         return rep
@@ -402,6 +412,7 @@ class Function:
                 # Function has no allocated data
                 **util.info_allocated_activity(self)
                 # Function has no allocated information
+                # Function has no allocated goal
                 # No display of input_role and operand
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -501,6 +512,7 @@ class Information:
         # Information has no allocated data
         # Information has no allocated activity
         # Information has no allocated information
+        # Information has no allocated goal
         # No display of predecessor list
 
         return rep
@@ -519,6 +531,7 @@ class Information:
                 # Information has no allocated data
                 # Information has no allocated activity
                 # Information has no allocated information
+                # Information has no allocated goal
                 # No display of predecessor list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_REQUIREMENT_LIST
@@ -625,6 +638,7 @@ class Data:
         # Data has no allocated data
         # Data has no allocated activity
         rep += util.str_allocated_information(self)
+        # Data has no allocated goal
         # No display of predecessor list
 
         return rep
@@ -639,10 +653,11 @@ class Data:
                 # Data cannot be specialized
                 # Data has no parent
                 # Data has no children
-                **util.info_allocated_req(self)
+                **util.info_allocated_req(self),
                 # Data has no allocated data
                 # Data has no allocated activity
                 **util.info_allocated_information(self)
+                # Data has no allocated goal
                 # No display of predecessor list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_REQUIREMENT_LIST,
@@ -780,6 +795,7 @@ class State:
         # State has no allocated data
         # State has no allocated activity
         # State has no allocated information
+        # State has no allocated goal
         # No display of allocated function list
 
         return rep
@@ -798,6 +814,7 @@ class State:
                 # State has no allocated data
                 # State has no allocated activity
                 # State has no allocated information
+                # State has no allocated goal
                 # No display of allocated function list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -930,6 +947,7 @@ class Transition:
         # Transition has no allocated data
         # Transition has no allocated activity
         # Transition has no allocated information
+        # Transition has no allocated goal
         # No display of source, destination and condition_list
 
         return rep
@@ -947,6 +965,7 @@ class Transition:
                 **util.info_allocated_req(self)
                 # Transition has no allocated data
                 # Transition has no allocated activity
+                # Transition has no allocated goal
                 # No display of source, destination and condition_list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1129,6 +1148,7 @@ class FunctionalElement:
         # Functional element has no allocated data
         # Functional element has no allocated activity
         # Functional element has no allocated information
+        # Functional element has no allocated goal
         # No display of allocated function, allocated state and exposed interface
 
         return rep
@@ -1147,6 +1167,7 @@ class FunctionalElement:
                 # Functional element has no allocated data
                 # Functional element has no allocated activity
                 # Functional element has no allocated information
+                # Functional element has no allocated goal
                 # No display of allocated function, allocated state and exposed interface
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1241,6 +1262,7 @@ class View:
         # View has no allocated data
         # View has no allocated activity
         # View has no allocated information
+        # View has no allocated goal
         # No display of allocated item list
 
         return rep
@@ -1259,6 +1281,7 @@ class View:
                 # View has no allocated data
                 # View has no allocated activity
                 # View has no allocated information
+                # View has no allocated goal
                 # No display of allocated item list
                 }, [util.INFO_KEY_TYPE
                     ]
@@ -1360,6 +1383,7 @@ class Attribute:
         # Attribute has no allocated data
         # Attribute has no allocated activity
         # Attribute has no allocated information
+        # Attribute has no allocated goal
         # No display of described item list
 
         return rep
@@ -1378,6 +1402,7 @@ class Attribute:
                 # Attribute has no allocated data
                 # Attribute has no allocated activity
                 # Attribute has no allocated information
+                # Attribute has no allocated goal
                 # No display of described item list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1496,6 +1521,7 @@ class FunctionalInterface:
         rep += util.str_allocated_data(self)
         # Functional interface has no allocated activity
         # Functional interface has no allocated information
+        # Functional interface has no allocated goal
 
         return rep
 
@@ -1513,6 +1539,7 @@ class FunctionalInterface:
                 **util.info_allocated_data(self)
                 # Functional interface has no allocated activity
                 # Functional interface has no allocated information
+                # Functional interface has no allocated goal
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
                     util.INFO_KEY_DERIVED,
@@ -1565,6 +1592,9 @@ class PhysicalElement:
 
         @var allocated_req_list
         allocated requirement list
+
+        @var allocated_goal_list
+        allocated goal list
         """
         self.id = p_id
         self.name = p_name
@@ -1577,6 +1607,7 @@ class PhysicalElement:
         self.child_list = set()
         self.derived = p_derived
         self.allocated_req_list = set()
+        self.allocated_goal_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1665,6 +1696,14 @@ class PhysicalElement:
         """
         self.allocated_req_list.add(p_req)
 
+    def add_allocated_goal(self, p_goal):
+        """Add allocated goal to allocated_goal_list
+        @param[in] self this class instance
+        @param[in] p_goal allocated goal
+        @return None
+        """
+        self.allocated_req_list.add(p_goal)
+
     def __str__(self):
         """Return a string representation of the class instance
         @param[in] self this class instance
@@ -1679,6 +1718,7 @@ class PhysicalElement:
         # Physical element has no allocated data
         rep += util.str_allocated_activity(self)
         # Physical element has no allocated information
+        rep += util.str_allocated_goal(self) + '\n'
         # No display of allocated activity, allocated functional element list and exposed interface list
 
         return rep
@@ -1695,8 +1735,9 @@ class PhysicalElement:
                 **util.info_child_list(self),
                 **util.info_allocated_req(self),
                 # Physical element has no allocated data
-                **util.info_allocated_activity(self)
+                **util.info_allocated_activity(self),
                 # Physical element has no allocated information
+                **util.info_allocated_goal(self)
                 # No display of allocated activity, allocated functional element list and exposed interface list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1704,7 +1745,8 @@ class PhysicalElement:
                     util.INFO_KEY_PARENT,
                     util.INFO_KEY_CHILD_LIST,
                     util.INFO_KEY_REQUIREMENT_LIST,
-                    util.INFO_KEY_ACTIVITY_LIST
+                    util.INFO_KEY_ACTIVITY_LIST,
+                    util.INFO_KEY_GOAL_LIST
                     ]
 
 
@@ -1819,6 +1861,7 @@ class PhysicalInterface:
         # Physical interface has no allocated data
         # Physical interface has no allocated activity
         # Physical interface has no allocated information
+        # Physical interface has no allocated goal
         # No display of allocated functional interface list
 
         return rep
@@ -1837,6 +1880,7 @@ class PhysicalInterface:
                 # Physical interface has no allocated data
                 # Physical interface has no allocated activity
                 # Physical interface has no allocated information
+                # Physical interface has no allocated goal
                 # No display of allocated functional interface list
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -1929,6 +1973,7 @@ class Type:
         # Type has no allocated data
         # Type has no allocated activity
         # Type has no allocated information
+        # Type has no allocated goal
         # No display of base type
 
         return rep
@@ -1946,6 +1991,7 @@ class Type:
                 # Type has no allocated data
                 # Type has no allocated activity
                 # Type has no allocated information
+                # Type has no allocated goal
                 # No display of base type
                 }, [util.INFO_KEY_ALIAS,
                     util.INFO_KEY_REQUIREMENT_LIST
@@ -1976,7 +2022,7 @@ class Requirement:
         unique alias
 
         @var type
-        functional element type\n
+        requirement type\n
         Could be @ref BaseType .REQUIREMENT or a @ref Type based on @ref BaseType .REQUIREMENT
 
         @var parent
@@ -2066,6 +2112,7 @@ class Requirement:
         # Requirement has no allocated data
         # Requirement has no allocated activity
         # Requirement has no allocated information
+        # Requirement has no allocated goal
         rep += util.str_text(self)
 
         return rep
@@ -2084,6 +2131,146 @@ class Requirement:
                 # Requirement has no allocated data
                 # Requirement has no allocated activity
                 # Requirement has no allocated information
+                # Requirement has no allocated goal
+                **util.info_text(self)
+                }, [util.INFO_KEY_TYPE,
+                    util.INFO_KEY_ALIAS,
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_CHILD_LIST,
+                    util.INFO_KEY_TEXT
+                    ]
+
+
+class Goal:
+    """@ingroup datamodel
+    @anchor Goal
+    Basic type representing a goal
+
+    Stakeholder’s description of an characteristic (property, behavior…) of a system
+    """
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.GOAL,
+                 p_parent=None):
+        """
+        @var id
+        unique identifier
+
+        @var name
+        unique name
+
+        @var alias
+        unique alias
+
+        @var type
+        Goal type\n
+        Could be @ref BaseType .GOAL or a @ref Type based on @ref BaseType .GOAL
+
+        @var parent
+        parent identifier
+
+        @var child_list
+        child list
+
+        @var text
+        goal text
+        """
+        self.id = p_id
+        self.name = p_name
+        self.alias = p_alias
+        self.type = p_type
+        self.parent = p_parent
+        self.child_list = set()
+        self.text = ""
+
+    def set_id(self, p_id):
+        """Set unique identifier
+        @param[in] self this class instance
+        @param[in] p_id unique identifier
+        @return None
+        """
+        self.id = p_id
+
+    def set_name(self, p_name):
+        """Set unique name
+        @param[in] self this class instance
+        @param[in] p_name unique name
+        @return None
+        """
+        self.name = p_name
+
+    def set_alias(self, p_alias):
+        """Set unique alias
+        @param[in] self this class instance
+        @param[in] p_alias unique alias
+        @return None
+        """
+        self.alias = p_alias
+
+    def set_type(self, p_type):
+        """Set type
+        @param[in] self this class instance
+        @param[in] p_type type
+        @return None
+        """
+        self.type = p_type
+
+    def set_parent(self, p_parent):
+        """Set parent
+        @param[in] self this class instance
+        @param[in] p_parent identifier of the parent
+        @return None
+        """
+        self.parent = p_parent
+
+    def add_child(self, p_child):
+        """Add child to child_list
+        @param[in] self this class instance
+        @param[in] p_child child
+        @return None
+        """
+        self.child_list.add(p_child)
+
+    def set_text(self, p_text):
+        """Set text
+        @param[in] self this class instance
+        @param[in] p_text requirement text
+        @return None
+        """
+        self.text = p_text
+
+    def __str__(self):
+        """Return a string representation of the class instance
+        @param[in] self this class instance
+        @return string
+        """
+        rep = util.str_type(self) + '\n'
+        rep += util.str_alias(self) + '\n'
+        # Goal cannot be specialized
+        rep += util.str_parent(self) + '\n'
+        rep += util.str_child_list(self) + '\n'
+        # Goal has no allocated requirement
+        # Goal has no allocated data
+        # Goal has no allocated activity
+        # Goal has no allocated information
+        # Goal has no allocated goal
+        rep += util.str_text(self)
+
+        return rep
+
+    def info(self):
+        """Return a dict representation of the class instance
+        @param[in] self this class instance
+        @return dict
+        """
+        return {**util.info_type(self),
+                **util.info_alias(self),
+                # Goal cannot be specialized
+                **util.info_parent(self),
+                **util.info_child_list(self),
+                # Goal has no allocated requirement
+                # Goal has no allocated data
+                # Goal has no allocated activity
+                # Goal has no allocated information
+                # Goal has no allocated goal
                 **util.info_text(self)
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
@@ -2094,12 +2281,13 @@ class Requirement:
 
 
 # Global variables definition
-TypeWithChildList = (Function, State, FunctionalElement, PhysicalElement, Requirement)
+TypeWithChildList = (Function, State, FunctionalElement, PhysicalElement, Requirement, Goal)
 TypeWithChildListFunctionIndex = 0
 TypeWithChildListStateIndex = 1
 TypeWithChildListFunctionalElementIndex = 2
 TypeWithChildListPhysicalElementIndex = 3
 TypeWithChildListRequirementIndex = 4
+TypeWithChildListGoalIndex = 5
 TypeWithAllocatedReqList = (Function, Information, Data, State, Transition, FunctionalElement, Attribute,
                             FunctionalInterface, PhysicalElement, PhysicalInterface, Type)
 EntryStateLabel = 'entry'

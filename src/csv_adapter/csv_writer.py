@@ -10,9 +10,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import util
 from tools import Logger
 
@@ -41,15 +41,16 @@ class CsvWriter3SE:
             6: self.write_state,
             7: self.write_transition,
             8: self.write_requirement,
-            9: self.write_activity,
-            10: self.write_information,
-            11: self.write_attribute,
-            12: self.write_view,
-            13: self.write_type_element,
-            14: self.write_data_consumer,
-            15: self.write_data_producer,
-            16: self.write_information_consumer,
-            17: self.write_information_producer
+            9: self.write_goal,
+            10: self.write_activity,
+            11: self.write_information,
+            12: self.write_attribute,
+            13: self.write_view,
+            14: self.write_type_element,
+            15: self.write_data_consumer,
+            16: self.write_data_producer,
+            17: self.write_information_consumer,
+            18: self.write_information_producer
         }
 
         self.file = output_filename
@@ -70,15 +71,16 @@ class CsvWriter3SE:
             6: kwargs[XML_DICT_KEY_6_STATE_LIST],
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
-            9: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
-            10: kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
-            11: kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST],
-            12: kwargs[XML_DICT_KEY_12_VIEW_LIST],
-            13: kwargs[XML_DICT_KEY_13_TYPE_LIST],
-            14: kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
-            15: kwargs[XML_DICT_KEY_15_FUN_PROD_LIST],
-            16: kwargs[XML_DICT_KEY_16_ACT_CONS_LIST],
-            17: kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+            9: kwargs[XML_DICT_KEY_9_GOAL_LIST],
+            10: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
+            11: kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
+            12: kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST],
+            13: kwargs[XML_DICT_KEY_13_VIEW_LIST],
+            14: kwargs[XML_DICT_KEY_14_TYPE_LIST],
+            15: kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+            16: kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
+            17: kwargs[XML_DICT_KEY_17_ACT_CONS_LIST],
+            18: kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
         }
 
         try:
@@ -109,7 +111,8 @@ class CsvWriter3SE:
                                  'described element list',
                                  'view element list',
                                  'information list',
-                                 'requirement list'])
+                                 'requirement list',
+                                 'goal list'])
 
                 array = []
                 for i in range(0, len(xml_dictionary_list)):
@@ -167,7 +170,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          ''  # Requirement list
+                          '',  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -219,7 +223,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -266,7 +271,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           allocated_information_id_list[:-1],  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -351,7 +357,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          ''  # Requirement list
+                          '',  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -434,7 +441,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -477,7 +485,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -537,7 +546,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -576,7 +586,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           allocated_element_id_list[:-1],  # View element list
                           '',  # Information list
-                          ''  # Requirement list
+                          '',  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -620,7 +631,8 @@ class CsvWriter3SE:
                           described_element_list[:-1],  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -668,7 +680,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -700,6 +713,10 @@ class CsvWriter3SE:
             for allocated_requirement_id in element.allocated_req_list:
                 allocated_requirement_id_list += allocated_requirement_id + util.CSV_MEMBER_SPLIT
 
+            allocated_goal_id_list = ''
+            for allocated_goal_id in element.allocated_goal_list:
+                allocated_goal_id_list += allocated_goal_id + util.CSV_MEMBER_SPLIT
+
             if element.derived is not None:
                 element_derived = element.derived.id
             else:
@@ -728,7 +745,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          allocated_goal_id_list[:-1]  # Goal list
                           ])
 
         return array
@@ -776,7 +794,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          allocated_requirement_id_list[:-1]  # Requirement list
+                          allocated_requirement_id_list[:-1],  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -811,7 +830,8 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          ''  # Requirement list
+                          '',  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array
@@ -832,7 +852,7 @@ class CsvWriter3SE:
                           self.check_object_type(requirement.type),
                           requirement.name,
                           requirement.alias,  # Alias
-                          requirement.description,  # Description list
+                          requirement.text,  # Description list
                           '',  # Derived
                           '',  # Source
                           '',  # Dest
@@ -850,7 +870,48 @@ class CsvWriter3SE:
                           '',  # Described element list
                           '',  # View element list
                           '',  # Information list
-                          ''  # Requirement list
+                          '',  # Requirement list
+                          ''  # Goal list
+                          ])
+
+        return array
+
+    def write_goal(self, array, goal_list):
+        """Write goals from list of goals
+        @param[in] array : CSV object array
+        @param[in] goal_list : list of gools
+        @return updated CSV object array
+        """
+        for goal in goal_list:
+            children_id_list = ''
+            for goal_child in goal.child_list:
+                children_id_list += goal_child.id + util.CSV_MEMBER_SPLIT
+
+            array.append([goal.id,
+                          util.CSV_BASE_TAG_GOAL,
+                          self.check_object_type(goal.type),
+                          goal.name,
+                          goal.alias,  # Alias
+                          goal.text,  # Description list
+                          '',  # Derived
+                          '',  # Source
+                          '',  # Dest
+                          '',  # Consumer list
+                          '',  # Producer list
+                          '',  # Predecessor list
+                          children_id_list[:-1],  # Children list
+                          '',  # Data list
+                          '',  # Condition list
+                          '',  # Function list
+                          '',  # State list
+                          '',  # Interface list
+                          '',  # Activity list
+                          '',  # Functional element list
+                          '',  # Described element list
+                          '',  # View element list
+                          '',  # Information list
+                          '',  # Requirement list
+                          ''  # Goal list
                           ])
 
         return array

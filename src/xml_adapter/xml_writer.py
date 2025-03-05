@@ -41,7 +41,7 @@ class XmlWriter3SE:
             etree.SubElement(phy_arch, tag)
 
         viewpoint = etree.SubElement(self.root, "viewPoint")
-        viewpoint_tags = ['viewList', 'attributeList', 'requirementList', 'typeList']
+        viewpoint_tags = ['viewList', 'attributeList', 'requirementList', 'goalList', 'typeList']
         for tag in viewpoint_tags:
             etree.SubElement(viewpoint, tag)
 
@@ -1037,6 +1037,8 @@ class XmlWriter3SE:
             elem_tag = "allocatedItem"
         elif isinstance(obj, datamodel.Requirement):
             elem_tag = "allocatedRequirement"
+        elif isinstance(obj, datamodel.Goal):
+            elem_tag = "allocatedGoal"
         elif isinstance(obj, datamodel.Information):
             elem_tag = "allocatedInformation"
         else:
@@ -1121,7 +1123,7 @@ class XmlWriter3SE:
 
     def write_requirement(self, requirement_list):
         """Write attribute from list of attributes
-        @param[in] attribute_list : list of attributes
+        @param[in] requirement_list : list of requirements
         @return None
         """
         parser = etree.XMLParser(remove_blank_text=True)
@@ -1148,7 +1150,7 @@ class XmlWriter3SE:
 
     def write_requirement_text(self, p_text_list):
         """Write requirement text from list [requirement, text]
-        @param[in] object_allocated_object_list : list of requirement text
+        @param[in] p_text_list : list of requirement text
         @return None
         """
         parser = etree.XMLParser(remove_blank_text=True)
@@ -1162,4 +1164,31 @@ class XmlWriter3SE:
                 # Else do nothing
 
         Logger.set_debug(__name__, self.write_requirement_text.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+    def write_goal(self, goal_list):
+        """Write goal from list of goals
+        @param[in] goal_list : list of goals
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        if root.find('.//goalList') is None:
+            etree.SubElement(root.find('./viewPoint'), 'goalList')
+
+        for goal_list_tag in root.findall(".//goalList"):
+            for goal in goal_list:
+                goal_tag = etree.SubElement(goal_list_tag, "goal",
+                                                   {'id': goal.id,
+                                                    'name': util.normalize_xml_string(goal.name),
+                                                    'type': self.check_object_type(goal.type),
+                                                    'alias': goal.alias})
+
+                text_tag = etree.SubElement(goal_tag, "text")
+                text_tag.text = goal.text
+
+                _req_part_list_tag = etree.SubElement(goal_tag, "goalPartList")
+
+        Logger.set_debug(__name__, self.write_requirement.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

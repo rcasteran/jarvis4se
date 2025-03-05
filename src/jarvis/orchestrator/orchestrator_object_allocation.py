@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_viewpoint_requirement
 from jarvis.handler import handler_question
 from jarvis import util
@@ -74,10 +74,10 @@ def check_add_allocation(allocation_str_list, **kwargs):
         obj_to_alloc = orchestrator_object.retrieve_object_by_name(
             elem[1],
             **{XML_DICT_KEY_1_FUNCTION_LIST: kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-               XML_DICT_KEY_9_ACTIVITY_LIST: kwargs[XML_DICT_KEY_9_ACTIVITY_LIST],
+               XML_DICT_KEY_10_ACTIVITY_LIST: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                XML_DICT_KEY_6_STATE_LIST: kwargs[XML_DICT_KEY_6_STATE_LIST],
                XML_DICT_KEY_0_DATA_LIST: kwargs[XML_DICT_KEY_0_DATA_LIST],
-               XML_DICT_KEY_10_INFORMATION_LIST: kwargs[XML_DICT_KEY_10_INFORMATION_LIST],
+               XML_DICT_KEY_11_INFORMATION_LIST: kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
                XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
@@ -252,7 +252,7 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
     Returns:
         [View, Object]
     """
-    xml_view_list = kwargs[XML_DICT_KEY_12_VIEW_LIST]
+    xml_view_list = kwargs[XML_DICT_KEY_13_VIEW_LIST]
 
     # [data, function, fun_elem] case
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
@@ -260,8 +260,8 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
     xml_data_list = kwargs[XML_DICT_KEY_0_DATA_LIST]
 
     # [information, activity, phy_elem] case
-    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
     xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
 
     new_allocation_dict = {
@@ -442,8 +442,8 @@ def check_allocation_to_fun_inter(fun_inter, data, **kwargs):
             data, fun_inter,
             kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
-            kwargs[XML_DICT_KEY_14_FUN_CONS_LIST],
-            kwargs[XML_DICT_KEY_15_FUN_PROD_LIST])
+            kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+            kwargs[XML_DICT_KEY_16_FUN_PROD_LIST])
         if all(i for i in check_fe):
             out = [fun_inter, data]
             fun_inter.add_allocated_data(data.id)
@@ -502,10 +502,10 @@ def check_fun_elem_data_consumption(data, fun_inter, fun_elem_list, function_lis
 
 
 def check_allocation_information(p_obj, p_information, **kwargs):
-    xml_consumer_function_list = kwargs[XML_DICT_KEY_14_FUN_CONS_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
-    xml_consumer_activity_list = kwargs[XML_DICT_KEY_16_ACT_CONS_LIST]
-    xml_producer_activity_list = kwargs[XML_DICT_KEY_17_ACT_PROD_LIST]
+    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
+    xml_consumer_activity_list = kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]
+    xml_producer_activity_list = kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]
     pair = None
 
     if not any(allocated_info_id == p_information.id for allocated_info_id in p_obj.allocated_info_list):

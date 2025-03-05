@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_object_allocation
 from jarvis import util
 from tools import Logger
@@ -30,7 +30,7 @@ def add_view(p_str_list, **kwargs):
             Returns:
                 1 if update, else 0
         """
-    xml_view_list = kwargs[XML_DICT_KEY_12_VIEW_LIST]
+    xml_view_list = kwargs[XML_DICT_KEY_13_VIEW_LIST]
     output_xml = kwargs['output_xml']
     view_list = []
     update = 0
@@ -93,8 +93,8 @@ def check_get_consider(consider_str_list, **kwargs):
     xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
 
     # [information, activity, phy_elem] case
-    xml_information_list = kwargs[XML_DICT_KEY_10_INFORMATION_LIST]
-    xml_activity_list = kwargs[XML_DICT_KEY_9_ACTIVITY_LIST]
+    xml_information_list = kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
+    xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
     xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
 
     # Create lists with all object names/aliases already in the xml

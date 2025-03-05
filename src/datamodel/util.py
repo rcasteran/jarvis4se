@@ -9,6 +9,7 @@ INFO_KEY_PARENT = 'parent'
 INFO_KEY_DERIVED = 'derived from object'
 INFO_KEY_CHILD_LIST = 'child list'
 INFO_KEY_REQUIREMENT_LIST = 'requirement list'
+INFO_KEY_GOAL_LIST = 'goal list'
 INFO_KEY_DATA_LIST = 'allocated data list'
 INFO_KEY_ACTIVITY_LIST = 'allocated activity list'
 INFO_KEY_INFORMATION_LIST = 'allocated information list'
@@ -283,6 +284,48 @@ def info_allocated_req(p_obj):
         info_dict = {INFO_KEY_REQUIREMENT_LIST: req_id_list}
     else:
         info_dict = {INFO_KEY_REQUIREMENT_LIST: 'none'}
+
+    return info_dict
+
+
+def str_allocated_goal(p_obj):
+    """@ingroup datamodel
+    @anchor str_allocated_goal
+    Return a string representation of the allocated goal list of a class instance
+    @param[in] p_obj class instance
+    @return string
+    """
+    if len(p_obj.allocated_goal_list) > 1:
+        rep = f'"{p_obj.name}" has {len(p_obj.allocated_goal_list)} allocated goals:\n'
+        for item in p_obj.allocated_goal_list:
+            rep += f' - goal (id: {item})\n'
+        rep = rep[:-1]
+    elif len(p_obj.allocated_goal_list) == 1:
+        rep = f'"{p_obj.name}" has one allocated goal:\n'
+        for item in p_obj.allocated_goal_list:
+            rep += f' - goal (id: {item})\n'
+        rep = rep[:-1]
+    else:
+        rep = f'"{p_obj.name}" has no allocated goal.'
+
+    return rep
+
+
+def info_allocated_goal(p_obj):
+    """@ingroup datamodel
+    @anchor info_allocated_goal
+    Return a dict representation of the allocated goal list of a class instance
+    @param[in] p_obj class instance
+    @return dict
+    """
+    if len(p_obj.allocated_goal_list) > 0:
+        goal_id_list = ''
+        for item in p_obj.allocated_goal_list:
+            goal_id_list += f'{item}\n'
+        goal_id_list = goal_id_list[:-1]
+        info_dict = {INFO_KEY_GOAL_LIST: goal_id_list}
+    else:
+        info_dict = {INFO_KEY_GOAL_LIST: 'none'}
 
     return info_dict
 

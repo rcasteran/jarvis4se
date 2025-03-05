@@ -8,9 +8,9 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_ACTIVITY_LIST, XML_DICT_KEY_10_INFORMATION_LIST, XML_DICT_KEY_11_ATTRIBUTE_LIST, \
-    XML_DICT_KEY_12_VIEW_LIST, XML_DICT_KEY_13_TYPE_LIST, XML_DICT_KEY_14_FUN_CONS_LIST, \
-    XML_DICT_KEY_15_FUN_PROD_LIST, XML_DICT_KEY_16_ACT_CONS_LIST, XML_DICT_KEY_17_ACT_PROD_LIST
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
+    XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from jarvis.query import query_object, question_answer
 from tools import Logger
 
@@ -60,7 +60,7 @@ class StateModel:
 
     def create_data(self, p_data, p_initial_value, **kwargs):
         data_attribute = query_object.query_object_by_name(datamodel.DesignAttributeLabel,
-                                                           **{XML_DICT_KEY_11_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_11_ATTRIBUTE_LIST]})
+                                                           **{XML_DICT_KEY_12_ATTRIBUTE_LIST: kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST]})
         if p_data not in self.global_data_list:
             if data_attribute:
                 for described_item in data_attribute.described_item_list:
@@ -79,7 +79,7 @@ class StateModel:
 
     def create_state(self, p_state, p_is_initial=False, **kwargs):
         xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
-        xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+        xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
 
         if p_is_initial:
             self.string_state_initial = f'State state(start = State.{p_state.name});\n'
@@ -96,8 +96,8 @@ class StateModel:
         state_function_list = sort_state_function_list(p_state.allocated_function_list, **kwargs)
         for state_function in state_function_list:
             design_attribute = query_object.query_object_by_name(datamodel.DesignAttributeLabel,
-                                                                 **{XML_DICT_KEY_11_ATTRIBUTE_LIST: kwargs[
-                                                                    XML_DICT_KEY_11_ATTRIBUTE_LIST]})
+                                                                 **{XML_DICT_KEY_12_ATTRIBUTE_LIST: kwargs[
+                                                                    XML_DICT_KEY_12_ATTRIBUTE_LIST]})
             if design_attribute:
                 for described_item in design_attribute.described_item_list:
                     if described_item[0] == state_function.id:
@@ -111,8 +111,8 @@ class StateModel:
                 if xml_producer_function[1].id == state_function.id:
                     initial_value_attribute = query_object.query_object_by_name(
                         datamodel.InitialValueAttributeLabel,
-                        **{XML_DICT_KEY_11_ATTRIBUTE_LIST: kwargs[
-                            XML_DICT_KEY_11_ATTRIBUTE_LIST]})
+                        **{XML_DICT_KEY_12_ATTRIBUTE_LIST: kwargs[
+                            XML_DICT_KEY_12_ATTRIBUTE_LIST]})
                     is_initial_value = False
                     if initial_value_attribute:
                         for described_item in initial_value_attribute.described_item_list:
@@ -139,8 +139,8 @@ class StateModel:
         for xml_state in xml_state_list:
             if xml_state.id == p_transition.destination:
                 data_attribute = query_object.query_object_by_name(datamodel.DesignAttributeLabel,
-                                                                   **{XML_DICT_KEY_11_ATTRIBUTE_LIST: kwargs[
-                                                                       XML_DICT_KEY_11_ATTRIBUTE_LIST]})
+                                                                   **{XML_DICT_KEY_12_ATTRIBUTE_LIST: kwargs[
+                                                                       XML_DICT_KEY_12_ATTRIBUTE_LIST]})
                 if data_attribute:
                     for described_item in data_attribute.described_item_list:
                         if described_item[0] == p_transition.id:
@@ -169,7 +169,7 @@ class StateModel:
 
 def sort_state_function_list(p_function_id_list, **kwargs):
     xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
-    xml_producer_function_list = kwargs[XML_DICT_KEY_15_FUN_PROD_LIST]
+    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
     state_function_list = []
 
     for function_id in p_function_id_list:
