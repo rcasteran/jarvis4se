@@ -154,6 +154,17 @@ class CsvParser3SE:
                                               p_type=row[util.CSV_EXTENSION_IDX])
 
                 activity_list.add(activity)
+
+                # Looking for allocated goals and add them to the activity
+                if len(row[util.CSV_GOAL_LIST_IDX]) > 0:
+                    csv_allocated_goal_id_list = row[util.CSV_GOAL_LIST_IDX].split(util.CSV_MEMBER_SPLIT)
+                    for csv_allocated_goal_id in csv_allocated_goal_id_list:
+                        activity.add_allocated_goal(csv_allocated_goal_id)
+
+                        Logger.set_debug(__name__, f"Goal [{csv_allocated_goal_id}]"
+                                                   f" is satisfied by "
+                                                   f"activity [{activity.id}, {activity.name}]")
+                # Else do nothing
             # Else do nothing
 
         # Loop to set parent and child relationship

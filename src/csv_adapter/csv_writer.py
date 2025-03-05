@@ -147,6 +147,10 @@ class CsvWriter3SE:
         @return updated CSV object array
         """
         for activity in activity_list:
+            allocated_goal_id_list = ''
+            for allocated_goal_id in activity.allocated_goal_list:
+                allocated_goal_id_list += allocated_goal_id + util.CSV_MEMBER_SPLIT
+
             array.append([activity.id,
                           util.CSV_BASE_TAG_ACTIVITY,
                           self.check_object_type(activity.type),
@@ -171,7 +175,7 @@ class CsvWriter3SE:
                           '',  # View element list
                           '',  # Information list
                           '',  # Requirement list
-                          ''  # Goal list
+                          allocated_goal_id_list[:-1]  # Goal list
                           ])
 
         return array

@@ -160,6 +160,15 @@ class XmlParser3SE:
 
             activity_list.add(activity)
 
+            # Looking for allocated goals and add them to the activity
+            xml_allocated_goal_list = activity.iter('allocatedGoal')
+            for xml_allocated_goal in xml_allocated_goal_list:
+                activity.add_allocated_goal(xml_allocated_goal.get("id"))
+
+                Logger.set_debug(__name__, f"Goal [{xml_allocated_goal.get('id')}]"
+                                           f" is satisfied by "
+                                           f"activity [{activity.id}, {activity.name}]")
+
         # Loop to set parent and child relationship
         self.update_parental_relationship(parent_list, activity_list)
 
@@ -660,6 +669,15 @@ class XmlParser3SE:
                 phy_elem.add_allocated_requirement(xml_allocated_requirement.get("id"))
 
                 Logger.set_debug(__name__, f"Requirement [{xml_allocated_requirement.get('id')}]"
+                                           f" is satisfied by "
+                                           f"physical element [{phy_elem.id}, {phy_elem.name}]")
+
+            # Looking for allocated goals and add them to the physical element
+            xml_allocated_goal_list = xml_phy_elem.iter('allocatedGoal')
+            for xml_allocated_goal in xml_allocated_goal_list:
+                phy_elem.add_allocated_goal(xml_allocated_goal.get("id"))
+
+                Logger.set_debug(__name__, f"Goal [{xml_allocated_goal.get('id')}]"
                                            f" is satisfied by "
                                            f"physical element [{phy_elem.id}, {phy_elem.name}]")
 

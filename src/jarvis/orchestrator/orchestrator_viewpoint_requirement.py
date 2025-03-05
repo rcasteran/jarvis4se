@@ -18,7 +18,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
     XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
     XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
-from . import orchestrator_object
+from . import orchestrator_object, orchestrator_viewpoint_goal
 from tools import Logger
 from jarvis.handler import handler_question
 from jarvis import util
@@ -137,8 +137,9 @@ def check_add_requirement(p_str_list, **kwargs):
 def check_add_text(p_text_str_list, **kwargs):
     xml_requirement_list = kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
     text_list = []
+    update = 0
 
-    # Create a list with all transition names/aliases already in the xml
+    # Create a list with all requirement names/aliases already in the xml
     xml_requirement_name_list = orchestrator_object.check_object_name_in_list(xml_requirement_list)
     for elem in p_text_str_list:
         requirement_str = elem[0].replace('"', "")
@@ -172,44 +173,48 @@ def check_add_text(p_text_str_list, **kwargs):
                                 Logger.set_warning(__name__,
                                                    f'Subject "{req_subject}" of the requirement {requirement.name} '
                                                    f'is unknown')
+                        else:
+                            req_subject_object = None
+                            Logger.set_warning(__name__,
+                                               f'Subject "{req_subject}" of the requirement {requirement.name} '
+                                               f'is unknown')
 
-                            # Check if a requirement with the same text already exist
-                            sequence_ratio_list = evaluate_text_similarities(req_subject,
-                                                                             req_object,
-                                                                             req_conditional,
-                                                                             req_temporal,
-                                                                             **kwargs)
+                        # Check if a requirement with the same text already exist
+                        sequence_ratio_list = evaluate_text_similarities(req_subject,
+                                                                         req_object,
+                                                                         req_conditional,
+                                                                         req_temporal,
+                                                                         **kwargs)
 
-                            req_allocated_object_list = check_requirement_relationship(req_subject_object_list,
-                                                                                       req_object,
-                                                                                       req_conditional,
-                                                                                       req_temporal,
-                                                                                       **kwargs)
+                        req_allocated_object_list = check_requirement_relationship(req_subject_object_list,
+                                                                                   req_object,
+                                                                                   req_conditional,
+                                                                                   req_temporal,
+                                                                                   **kwargs)
 
-                            if sequence_ratio_list:
-                                similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
-                                Logger.set_info(__name__,
-                                                f"Requirement {similar_requirement_name} has the same "
-                                                f"text (confidence factor: "
-                                                f"{sequence_ratio_list[similar_requirement_name]})")
-                            else:
-                                text_list.append([requirement, text_str.lstrip(' '),
-                                                  req_subject_object,
-                                                  req_allocated_object_list])
-                            # Else do nothing
-                        # Else do nothing
+                        if sequence_ratio_list:
+                            similar_requirement_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+                            Logger.set_info(__name__,
+                                            f"Requirement {similar_requirement_name} has the same "
+                                            f"text (confidence factor: "
+                                            f"{sequence_ratio_list[similar_requirement_name]})")
+                        else:
+                            text_list.append([requirement, text_str.lstrip(' '),
+                                              req_subject_object,
+                                              req_allocated_object_list])
                     # Else do nothing
             else:
                 Logger.set_error(__name__,
                                  f"The requirement {requirement_str} does not exist")
+        elif 'want' in text_str:
+            update = orchestrator_viewpoint_goal.check_add_goal_text(p_text_str_list, **kwargs)
         else:
             Logger.set_error(__name__,
                              f"text bad formatted: {text_str}")
 
     if text_list:
         update = add_requirement_text(text_list, **kwargs)
-    else:
-        update = 0
+    # Else do nothing
 
     return update
 
@@ -505,6 +510,7 @@ def add_requirement_text(p_text_list, **kwargs):
                         # Else do nothing
                     # Else do nothing
                 # Else do nothing
+        # Else do nothing
 
         update = 1
 

@@ -10,7 +10,7 @@ from . import util
 
 # Constants
 REQUIREMENT_PATTERN = r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)"
-GOAL_PATTERN = r"As a (.*?), I want (.*?) to ([^.|\n]*)"
+GOAL_PATTERN = r"([^. |\n][^.|\n]*), I want (.*?) to ([^.|\n]*)"
 
 # Type definition
 
@@ -138,6 +138,9 @@ class Activity:
 
         @var parent
         parent identifier
+
+        @var allocated_goal_list
+        allocated goal list
         """
 
         self.id = p_id
@@ -146,6 +149,7 @@ class Activity:
         self.type = p_type
         self.parent = p_parent
         self.child_list = set()
+        self.allocated_goal_list = set()
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -187,6 +191,14 @@ class Activity:
         """
         self.parent = p_parent
 
+    def add_allocated_goal(self, p_goal):
+        """Add allocated goal to allocated_goal_list
+        @param[in] self this class instance
+        @param[in] p_goal allocated goal
+        @return None
+        """
+        self.allocated_goal_list.add(p_goal)
+
     def __str__(self):
         """Return a string representation of the class instance
         @param[in] self this class instance
@@ -201,7 +213,8 @@ class Activity:
         # Activity has no allocated data
         # Activity has no allocated activity
         # Activity has no allocated information
-        # Activity has no allocated goal
+        rep += util.str_allocated_goal(self) + '\n'
+
         return rep
 
     def info(self):
@@ -212,17 +225,17 @@ class Activity:
         return {**util.info_type(self),
                 **util.info_alias(self),
                 # Activity cannot be derived
-                **util.info_parent(self)
+                **util.info_parent(self),
                 # Activity has no child
                 # Activity has no allocated requirement
                 # Activity has no allocated data
                 # Activity has no allocated activity
                 # Activity has no allocated information
-                # Activity has no allocated goal
-                # No display of input_role and operand
+                **util.info_allocated_goal(self)
                 }, [util.INFO_KEY_TYPE,
                     util.INFO_KEY_ALIAS,
-                    util.INFO_KEY_PARENT
+                    util.INFO_KEY_PARENT,
+                    util.INFO_KEY_GOAL_LIST
                     ]
 
 
@@ -1702,7 +1715,7 @@ class PhysicalElement:
         @param[in] p_goal allocated goal
         @return None
         """
-        self.allocated_req_list.add(p_goal)
+        self.allocated_goal_list.add(p_goal)
 
     def __str__(self):
         """Return a string representation of the class instance

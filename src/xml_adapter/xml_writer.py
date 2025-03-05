@@ -1190,5 +1190,24 @@ class XmlWriter3SE:
 
                 _req_part_list_tag = etree.SubElement(goal_tag, "goalPartList")
 
-        Logger.set_debug(__name__, self.write_requirement.__name__)
+        Logger.set_debug(__name__, self.write_goal.__name__)
+        self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+
+    def write_goal_text(self, p_text_list):
+        """Write goal text from list [goal, text]
+        @param[in] p_text_list : list of goal text
+        @return None
+        """
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = self.tree.parse(self.file, parser)
+
+        for goal_tag in root.findall(".//goal"):
+            for goal, goal_req in p_text_list:
+                if goal_tag.get('id') == goal.id:
+                    tag = goal_tag.find('text')
+                    tag.text = util.normalize_xml_string(goal_req)
+                # Else do nothing
+
+        Logger.set_debug(__name__, self.write_goal_text.__name__)
         self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

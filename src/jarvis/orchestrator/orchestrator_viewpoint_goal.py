@@ -34,11 +34,14 @@ def check_add_goal(p_str_list, **kwargs):
     goal_list = []
 
     for p_str in p_str_list:
-        desc_actor = p_str[0].replace('"', "")
+        pattern_actor = p_str[0].replace('"', "")
         desc_subject = p_str[1].replace('"', "")
         desc_activity = p_str[2].replace('"', "")
 
-        if not desc_actor.startswith(f'The {datamodel.ObjectTextPropertyLabel} of '):
+        if not pattern_actor.startswith(f'The {datamodel.ObjectTextPropertyLabel} of '):
+            pattern_actor = re.compile(r'As a (.*?)', re.IGNORECASE).split(pattern_actor)
+            desc_actor = pattern_actor[2]
+
             # Retrieve the subject in object list
             goal_subject_object, _ = retrieve_goal_proper_noun_subject_object(desc_subject, **kwargs)
 
@@ -204,12 +207,13 @@ def detect_goal_pattern(p_str):
     @return goal actor, goal subject, goal activity
     """
     pattern = re.compile(datamodel.GOAL_PATTERN, re.IGNORECASE).split(p_str)
+    pattern_actor = re.compile(r'As a (.*?)', re.IGNORECASE).split(pattern[1])
 
-    Logger.set_debug(__name__, f"Goal actor: {pattern[1]}")
+    Logger.set_debug(__name__, f"Goal actor: {pattern_actor[2]}")
     Logger.set_debug(__name__, f"Goal subject: {pattern[2]}")
     Logger.set_debug(__name__, f"Goal activity: {pattern[3]}")
 
-    return pattern[1].strip(), pattern[2].strip(), pattern[3].strip()
+    return pattern_actor[2].strip(), pattern[2].strip(), pattern[3].strip()
 
 
 def retrieve_goal_actor_object(p_str, **kwargs):
@@ -383,5 +387,107 @@ def add_goal(p_goal_list, **kwargs):
 
         update = 1
     # Else do nothing
+
+    return update
+
+
+def check_add_goal_text(p_text_str_list, **kwargs):
+    xml_goal_list = kwargs[XML_DICT_KEY_9_GOAL_LIST]
+    text_list = []
+
+    # Create a list with all goal names/aliases already in the xml
+    xml_goal_name_list = orchestrator_object.check_object_name_in_list(xml_goal_list)
+    for elem in p_text_str_list:
+        goal_str = elem[0].replace('"', "")
+        text_str = elem[1].replace('"', "")
+
+        if any(goal_str in s for s in xml_goal_name_list):
+            for goal in xml_goal_list:
+                if goal_str == goal.name or goal_str == goal.alias:
+                    goal_actor, goal_subject, goal_activity = detect_goal_pattern(text_str.lstrip(' '))
+
+                    # Retrieve the subject in object list
+                    goal_subject_object, is_error = retrieve_goal_proper_noun_subject_object(goal_subject,
+                                                                                             **kwargs)
+
+                    if not is_error:
+                        if isinstance(goal_subject_object, datamodel.TypeWithAllocatedReqList):
+                            Logger.set_info(__name__, f"Goal {goal.name} is about "
+                                                      f"{goal_subject_object.name}")
+                        else:
+                            Logger.set_warning(__name__,
+                                               f'Subject "{goal_subject}" of the goal {goal.name} '
+                                               f'is unknown')
+                    # Else do nothing
+
+                    # Check if a requirement with the same text already exist
+                    sequence_ratio_list = evaluate_goal_text_similarities(goal_actor,
+                                                                          goal_subject,
+                                                                          goal_activity,
+                                                                          **kwargs)
+
+                    goal_allocated_object_list = check_goal_relationship(goal_subject_object,
+                                                                         goal_actor,
+                                                                         goal_activity,
+                                                                         **kwargs)
+
+                    if sequence_ratio_list:
+                        similar_goal_name = max(sequence_ratio_list, key=sequence_ratio_list.get)
+                        Logger.set_info(__name__,
+                                        f"Goal {similar_goal_name} has the same "
+                                        f"text (confidence factor: "
+                                        f"{sequence_ratio_list[similar_goal_name]})")
+                    else:
+                        text_list.append([goal, text_str.lstrip(' '),
+                                          goal_subject_object,
+                                          goal_allocated_object_list])
+                # Else do nothing
+        else:
+            Logger.set_error(__name__,
+                             f"The goal {goal_str} does not exist")
+
+    if text_list:
+        update = add_goal_text(text_list, **kwargs)
+    else:
+        update = 0
+
+    return update
+
+
+def add_goal_text(p_text_list, **kwargs):
+    output_xml = kwargs['output_xml']
+    update = 0
+
+    for text_item in p_text_list:
+        new_allocation_list = []
+        # Test if allocated object is identified in the goal subject
+        if text_item[2]:
+            text_item[2].add_allocated_goal(text_item[0].id)
+            new_allocation_list.append([text_item[2], text_item[0]])
+        # Else do nothing
+
+        # Test if allocated object is identified in the goal actor or activity
+        if text_item[3]:
+            for item in text_item[3]:
+                if item:
+                    item.add_allocated_goal(text_item[0].id)
+                    new_allocation_list.append([item, text_item[0]])
+                # Else do nothing
+        # Else do nothing
+
+        output_xml.write_goal_text([[text_item[0], text_item[1]]])
+        Logger.set_info(__name__,
+                        f"{text_item[0].name} text is {text_item[1]}")
+
+        if new_allocation_list:
+            output_xml.write_object_allocation(new_allocation_list)
+
+            for elem in new_allocation_list:
+                Logger.set_info(__name__,
+                                f"{elem[1].__class__.__name__} {elem[1].name} is satisfied by "
+                                f"{elem[0].__class__.__name__} {elem[0].name}")
+        # Else do nothing
+
+        update = 1
 
     return update
