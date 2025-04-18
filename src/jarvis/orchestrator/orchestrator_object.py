@@ -285,6 +285,19 @@ def retrieve_object_children_recursively(p_object, p_object_list=None, p_parent_
     return p_object_list, p_parent_child_dict
 
 
+def retrieve_object_parents_recursively(p_object, p_object_list=None):
+    if p_object_list is None:
+        p_object_list = set()
+    # Else do nothing
+
+    if p_object.parent:
+        p_object_list.add(p_object.parent)
+        retrieve_object_parents_recursively(p_object.parent, p_object_list)
+    # Else do nothing
+
+    return p_object_list
+
+
 def retrieve_object_by_name(p_obj_name_str, **kwargs):
     """
     Returns the desired object from object's string
@@ -832,14 +845,13 @@ def check_object_instance_list_goal(object_instance_list, **kwargs):
 
 
 def check_object_is_parent_recursively(p_object_parent, p_object_child):
-    is_parent = False
-
     if p_object_child.parent:
         if p_object_parent == p_object_child.parent:
             is_parent = True
         else:
-            check_object_is_parent_recursively(p_object_parent, p_object_child.parent)
-    # Else do nothing
+            is_parent = check_object_is_parent_recursively(p_object_parent, p_object_child.parent)
+    else:
+        is_parent = False
 
     return is_parent
 

@@ -1946,3 +1946,73 @@ def input_test_requirement():
                              ""])
 
     return first_part, second_part, third_part, fourth_part
+
+
+@pytest.fixture
+def input_test_issue_102():
+    """@ingroup test_issue_102
+    @anchor input_test_issue_102
+    Defines input fixture for @ref test_issue_102
+
+    @return input fixture
+
+    **Jarvis4se equivalent:**
+
+        E is a functional element
+        E1 is a functional element
+        E2 is a functional element
+        E1 composes E
+        E2 composes E
+
+        F is a function
+        E allocates F
+
+        F1 is a function
+        F2 is a function
+        F1, F2 compose F
+        E allocates F1
+        E allocates F2
+        F11 is a function
+        F12 is a function
+        F11, F12 composes F1
+        E allocates F11
+        E allocates F12
+
+        E2 allocates F2
+        E1 allocates F11
+        E2 allocates F12
+
+        E21 is a functional element
+        E22 is a functional element
+        E21 composes E2
+        E22 composes E2
+
+        E21 allocates F12
+        E22 allocates F2
+    """
+    return "\n".join(["E is a functional element",
+                      "E1 is a functional element",
+                      "E2 is a functional element",
+                      "E1 composes E",
+                      "E2 composes E",
+                      "F is a function",
+                      "E allocates F",
+                      "F1 is a function",
+                      "F2 is a function",
+                      "F1, F2 compose F",
+                      "E allocates F1",
+                      "E allocates F2",
+                      "F11 is a function",
+                      "F12 is a function",
+                      "F11, F12 composes F1",
+                      "E allocates F11",
+                      "E allocates F12",
+                      "E2 allocates F2",
+                      "E1 allocates F11",
+                      "E2 allocates F12",
+                      "E21 is a functional element",
+                      "E22 is a functional element",
+                      "E21 composes E2",
+                      "E22 composes E2",
+                      "E21 allocates F12",
+                      "E22 allocates F2"])

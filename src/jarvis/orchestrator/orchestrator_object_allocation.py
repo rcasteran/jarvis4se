@@ -688,35 +688,41 @@ def allocate_all_children_in_element(elem, **kwargs):
 
 
 def check_parent_allocation(elem, **kwargs):
-    """Check if parent's Function/Sate are allocated to parent's Fucntional Element:
+    """Check if parent's Function/State are allocated to parent's Functional Element:
     if not print message to user asking if he wants to, if yes write it in xml then continue
     with parents"""
     if elem[0].parent is not None and elem[1].parent is not None:
-        fun_elem_parent = elem[0].parent
-        object_parent = elem[1].parent
+        fun_elem_parent_list = orchestrator_object.retrieve_object_parents_recursively(elem[0])
+        object_parent_list = orchestrator_object.retrieve_object_parents_recursively(elem[1])
         check = False
         if isinstance(elem[1], datamodel.State):
-            if object_parent.id in fun_elem_parent.allocated_state_list:
-                check = True
+            for object_parent in object_parent_list:
+                for fun_elem_parent in fun_elem_parent_list:
+                    if object_parent.id in fun_elem_parent.allocated_state_list:
+                        check = True
+                        break
         elif isinstance(elem[1], datamodel.Function):
-            if object_parent.id in fun_elem_parent.allocated_function_list:
-                check = True
+            for object_parent in object_parent_list:
+                for fun_elem_parent in fun_elem_parent_list:
+                    if object_parent.id in fun_elem_parent.allocated_function_list:
+                        check = True
+                        break
         if not check:
             answer, _ = handler_question.question_to_user(f"Do you also want to allocate parents "
-                                                          f"(i.e. {object_parent.name} "
-                                                          f"to {fun_elem_parent.name}) ? (Y/N)")
+                                                          f"(i.e. {elem[1].parent.name} "
+                                                          f"to {elem[0].parent.name}) ? (Y/N)")
             if answer.lower() == "y":
                 if isinstance(elem[1], datamodel.State):
-                    fun_elem_parent.add_allocated_state(object_parent.id)
+                    elem[0].parent.add_allocated_state(elem[1].parent.id)
                 else:
-                    fun_elem_parent.add_allocated_function(object_parent.id)
+                    elem[0].parent.add_allocated_function(elem[1].parent.id)
 
-                add_allocation({5: [[fun_elem_parent, object_parent]]}, **kwargs)
-                check_parent_allocation([fun_elem_parent, object_parent], **kwargs)
+                add_allocation({5: [[elem[0].parent, elem[1].parent]]}, **kwargs)
+                check_parent_allocation([elem[0].parent, elem[1].parent], **kwargs)
             else:
-                Logger.set_error(__name__,
-                                 f"{object_parent.name} is not allocated despite at least one "
-                                 f"of its child is")
+                Logger.set_warning(__name__,
+                                   f"{elem[1].parent.name} is not allocated despite at least one "
+                                   f"of its child is")
 
 
 def get_allocated_child(elem, xml_fun_elem_list):
