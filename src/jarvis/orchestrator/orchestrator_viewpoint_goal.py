@@ -319,7 +319,13 @@ def retrieve_goal_proper_noun_activity_object(p_desc_activity, **kwargs):
     if req_object:
         is_error = False
     else:
-        is_error = True
+        # Try to retrieve the object with the whole goal string
+        req_object = orchestrator_object.retrieve_object_by_name("To" + p_desc_activity, **kwargs)
+
+        if req_object:
+            is_error = False
+        else:
+            is_error = True
 
     return req_object, is_error
 
@@ -420,7 +426,7 @@ def check_add_goal_text(p_text_str_list, **kwargs):
                                                f'is unknown')
                     # Else do nothing
 
-                    # Check if a requirement with the same text already exist
+                    # Check if a goal with the same text already exist
                     sequence_ratio_list = evaluate_goal_text_similarities(goal_actor,
                                                                           goal_subject,
                                                                           goal_activity,
