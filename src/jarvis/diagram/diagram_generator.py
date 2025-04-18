@@ -611,6 +611,17 @@ def case_sequence_diagram(**kwargs):
             elif all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
                      for i in object_list_str):
                 if len(xml_data_list) > 0:
+                    consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                        kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+                        **kwargs
+                    )
+                    produced_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
+                        kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                        kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
+                        **kwargs
+                    )
+
                     if len(xml_data_list) != len(kwargs[XML_DICT_KEY_0_DATA_LIST]):
                         xml_cons = [i for i in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
                                     if any(a == i[0] for a in [d for d in xml_data_list])]
@@ -625,6 +636,17 @@ def case_sequence_diagram(**kwargs):
                                                               xml_cons,
                                                               xml_prod,
                                                               xml_data_list)
+
+                    query_inheritance.query_inheritance_remove_inherited_object(
+                        consumed_flow_inheritance,
+                        kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
+                        **kwargs
+                    )
+                    query_inheritance.query_inheritance_remove_inherited_object(
+                        produced_flow_inheritance,
+                        kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
+                        **kwargs
+                    )
                 else:
                     Logger.set_warning(__name__,
                                        f"There are no data defined for the requested elements")
