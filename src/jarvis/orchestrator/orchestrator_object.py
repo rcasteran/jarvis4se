@@ -91,8 +91,9 @@ class ObjectInstance:
             6: kwargs[XML_DICT_KEY_6_STATE_LIST].add,
             7: kwargs[XML_DICT_KEY_7_TRANSITION_LIST].add,
             8: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST].add,
-            9: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST].add,
-            10: kwargs[XML_DICT_KEY_11_INFORMATION_LIST].add
+            9: kwargs[XML_DICT_KEY_9_GOAL_LIST].add,
+            10: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST].add,
+            11: kwargs[XML_DICT_KEY_11_INFORMATION_LIST].add
         }
         call = object_dictionary_list.get(self.base_type_idx)
         call(self.object_instance)
