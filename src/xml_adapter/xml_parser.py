@@ -161,7 +161,7 @@ class XmlParser3SE:
             activity_list.add(activity)
 
             # Looking for allocated goals and add them to the activity
-            xml_allocated_goal_list = activity.iter('allocatedGoal')
+            xml_allocated_goal_list = xml_activity.iter('allocatedGoal')
             for xml_allocated_goal in xml_allocated_goal_list:
                 activity.add_allocated_goal(xml_allocated_goal.get("id"))
 

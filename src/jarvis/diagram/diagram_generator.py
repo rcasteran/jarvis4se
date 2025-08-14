@@ -507,19 +507,27 @@ def case_chain_diagram(**kwargs):
                                                                          kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                                                                          kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
+                activity_list = set()
                 for i in object_list_str:
                     for phy_elem in phy_elem_list_from_view:
                         if i == phy_elem.name or i == phy_elem.alias:
                             phy_elem_list.add(phy_elem)
 
-                            if len(phy_elem.allocated_activity_list) > 0:
-                                for allocated_activity_id in phy_elem.allocated_activity_list:
-                                    for activity in kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]:
-                                        if activity.id == allocated_activity_id:
-                                            if len(activity_list_from_view) == 0 or activity in activity_list_from_view:
-                                                activity_list.add(activity)
-                                            # Else do nothing
-                                        # Else do nothing
+                            if len(activity_list_from_view) == 0:
+                                temp_activity_list = question_answer.get_allocation_object(
+                                    phy_elem,
+                                    kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
+                                    **kwargs
+                                )
+                            else:
+                                temp_activity_list = question_answer.get_allocation_object(
+                                    phy_elem,
+                                    activity_list_from_view,
+                                    **kwargs
+                                )
+
+                            if temp_activity_list is not None:
+                                activity_list = activity_list | temp_activity_list
                             else:
                                 Logger.set_info(__name__,
                                                 f"No activity allocated to {phy_elem.name} (no display)")

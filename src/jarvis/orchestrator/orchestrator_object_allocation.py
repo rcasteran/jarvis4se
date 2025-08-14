@@ -368,6 +368,12 @@ def check_allocation_to_phy_elem(alloc_obj, obj_to_alloc, **kwargs):
             alloc_obj.add_allocated_activity(obj_to_alloc.id)
             pair = [alloc_obj, obj_to_alloc]
         # Else do nothing
+    elif  isinstance(obj_to_alloc, datamodel.FunctionalElement):
+        if not any(allocated_fun_elem_id == obj_to_alloc.id
+                   for allocated_fun_elem_id in alloc_obj.allocated_fun_elem_list):
+            alloc_obj.add_allocated_activity(obj_to_alloc.id)
+            pair = [alloc_obj, obj_to_alloc]
+        # Else do nothing
     # Else do nothing
 
     return pair
@@ -558,11 +564,19 @@ def add_allocation(allocation_dict, **kwargs):
 
                     orchestrator_object.check_object_instance_list_requirement([elem[0], elem[1]], **kwargs)
 
-                    if k == OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX and isinstance(elem[1], datamodel.Function):
+                    if isinstance(elem[1].type, datamodel.BaseType):
+                        object_type = elem[1].type
+                    else:
+                        _, object_type = orchestrator_object.retrieve_type(elem[1].type.name, True, **kwargs)
+
+                    if k == OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX and object_type == datamodel.BaseType.FUNCTION:
                         # Allocation of function to state
                         # Need to remove previous allocation if any
                         xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
+                        xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
                         xml_state_list = kwargs[XML_DICT_KEY_6_STATE_LIST]
+                        xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+
                         for xml_state in xml_state_list:
                             if xml_state.id != elem[0].id:
                                 if elem[1].id in xml_state.allocated_function_list:
@@ -622,6 +636,90 @@ def add_allocation(allocation_dict, **kwargs):
                                                 f"{elem[0].__class__.__name__} {elem[0].name} is allocated to "
                                                 f"{xml_fun_elem.__class__.__name__} {xml_fun_elem.name}")
                             # Else do nothing
+
+                        if len(elem[1].allocated_activity_list) > 0:
+                            # Need to check if state allocated to fun elem allocated to phy elem
+                            # to allocate activity to phy elem
+                            for xml_fun_elem in xml_fun_elem_list:
+                                if elem[1].id in xml_fun_elem.allocated_function_list:
+                                    for xml_phy_elem in xml_phy_elem_list:
+                                        if xml_fun_elem.id in xml_phy_elem.allocated_fun_elem_list:
+                                            for allocated_activity_id in elem[1].allocated_activity_list:
+                                                for xml_activity in xml_activity_list:
+                                                    if xml_activity.id == allocated_activity_id:
+                                                        xml_phy_elem.add_allocated_activity(xml_activity.id)
+                                                        output_xml.write_object_allocation([[xml_phy_elem,
+                                                                                             xml_activity]])
+                                                        Logger.set_info(__name__,
+                                                                        f"{xml_activity.__class__.__name__} "
+                                                                        f"{xml_activity.name} is allocated to "
+                                                                        f"{xml_phy_elem.__class__.__name__} "
+                                                                        f"{xml_phy_elem.name}")
+                                                    # Else do nothing
+                                        # Else do nothing
+                                # Else do nothing
+                        #Else do nothing
+                    elif k == OBJ_ALLOCATION_TO_FUNCTION_IDX and object_type == datamodel.BaseType.ACTIVITY:
+                        # Allocation of activity to function
+                        # Need to add activity to physical element if any
+                        xml_fun_elem_list = kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]
+                        xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
+
+                        for xml_fun_elem in xml_fun_elem_list:
+                            if elem[0].id in xml_fun_elem.allocated_function_list:
+                                for xml_phy_elem in xml_phy_elem_list:
+                                    if xml_fun_elem.id in xml_phy_elem.allocated_fun_elem_list:
+                                        xml_phy_elem.add_allocated_activity(elem[1].id)
+                                        output_xml.write_object_allocation([[xml_phy_elem, elem[1]]])
+                                        Logger.set_info(__name__,
+                                                        f"{elem[1].__class__.__name__} {elem[1].name} is allocated to "
+                                                        f"{xml_phy_elem.__class__.__name__} {xml_phy_elem.name}")
+                                    # Else do nothing
+                            # Else do nothing
+                    elif k == OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX and object_type == datamodel.BaseType.FUNCTION:
+                        xml_phy_elem_list = kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]
+                        xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+
+                        if len(elem[1].allocated_activity_list) > 0:
+                            # Need to check if fun elem allocated to phy elem
+                            # to allocate activity to phy elem
+                            for xml_phy_elem in xml_phy_elem_list:
+                                if elem[0].id in xml_phy_elem.allocated_fun_elem_list:
+                                    for allocated_activity_id in elem[1].allocated_activity_list:
+                                        for xml_activity in xml_activity_list:
+                                            if xml_activity.id == allocated_activity_id:
+                                                xml_phy_elem.add_allocated_activity(xml_activity.id)
+                                                output_xml.write_object_allocation([[xml_phy_elem,
+                                                                                     xml_activity]])
+                                                Logger.set_info(__name__,
+                                                                f"{xml_activity.__class__.__name__} "
+                                                                f"{xml_activity.name} is allocated to "
+                                                                f"{xml_phy_elem.__class__.__name__} "
+                                                                f"{xml_phy_elem.name}")
+                                            # Else do nothing
+                                # Else do nothing
+                        # Else do nothing
+                    elif k == OBJ_ALLOCATION_TO_PHY_ELEM_IDX and object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                        xml_function_list = kwargs[XML_DICT_KEY_1_FUNCTION_LIST]
+                        xml_activity_list = kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
+
+                        for allocated_fun_id in elem[1].allocated_function_list:
+                            for xml_fun in xml_function_list:
+                                if xml_fun.id == allocated_fun_id:
+                                    for allocated_activity_id in xml_fun.allocated_activity_list:
+                                        for xml_activity in xml_activity_list:
+                                            if xml_activity.id == allocated_activity_id:
+                                                elem[0].add_allocated_activity(xml_activity.id)
+                                                output_xml.write_object_allocation([[elem[0],
+                                                                                     xml_activity]])
+                                                Logger.set_info(__name__,
+                                                                f"{xml_activity.__class__.__name__} "
+                                                                f"{xml_activity.name} is allocated to "
+                                                                f"{elem[0].__class__.__name__} "
+                                                                f"{elem[0].name}")
+                                            # Else do nothing
+
+                    # Else do nothing
 
                     if k in (OBJ_ALLOCATION_TO_FUN_ELEM_RECURSIVELY_IDX, OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX):
                         allocate_all_children_in_element(elem, **kwargs)
