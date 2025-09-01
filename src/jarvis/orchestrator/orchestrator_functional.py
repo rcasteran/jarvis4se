@@ -233,7 +233,7 @@ def check_add_consumer_elem(consumer_str_list, **kwargs):
             Logger.set_error(__name__, f"{flow_name} does not exist as Information")
         elif not any(item == consumer_elem_name for item in xml_activity_name_list) and \
                 any(item == flow_name for item in xml_information_name_list):
-            Logger.set_error(__name__, f"{flow_name} does not exist as Activity")
+            Logger.set_error(__name__, f"{consumer_elem_name} does not exist as Activity")
         else:
             Logger.set_error(__name__, f"{consumer_elem_name} and {flow_name} do not exist")
 
@@ -550,7 +550,7 @@ def check_add_producer_elem(producer_str_list, **kwargs):
             Logger.set_error(__name__, f"{flow_name} does not exist as Information")
         elif not any(item == producer_elem_name for item in xml_activity_name_list) and \
                 any(item == flow_name for item in xml_information_name_list):
-            Logger.set_error(__name__, f"{flow_name} does not exist as Activity")
+            Logger.set_error(__name__, f"{producer_elem_name} does not exist as Activity")
         else:
             Logger.set_error(__name__, f"{producer_elem_name} and {flow_name} do not exist")
 

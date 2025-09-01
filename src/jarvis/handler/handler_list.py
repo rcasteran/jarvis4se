@@ -305,7 +305,7 @@ def get_fun_elem_interface(wanted_object, object_type, is_list_transposed, **kwa
 def report_no_list_available(wanted_object, object_type):
     """Case when there is incompatible list's type with object's type """
     Logger.set_error(__name__, f"No list available for object '{wanted_object.name}' "
-                               f"of type '{object_type.capitalize()}', possible lists are:\n"
+                               f"of type '{str(object_type).capitalize()}', possible lists are:\n"
                                f"- List child [Function/State/Functional element]\n"
                                f"- List input/output [Function/Functional element]\n"
                                f"- List function/transition [State]\n"
