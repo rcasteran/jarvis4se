@@ -10,7 +10,7 @@ from . import util
 
 # Constants
 REQUIREMENT_PATTERN = r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)"
-GOAL_PATTERN = r"([^. |\n][^.|\n]*), I want (.*?) to ([^.|\n]*)"
+GOAL_PATTERN = r"([^. |\n][^.|\n]*) I want (.*?) to ([^.|\n]*)"
 
 # Type definition
 
