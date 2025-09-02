@@ -10,7 +10,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
     XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
     XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
-from jarvis.query import query_object, question_answer
+from jarvis.query import query_object
 from tools import Logger
 
 
@@ -133,8 +133,9 @@ def question_object_allocation(p_object_str, **kwargs):
     p_object_str = p_object_str[0].strip()
     wanted_object = query_object.query_object_by_name(p_object_str, **kwargs)
     if wanted_object:
-        allocation_list = question_answer.get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
-                                                                **kwargs)
+        allocation_list = query_object.query_object_allocated_object_list(wanted_object,
+                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                          **kwargs)
         if allocation_list:
             object_info = f'"{wanted_object.name}" is allocated to ' \
                            + ", ".join([elem.name for elem in allocation_list])

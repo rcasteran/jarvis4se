@@ -514,13 +514,13 @@ def case_chain_diagram(**kwargs):
                             phy_elem_list.add(phy_elem)
 
                             if len(activity_list_from_view) == 0:
-                                temp_activity_list = question_answer.get_allocation_object(
+                                temp_activity_list = query_object.query_object_allocated_object_list(
                                     phy_elem,
                                     kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                                     **kwargs
                                 )
                             else:
-                                temp_activity_list = question_answer.get_allocation_object(
+                                temp_activity_list = query_object.query_object_allocated_object_list(
                                     phy_elem,
                                     activity_list_from_view,
                                     **kwargs
@@ -994,7 +994,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
     }
 
     for fun_elem in new_fun_elem_list:
-        temp_fun_set = question_answer.get_allocation_object(
+        temp_fun_set = query_object.query_object_allocated_object_list(
             fun_elem,
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
             **kwargs
@@ -1009,7 +1009,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
 
             # TODO not used in the code
             if isinstance(get_derived_if_in_view, list):
-                alloc_derived_func_set = question_answer.get_allocation_object(
+                alloc_derived_func_set = query_object.query_object_allocated_object_list(
                     fun_elem.derived,
                     kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                     **kwargs
@@ -1080,7 +1080,7 @@ def get_phy_elem_sequence_diagram(phy_elem_str, **kwargs):
     }
 
     for phy_elem in new_phy_elem_list:
-        temp_activity_set = question_answer.get_allocation_object(
+        temp_activity_set = query_object.query_object_allocated_object_list(
             phy_elem,
             kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
             **kwargs
@@ -1095,7 +1095,7 @@ def get_phy_elem_sequence_diagram(phy_elem_str, **kwargs):
 
             # TODO not used in the code
             if isinstance(get_derived_if_in_view, list):
-                alloc_derived_func_set = question_answer.get_allocation_object(
+                alloc_derived_func_set = query_object.query_object_allocated_object_list(
                     phy_elem.derived,
                     kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                     **kwargs

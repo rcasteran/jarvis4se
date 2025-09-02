@@ -61,3 +61,7 @@ def query_object_is_parent_recursively(p_object_parent, p_object_child):
 
 def query_object_type_requirement_list(p_object, **kwargs):
     return orchestrator_object.retrieve_object_type_requirement_list(p_object, **kwargs)
+
+
+def query_object_allocated_object_list(p_object, p_allocated_object_dict, **kwargs):
+    return orchestrator_object.retrieve_allocated_object_list(p_object, p_allocated_object_dict, **kwargs)

@@ -38,10 +38,6 @@ def get_child_name_list(parent_object, object_list):
     return list(child_list)
 
 
-def get_allocation_object(wanted_object, object_list, **kwargs):
-    return orchestrator_object.retrieve_allocated_object_list(wanted_object, object_list, **kwargs)
-
-
 def get_fun_elem_function_state_allocation(wanted_object, xml_function_list, xml_state_list):
     """Returns a list for allocations with:
     [(function.name, "Function allocation"), (state.name, "State allocation"), ...]
@@ -76,7 +72,9 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                 prod_last_fun_elem = None
                 if cons[0] == prod[0] and \
                         check_latest(cons[1], kwargs[XML_DICT_KEY_1_FUNCTION_LIST]) == cons[1].name:
-                    cons_fun_elem_list = get_allocation_object(cons[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
+                    cons_fun_elem_list = query_object.query_object_allocated_object_list(cons[1],
+                                                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                                         **kwargs)
                     if cons_fun_elem_list:
                         for fun_elem in cons_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
@@ -94,7 +92,10 @@ def get_latest_obj_interface(fun_intf, data, last_fun_elem_exposing_list, fun_el
                             # Else do nothing
                     # Else do nothing
 
-                    prod_fun_elem_list = get_allocation_object(prod[1], kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
+                    prod_fun_elem_list = \
+                        query_object.query_object_allocated_object_list(prod[1],
+                                                                        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                        **kwargs)
                     if prod_fun_elem_list:
                         for fun_elem in prod_fun_elem_list:
                             if fun_elem.name in last_fun_elem_exposing_list:
@@ -267,10 +268,14 @@ def get_fun_intf_data(wanted_object, _, is_list_transposed, **kwargs):
     """Case for 'list data Functional Interface' """
     data_dict = {}
     data_list = []
-    fun_elem_exposing = get_allocation_object(wanted_object, kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
+    fun_elem_exposing = query_object.query_object_allocated_object_list(wanted_object,
+                                                                        kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                                        **kwargs)
     if wanted_object.derived:
-        derived_fun_elem_exposing = get_allocation_object(wanted_object.derived,
-                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST], **kwargs)
+        derived_fun_elem_exposing = \
+            query_object.query_object_allocated_object_list(wanted_object.derived,
+                                                            kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
+                                                            **kwargs)
         if derived_fun_elem_exposing and fun_elem_exposing:
             fun_elem_exposing = fun_elem_exposing.union(derived_fun_elem_exposing)
 

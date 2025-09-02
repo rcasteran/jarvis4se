@@ -58,34 +58,62 @@ def list_object(p_str_list, **kwargs):
 def switch_object_list(type_list_str, wanted_object, object_type, is_list_transposed, **kwargs):
     """Switch depending on list's type and object's type """
     object_list = {}
-    if object_type in (datamodel.BaseType.STATE,
+    # List child [Function/State/Functional element]
+    if type_list_str == "child" and object_type in (datamodel.BaseType.STATE,
                        datamodel.BaseType.FUNCTION,
                        datamodel.BaseType.FUNCTIONAL_ELEMENT):
-        if object_type == datamodel.BaseType.STATE and type_list_str in ("input", "output"):
-            report_no_list_available(wanted_object, object_type)
-        elif object_type != datamodel.BaseType.STATE and type_list_str in ("function", "transition"):
-            report_no_list_available(wanted_object, object_type)
-        elif object_type != datamodel.BaseType.FUNCTIONAL_ELEMENT and type_list_str == "interface":
-            report_no_list_available(wanted_object, object_type)
-        else:
-            switch_type_list = {
-                "input": get_input_list,
-                "output": get_output_list,
-                "child": get_child_list,
-                "function": get_state_function,
-                "transition": get_state_transition,
-                "interface": get_fun_elem_interface,
-            }
-            type_list = switch_type_list.get(type_list_str, None)
-            if type_list:
-                object_list = type_list(wanted_object, object_type, is_list_transposed, **kwargs)
+        object_list = get_child_list(wanted_object, object_type, is_list_transposed, **kwargs)
 
-                if not object_list:
-                    Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
-                # Else do nothing
-            else:
-                report_no_list_available(wanted_object, object_type)
-    elif object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE and type_list_str == "data":
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List input [Function/Functional element]
+    elif type_list_str == "input" and object_type in (datamodel.BaseType.FUNCTION,
+                                                      datamodel.BaseType.FUNCTIONAL_ELEMENT):
+        object_list = get_input_list(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List output [Function/Functional element]
+    elif type_list_str == "output" and object_type in (datamodel.BaseType.FUNCTION,
+                                                      datamodel.BaseType.FUNCTIONAL_ELEMENT):
+        object_list = get_output_list(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List function [Functional element / State]
+    elif type_list_str == "function" and object_type in (datamodel.BaseType.STATE,
+                                                         datamodel.BaseType.FUNCTIONAL_ELEMENT):
+        object_list = get_allocated_function_table(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List transition [State]
+    elif type_list_str == "transition" and object_type == datamodel.BaseType.STATE:
+        object_list = get_state_transition(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List interface [Functional element]
+    elif type_list_str == "interface" and object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+        object_list = get_fun_elem_interface(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List activity [Physical element]
+    elif type_list_str == "activity" and object_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+        object_list = get_phy_elem_allocated_activity_table(wanted_object, object_type, is_list_transposed, **kwargs)
+
+        if not object_list:
+            Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
+        # Else do nothing
+    # List data [Functional interface]
+    elif type_list_str == "data" and object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
         object_list = question_answer.get_fun_intf_data(wanted_object, object_type, is_list_transposed, **kwargs)
 
         if not object_list:
@@ -186,25 +214,33 @@ def get_child_list(wanted_object, object_type, is_list_transposed, **kwargs):
     return child_dict
 
 
-def get_state_function(wanted_object, object_type, is_list_transposed, **kwargs):
+def get_allocated_function_table(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list function State' """
     function_dict = {}
     function_list = []
-    for allocated_fun in wanted_object.allocated_function_list:
-        for fun in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
-            if fun.id == allocated_fun:
-                function_list.append((fun.name, "Function allocation"))
 
-    if function_list:
-        if is_list_transposed:
-            function_dict = {'title': f"Function list for {wanted_object.name}:",
-                             'data': list(tuple(sorted(function_list))),
-                             'columns': ["Object's name", "Relationship's type"],
-                             'transpose': 'y'}
-        else:
-            function_dict = {'title': f"Function list for {wanted_object.name}:",
-                             'data': list(tuple(sorted(function_list))),
-                             'columns': ["Object's name", "Relationship's type"]}
+    allocated_function_list = query_object.query_object_allocated_object_list(wanted_object,
+                                                                              kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
+                                                                              **kwargs)
+
+    if not allocated_function_list:
+        Logger.set_warning(__name__, f"No function allocated to {wanted_object.__class__.__name__} "
+                                     f"{wanted_object.name}")
+    else:
+        for allocated_function in allocated_function_list:
+            function_list.append([allocated_function.name])
+
+        if function_list:
+            if is_list_transposed:
+                function_dict = {'title': f"Function list for {wanted_object.name}:",
+                                 'data': list(tuple(sorted(function_list))),
+                                 'columns': ["Name"],
+                                 'transpose': 'y'}
+            else:
+                function_dict = {'title': f"Function list for {wanted_object.name}:",
+                                 'data': list(tuple(sorted(function_list))),
+                                 'columns': ["Name"]}
+        # Else do nothing
 
     return function_dict
 
@@ -302,12 +338,51 @@ def get_fun_elem_interface(wanted_object, object_type, is_list_transposed, **kwa
     return interface_dict
 
 
+def get_phy_elem_allocated_activity_table(wanted_object, _, is_list_transposed, **kwargs):
+    activity_dict = {}
+    activity_list = []
+
+    allocated_activity_list = query_object.query_object_allocated_object_list(wanted_object,
+                                                                              kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
+                                                                              **kwargs)
+    if wanted_object.derived:
+        derived_allocated_activity_list = \
+            query_object.query_object_allocated_object_list(wanted_object.derived,
+                                                            kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
+                                                            **kwargs)
+        if derived_allocated_activity_list and allocated_activity_list:
+            allocated_activity_list = allocated_activity_list.union(derived_allocated_activity_list)
+        # Else do nothing
+    # Else do nothing
+
+    if not allocated_activity_list:
+        Logger.set_warning(__name__, f"No activity allocated to physical element {wanted_object.name}")
+    else:
+        for allocated_activity in allocated_activity_list:
+            activity_list.append([allocated_activity.name])
+
+        if activity_list:
+            if is_list_transposed:
+                activity_dict = {'title': f"Activity list for {wanted_object.name}:",
+                             'data': list(tuple(sorted(activity_list))),
+                             'columns': ['Name'],
+                             'transpose': 'y'}
+            else:
+                activity_dict = {'title': f"Activity list for {wanted_object.name}:",
+                             'data':list(tuple(sorted(activity_list))),
+                             'columns': ['Name']}
+        # Else do nothing
+
+    return activity_dict
+
 def report_no_list_available(wanted_object, object_type):
     """Case when there is incompatible list's type with object's type """
     Logger.set_error(__name__, f"No list available for object '{wanted_object.name}' "
                                f"of type '{str(object_type).capitalize()}', possible lists are:\n"
                                f"- List child [Function/State/Functional element]\n"
                                f"- List input/output [Function/Functional element]\n"
+                               f"- List function [Functional element]\n"
                                f"- List function/transition [State]\n"
                                f"- List interface [Functional element]\n"
-                               f"- List data [Functional interface]")
+                               f"- List data [Functional interface]\n"
+                               f"- List activity [Physical element]")

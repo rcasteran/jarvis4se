@@ -65,7 +65,8 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) is derived into ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"^show ([^.|\n]*)", self.matched_show),
             (r"^(.*?)\?", self.matched_question_mark),
-            (r"^list (input|output|child|data|function|transition|interface) ([^.|\n]*)", CmdParser.matched_list),
+            (r"^list (input|output|child|data|function|transition|interface|activity|information|requirement|goal) "
+             r"([^.|\n]*)", CmdParser.matched_list),
             (r"^import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
             (r"^import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
             (r"^export ([^.|\n]*)", CmdParser.matched_export),
@@ -113,53 +114,57 @@ class CmdParser:
     def lookup_table(self, string, **kwargs):
         """Lookup table with conditions depending on the match"""
         update_list = []
+        update = None
 
         # Case of non-attribute command
         for regex, method in self.command_list:
-            result_chain = None
-            result = None
-            update = None
+            result_command = None
+            result_command_chain = None
 
             if regex == r"under ([^.|\n]*)":
-                result_chain = re.split(regex, string)
-                del result_chain[0]
+                result_command_chain = re.split(regex, string)
+                del result_command_chain[0]
             # Only one diagram per cell can be output
             elif regex == r"show ([^.|\n]*)":
-                result = re.search(regex, string, flags=re.MULTILINE | re.IGNORECASE)
+                result_command = re.search(regex, string, flags=re.MULTILINE | re.IGNORECASE)
             else:
                 # Transform to avoid duplicated function's declaration within cells input
-                result = []
-                [result.append(x) for x in re.findall(regex, string, flags=re.MULTILINE | re.IGNORECASE)
-                 if x not in result]
+                result_command = []
+                [result_command.append(x) for x in re.findall(regex, string, flags=re.MULTILINE | re.IGNORECASE)
+                 if x not in result_command]
 
-            if result and not result_chain:
+            if result_command and not result_command_chain:
                 # self.reverse
                 if regex in self.reverse_command_list:
-                    result = util.reverse_tuple_list(result)
-                update = method(result, **kwargs)
-            elif result_chain:
+                    result_command = util.reverse_tuple_list(result_command)
+                update = method(result_command, **kwargs)
+            elif result_command_chain:
                 string = ''
-                update = self.matched_under(result_chain, **kwargs)
+                update = self.matched_under(result_command_chain, **kwargs)
 
             if update is not None:
                 if isinstance(update, int):
                     update_list.append(update)
 
         # Case of attribute command
-        result = re.findall(self.attribute_command_list[0][0], string, flags=re.MULTILINE | re.IGNORECASE)
-        if result:
-            update = self.attribute_command_list[0][1](result, **kwargs)
+        result_attr_command = re.findall(self.attribute_command_list[0][0], string, flags=re.MULTILINE | re.IGNORECASE)
+        if result_attr_command:
+            update = self.attribute_command_list[0][1](result_attr_command, **kwargs)
             if update is not None:
                 if isinstance(update, int):
                     update_list.append(update)
         else:
-            result = re.findall(self.attribute_command_list[1][0], string, flags=re.MULTILINE | re.IGNORECASE)
-            if result:
-                update = self.attribute_command_list[1][1](result, **kwargs)
+            result_attr_command = re.findall(self.attribute_command_list[1][0], string, flags=re.MULTILINE | re.IGNORECASE)
+            if result_attr_command:
+                update = self.attribute_command_list[1][1](result_attr_command, **kwargs)
                 if update is not None:
                     if isinstance(update, int):
                         update_list.append(update)
             # Else do nothing
+
+        if update is None:
+            Logger.set_error(__name__, f"Unable to understand this request")
+        # Else do nothing
 
         return update_list
 
@@ -171,6 +176,8 @@ class CmdParser:
         return update
 
     def matched_show(self, diagram_name_str, **kwargs):
+        update = 0
+
         """Get "show" declaration"""
         out = diagram_generator.filter_show_command(diagram_name_str, **kwargs)
 
@@ -201,9 +208,11 @@ class CmdParser:
             print("Overview :")
             display(Markdown(f'![figure]({url})'))
 
-        return None
+        return update
 
     def matched_simulate(self, simulation_str_list, **kwargs):
+        update = 0
+
         if Config.is_open_modelica:
             if len(simulation_str_list[0]) == 3:
                 wanted_simulation_str = simulation_str_list[0][0].replace('"', "").strip()
@@ -248,15 +257,18 @@ class CmdParser:
             Logger.set_error(__name__,
                              "Open modelica simulation is not activated")
 
-        return None
+        return update
 
     def matched_plot(self, plot_name_str, **kwargs):
+        update = 0
+
         if Config.is_open_modelica:
             self.simulator.plot(plot_name_str[0].replace('"', "").strip())
         else:
             Logger.set_error(__name__,
                              "Open modelica simulation is not activated")
-        return None
+
+        return update
 
     def matched_question_mark(self, p_str_list, **kwargs):
         """@ingroup jarvis
@@ -267,6 +279,8 @@ class CmdParser:
         @param[in] kwargs : jarvis data structure
         @return None (no xml update, no info displayed)
         """
+        update = 0
+
         for regex, method in self.question_list:
             for elem in p_str_list:
                 elem = elem.replace('"', "").strip()
@@ -283,7 +297,7 @@ class CmdParser:
                     # Else do nothing
                 # Else do nothing
 
-        return None
+        return update
 
     @staticmethod
     def matched_list(p_str_list, **kwargs):
@@ -295,12 +309,14 @@ class CmdParser:
         @param[in] kwargs : jarvis data structure
         @return None (no xml update, no info displayed)
         """
+        update = 0
+
         out = handler_list.list_object(p_str_list, **kwargs)
         if out:
             for i in out:
                 display(HTML(util.get_pandas_table(i)))
 
-        return None
+        return update
 
     @staticmethod
     def matched_import(p_str_list, **kwargs):
@@ -346,11 +362,13 @@ class CmdParser:
         @param[in] kwargs : jarvis data structure
         @return None (no xml update, no info displayed)
         """
+        update = 0
+
         csv_name = p_str_list[0].replace('"', "").strip()
         csv_writer = CsvWriter3SE(f"{csv_name}.csv")
         csv_writer.write_file(**kwargs)
 
-        return None
+        return update
 
     @staticmethod
     def matched_analyze(p_str_list, **kwargs):
