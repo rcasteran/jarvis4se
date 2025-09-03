@@ -646,7 +646,9 @@ def add_allocation(allocation_dict, **kwargs):
                                         if xml_fun_elem.id in xml_phy_elem.allocated_fun_elem_list:
                                             for allocated_activity_id in elem[1].allocated_activity_list:
                                                 for xml_activity in xml_activity_list:
-                                                    if xml_activity.id == allocated_activity_id:
+                                                    if xml_activity.id == allocated_activity_id \
+                                                            and xml_activity.id not in \
+                                                            xml_phy_elem.allocated_activity_list:
                                                         xml_phy_elem.add_allocated_activity(xml_activity.id)
                                                         output_xml.write_object_allocation([[xml_phy_elem,
                                                                                              xml_activity]])
@@ -668,7 +670,8 @@ def add_allocation(allocation_dict, **kwargs):
                         for xml_fun_elem in xml_fun_elem_list:
                             if elem[0].id in xml_fun_elem.allocated_function_list:
                                 for xml_phy_elem in xml_phy_elem_list:
-                                    if xml_fun_elem.id in xml_phy_elem.allocated_fun_elem_list:
+                                    if xml_fun_elem.id in xml_phy_elem.allocated_fun_elem_list \
+                                            and elem[1].id not in xml_phy_elem.allocated_activity_list:
                                         xml_phy_elem.add_allocated_activity(elem[1].id)
                                         output_xml.write_object_allocation([[xml_phy_elem, elem[1]]])
                                         Logger.set_info(__name__,
@@ -687,7 +690,8 @@ def add_allocation(allocation_dict, **kwargs):
                                 if elem[0].id in xml_phy_elem.allocated_fun_elem_list:
                                     for allocated_activity_id in elem[1].allocated_activity_list:
                                         for xml_activity in xml_activity_list:
-                                            if xml_activity.id == allocated_activity_id:
+                                            if xml_activity.id == allocated_activity_id \
+                                                    and xml_activity.id not in xml_phy_elem.allocated_activity_list:
                                                 xml_phy_elem.add_allocated_activity(xml_activity.id)
                                                 output_xml.write_object_allocation([[xml_phy_elem,
                                                                                      xml_activity]])
@@ -708,7 +712,8 @@ def add_allocation(allocation_dict, **kwargs):
                                 if xml_fun.id == allocated_fun_id:
                                     for allocated_activity_id in xml_fun.allocated_activity_list:
                                         for xml_activity in xml_activity_list:
-                                            if xml_activity.id == allocated_activity_id:
+                                            if xml_activity.id == allocated_activity_id \
+                                                    and xml_activity.id not in elem[0].allocated_activity_list:
                                                 elem[0].add_allocated_activity(xml_activity.id)
                                                 output_xml.write_object_allocation([[elem[0],
                                                                                      xml_activity]])

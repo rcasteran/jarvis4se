@@ -228,18 +228,29 @@ def get_allocated_function_table(wanted_object, object_type, is_list_transposed,
                                      f"{wanted_object.name}")
     else:
         for allocated_function in allocated_function_list:
-            function_list.append([allocated_function.name])
+            allocated_activity_name_list = '-'
+            for allocated_activity_id in allocated_function.allocated_activity_list:
+                for activity in kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]:
+                    if activity.id == allocated_activity_id:
+                        allocated_activity_name_list = allocated_activity_name_list + activity.name + '\n'
+                    # Else do nothing
+
+            if len(allocated_activity_name_list) > 1:
+                allocated_activity_name_list = allocated_activity_name_list[1:-1]
+            # Else do nothing
+
+            function_list.append([allocated_function.name, allocated_activity_name_list])
 
         if function_list:
             if is_list_transposed:
                 function_dict = {'title': f"Function list for {wanted_object.name}:",
                                  'data': list(tuple(sorted(function_list))),
-                                 'columns': ["Name"],
+                                 'columns': ["Name", "Allocated activity(ies)"],
                                  'transpose': 'y'}
             else:
                 function_dict = {'title': f"Function list for {wanted_object.name}:",
                                  'data': list(tuple(sorted(function_list))),
-                                 'columns': ["Name"]}
+                                 'columns': ["Name", "Allocated activity(ies)"]}
         # Else do nothing
 
     return function_dict
@@ -359,18 +370,29 @@ def get_phy_elem_allocated_activity_table(wanted_object, _, is_list_transposed, 
         Logger.set_warning(__name__, f"No activity allocated to physical element {wanted_object.name}")
     else:
         for allocated_activity in allocated_activity_list:
-            activity_list.append([allocated_activity.name])
+            allocated_goal_name_list = '-'
+            for allocated_goal_id in allocated_activity.allocated_goal_list:
+                for goal in kwargs[XML_DICT_KEY_9_GOAL_LIST]:
+                    if goal.id == allocated_goal_id:
+                        allocated_goal_name_list = allocated_goal_name_list + goal.name + '\n'
+                    # Else do nothing
+
+            if len(allocated_goal_name_list) > 1:
+                allocated_goal_name_list = allocated_goal_name_list[1:-1]
+            # Else do nothing
+
+            activity_list.append([allocated_activity.name, allocated_goal_name_list])
 
         if activity_list:
             if is_list_transposed:
                 activity_dict = {'title': f"Activity list for {wanted_object.name}:",
                              'data': list(tuple(sorted(activity_list))),
-                             'columns': ['Name'],
+                             'columns': ['Name', 'Allocated goal(s)'],
                              'transpose': 'y'}
             else:
                 activity_dict = {'title': f"Activity list for {wanted_object.name}:",
                              'data':list(tuple(sorted(activity_list))),
-                             'columns': ['Name']}
+                             'columns': ['Name', 'Allocated goal(s)']}
         # Else do nothing
 
     return activity_dict
