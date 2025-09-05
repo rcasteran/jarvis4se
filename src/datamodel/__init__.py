@@ -12,6 +12,7 @@ Defines the following basic types that are manipulated by systems engineers:
 """
 from .datamodel import REQUIREMENT_PATTERN
 from .datamodel import GOAL_PATTERN
+from .datamodel import DIRECTION_PATTERN
 
 from .datamodel import Function
 from .datamodel import Activity

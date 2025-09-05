@@ -60,8 +60,8 @@ def check_add_predecessor(flow_predecessor_str_set, **kwargs):
 
             if predecessor is not None and selected_data is not None:
                 flow_predecessor_list.append([selected_data, predecessor])
-                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], **kwargs)
-                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], '', '', **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], '', '', **kwargs)
         elif is_information_found:
             predecessor = None
             selected_information = None
@@ -79,8 +79,8 @@ def check_add_predecessor(flow_predecessor_str_set, **kwargs):
 
             if predecessor is not None and selected_information is not None:
                 flow_predecessor_list.append([selected_information, predecessor])
-                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], **kwargs)
-                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[0], '', '', **kwargs)
+                orchestrator_object_allocation.check_add_allocated_item_to_view(elem[1], '', '', **kwargs)
         elif elem[0] not in xml_data_name_list and elem[1] in xml_data_name_list:
             Logger.set_error(__name__, f"{elem[0]} does not exist as Data")
         elif elem[0] in xml_data_name_list and elem[1] not in xml_data_name_list:

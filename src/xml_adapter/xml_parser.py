@@ -528,6 +528,15 @@ class XmlParser3SE:
                                            f" is allocated to "
                                            f"view [{view.id}, {view.name}]")
 
+                if len(xml_item.get("consumer")) > 0:
+                    view.add_allocated_item_filter(xml_item.get('id'),
+                                                   xml_item.get('consumer'),
+                                                   xml_item.get('producer'))
+                    Logger.set_debug(__name__, f"Element [{xml_item.get('id')}]"
+                                               f" is filtered to consumer [{xml_item.get('consumer')}]"
+                                               f" and producer [{xml_item.get('producer')}]")
+                # Else do nothing
+
         return view_list
 
     def parse_attribute_list(self):

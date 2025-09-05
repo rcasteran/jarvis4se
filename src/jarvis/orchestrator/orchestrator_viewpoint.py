@@ -2,6 +2,7 @@
 Jarvis orchestrator module
 """
 # Libraries
+import re
 
 # Modules
 import datamodel
@@ -108,17 +109,37 @@ def check_get_consider(consider_str_list, **kwargs):
     consider_str_list = util.cut_chain_from_string_list(consider_str_list)
 
     for consider_str in consider_str_list:
-        is_data_related = (consider_str in [*xml_fun_elem_name_list, *xml_function_name_list,
-                                            *xml_data_name_list])
-        is_information_related = (consider_str in [*xml_phy_elem_name_list, *xml_activity_name_list,
-                                                   *xml_information_name_list])
+        pattern_direction = re.compile(datamodel.DIRECTION_PATTERN, re.IGNORECASE).split(consider_str)
+        if len(pattern_direction) > 1:
+            considered_name = pattern_direction[1]
+            if len(pattern_direction) > 2:
+                considered_src = pattern_direction[2]
+                considered_dest = pattern_direction[3]
+            else:
+                considered_src = ''
+                considered_dest = ''
+        else:
+            considered_name = pattern_direction[0]
+            considered_src = ''
+            considered_dest = ''
+
+        is_data_related = (considered_name in [*xml_fun_elem_name_list, *xml_function_name_list,
+                                               *xml_data_name_list])
+        is_information_related = (considered_name in [*xml_phy_elem_name_list, *xml_activity_name_list,
+                                                      *xml_information_name_list])
         if is_data_related:
-            update = orchestrator_object_allocation.check_add_allocated_item_to_view(consider_str, **kwargs)
+            update = orchestrator_object_allocation.check_add_allocated_item_to_view(considered_name,
+                                                                                     considered_src,
+                                                                                     considered_dest,
+                                                                                     **kwargs)
         elif is_information_related:
-            update = orchestrator_object_allocation.check_add_allocated_item_to_view(consider_str, **kwargs)
+            update = orchestrator_object_allocation.check_add_allocated_item_to_view(considered_name,
+                                                                                     considered_src,
+                                                                                     considered_dest,
+                                                                                     **kwargs)
         else:
             Logger.set_warning(__name__,
-                               f'Object {consider_str} does not exist, available object types are:\n'
+                               f'Object {considered_name} does not exist, available object types are:\n'
                                f'- Functional Element, Function and Data\n'
                                f'- Physical Element, Activity and Information')
 

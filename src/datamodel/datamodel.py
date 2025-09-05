@@ -11,6 +11,7 @@ from . import util
 # Constants
 REQUIREMENT_PATTERN = r"([^. |\n][^.|\n]*) shall (([^.]|\n)*)"
 GOAL_PATTERN = r"([^. |\n][^.|\n]*) I want (.*?) to ([^.|\n]*)"
+DIRECTION_PATTERN = r"([^. |\n][^.|\n]*) from (.*?) to ([^.|\n]*)"
 
 # Type definition
 
@@ -1220,6 +1221,7 @@ class View:
         self.type = v_type
         self.activated = False
         self.allocated_item_list = set()
+        self.allocated_item_filter_dict = {}
 
     def set_id(self, p_id):
         """Set unique identifier
@@ -1252,6 +1254,16 @@ class View:
         @return None
         """
         self.allocated_item_list.add(p_item)
+
+    def add_allocated_item_filter(self, p_item, p_consumer, p_producer):
+        """Add allocated item filter to add_allocated_item_filter
+        @param[in] self this class instance
+        @param[in] p_item allocated item
+        @param[in] p_consumer allocated item consumer
+        @param[in] p_producer allocated item producer
+        @return None
+        """
+        self.allocated_item_filter_dict[p_item] = [p_consumer, p_producer]
 
     def set_activation(self, p_activation):
         """Change the activation status

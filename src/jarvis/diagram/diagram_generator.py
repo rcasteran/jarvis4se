@@ -507,7 +507,6 @@ def case_chain_diagram(**kwargs):
                                                                          kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                                                                          kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
-                activity_list = set()
                 for i in object_list_str:
                     for phy_elem in phy_elem_list_from_view:
                         if i == phy_elem.name or i == phy_elem.alias:
@@ -557,8 +556,8 @@ def case_chain_diagram(**kwargs):
                                                         kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
             if len(state_list) > 0:
-                transition_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
-                                                                       kwargs[XML_DICT_KEY_13_VIEW_LIST])
+                transition_list, _ = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
+                                                                          kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
                 plantuml_string = show_states_chain(object_list_str, state_list, transition_list)
             else:
@@ -590,11 +589,11 @@ def case_sequence_diagram(**kwargs):
             # Check view if activated and filter allocated item,
             # if not activated then no item filtered
             # if not any item under view return string
-            xml_data_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_0_DATA_LIST],
-                                                                 kwargs[XML_DICT_KEY_13_VIEW_LIST])
+            xml_data_list, _ = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_0_DATA_LIST],
+                                                                    kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
-            xml_information_list = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
-                                                                        kwargs[XML_DICT_KEY_13_VIEW_LIST])
+            xml_information_list, _ = util.filter_allocated_item_from_view(kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
+                                                                           kwargs[XML_DICT_KEY_13_VIEW_LIST])
 
             if all(i in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_10_ACTIVITY_LIST])
                      for i in object_list_str):
@@ -1001,7 +1000,7 @@ def get_fun_elem_sequence_diagram(fun_elem_str, **kwargs):
         )
 
         if isinstance(fun_elem.derived, FunctionalElement):
-            get_derived_if_in_view = util.filter_allocated_item_from_view(
+            get_derived_if_in_view, _ = util.filter_allocated_item_from_view(
                 {fun_elem.derived}, kwargs[XML_DICT_KEY_13_VIEW_LIST]
             )
             # If type(list) has been returned from activated View()
@@ -1087,7 +1086,7 @@ def get_phy_elem_sequence_diagram(phy_elem_str, **kwargs):
         )
 
         if isinstance(phy_elem.derived, FunctionalElement):
-            get_derived_if_in_view = util.filter_allocated_item_from_view(
+            get_derived_if_in_view, _ = util.filter_allocated_item_from_view(
                 {phy_elem.derived}, kwargs[XML_DICT_KEY_13_VIEW_LIST]
             )
             # If type(list) has been returned from activated View()

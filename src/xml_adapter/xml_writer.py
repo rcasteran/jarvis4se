@@ -1051,7 +1051,10 @@ class XmlWriter3SE:
         @param[in] object_allocated_object_list : list of allocated objects
         @return None
         """
-        for obj, allocated_obj in object_allocated_object_list:
+        for object_allocated_object in object_allocated_object_list:
+            obj = object_allocated_object[0]
+            allocated_obj = object_allocated_object[1]
+
             elem_tag = self.get_object_tag(obj)
             if elem_tag:
                 parser = etree.XMLParser(remove_blank_text=True)
@@ -1067,8 +1070,27 @@ class XmlWriter3SE:
                         tag = obj_tag.find(allocated_tag + 'List')
                         if tag is None:
                             tag = etree.SubElement(obj_tag, allocated_tag + 'List')
+                        # Else do nothing
 
-                        _allocated_obj_tag = etree.SubElement(tag, allocated_tag, {'id': allocated_obj.id})
+                        if len(object_allocated_object) > 2:
+                            if object_allocated_object[2] is not None and object_allocated_object[3] is not None:
+                                _allocated_obj_tag = etree.SubElement(tag, allocated_tag,
+                                                                      {'id': allocated_obj.id,
+                                                                       'consumer': object_allocated_object[2].id,
+                                                                       'producer': object_allocated_object[3].id})
+                            else:
+                                _allocated_obj_tag = etree.SubElement(tag, allocated_tag,
+                                                                      {'id': allocated_obj.id,
+                                                                       'consumer': '',
+                                                                       'producer': ''
+                                                                       })
+                        else:
+                            _allocated_obj_tag = etree.SubElement(tag, allocated_tag,
+                                                                  {'id': allocated_obj.id,
+                                                                   'consumer': '',
+                                                                   'producer': ''
+                                                                   })
+                    # Else do nothing
 
             Logger.set_debug(__name__, self.write_object_allocation.__name__)
             self.tree.write(self.file, encoding='utf-8', xml_declaration=True, pretty_print=True)

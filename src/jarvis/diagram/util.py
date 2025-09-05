@@ -318,7 +318,7 @@ def get_level_0_activity(phy_elem, activity_list, level_0_activity_list):
 
 def get_object_list_from_view(obj_str, xml_obj_list, xml_view_list):
     """Returns current object's list by checking view"""
-    filtered_item_list = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
+    filtered_item_list, _ = filter_allocated_item_from_view(xml_obj_list, xml_view_list)
 
     if len(xml_obj_list) == len(filtered_item_list):
         return xml_obj_list
@@ -352,19 +352,23 @@ def filter_allocated_item_from_view(xml_item_list, xml_view_list):
     allocated item's list"""
     if any(j.activated for j in xml_view_list):
         filtered_item_list = []
-        activated_view_name = ''
+        filtered_item_dict = {}
         for view in xml_view_list:
             if view.activated:
-                activated_view_name = view.name
                 for item in xml_item_list:
                     if item.id in view.allocated_item_list:
                         filtered_item_list.append(item)
+                        if item.id in view.allocated_item_filter_dict:
+                            filtered_item_dict[item.id] = view.allocated_item_filter_dict[item.id]
+                        # Else do nothing
+                    # Else do nothing
                 break
             # Else do nothing
     else:
         filtered_item_list = xml_item_list
+        filtered_item_dict = {}
 
-    return filtered_item_list
+    return filtered_item_list, filtered_item_dict
 
 
 def check_get_flows(function_list, xml_flow_list):
@@ -446,37 +450,78 @@ def get_cons_prod_from_view_allocated_flow(xml_flow_list, xml_view_list, xml_con
     new_elem_list = []
     new_consumer_list = []
     new_producer_list = []
-    new_flow_list = filter_allocated_item_from_view(xml_flow_list, xml_view_list)
+    new_flow_list, new_flow_dict = filter_allocated_item_from_view(xml_flow_list, xml_view_list)
 
     if len(new_flow_list) == len(xml_flow_list):
         for prod in xml_producer_elem_list:
             if any(item == prod[1] for item in elem_list):
-                new_producer_list.append(prod)
-                if prod[1] not in new_elem_list:
-                    new_elem_list.append(prod[1])
+                if prod[0].id in new_flow_dict:
+                    if prod[1].id == new_flow_dict[prod[0].id][1]:
+                        new_producer_list.append(prod)
+                        if prod[1] not in new_elem_list:
+                            new_elem_list.append(prod[1])
+                        # Else do nothing
+                    # Else do nothing
+                else:
+                    new_producer_list.append(prod)
+                    if prod[1] not in new_elem_list:
+                        new_elem_list.append(prod[1])
+                    # Else do nothing
+            #Else do nothing
 
         for cons in xml_consumer_elem_list:
             if any(item == cons[1] for item in elem_list):
-                new_consumer_list.append(cons)
-                if cons[1] not in new_elem_list:
-                    new_elem_list.append(cons[1])
+                if cons[0].id in new_flow_dict:
+                    if cons[1].id == new_flow_dict[cons[0].id][0]:
+                        new_consumer_list.append(cons)
+                        if cons[1] not in new_elem_list:
+                            new_elem_list.append(cons[1])
+                        # Else do nothing
+                    # Else do nothing
+                else:
+                    new_consumer_list.append(cons)
+                    if cons[1] not in new_elem_list:
+                        new_elem_list.append(cons[1])
+                    # Else do nothing
+            #Else do nothing
     else:
         for cons in xml_consumer_elem_list:
             if any(item == cons[0] for item in new_flow_list) and \
                     any(item == cons[1] for item in elem_list):
-                new_consumer_list.append(cons)
-                if cons[1] not in new_elem_list:
-                    new_elem_list.append(cons[1])
+                if cons[0].id in new_flow_dict:
+                    if cons[1].id == new_flow_dict[cons[0].id][0]:
+                        new_consumer_list.append(cons)
+                        if cons[1] not in new_elem_list:
+                            new_elem_list.append(cons[1])
+                        # Else do nothing
+                    # Else do nothing
+                else:
+                    new_consumer_list.append(cons)
+                    if cons[1] not in new_elem_list:
+                        new_elem_list.append(cons[1])
+                    # Else do nothing
+            #Else do nothing
 
         for prod in xml_producer_elem_list:
             if any(item == prod[0] for item in new_flow_list) and \
                     any(item == prod[1] for item in elem_list):
-                new_producer_list.append(prod)
-                if prod[1] not in new_elem_list:
-                    new_elem_list.append(prod[1])
+                if prod[0].id in new_flow_dict:
+                    if prod[1].id == new_flow_dict[prod[0].id][1]:
+                        new_producer_list.append(prod)
+                        if prod[1] not in new_elem_list:
+                            new_elem_list.append(prod[1])
+                        # Else do nothing
+                    # Else do nothing
+                else:
+                    new_producer_list.append(prod)
+                    if prod[1] not in new_elem_list:
+                        new_elem_list.append(prod[1])
+                    # Else do nothing
+            #Else do nothing
 
     if len(new_consumer_list) == 0 and len(new_producer_list) == 0:
         new_elem_list = elem_list
+    # Else do nothing
 
     return new_elem_list, new_consumer_list, new_producer_list
 

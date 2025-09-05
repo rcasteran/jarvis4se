@@ -243,7 +243,7 @@ def check_allocation_to_function(alloc_obj, obj_to_alloc, **kwargs):
     return pair
 
 
-def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
+def check_add_allocated_item_to_view(p_item_name_str, p_item_producer_str, p_item_consumer_str, **kwargs):
     """
     Checks if a view is already activated, if yes check if item isn't already
     allocated and returns corresponding [View, Object].
@@ -283,7 +283,13 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                 if p_item_name_str == xml_data.name:
                     if xml_data.id not in activated_view.allocated_item_list:
                         activated_view.add_allocated_item(xml_data.id)
-                        new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view, xml_data])
+                        new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                            [activated_view,
+                             xml_data,
+                             orchestrator_object.retrieve_object_by_name(p_item_consumer_str,
+                                                                         **kwargs),
+                             orchestrator_object.retrieve_object_by_name(p_item_producer_str,
+                                                                         **kwargs)])
                     # Else do nothing
                     is_allocated = True
                     break
@@ -294,7 +300,13 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                     if p_item_name_str == xml_function.name or p_item_name_str == xml_function.alias:
                         if xml_function.id not in activated_view.allocated_item_list:
                             activated_view.add_allocated_item(xml_function.id)
-                            new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view, xml_function])
+                            new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                                [activated_view,
+                                 xml_function,
+                                 orchestrator_object.retrieve_object_by_name(p_item_consumer_str,
+                                                                             **kwargs),
+                                 orchestrator_object.retrieve_object_by_name(p_item_producer_str,
+                                                                             **kwargs)])
                         # Else do nothing
                         is_allocated = True
                         break
@@ -305,7 +317,13 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                         if p_item_name_str == xml_fun_elem.name or p_item_name_str == xml_fun_elem.alias:
                             if xml_fun_elem.id not in activated_view.allocated_item_list:
                                 activated_view.add_allocated_item(xml_fun_elem.id)
-                                new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view, xml_fun_elem])
+                                new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                                    [activated_view,
+                                     xml_fun_elem,
+                                     orchestrator_object.retrieve_object_by_name(p_item_consumer_str,
+                                                                                 **kwargs),
+                                     orchestrator_object.retrieve_object_by_name(p_item_producer_str,
+                                                                                 **kwargs)])
                             # Else do nothing
                             is_allocated = True
                             break
@@ -315,9 +333,31 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                         for xml_information in xml_information_list:
                             if p_item_name_str == xml_information.name:
                                 if xml_information.id not in activated_view.allocated_item_list:
+                                    xml_activity_consumer = orchestrator_object.retrieve_object_by_name(
+                                        p_item_consumer_str,
+                                        **kwargs)
+                                    xml_activity_producer = orchestrator_object.retrieve_object_by_name(
+                                        p_item_producer_str,
+                                        **kwargs)
+
+                                    if len(p_item_consumer_str) > 0 and xml_activity_consumer is None:
+                                        Logger.set_warning(__name__,
+                                                           f'Activity "{p_item_consumer_str}" is unknown. '
+                                                           f'Unable to filter the considered information '
+                                                           f'"{xml_information.name}"')
+                                    elif len(p_item_producer_str) > 0 and xml_activity_producer is None:
+                                        Logger.set_warning(__name__,
+                                                           f'Activity "{p_item_producer_str}" is unknown. '
+                                                           f'Unable to filter the considered information '
+                                                           f'"{xml_information.name}"')
+                                    # Else do nothing
+
                                     activated_view.add_allocated_item(xml_information.id)
-                                    new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view,
-                                                                                            xml_information])
+                                    new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                                        [activated_view,
+                                         xml_information,
+                                         xml_activity_consumer,
+                                         xml_activity_producer])
                                 # Else do nothing
                                 is_allocated = True
                                 break
@@ -328,8 +368,13 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                                 if p_item_name_str == xml_activity.name or p_item_name_str == xml_activity.alias:
                                     if xml_activity.id not in activated_view.allocated_item_list:
                                         activated_view.add_allocated_item(xml_activity.id)
-                                        new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append([activated_view,
-                                                                                                xml_activity])
+                                        new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
+                                            [activated_view,
+                                             xml_activity,
+                                             orchestrator_object.retrieve_object_by_name(p_item_consumer_str,
+                                                                                         **kwargs),
+                                             orchestrator_object.retrieve_object_by_name(p_item_producer_str,
+                                                                                         **kwargs)])
                                     # Else do nothing
                                     is_allocated = True
                                     break
@@ -341,7 +386,12 @@ def check_add_allocated_item_to_view(p_item_name_str, **kwargs):
                                         if xml_phy_elem.id not in activated_view.allocated_item_list:
                                             activated_view.add_allocated_item(xml_phy_elem.id)
                                             new_allocation_dict[OBJ_ALLOCATION_TO_VIEW_IDX].append(
-                                                [activated_view, xml_phy_elem])
+                                                [activated_view,
+                                                 xml_phy_elem,
+                                                 orchestrator_object.retrieve_object_by_name(p_item_consumer_str,
+                                                                                             **kwargs),
+                                                 orchestrator_object.retrieve_object_by_name(p_item_producer_str,
+                                                                                             **kwargs)])
                                         # Else do nothing
                                         break
                                     # Else do nothing
@@ -797,6 +847,7 @@ def check_parent_allocation(elem, **kwargs):
     if elem[0].parent is not None and elem[1].parent is not None:
         fun_elem_parent_list = orchestrator_object.retrieve_object_parents_recursively(elem[0])
         object_parent_list = orchestrator_object.retrieve_object_parents_recursively(elem[1])
+
         check = False
         if isinstance(elem[1], datamodel.State):
             for object_parent in object_parent_list:
@@ -804,12 +855,16 @@ def check_parent_allocation(elem, **kwargs):
                     if object_parent.id in fun_elem_parent.allocated_state_list:
                         check = True
                         break
+                    # Else do nothing
         elif isinstance(elem[1], datamodel.Function):
             for object_parent in object_parent_list:
                 for fun_elem_parent in fun_elem_parent_list:
                     if object_parent.id in fun_elem_parent.allocated_function_list:
                         check = True
                         break
+                    # Else do nothing
+        # Else do nothing
+
         if not check:
             answer, _ = handler_question.question_to_user(f"Do you also want to allocate parents "
                                                           f"(i.e. {elem[1].parent.name} "
@@ -817,15 +872,18 @@ def check_parent_allocation(elem, **kwargs):
             if answer.lower() == "y":
                 if isinstance(elem[1], datamodel.State):
                     elem[0].parent.add_allocated_state(elem[1].parent.id)
-                else:
+                    add_allocation({OBJ_ALLOCATION_TO_STATE_IDX: [[elem[0].parent, elem[1].parent]]}, **kwargs)
+                    check_parent_allocation([elem[0].parent, elem[1].parent], **kwargs)
+                elif isinstance(elem[1], datamodel.Function):
                     elem[0].parent.add_allocated_function(elem[1].parent.id)
-
-                add_allocation({5: [[elem[0].parent, elem[1].parent]]}, **kwargs)
-                check_parent_allocation([elem[0].parent, elem[1].parent], **kwargs)
+                    add_allocation({OBJ_ALLOCATION_TO_FUNCTION_IDX: [[elem[0].parent, elem[1].parent]]}, **kwargs)
+                    check_parent_allocation([elem[0].parent, elem[1].parent], **kwargs)
+                # Else do nothing
             else:
                 Logger.set_warning(__name__,
                                    f"{elem[1].parent.name} is not allocated despite at least one "
                                    f"of its child is")
+        # Else do nothing
 
 
 def get_allocated_child(elem, xml_fun_elem_list):
