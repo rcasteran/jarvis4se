@@ -36,7 +36,9 @@ class MagicJarvis(Magics):
         # Take the value within the buffer
         input_str = sio.getvalue()
         # Delete extra whitespaces
-        input_str = re.sub(' +', ' ', input_str)
+        input_str = re.sub(' {2,}', ' ', input_str)
+        # Delete comments
+        input_str = re.sub('#([^.|\n]*)', '', input_str)
         # Get model's declaration, need a space after "with" otherwise print a message
         xml_name_str = re.match(r"^with (.*)(?=.|\n)", input_str, re.MULTILINE)
         if xml_name_str:
