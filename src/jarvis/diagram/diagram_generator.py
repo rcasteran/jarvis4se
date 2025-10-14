@@ -26,7 +26,7 @@ from tools import Logger
 def filter_show_command(diagram_name_str, **kwargs):
     """Entry point for all diagrams (i.e. 'show' command) from command_parser.py"""
     plantuml_string = None
-    wanted_diagram_str = diagram_name_str[0].replace('"', "").strip()
+    wanted_diagram_str = diagram_name_str[0].strip()
     regex = r"(decomposition|context|chain|sequence|state|function|state sequence)\s(.*)"
     specific_diagram_str = re.search(regex, wanted_diagram_str, re.MULTILINE)
     if specific_diagram_str:
@@ -65,9 +65,10 @@ def switch_show_filter(**kwargs):
 def case_function_diagram(**kwargs):
     """Case for 'show function <functional_element>'"""
     plantuml_string = None
+    object_str = kwargs['diagram_object_str'].replace("\"", "")
 
-    if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
-        plantuml_string = diagram_generator_farch.show_fun_elem_function(kwargs['diagram_object_str'],
+    if object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
+        plantuml_string = diagram_generator_farch.show_fun_elem_function(object_str,
                                                                          kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                                          kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                                          kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
@@ -76,7 +77,7 @@ def case_function_diagram(**kwargs):
 
     else:
         Logger.set_warning(__name__,
-                           f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
+                           f"Jarvis does not know the functional Element {object_str}")
 
     return plantuml_string
 
@@ -84,8 +85,9 @@ def case_function_diagram(**kwargs):
 def case_context_diagram(**kwargs):
     """Case for 'show context <functional_element>/<function>'"""
     plantuml_string = None
+    object_str = kwargs['diagram_object_str'].replace("\"", "")
 
-    if kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
+    if object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_1_FUNCTION_LIST]):
         consumed_flow_inheritance = query_inheritance.query_inheritance_add_inherited_object(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
             kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
@@ -103,8 +105,7 @@ def case_context_diagram(**kwargs):
             kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST],
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST])
 
-        plantuml_string = diagram_generator_fana.show_function_context(kwargs['diagram_object_str'],
-                                                                       **kwargs)
+        plantuml_string = diagram_generator_fana.show_function_context(object_str, **kwargs)
 
         query_inheritance.query_inheritance_remove_inherited_object(
             consumed_flow_inheritance,
@@ -124,19 +125,19 @@ def case_context_diagram(**kwargs):
             kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST],
             attribute_inheritance
         )
-    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]):
-        plantuml_string = diagram_generator_fana.show_activity_context(kwargs['diagram_object_str'],
+    elif object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]):
+        plantuml_string = diagram_generator_fana.show_activity_context(object_str,
                                                                        kwargs[XML_DICT_KEY_10_ACTIVITY_LIST],
                                                                        kwargs[XML_DICT_KEY_17_ACT_CONS_LIST],
                                                                        kwargs[XML_DICT_KEY_18_ACT_PROD_LIST],
                                                                        kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
                                                                        kwargs[XML_DICT_KEY_12_ATTRIBUTE_LIST],
                                                                        kwargs[XML_DICT_KEY_14_TYPE_LIST])
-    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST]):
-        plantuml_string = show_states_chain([kwargs['diagram_object_str']],
+    elif object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST]):
+        plantuml_string = show_states_chain([object_str],
                                             kwargs[XML_DICT_KEY_6_STATE_LIST],
                                             kwargs[XML_DICT_KEY_7_TRANSITION_LIST])
-    elif kwargs['diagram_object_str'] in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
+    elif object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST]):
         child_inheritance = query_inheritance.query_inheritance_add_inherited_object_children(
             kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
             kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
@@ -159,7 +160,7 @@ def case_context_diagram(**kwargs):
             **kwargs
         )
 
-        plantuml_string = diagram_generator_farch.show_fun_elem_context(kwargs['diagram_object_str'],
+        plantuml_string = diagram_generator_farch.show_fun_elem_context(object_str,
                                                                         kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                                         kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
@@ -187,8 +188,8 @@ def case_context_diagram(**kwargs):
             **kwargs)
     else:
         Logger.set_warning(__name__,
-                           f"Jarvis does not know the function {kwargs['diagram_object_str']} or "
-                           f"{kwargs['diagram_object_str']} is not a valid "
+                           f"Jarvis does not know the function {object_str} or "
+                           f"{object_str} is not a valid "
                            f"Activity/Function/State/Functional Element name/alias")
 
     return plantuml_string
@@ -197,9 +198,10 @@ def case_context_diagram(**kwargs):
 def case_decomposition_diagram(**kwargs):
     """Case for 'show decomposition <functional_element>/<function>'"""
     plantuml_string = None
+    object_str = kwargs['diagram_object_str'].replace("\"", "")
 
-    if ' at level ' in kwargs['diagram_object_str']:
-        splitted_str = re.split(" at level ", kwargs['diagram_object_str'])
+    if ' at level ' in object_str:
+        splitted_str = re.split(" at level ", object_str)
         diagram_object_str = splitted_str[0]
         try:
             diagram_level = int(splitted_str[1])
@@ -212,7 +214,7 @@ def case_decomposition_diagram(**kwargs):
                              "Invalid level, please choose a valid level >= 1")
             return plantuml_string
     else:
-        diagram_object_str = kwargs['diagram_object_str']
+        diagram_object_str = object_str
         diagram_level = None
 
     v_inheritance = query_inheritance.query_inheritance_add_inherited_view(kwargs[XML_DICT_KEY_13_VIEW_LIST],
@@ -578,8 +580,7 @@ def case_chain_diagram(**kwargs):
 def case_sequence_diagram(**kwargs):
     """Case for 'show sequence <functional_elements>/<functions>/<functional_interface>'"""
     plantuml_string = None
-    object_list_str = re.split(r',(?![^[]*\])', kwargs['diagram_object_str'].replace(", ", ","))
-    object_list_str = [s.rstrip() for s in object_list_str]
+    object_list_str = jarvis_util.cut_string(kwargs['diagram_object_str'])
     if object_list_str:
         if len(object_list_str) == 1 and \
                 any(s == object_list_str[0] for s in
@@ -705,15 +706,16 @@ def case_sequence_diagram(**kwargs):
 def case_state_diagram(**kwargs):
     """Case for 'show state <functional_element>'"""
     plantuml_string = None
+    object_str = kwargs['diagram_object_str'].replace("\"", "")
     xml_fun_elem_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
-    if kwargs['diagram_object_str'] in xml_fun_elem_name_list:
-        plantuml_string = show_fun_elem_state_machine(kwargs['diagram_object_str'],
+    if object_str in xml_fun_elem_name_list:
+        plantuml_string = show_fun_elem_state_machine(object_str,
                                                       kwargs[XML_DICT_KEY_6_STATE_LIST],
                                                       kwargs[XML_DICT_KEY_7_TRANSITION_LIST],
                                                       kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST])
     else:
         Logger.set_error(__name__,
-                         f"Jarvis does not know the functional Element {kwargs['diagram_object_str']}")
+                         f"Jarvis does not know the functional Element {object_str}")
 
     return plantuml_string
 
@@ -721,9 +723,10 @@ def case_state_diagram(**kwargs):
 def case_state_sequence_diagram(**kwargs):
     """Case for 'show state sequence <state>'"""
     plantuml_string = None
+    object_str = kwargs['diagram_object_str'].replace("\"", "")
     xml_state_name_list = query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_6_STATE_LIST])
-    if kwargs['diagram_object_str'] in xml_state_name_list:
-        plantuml_string = show_state_allocated_function(kwargs['diagram_object_str'],
+    if object_str in xml_state_name_list:
+        plantuml_string = show_state_allocated_function(object_str,
                                                         kwargs[XML_DICT_KEY_6_STATE_LIST],
                                                         kwargs[XML_DICT_KEY_1_FUNCTION_LIST],
                                                         kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
@@ -731,7 +734,7 @@ def case_state_sequence_diagram(**kwargs):
                                                         kwargs[XML_DICT_KEY_0_DATA_LIST])
     else:
         Logger.set_error(__name__,
-                         f"Jarvis does not know the State {kwargs['diagram_object_str']}")
+                         f"Jarvis does not know the State {object_str}")
 
     return plantuml_string
 
