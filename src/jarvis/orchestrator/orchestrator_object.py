@@ -73,8 +73,8 @@ class ObjectInstance:
         else:
             self.object_instance = call(p_name=obj_str, p_id=util.get_unique_id(), p_type=self.specific_type)
 
-        # Data() and View() do not have aliases
-        if not isinstance(self.object_instance, (datamodel.Data, datamodel.View)):
+        # Information, Data and View do not have aliases
+        if not isinstance(self.object_instance, (datamodel.Information, datamodel.Data, datamodel.View)):
             alias_str = re.search(r"(.*)\s[-]\s", obj_str, re.MULTILINE)
             if alias_str:
                 self.object_instance.set_alias(alias_str.group(1))
