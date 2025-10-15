@@ -529,8 +529,8 @@ def check_add_producer_elem(producer_str_list, **kwargs):
                             if [information, activity] not in xml_producer_activity_list:
                                 add_producer_consumer_flow_recursively(information,
                                                                        activity,
-                                                                       xml_producer_function_list,
-                                                                       xml_consumer_function_list,
+                                                                       xml_producer_activity_list,
+                                                                       xml_consumer_activity_list,
                                                                        new_producer_list,
                                                                        output_xml,
                                                                        "producer",
