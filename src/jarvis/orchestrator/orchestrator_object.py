@@ -883,3 +883,183 @@ def retrieve_object_type_requirement_list(p_object, **kwargs):
     # Else do nothing because it is a type
 
     return requirement_list
+
+
+def retrieve_object_input_name_list(p_object, p_is_sorted=True, **kwargs):
+    input_list = []
+    if hasattr(p_object, 'type'):
+        if isinstance(p_object.type, datamodel.BaseType):
+            object_type = p_object.type
+        else:
+            _, object_type = retrieve_type(p_object.type.name, True, **kwargs)
+
+        flow_list = set()
+        if object_type == datamodel.BaseType.ACTIVITY:
+            for elem in kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]:
+                if elem[1].id == p_object.id:
+                    flow_list.add(elem[0])
+
+            for flow in flow_list:
+                if not any(flow in s for s in kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]):
+                    input_list.append([flow.name, None])
+                else:
+                    for elem in kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]:
+                        check = True
+                        if elem[0] == flow:
+                            for child in elem[1].child_list:
+                                if [elem[0], child] in XML_DICT_KEY_18_ACT_PROD_LIST:
+                                    check = False
+                                # Else do nothing
+
+                            if check:
+                                input_list.append([elem[0].name, elem[1].name])
+                            # Else do nothing
+                        # Else do nothing
+        elif object_type == datamodel.BaseType.FUNCTION:
+            for elem in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]:
+                if elem[1].id == p_object.id:
+                    flow_list.add(elem[0])
+
+            for flow in flow_list:
+                if not any(flow in s for s in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]):
+                    input_list.append([flow.name, None])
+                else:
+                    for elem in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]:
+                        check = True
+                        if elem[0] == flow:
+                            for child in elem[1].child_list:
+                                if [elem[0], child] in XML_DICT_KEY_16_FUN_PROD_LIST:
+                                    check = False
+                                # Else do nothing
+
+                            if check:
+                                input_list.append([elem[0].name, elem[1].name])
+                            # Else do nothing
+                        # Else do nothing
+        elif object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+            allocated_function_list = retrieve_allocated_object_list(p_object, XML_DICT_KEY_1_FUNCTION_LIST, **kwargs)
+
+            for function in allocated_function_list:
+                function_input_list = retrieve_object_input_name_list(function, False, **kwargs)
+                for function_input in function_input_list:
+                    if function_input[1] not in [f.name for f in allocated_function_list]:
+                        input_list.append(function_input)
+                    # Else do nothing
+        elif object_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+            allocated_activity_list = retrieve_allocated_object_list(p_object, XML_DICT_KEY_10_ACTIVITY_LIST, **kwargs)
+
+            for activity in allocated_activity_list:
+                activity_input_list = retrieve_object_input_name_list(activity, False, **kwargs)
+                for activity_input in activity_input_list:
+                    if activity_input[1] not in [f.name for f in allocated_activity_list]:
+                        input_list.append(activity_input)
+                    # Else do nothing
+        # Else do nothing
+
+        if p_is_sorted:
+            input_list = sorted(input_list)
+            output_list = []
+            empty_dict = {}
+            for data_name, obj_name in input_list:
+                if data_name not in empty_dict:
+                    output_list.append([data_name, obj_name])
+                    empty_dict[data_name] = len(empty_dict)
+                else:
+                    if obj_name:
+                        if obj_name not in output_list[empty_dict[data_name]][1]:
+                            output_list[empty_dict[data_name]][1] += '\\n' + obj_name
+
+            input_list = output_list
+        # Else do nothing
+
+    return input_list
+
+
+def retrieve_object_output_name_list(p_object, p_is_sorted=True, **kwargs):
+    input_list = []
+    if hasattr(p_object, 'type'):
+        if isinstance(p_object.type, datamodel.BaseType):
+            object_type = p_object.type
+        else:
+            _, object_type = retrieve_type(p_object.type.name, True, **kwargs)
+
+        flow_list = set()
+        if object_type == datamodel.BaseType.ACTIVITY:
+            for elem in kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]:
+                if elem[1].id == p_object.id:
+                    flow_list.add(elem[0])
+
+            for flow in flow_list:
+                if not any(flow in s for s in kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]):
+                    input_list.append([flow.name, None])
+                else:
+                    for elem in kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]:
+                        check = True
+                        if elem[0] == flow:
+                            for child in elem[1].child_list:
+                                if [elem[0], child] in XML_DICT_KEY_17_ACT_CONS_LIST:
+                                    check = False
+                                # Else do nothing
+
+                            if check:
+                                input_list.append([elem[0].name, elem[1].name])
+                            # Else do nothing
+                        # Else do nothing
+        elif object_type == datamodel.BaseType.FUNCTION:
+            for elem in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]:
+                if elem[1].id == p_object.id:
+                    flow_list.add(elem[0])
+
+            for flow in flow_list:
+                if not any(flow in s for s in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]):
+                    input_list.append([flow.name, None])
+                else:
+                    for elem in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]:
+                        check = True
+                        if elem[0] == flow:
+                            for child in elem[1].child_list:
+                                if [elem[0], child] in XML_DICT_KEY_15_FUN_CONS_LIST:
+                                    check = False
+                                # Else do nothing
+
+                            if check:
+                                input_list.append([elem[0].name, elem[1].name])
+                            # Else do nothing
+                        # Else do nothing
+        elif object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+            allocated_function_list = retrieve_allocated_object_list(p_object, XML_DICT_KEY_1_FUNCTION_LIST, **kwargs)
+
+            for function in allocated_function_list:
+                function_input_list = retrieve_object_output_name_list(function, False, **kwargs)
+                for function_input in function_input_list:
+                    if function_input[1] not in [f.name for f in allocated_function_list]:
+                        input_list.append(function_input)
+                    # Else do nothing
+        elif object_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+            allocated_activity_list = retrieve_allocated_object_list(p_object, XML_DICT_KEY_10_ACTIVITY_LIST, **kwargs)
+
+            for activity in allocated_activity_list:
+                activity_input_list = retrieve_object_output_name_list(activity, False, **kwargs)
+                for activity_input in activity_input_list:
+                    if activity_input[1] not in [f.name for f in allocated_activity_list]:
+                        input_list.append(activity_input)
+                    # Else do nothing
+        # Else do nothing
+
+        if p_is_sorted:
+            input_list = sorted(input_list)
+            output_list = []
+            empty_dict = {}
+            for data_name, obj_name in input_list:
+                if data_name not in empty_dict:
+                    output_list.append([data_name, obj_name])
+                    empty_dict[data_name] = len(empty_dict)
+                else:
+                    if obj_name:
+                        if obj_name not in output_list[empty_dict[data_name]][1]:
+                            output_list[empty_dict[data_name]][1] += '\\n' + obj_name
+
+            input_list = output_list
+        # Else do nothing
+
+    return input_list

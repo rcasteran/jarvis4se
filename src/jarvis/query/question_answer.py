@@ -19,14 +19,7 @@ from tools import Logger
 
 def get_consumes_produces_info(wanted_object, relationship_list):
     """Get consumes/produces info"""
-    object_relationship = set()
-    for elem in relationship_list:
-        if elem[1].id == wanted_object.id:
-            object_relationship.add(elem[0])
-        if elem[0] == wanted_object:
-            object_relationship.add(elem[1])
-    if object_relationship:
-        return object_relationship
+
 
 
 def get_child_name_list(parent_object, object_list):
@@ -150,105 +143,6 @@ def check_child_fun_elem_exposing_recursively(p_nb_last_fun_elem_exposing, p_fun
     # Else do nothing
 
     return p_nb_last_fun_elem_exposing
-
-
-def get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', unmerged=False, **kwargs):
-    """
-    Gets inputs/outputs for object (Function or Functional Element):
-    i.e. what is consumed/produces by wanted object or object allocated functions.
-    Args:
-        wanted_object: current object
-        direction (str: default=input): i.e. input or output asked
-        unmerged (bool: default=false): used by functional elements
-        **kwargs: all xml lists/sets
-
-    Returns:
-        input or output list
-    """
-    in_or_out_list = []
-
-    object_type = query_object.query_object_type(wanted_object, **kwargs)
-    if object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-        allocated_function_list = set()
-        for allocated_function in wanted_object.allocated_function_list:
-            for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
-                if allocated_function == xml_function.id:
-                    allocated_function_list.add(xml_function)
-
-        for function in allocated_function_list:
-            function_in_or_out_list = get_input_or_output_fun_and_fun_elem(function, direction, True, **kwargs)
-            for function_in_or_out in function_in_or_out_list:
-                if function_in_or_out and function_in_or_out[1] not in [f.name for f in allocated_function_list]:
-                    in_or_out_list.append(function_in_or_out)
-    elif object_type == datamodel.BaseType.FUNCTION:
-        if direction == 'output':
-            in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs[XML_DICT_KEY_16_FUN_PROD_LIST],
-                                                 kwargs[XML_DICT_KEY_15_FUN_CONS_LIST])
-        else:
-            in_or_out_list = get_in_out_function(wanted_object,
-                                                 kwargs[XML_DICT_KEY_15_FUN_CONS_LIST],
-                                                 kwargs[XML_DICT_KEY_16_FUN_PROD_LIST])
-
-    if in_or_out_list and not unmerged:
-        in_or_out_list = merge_list_per_cons_prod(in_or_out_list)
-    # Else do nothing
-
-    return in_or_out_list
-
-
-def merge_list_per_cons_prod(input_list):
-    """
-    Sorts data_name in alphabetical order according to their name and merges list by producer or consumer
-    Args:
-        input_list ([data_name, function_name]): List of consumer/producer with data_name per Function
-
-    Returns:
-        Sorted + merged list
-    """
-    input_list = sorted(input_list)
-    output_list = []
-    empty_dict = {}
-    for data_name, obj_name in input_list:
-        if data_name not in empty_dict:
-            output_list.append([data_name, obj_name])
-            empty_dict[data_name] = len(empty_dict)
-        else:
-            if obj_name:
-                if obj_name not in output_list[empty_dict[data_name]][1]:
-                    output_list[empty_dict[data_name]][1] += '\\n' + obj_name
-
-    return output_list
-
-
-def get_in_out_function(wanted_object, wanted_relationship, opposite_wanted_relationship):
-    """
-    Return the list of Input/Output for Function's objects.
-    Args:
-        wanted_object (Function): Object's wanted
-        wanted_relationship ([Xml_list]): For Output (producer's list) and Input (consumer's list)
-        opposite_wanted_relationship ([Xml_list]): slef-explained
-    Returns:
-        output_list ([Data, prod/cons])
-    """
-    output_list = []
-    flow_list = get_consumes_produces_info(wanted_object, wanted_relationship)
-    if not flow_list:
-        return output_list
-    for data in flow_list:
-        if not any(data in s for s in opposite_wanted_relationship):
-            output_list.append([data.name, None])
-        else:
-            for elem in opposite_wanted_relationship:
-                check = True
-                if elem[0] == data:
-                    for child in elem[1].child_list:
-                        if [elem[0], child] in opposite_wanted_relationship:
-                            check = False
-                    if check:
-                        output_list.append([elem[0].name, elem[1].name])
-
-    return output_list
 
 
 def get_objects_from_id_list(id_list, object_list):

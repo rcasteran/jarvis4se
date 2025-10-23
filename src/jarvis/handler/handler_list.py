@@ -67,17 +67,19 @@ def switch_object_list(type_list_str, wanted_object, object_type, is_list_transp
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
-    # List input [Function/Functional element]
-    elif type_list_str == "input" and object_type in (datamodel.BaseType.FUNCTION,
+    # List input [Activity/Function/Functional element]
+    elif type_list_str == "input" and object_type in (datamodel.BaseType.ACTIVITY,
+                                                      datamodel.BaseType.FUNCTION,
                                                       datamodel.BaseType.FUNCTIONAL_ELEMENT):
         object_list = get_input_list(wanted_object, object_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
-    # List output [Function/Functional element]
-    elif type_list_str == "output" and object_type in (datamodel.BaseType.FUNCTION,
-                                                      datamodel.BaseType.FUNCTIONAL_ELEMENT):
+    # List output [Activity/Function/Functional element]
+    elif type_list_str == "output" and object_type in (datamodel.BaseType.ACTIVITY,
+                                                       datamodel.BaseType.FUNCTION,
+                                                       datamodel.BaseType.FUNCTIONAL_ELEMENT):
         object_list = get_output_list(wanted_object, object_type, is_list_transposed, **kwargs)
 
         if not object_list:
@@ -128,13 +130,13 @@ def switch_object_list(type_list_str, wanted_object, object_type, is_list_transp
 def get_input_list(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list input Function/Functional ELement' """
     input_dict = {}
-    input_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='input', **kwargs)
+    input_list = query_object.query_object_input_name_list(wanted_object, **kwargs)
 
-    if wanted_object.derived:
-        for input_derived in question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
-                                                                                  direction='input',
-                                                                                  **kwargs):
-            input_list.append(input_derived)
+    if hasattr(wanted_object, "derived"):
+        if wanted_object.derived:
+            for input_derived in query_object.query_object_input_name_list(wanted_object, **kwargs):
+                input_list.append(input_derived)
+        # Else do nothing
     # Else do nothing
 
     if input_list:
@@ -154,15 +156,15 @@ def get_input_list(wanted_object, object_type, is_list_transposed, **kwargs):
 def get_output_list(wanted_object, object_type, is_list_transposed, **kwargs):
     """Case 'list output Function/Functional ELement' """
     output_dict = {}
-    output_list = question_answer.get_input_or_output_fun_and_fun_elem(wanted_object, direction='output', **kwargs)
+    output_list = query_object.query_object_output_name_list(wanted_object, **kwargs)
 
-    if wanted_object.derived:
-        for output_derived in question_answer.get_input_or_output_fun_and_fun_elem(wanted_object.derived,
-                                                                                   direction='output',
-                                                                                   **kwargs):
-            output_list.append(output_derived)
+    if hasattr(wanted_object, "derived"):
+        if wanted_object.derived:
+            for output_derived in query_object.query_object_output_name_list(wanted_object.derived, **kwargs):
+                output_list.append(output_derived)
+        # Else do nothing
     # Else do nothing
-    
+
     if output_list:
         if is_list_transposed:
             output_dict = {'title': f"Output list for {wanted_object.name}:",

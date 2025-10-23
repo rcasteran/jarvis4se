@@ -65,3 +65,11 @@ def query_object_type_requirement_list(p_object, **kwargs):
 
 def query_object_allocated_object_list(p_object, p_allocated_object_dict, **kwargs):
     return orchestrator_object.retrieve_allocated_object_list(p_object, p_allocated_object_dict, **kwargs)
+
+
+def query_object_input_name_list(p_object, **kwargs):
+    return orchestrator_object.retrieve_object_input_name_list(p_object, True, **kwargs)
+
+
+def query_object_output_name_list(p_object, **kwargs):
+    return orchestrator_object.retrieve_object_output_name_list(p_object, True, **kwargs)
