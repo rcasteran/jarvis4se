@@ -18,6 +18,10 @@ JARVIS4SE allows to define a new goal named <_goal name>_ through the following 
 <goal name> is a goal
 ```
 
+{% hint style="info" %}
+JARVIS4SE detects automatically a goal when using a command following the requirement text structure. Please refer to [#text](requirement-analysis.md#text "mention")
+{% endhint %}
+
 ### Attributes
 
 JARVIS4SE allows to define an attribute named _\<attribute name>_ for a goal named _\<goal name>_ through the following commands:
@@ -76,7 +80,7 @@ JARVIS4SE allows to define a new requirement named _\<requirement name>_ through
 ```
 
 {% hint style="info" %}
-JARVIS4SE detects automatically a requirement when using a command following the requirement text structure. Please refer to [#text-definition](requirement-analysis.md#text-definition "mention")
+JARVIS4SE detects automatically a requirement when using a command following the requirement text structure. Please refer to [#text-1](requirement-analysis.md#text-1 "mention")
 {% endhint %}
 
 ### Attributes
