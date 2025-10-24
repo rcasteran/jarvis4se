@@ -41,7 +41,7 @@ JARVIS4SE allows to define the text _\<goal\_text>_ of a goal named _\<goal name
 The text of <goal_name> is <goal_text>
 ```
 
-{% hint style="danger" %}
+{% hint style="warning" %}
 The text of a goal is handled as an attribute of the goal named "text".\
 Therefore:
 
@@ -51,9 +51,9 @@ Therefore:
 
 JARVIS4SE allows to structure the text _\<goal\_text>_ to define actor, subject and activity related to the goal as follows:
 
-| Goal   | Boilerplate                                                                  | Example                                                 |
-| ------ | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Simple | **As a** _\<actor name>_, **I want** _\<subject>_ **to** _\<activity name>_. | As a system engineer, I want JARVIS4SE to manage goals. |
+| Goal   | Boilerplate                                                                  | Example                                                             |
+| ------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Simple | **As a** _\<actor name>_, **I want** _\<subject>_ **to** _\<activity name>_. | **As a** system engineer, **I want** JARVIS4SE **to** manage goals. |
 
 ## Goal decomposition
 
@@ -102,7 +102,7 @@ JARVIS4SE allows to define the text _\<requirement\_text>_ of a requirement name
 The text of <requirement_name> is <requirement_text>
 ```
 
-{% hint style="danger" %}
+{% hint style="warning" %}
 The text of a requirement is handled as an attribute of the requirement named "text".\
 Therefore:
 
@@ -116,12 +116,12 @@ The text of a requirement must be a sentence containing the modal "shall".
 
 JARVIS4SE allows to structure the text _\<requirement\_text>_ to define conditions and temporality of the requirement as follows:
 
-| Requirement                     | Boilerplate                                                                                     | Example                                                                                                               |
-| ------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Simple                          | _\<subject>_ **shall** _\<object>_.                                                             | The system **shall** open the door.                                                                                   |
-| With conditions                 | **If** _\<condition list>_, **then** _\<subject>_ shall _\<object>_.                            | **If** the system detects an emergency stop, **then** the system **shall** open the door.                             |
-| With temporality only           | **When** _\<temporality>_, _\<subject>_ **shall** _\<object>_.                                  | **When** the system is stopped, the system **shall** open the door.                                                   |
-| With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject>_ shall _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system shall open the door. |
+| Requirement                     | Boilerplate                                                                                         | Example                                                                                                                   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Simple                          | _\<subject>_ **shall** _\<object>_.                                                                 | The system **shall** open the door.                                                                                       |
+| With conditions                 | **If** _\<condition list>_, **then** _\<subject>_ **shall** _\<object>_.                            | **If** the system detects an emergency stop, **then** the system **shall** open the door.                                 |
+| With temporality only           | **When** _\<temporality>_, _\<subject>_ **shall** _\<object>_.                                      | **When** the system is stopped, the system **shall** open the door.                                                       |
+| With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject>_ **shall** _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system **shall** open the door. |
 
 ## Requirement decomposition
 
