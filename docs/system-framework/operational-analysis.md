@@ -104,7 +104,7 @@ show context A
 
 ## Activity decomposition
 
-{% hint style="info" %}
+{% hint style="warning" %}
 An activity cannot be decomposed
 {% endhint %}
 
