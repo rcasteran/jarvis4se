@@ -55,9 +55,13 @@ Therefore:
 
 JARVIS4SE allows to structure the text _\<goal\_text>_ to define actor, subject and activity related to the goal as follows:
 
-| Goal   | Boilerplate                                                                  | Example                                                             |
-| ------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Simple | **As a** _\<actor name>_, **I want** _\<subject>_ **to** _\<activity name>_. | **As a** system engineer, **I want** JARVIS4SE **to** manage goals. |
+| Goal   | Boilerplate                                                                       | Example                                                             |
+| ------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Simple | **As a** _\<actor name>_, **I want** _\<subject name>_ **to** _\<activity name>_. | **As a** system engineer, **I want** JARVIS4SE **to** manage goals. |
+
+{% hint style="info" %}
+If a concept named \<actor name>, \<subject name> or \<activity name> already exists, and if this concept supports goal allocation, then JARVIS4SE will automatically allocate the goal to this concept.
+{% endhint %}
 
 ## Goal decomposition
 
@@ -120,12 +124,20 @@ The text of a requirement must be a sentence containing the modal "shall".
 
 JARVIS4SE allows to structure the text _\<requirement\_text>_ to define conditions and temporality of the requirement as follows:
 
-| Requirement                     | Boilerplate                                                                                         | Example                                                                                                                   |
-| ------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Simple                          | _\<subject>_ **shall** _\<object>_.                                                                 | The system **shall** open the door.                                                                                       |
-| With conditions                 | **If** _\<condition list>_, **then** _\<subject>_ **shall** _\<object>_.                            | **If** the system detects an emergency stop, **then** the system **shall** open the door.                                 |
-| With temporality only           | **When** _\<temporality>_, _\<subject>_ **shall** _\<object>_.                                      | **When** the system is stopped, the system **shall** open the door.                                                       |
-| With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject>_ **shall** _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system **shall** open the door. |
+| Requirement                     | Boilerplate                                                                                              | Example                                                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Simple                          | _\<subject name>_ **shall** _\<object>_.                                                                 | The system **shall** open the door.                                                                                       |
+| With conditions                 | **If** _\<condition list>_, **then** _\<subject name>_ **shall** _\<object>_.                            | **If** the system detects an emergency stop, **then** the system **shall** open the door.                                 |
+| With temporality only           | **When** _\<temporality>_, _\<subject name>_ **shall** _\<object>_.                                      | **When** the system is stopped, the system **shall** open the door.                                                       |
+| With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject name>_ **shall** _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system **shall** open the door. |
+
+{% hint style="info" %}
+If a concept named \<subject name> already exists, and if this concept supports requirement allocation, then JARVIS4SE will automatically allocate the requirement to this concept.
+{% endhint %}
+
+{% hint style="info" %}
+If a concept is named in \<object>, \<condition list>, or \<temporality>, then JARVIS4SE will automatically allocate the requirement to this concept.
+{% endhint %}
 
 ## Requirement decomposition
 
