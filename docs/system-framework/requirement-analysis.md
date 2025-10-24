@@ -60,7 +60,7 @@ JARVIS4SE allows to structure the text _\<goal\_text>_ to define actor, subject 
 | Simple | **As a** _\<actor name>_, **I want** _\<subject name>_ **to** _\<activity name>_. | **As a** system engineer, **I want** JARVIS4SE **to** manage goals. |
 
 {% hint style="info" %}
-If a concept named \<actor name>, \<subject name> or \<activity name> already exists, and if this concept supports goal allocation, then JARVIS4SE will automatically allocate the goal to this concept.
+If a concept named \<actor name>, \<subject name> or \<activity name> already exists, and if this concept supports goal satisfaction, then JARVIS4SE will automatically consider that this concept satisfies the goal.
 {% endhint %}
 
 ## Goal decomposition
@@ -132,11 +132,11 @@ JARVIS4SE allows to structure the text _\<requirement\_text>_ to define conditio
 | With conditions and temporality | **When** _\<temporality>_, **if** _\<condition list>_, **then** _\<subject name>_ **shall** _\<object>_. | **When** the system is stopped, **if** the system detects an emergency stop, **then** the system **shall** open the door. |
 
 {% hint style="info" %}
-If a concept named \<subject name> already exists, and if this concept supports requirement allocation, then JARVIS4SE will automatically allocate the requirement to this concept.
+If a concept named \<subject name> already exists, and if this concept supports requirement satisfaction, then JARVIS4SE will automatically consider that this concept satisfies the requirement.
 {% endhint %}
 
 {% hint style="info" %}
-If a concept is named in \<object>, \<condition list>, or \<temporality>, then JARVIS4SE will automatically allocate the requirement to this concept.
+If a concept is named in \<object>, \<condition list>, or \<temporality>, then JARVIS4SE will automatically consider that this concept satisfies the requirement.
 {% endhint %}
 
 ## Requirement decomposition
