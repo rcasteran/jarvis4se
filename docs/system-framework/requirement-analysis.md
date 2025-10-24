@@ -10,9 +10,50 @@ From a methodological point of view:
 
 ## Goal creation
 
-### Goal definition
+### Definition
 
-### Goal attributes
+JARVIS4SE allows to define a new goal named <_goal name>_ through the following command:
+
+```
+<goal name> is a goal
+```
+
+### Attributes
+
+JARVIS4SE allows to define an attribute named _\<attribute name>_ for a goal named _\<goal name>_ through the following commands:
+
+```
+<attribute name> is an attribute
+The <attribute name> of <goal name> is <attribute value>
+```
+
+The definition of an attribute implies to assign a value _\<attribute value>_ that characterizes the goal.
+
+{% hint style="info" %}
+The first command is only required when the attribute does not exist.
+{% endhint %}
+
+### Text
+
+JARVIS4SE allows to define the text _\<goal\_text>_ of a goal named _\<goal name>_ through the following command:
+
+```
+The text of <goal_name> is <goal_text>
+```
+
+{% hint style="danger" %}
+The text of a goal is handled as an attribute of the goal named "text".\
+Therefore:
+
+* Using this command multiple times for the same goal will only keep the latest text value.
+* JARVIS4SE does not allow to define a new attribute named "text"
+{% endhint %}
+
+JARVIS4SE allows to structure the text _\<goal\_text>_ to define actor, subject and activity related to the goal as follows:
+
+| Goal   | Boilerplate                                                                  | Example                                                 |
+| ------ | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Simple | **As a** _\<actor name>_, **I want** _\<subject>_ **to** _\<activity name>_. | As a system engineer, I want JARVIS4SE to manage goals. |
 
 ## Goal decomposition
 
@@ -34,6 +75,10 @@ JARVIS4SE allows to define a new requirement named _\<requirement name>_ through
 <requirement name> is a requirement
 ```
 
+{% hint style="info" %}
+JARVIS4SE detects automatically a requirement when using a command following the requirement text structure. Please refer to [#text-definition](requirement-analysis.md#text-definition "mention")
+{% endhint %}
+
 ### Attributes
 
 JARVIS4SE allows to define an attribute named _\<attribute name>_ for a requirement named _\<requirement name>_ through the following commands:
@@ -49,7 +94,7 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 The first command is only required when the attribute does not exist.
 {% endhint %}
 
-### Text definition
+### Text
 
 JARVIS4SE allows to define the text _\<requirement\_text>_ of a requirement named _\<requirement name>_ through the following command:
 
@@ -90,6 +135,9 @@ JARVIS4SE allows to derive a requirement named _\<requirement name>_ into derive
 
 ```
 <devreq 1 name> derives from <requirement name>
+```
+
+```
 <devreq 1 name>, <devreq 2 name> derive from <requirement name>
 ```
 

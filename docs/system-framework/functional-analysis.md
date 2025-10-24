@@ -33,6 +33,18 @@ The definition of an attribute implies to assign a value _\<attribute value>_ th
 The first command is only required when the attribute does not exist
 {% endhint %}
 
+### Information allocation
+
+JARVIS4SE allows to allocate an information named \<information name> to a data named \<data name> through one of the following commands:
+
+```
+<data name> allocates <information name>
+```
+
+```
+<information name> is allocated to <data name>
+```
+
 ## Function creation
 
 ### Definition
