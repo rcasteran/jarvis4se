@@ -39,8 +39,8 @@ def check_add_goal(p_str_list, **kwargs):
         desc_activity = p_str[2].replace('"', "")
 
         if not pattern_actor.startswith(f'The {datamodel.ObjectTextPropertyLabel} of '):
-            pattern_actor = re.compile(r'As a (.*?)', re.IGNORECASE).split(pattern_actor)
-            desc_actor = pattern_actor[2]
+            pattern_actor = re.compile(r'As a (.*?),', re.IGNORECASE).split(pattern_actor)
+            desc_actor = pattern_actor[1]
 
             # Retrieve the subject in object list
             goal_subject_object, _ = retrieve_goal_proper_noun_subject_object(desc_subject, **kwargs)
@@ -207,13 +207,13 @@ def detect_goal_pattern(p_str):
     @return goal actor, goal subject, goal activity
     """
     pattern = re.compile(datamodel.GOAL_PATTERN, re.IGNORECASE).split(p_str)
-    pattern_actor = re.compile(r'As a (.*?)', re.IGNORECASE).split(pattern[1])
+    pattern_actor = re.compile(r'As a (.*?),', re.IGNORECASE).split(pattern[1])
 
-    Logger.set_debug(__name__, f"Goal actor: {pattern_actor[2]}")
+    Logger.set_debug(__name__, f"Goal actor: {pattern_actor[1]}")
     Logger.set_debug(__name__, f"Goal subject: {pattern[2]}")
     Logger.set_debug(__name__, f"Goal activity: {pattern[3]}")
 
-    return pattern_actor[2].strip(), pattern[2].strip(), pattern[3].strip()
+    return pattern_actor[1].strip(), pattern[2].strip(), pattern[3].strip()
 
 
 def retrieve_goal_actor_object(p_str, **kwargs):
@@ -314,18 +314,12 @@ def retrieve_goal_proper_noun_activity_object(p_desc_activity, **kwargs):
     @return object
     """
     # Try to retrieve the object with the whole goal string
-    req_object = orchestrator_object.retrieve_object_by_name(p_desc_activity, **kwargs)
+    req_object = orchestrator_object.retrieve_object_by_name("to " + p_desc_activity, **kwargs)
 
     if req_object:
         is_error = False
     else:
-        # Try to retrieve the object with the whole goal string
-        req_object = orchestrator_object.retrieve_object_by_name("To" + p_desc_activity, **kwargs)
-
-        if req_object:
-            is_error = False
-        else:
-            is_error = True
+        is_error = True
 
     return req_object, is_error
 
