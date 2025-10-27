@@ -28,6 +28,7 @@ OBJ_ALLOCATION_TO_FUN_INTF_IDX = 7
 OBJ_ALLOCATION_TO_PHY_ELEM_IDX = 8
 OBJ_ALLOCATION_TO_PHY_INTF_IDX = 9
 OBJ_ALLOCATION_TO_VIEW_IDX = 10
+OBJ_ALLOCATION_TO_ACTIVITY_IDX = 11
 
 
 def check_add_allocation(allocation_str_list, **kwargs):
@@ -54,7 +55,8 @@ def check_add_allocation(allocation_str_list, **kwargs):
         OBJ_ALLOCATION_TO_FUN_INTF_IDX: [],  # [FunctionalInterface, Data/Requirement]
         OBJ_ALLOCATION_TO_PHY_ELEM_IDX: [],  # [PhysicalElement, FunctionalElement/Requirement]
         OBJ_ALLOCATION_TO_PHY_INTF_IDX: [],  # [PhysicalInterface, FunctionalInterface/Requirement]
-        OBJ_ALLOCATION_TO_VIEW_IDX: []  # [Function/Functional Element/Data, View]
+        OBJ_ALLOCATION_TO_VIEW_IDX: [],  # [Function/Functional Element/Data, View]
+        OBJ_ALLOCATION_TO_ACTIVITY_IDX: [] # [Activity, Goal]
     }
 
     cleaned_allocation_str_list = util.cut_tuple_list(allocation_str_list)
@@ -69,7 +71,8 @@ def check_add_allocation(allocation_str_list, **kwargs):
                XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
-               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST]
+               XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+               XML_DICT_KEY_10_ACTIVITY_LIST: kwargs[XML_DICT_KEY_10_ACTIVITY_LIST]
                })
         obj_to_alloc = orchestrator_object.retrieve_object_by_name(
             elem[1],
@@ -80,7 +83,8 @@ def check_add_allocation(allocation_str_list, **kwargs):
                XML_DICT_KEY_11_INFORMATION_LIST: kwargs[XML_DICT_KEY_11_INFORMATION_LIST],
                XML_DICT_KEY_2_FUN_ELEM_LIST: kwargs[XML_DICT_KEY_2_FUN_ELEM_LIST],
                XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
-               XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST]
+               XML_DICT_KEY_8_REQUIREMENT_LIST: kwargs[XML_DICT_KEY_8_REQUIREMENT_LIST],
+               XML_DICT_KEY_9_GOAL_LIST: kwargs[XML_DICT_KEY_9_GOAL_LIST]
                })
 
         if alloc_obj is None or obj_to_alloc is None:
@@ -96,6 +100,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
         else:
             is_improper_allocation = False
             is_req_already_allocated = False
+            is_goal_already_allocated = False
 
             # case OBJ_ALLOCATION_TO_DATA_IDX
             if isinstance(alloc_obj, datamodel.Data):
@@ -209,10 +214,20 @@ def check_add_allocation(allocation_str_list, **kwargs):
                         is_req_already_allocated = True
                 else:
                     is_improper_allocation = True
+            # case OBJ_ALLOCATION_TO_ACTIVITY_IDX
+            elif isinstance(alloc_obj, datamodel.Activity):
+                if isinstance(obj_to_alloc, datamodel.Goal):
+                    pair = check_allocation_goal(alloc_obj, obj_to_alloc, **kwargs)
+                    if pair:
+                        new_allocation_dict[OBJ_ALLOCATION_TO_ACTIVITY_IDX].append(pair)
+                    else:
+                        is_goal_already_allocated = True
+                else:
+                    is_improper_allocation = True
             else:
                 is_improper_allocation = True
 
-            if is_req_already_allocated:
+            if is_req_already_allocated or is_goal_already_allocated:
                 Logger.set_info(__name__,
                                 f"{obj_to_alloc.__class__.__name__} {obj_to_alloc.name} already satisfied by "
                                 f"{alloc_obj.__class__.__name__} {alloc_obj.name}")
@@ -444,6 +459,17 @@ def check_allocation_requirement(p_obj, p_req, **kwargs):
                                                                            **kwargs)
             # Else do nothing
         # Else do nothing
+    # Else do nothing
+
+    return pair
+
+
+def check_allocation_goal(p_obj, p_goal, **kwargs):
+    pair = None
+
+    if not any(allocated_goal_id == p_goal.id for allocated_goal_id in p_obj.allocated_goal_list):
+        p_obj.add_allocated_goal(p_goal.id)
+        pair = [p_obj, p_goal]
     # Else do nothing
 
     return pair
