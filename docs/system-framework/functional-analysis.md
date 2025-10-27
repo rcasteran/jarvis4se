@@ -179,9 +179,8 @@ JARVIS4SE allows to allocate an activity named \<activity name> to a function na
 
 JARVIS4SE allows to indicate that a function named \<function name> satisfies a requirement named \<requirement name> through one of the following commands:
 
-```
-<function name> satisfies <requirement name>
-```
+<pre><code><strong>&#x3C;function name> satisfies &#x3C;requirement name>
+</strong></code></pre>
 
 ```
 <requirement name> is satisfied by <function name>

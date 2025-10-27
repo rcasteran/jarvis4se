@@ -110,7 +110,16 @@ An activity cannot be decomposed
 
 ## Goal satisfaction
 
+### Goal satisfied by an activity
 
+JARVIS4SE allows to indicate that an activity named \<activity name> satisfies a goal named \<goal name> through one of the following commands:
+
+<pre><code><strong>&#x3C;activity name> satisfies &#x3C;goal name>
+</strong></code></pre>
+
+```
+<goal name> is satisfied by <activity name>
+```
 
 ## Operational chain
 
