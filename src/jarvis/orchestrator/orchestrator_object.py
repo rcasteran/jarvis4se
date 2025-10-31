@@ -421,262 +421,275 @@ def check_object_name_in_list(p_object_list):
 
 
 def check_object_relationship(p_object_src, p_object_dest, p_context, **kwargs):
-    if hasattr(p_object_src, 'type') and hasattr(p_object_dest, 'type'):
-        is_relationship = False
-        if isinstance(p_object_src.type, datamodel.BaseType):
-            object_src_type = p_object_src.type
-        else:
-            _, object_src_type = retrieve_type(p_object_src.type.name, True, **kwargs)
+    if p_object_src is not None and p_object_dest is not None:
+        if hasattr(p_object_src, 'type') and hasattr(p_object_dest, 'type'):
+            is_relationship = False
+            if isinstance(p_object_src.type, datamodel.BaseType):
+                object_src_type = p_object_src.type
+            else:
+                _, object_src_type = retrieve_type(p_object_src.type.name, True, **kwargs)
 
-        if isinstance(p_object_dest.type, datamodel.BaseType):
-            object_dest_type = p_object_dest.type
-        else:
-            _, object_dest_type = retrieve_type(p_object_dest.type.name, True, **kwargs)
+            if isinstance(p_object_dest.type, datamodel.BaseType):
+                object_dest_type = p_object_dest.type
+            else:
+                _, object_dest_type = retrieve_type(p_object_dest.type.name, True, **kwargs)
 
-        Logger.set_debug(__name__,
-                         f"Relationship detected in requirement/goal between {object_src_type} {p_object_src.name} and "
-                         f"{object_dest_type} {p_object_dest.name}")
-        if object_src_type == datamodel.BaseType.FUNCTION or object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-            # Relationship with DATA, ATTRIBUTE, FUNCTIONAL_ELEMENT
-            if object_dest_type == datamodel.BaseType.DATA:
-                if object_src_type == datamodel.BaseType.FUNCTION:
-                    xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
-                    xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
+            Logger.set_debug(__name__,
+                             f"Relationship detected in requirement/goal between {object_src_type} {p_object_src.name} and "
+                             f"{object_dest_type} {p_object_dest.name}")
+            if object_src_type == datamodel.BaseType.FUNCTION or object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+                # Relationship with DATA, ATTRIBUTE, FUNCTIONAL_ELEMENT
+                if object_dest_type == datamodel.BaseType.DATA:
+                    if object_src_type == datamodel.BaseType.FUNCTION:
+                        xml_consumer_function_list = kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]
+                        xml_producer_function_list = kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]
 
-                    for xml_consumer_function in xml_consumer_function_list:
-                        if xml_consumer_function[0] == p_object_dest and xml_consumer_function[1] == p_object_src:
-                            Logger.set_info(__name__,
-                                            f"{object_src_type} {p_object_src.name} consumes "
-                                            f"{object_dest_type} {p_object_dest.name}")
-                            is_relationship = True
-                            break
-
-                    if not is_relationship:
-                        for xml_producer_function in xml_producer_function_list:
-                            if xml_producer_function[0] == p_object_dest and xml_producer_function[1] == p_object_src:
+                        for xml_consumer_function in xml_consumer_function_list:
+                            if xml_consumer_function[0] == p_object_dest and xml_consumer_function[1] == p_object_src:
                                 Logger.set_info(__name__,
-                                                f"{object_src_type} {p_object_src.name} produces "
+                                                f"{object_src_type} {p_object_src.name} consumes "
                                                 f"{object_dest_type} {p_object_dest.name}")
                                 is_relationship = True
                                 break
-                    # Else do nothing
+
+                        if not is_relationship:
+                            for xml_producer_function in xml_producer_function_list:
+                                if xml_producer_function[0] == p_object_dest and xml_producer_function[1] == p_object_src:
+                                    Logger.set_info(__name__,
+                                                    f"{object_src_type} {p_object_src.name} produces "
+                                                    f"{object_dest_type} {p_object_dest.name}")
+                                    is_relationship = True
+                                    break
+                        # Else do nothing
+
+                        if not is_relationship:
+                            Logger.set_warning(__name__,
+                                               f"{object_src_type} {p_object_src.name} does not consume nor produce "
+                                               f"{object_dest_type} {p_object_dest.name}")
+                        # Else do nothing
+                    else:
+                        print("Data for Functional interface")
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    # Check if value of the attribute is in relationship context
+                    for described_object_id, value in p_object_dest.described_item_list:
+                        if described_object_id == p_object_src.id:
+                            is_relationship = True
+                            if value in p_context:
+                                Logger.set_info(__name__,
+                                                f"{object_dest_type} {p_object_dest.name} of "
+                                                f"{object_src_type} {p_object_src.name} has a value {value}")
+                            else:
+                                Logger.set_warning(__name__,
+                                                   f"Value of {object_dest_type} {p_object_dest.name} "
+                                                   f"for {object_src_type} {p_object_src.name} is not defined "
+                                                   f"by the relationship")
+                            break
+                        # Else do nothing
 
                     if not is_relationship:
                         Logger.set_warning(__name__,
-                                           f"{object_src_type} {p_object_src.name} does not consume nor produce "
-                                           f"{object_dest_type} {p_object_dest.name}")
+                                           f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
+                                           f"{object_src_type} {p_object_src.name}")
                     # Else do nothing
-                else:
-                    print("Data for Functional interface")
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                # Check if value of the attribute is in relationship context
-                for described_object_id, value in p_object_dest.described_item_list:
-                    if described_object_id == p_object_src.id:
-                        is_relationship = True
-                        if value in p_context:
+                elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                    if object_src_type == datamodel.BaseType.FUNCTION:
+                        if p_object_src.id in p_object_dest.allocated_function_list:
                             Logger.set_info(__name__,
-                                            f"{object_dest_type} {p_object_dest.name} of "
-                                            f"{object_src_type} {p_object_src.name} has a value {value}")
+                                            f"{object_dest_type} {p_object_dest.name} allocates "
+                                            f"{object_src_type} {p_object_src.name}")
+                            is_relationship = True
                         else:
                             Logger.set_warning(__name__,
-                                               f"Value of {object_dest_type} {p_object_dest.name} "
-                                               f"for {object_src_type} {p_object_src.name} is not defined "
-                                               f"by the relationship")
-                        break
+                                               f"{object_src_type} {p_object_src.name} is not allocated to "
+                                               f"{object_dest_type} {p_object_dest.name}")
+                    else:
+                        # TODO relationship between fun_elem and fun_intf
+                        print(f"Relationship detected between {object_src_type}: {p_object_src.name} and "
+                              f"{object_dest_type}: {p_object_dest.name}")
+                        print("Functional interface case")
+                elif object_dest_type == datamodel.BaseType.FUNCTION:
+                    if object_src_type == datamodel.BaseType.FUNCTION:
+                        # TODO investigate relationship based on inheritance
+                        is_relationship = True
                     # Else do nothing
-
-                if not is_relationship:
-                    Logger.set_warning(__name__,
-                                       f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
-                                       f"{object_src_type} {p_object_src.name}")
-                # Else do nothing
-            elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-                if object_src_type == datamodel.BaseType.FUNCTION:
-                    if p_object_src.id in p_object_dest.allocated_function_list:
+                elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+                    if object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+                        # TODO investigate relationship based on inheritance
+                        is_relationship = True
+                    # Else do nothing
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                # Relationship with FUNCTION, FUNCTIONAL_INTERFACE, STATE, ATTRIBUTE, DATA
+                if object_dest_type == datamodel.BaseType.FUNCTION:
+                    if p_object_dest.id in p_object_src.allocated_function_list:
                         Logger.set_info(__name__,
-                                        f"{object_dest_type} {p_object_dest.name} allocates "
-                                        f"{object_src_type} {p_object_src.name}")
+                                        f"{object_src_type} {p_object_src.name} allocates "
+                                        f"{object_dest_type} {p_object_dest.name}")
                         is_relationship = True
                     else:
                         Logger.set_warning(__name__,
-                                           f"{object_src_type} {p_object_src.name} is not allocated to "
-                                           f"{object_dest_type} {p_object_dest.name}")
-                else:
+                                           f"{object_dest_type} {p_object_dest.name} is not allocated to "
+                                           f"{object_src_type} {p_object_src.name}")
+                elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
                     # TODO relationship between fun_elem and fun_intf
                     print(f"Relationship detected between {object_src_type}: {p_object_src.name} and "
                           f"{object_dest_type}: {p_object_dest.name}")
                     print("Functional interface case")
-            elif object_dest_type == datamodel.BaseType.FUNCTION:
-                if object_src_type == datamodel.BaseType.FUNCTION:
-                    # TODO investigate relationship based on inheritance
-                    is_relationship = True
-                # Else do nothing
-            elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-                if object_src_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-                    # TODO investigate relationship based on inheritance
-                    is_relationship = True
-                # Else do nothing
-            else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-            # Relationship with FUNCTION, FUNCTIONAL_INTERFACE, STATE, ATTRIBUTE, DATA
-            if object_dest_type == datamodel.BaseType.FUNCTION:
-                if p_object_dest.id in p_object_src.allocated_function_list:
-                    Logger.set_info(__name__,
-                                    f"{object_src_type} {p_object_src.name} allocates "
-                                    f"{object_dest_type} {p_object_dest.name}")
-                    is_relationship = True
-                else:
-                    Logger.set_warning(__name__,
-                                       f"{object_dest_type} {p_object_dest.name} is not allocated to "
-                                       f"{object_src_type} {p_object_src.name}")
-            elif object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-                # TODO relationship between fun_elem and fun_intf
-                print(f"Relationship detected between {object_src_type}: {p_object_src.name} and "
-                      f"{object_dest_type}: {p_object_dest.name}")
-                print("Functional interface case")
-            elif object_dest_type == datamodel.BaseType.STATE:
-                if p_object_dest.id in p_object_src.allocated_state_list:
-                    Logger.set_info(__name__,
-                                    f"{object_src_type} {p_object_src.name} allocates "
-                                    f"{object_dest_type} {p_object_dest.name}")
-                    is_relationship = True
-                else:
-                    Logger.set_warning(__name__,
-                                       f"{object_dest_type} {p_object_dest.name} is not allocated to "
-                                       f"{object_src_type} {p_object_src.name}")
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                # Check if value of the attribute is in relationship context
-                for described_object_id, value in p_object_dest.described_item_list:
-                    if described_object_id == p_object_src.id:
+                elif object_dest_type == datamodel.BaseType.STATE:
+                    if p_object_dest.id in p_object_src.allocated_state_list:
+                        Logger.set_info(__name__,
+                                        f"{object_src_type} {p_object_src.name} allocates "
+                                        f"{object_dest_type} {p_object_dest.name}")
                         is_relationship = True
-                        if value in p_context:
-                            Logger.set_info(__name__,
-                                            f"{object_dest_type} {p_object_dest.name} of "
-                                            f"{object_src_type} {p_object_src.name} has a value {value}")
-                        else:
-                            Logger.set_warning(__name__,
-                                               f"Value of {object_dest_type} {p_object_dest.name} "
-                                               f"for {object_src_type} {p_object_src.name} is not defined "
-                                               f"by the relationship")
-                        break
-                    # Else do nothing
-
-                if not is_relationship:
-                    Logger.set_warning(__name__,
-                                       f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
-                                       f"{object_src_type} {p_object_src.name}")
-                # Else do nothing
-            elif object_dest_type == datamodel.BaseType.DATA:
-                for allocated_fun_id in p_object_src.allocated_function_list:
-                    for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
-                        if allocated_fun_id == xml_function.id:
-                            if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST] or
-                                    [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]):
-                                is_relationship = True
-                                break
-                            # Else do nothing
+                    else:
+                        Logger.set_warning(__name__,
+                                           f"{object_dest_type} {p_object_dest.name} is not allocated to "
+                                           f"{object_src_type} {p_object_src.name}")
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    # Check if value of the attribute is in relationship context
+                    for described_object_id, value in p_object_dest.described_item_list:
+                        if described_object_id == p_object_src.id:
+                            is_relationship = True
+                            if value in p_context:
+                                Logger.set_info(__name__,
+                                                f"{object_dest_type} {p_object_dest.name} of "
+                                                f"{object_src_type} {p_object_src.name} has a value {value}")
+                            else:
+                                Logger.set_warning(__name__,
+                                                   f"Value of {object_dest_type} {p_object_dest.name} "
+                                                   f"for {object_src_type} {p_object_src.name} is not defined "
+                                                   f"by the relationship")
+                            break
                         # Else do nothing
 
-                if not is_relationship:
-                    Logger.set_warning(__name__,
-                                       f"{object_src_type} {p_object_src.name} has no allocated function "
-                                       f"producing or consuming {object_dest_type} {p_object_dest.name}")
-                # Else do nothing
-            elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-                # TODO investigate relationship based on inheritance
-                is_relationship = True
-            else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
-            # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
-            if object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-                print("Functional element case")
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                print("Attribute case")
-            elif object_dest_type == datamodel.BaseType.PHYSICAL_ELEMENT:
-                # TODO investigate relationship based on inheritance
-                is_relationship = True
-            else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.PHYSICAL_INTERFACE:
-            # Relationship with FUNCTIONAL_INTERFACE, ATTRIBUTE
-            if object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-                print("Functional interface case")
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                print("Attribute case")
-            elif object_dest_type == datamodel.BaseType.PHYSICAL_INTERFACE:
-                # TODO investigate relationship based on inheritance
-                is_relationship = True
-            else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.STATE:
-            # Relationship with FUNCTION, FUNCTIONAL_ELEMENT, ATTRIBUTE
-            if object_dest_type == datamodel.BaseType.FUNCTION:
-                print("Function case")
-            elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-                print("Functional element case")
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                print("Attribute case")
-            elif object_dest_type == datamodel.BaseType.STATE:
-                # TODO investigate relationship based on inheritance
-                is_relationship = True
-            else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.TRANSITION:
-            # Relationship with STATE
-            if object_dest_type == datamodel.BaseType.STATE:
-                print("State case")
-            else:
-                # Warn about improper relationship between source type and destination type
-                print("Not supported")
-        elif object_src_type == datamodel.BaseType.ATTRIBUTE:
-            if object_dest_type == datamodel.BaseType.FUNCTION or \
-                    object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE or \
-                    object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT or \
-                    object_dest_type == datamodel.BaseType.PHYSICAL_INTERFACE or \
-                    object_dest_type == datamodel.BaseType.PHYSICAL_ELEMENT or \
-                    object_dest_type == datamodel.BaseType.STATE:
-                # Check if value of the attribute is in relationship context
-                for described_object_id, value in p_object_src.described_item_list:
-                    if described_object_id == p_object_dest.id:
-                        is_relationship = True
-                        if value in p_context:
-                            Logger.set_info(__name__,
-                                            f"{object_src_type} {p_object_src.name} of "
-                                            f"{object_dest_type} {p_object_dest.name} has a value {value}")
-                        else:
-                            Logger.set_warning(__name__,
-                                               f"Value of {object_src_type} {p_object_src.name} "
-                                               f"for {object_dest_type} {p_object_dest.name} is not defined "
-                                               f"by the relationship")
-                        break
+                    if not is_relationship:
+                        Logger.set_warning(__name__,
+                                           f"Value of {object_dest_type} {p_object_dest.name} is not defined for "
+                                           f"{object_src_type} {p_object_src.name}")
                     # Else do nothing
+                elif object_dest_type == datamodel.BaseType.DATA:
+                    for allocated_fun_id in p_object_src.allocated_function_list:
+                        for xml_function in kwargs[XML_DICT_KEY_1_FUNCTION_LIST]:
+                            if allocated_fun_id == xml_function.id:
+                                if ([p_object_dest, xml_function] in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST] or
+                                        [p_object_dest, xml_function] in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]):
+                                    is_relationship = True
+                                    break
+                                # Else do nothing
+                            # Else do nothing
 
-                if not is_relationship:
-                    Logger.set_warning(__name__,
-                                       f"Value of {object_src_type} {p_object_src.name} is not defined for "
-                                       f"{object_dest_type} {p_object_dest.name}")
-                # Else do nothing
-            elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
-                is_relationship = True
+                    if not is_relationship:
+                        Logger.set_warning(__name__,
+                                           f"{object_src_type} {p_object_src.name} has no allocated function "
+                                           f"producing or consuming {object_dest_type} {p_object_dest.name}")
+                    # Else do nothing
+                elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                    # TODO investigate relationship based on inheritance
+                    is_relationship = True
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+                # Relationship with FUNCTIONAL_ELEMENT, ATTRIBUTE
+                if object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                    print("Functional element case")
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    print("Attribute case")
+                elif object_dest_type == datamodel.BaseType.PHYSICAL_ELEMENT:
+                    # TODO investigate relationship based on inheritance
+                    is_relationship = True
+                elif object_dest_type == datamodel.BaseType.ACTIVITY:
+                    if p_object_dest.id in p_object_src.allocated_activity_list:
+                        Logger.set_info(__name__,
+                                        f"{object_src_type} {p_object_src.name} allocates "
+                                        f"{object_dest_type} {p_object_dest.name}")
+                        is_relationship = True
+                    else:
+                        Logger.set_warning(__name__,
+                                           f"{object_dest_type} {p_object_dest.name} is not allocated to "
+                                           f"{object_src_type} {p_object_src.name}")
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.PHYSICAL_INTERFACE:
+                # Relationship with FUNCTIONAL_INTERFACE, ATTRIBUTE
+                if object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
+                    print("Functional interface case")
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    print("Attribute case")
+                elif object_dest_type == datamodel.BaseType.PHYSICAL_INTERFACE:
+                    # TODO investigate relationship based on inheritance
+                    is_relationship = True
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.STATE:
+                # Relationship with FUNCTION, FUNCTIONAL_ELEMENT, ATTRIBUTE
+                if object_dest_type == datamodel.BaseType.FUNCTION:
+                    print("Function case")
+                elif object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+                    print("Functional element case")
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    print("Attribute case")
+                elif object_dest_type == datamodel.BaseType.STATE:
+                    # TODO investigate relationship based on inheritance
+                    is_relationship = True
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.TRANSITION:
+                # Relationship with STATE
+                if object_dest_type == datamodel.BaseType.STATE:
+                    print("State case")
+                else:
+                    # Warn about improper relationship between source type and destination type
+                    print("Not supported")
+            elif object_src_type == datamodel.BaseType.ATTRIBUTE:
+                if object_dest_type == datamodel.BaseType.FUNCTION or \
+                        object_dest_type == datamodel.BaseType.FUNCTIONAL_INTERFACE or \
+                        object_dest_type == datamodel.BaseType.FUNCTIONAL_ELEMENT or \
+                        object_dest_type == datamodel.BaseType.PHYSICAL_INTERFACE or \
+                        object_dest_type == datamodel.BaseType.PHYSICAL_ELEMENT or \
+                        object_dest_type == datamodel.BaseType.STATE:
+                    # Check if value of the attribute is in relationship context
+                    for described_object_id, value in p_object_src.described_item_list:
+                        if described_object_id == p_object_dest.id:
+                            is_relationship = True
+                            if value in p_context:
+                                Logger.set_info(__name__,
+                                                f"{object_src_type} {p_object_src.name} of "
+                                                f"{object_dest_type} {p_object_dest.name} has a value {value}")
+                            else:
+                                Logger.set_warning(__name__,
+                                                   f"Value of {object_src_type} {p_object_src.name} "
+                                                   f"for {object_dest_type} {p_object_dest.name} is not defined "
+                                                   f"by the relationship")
+                            break
+                        # Else do nothing
+
+                    if not is_relationship:
+                        Logger.set_warning(__name__,
+                                           f"Value of {object_src_type} {p_object_src.name} is not defined for "
+                                           f"{object_dest_type} {p_object_dest.name}")
+                    # Else do nothing
+                elif object_dest_type == datamodel.BaseType.ATTRIBUTE:
+                    is_relationship = True
+                else:
+                    # TODO Warn about improper relationship between source type and destination type
+                    print("Not supported")
             else:
-                # TODO Warn about improper relationship between source type and destination type
-                print("Not supported")
+                # Warn about improper object source type
+                print(f"Relationship not supported between {object_src_type}: {p_object_src.name} and "
+                      f"{object_dest_type}: {p_object_dest.name}")
+        elif hasattr(p_object_src, 'type') or hasattr(p_object_dest, 'type'):
+            # At least one of the object is a type: the requirement/goal itself is creating the relationship
+            is_relationship = True
         else:
-            # Warn about improper object source type
-            print(f"Relationship not supported between {object_src_type}: {p_object_src.name} and "
-                  f"{object_dest_type}: {p_object_dest.name}")
-    elif hasattr(p_object_src, 'type') or hasattr(p_object_dest, 'type'):
-        # At least one of the object is a type: the requirement/goal itself is creating the relationship
-        is_relationship = True
+            # The two object are types: they cannot be related
+            is_relationship = False
     else:
-        # The two object are types: they cannot be related
         is_relationship = False
 
     return is_relationship

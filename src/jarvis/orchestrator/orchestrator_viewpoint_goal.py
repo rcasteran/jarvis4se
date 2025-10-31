@@ -13,7 +13,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
     XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
     XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
-from . import orchestrator_object
+from . import orchestrator_object, orchestrator_object_allocation
 from tools import Logger
 from jarvis.handler import handler_question
 from jarvis import util
@@ -36,7 +36,7 @@ def check_add_goal(p_str_list, **kwargs):
     for p_str in p_str_list:
         pattern_actor = p_str[0].replace('"', "")
         desc_subject = p_str[1].replace('"', "")
-        desc_activity = p_str[2].replace('"', "")
+        desc_activity = "to " + p_str[2].replace('"', "")
 
         if not pattern_actor.startswith(f'The {datamodel.ObjectTextPropertyLabel} of '):
             pattern_actor = re.compile(r'As a (.*?),', re.IGNORECASE).split(pattern_actor)
@@ -48,17 +48,17 @@ def check_add_goal(p_str_list, **kwargs):
             if goal_subject_object:
                 if isinstance(goal_subject_object, datamodel.TypeWithAllocatedReqList):
                     Logger.set_info(__name__, f"Goal identified about {goal_subject_object.name}: "
-                                              f"As a {desc_actor}, I want {desc_subject} to "
+                                              f"As a {desc_actor}, I want {desc_subject} "
                                               f"{desc_activity}")
                 else:
                     Logger.set_info(__name__,
-                                    f"Goal identified: As a {desc_actor}, I want {desc_subject} to "
+                                    f"Goal identified: As a {desc_actor}, I want {desc_subject} "
                                     f"{desc_activity}")
                     Logger.set_warning(__name__,
                                        f'Subject "{desc_subject}" of the goal is unknown')
             else:
                 Logger.set_info(__name__, f"Goal identified: As a {desc_actor}, I want {desc_subject} "
-                                          f"to {desc_activity}")
+                                          f"{desc_activity}")
                 Logger.set_warning(__name__,
                                    f'Subject "{desc_subject}" of the goal is unknown')
 
@@ -90,7 +90,7 @@ def check_add_goal(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 goal_list.append([answer, f"As a {desc_actor}, I want {desc_subject} "
-                                                          f"to {desc_activity}",
+                                                          f"{desc_activity}",
                                                   goal_subject_object,
                                                   goal_allocated_object_list])
                         else:
@@ -100,12 +100,12 @@ def check_add_goal(p_str_list, **kwargs):
                                                  f"{answer} already exists")
                             else:
                                 goal_list.append([answer, f"As a {desc_actor}, I want {desc_subject} "
-                                                          f"to {desc_activity}",
+                                                          f"{desc_activity}",
                                                   goal_subject_object,
                                                   goal_allocated_object_list])
                     else:
                         goal_list.append([answer, f"As a {desc_actor}, I want {desc_subject} "
-                                                  f"to {desc_activity}",
+                                                  f"{desc_activity}",
                                           goal_subject_object,
                                           goal_allocated_object_list])
                 else:
@@ -170,6 +170,7 @@ def check_goal_relationship(p_goal_subject_object, p_desc_actor, p_desc_activity
     @return list of objects in relation with the object related to the goal subject
     """
     goal_object_list = []
+
     # Check goal actor content
     goal_actor_object, _ = retrieve_goal_proper_noun_actor_object(p_desc_actor, **kwargs)
     if p_goal_subject_object:
@@ -180,20 +181,24 @@ def check_goal_relationship(p_goal_subject_object, p_desc_actor, p_desc_activity
             # Relationship found in the datamodel between goal subject and goal
             # actor. Add it to the allocated object list.
             goal_object_list.append(goal_actor_object)
-        # Else do nothing
+        # Else do nothing : cannot create automatically this relationship because it requires
+        # physical interface
     # Else do nothing
 
     goal_activity_object, _ = retrieve_goal_proper_noun_activity_object(p_desc_activity, **kwargs)
     if p_goal_subject_object:
-        if orchestrator_object.check_object_relationship(p_goal_subject_object,
-                                                         goal_activity_object,
-                                                         p_desc_activity,
-                                                         **kwargs):
-            # Relationship found in the datamodel between goal subject and goal
-            # activity. Add it to the allocated object list.
-            goal_object_list.append(goal_activity_object)
+        if not orchestrator_object.check_object_relationship(p_goal_subject_object,
+                                                             goal_activity_object,
+                                                             p_desc_activity,
+                                                             **kwargs):
+            # Relationship not found in the datamodel between goal subject and goal
+            # activity. Create this relationship automatically because it is an allocation.
+            orchestrator_object_allocation.check_add_allocation([[p_goal_subject_object.name,
+                                                                 goal_activity_object.name]],
+                                                                **kwargs)
         # Else do nothing
-    # Else do nothing
+
+        goal_object_list.append(goal_activity_object)
 
     return goal_object_list
 
@@ -211,9 +216,9 @@ def detect_goal_pattern(p_str):
 
     Logger.set_debug(__name__, f"Goal actor: {pattern_actor[1]}")
     Logger.set_debug(__name__, f"Goal subject: {pattern[2]}")
-    Logger.set_debug(__name__, f"Goal activity: {pattern[3]}")
+    Logger.set_debug(__name__, f"Goal activity: {"to " + pattern[3]}")
 
-    return pattern_actor[1].strip(), pattern[2].strip(), pattern[3].strip()
+    return pattern_actor[1].strip(), pattern[2].strip(), "to " + pattern[3].strip()
 
 
 def retrieve_goal_actor_object(p_str, **kwargs):
@@ -314,7 +319,7 @@ def retrieve_goal_proper_noun_activity_object(p_desc_activity, **kwargs):
     @return object
     """
     # Try to retrieve the object with the whole goal string
-    req_object = orchestrator_object.retrieve_object_by_name("to " + p_desc_activity, **kwargs)
+    req_object = orchestrator_object.retrieve_object_by_name(p_desc_activity, **kwargs)
 
     if req_object:
         is_error = False
@@ -355,9 +360,8 @@ def add_goal(p_goal_list, **kwargs):
 
             # Test if any allocated object is identified in the goal subject
             if goal_item[2]:
-                for item in goal_item[2]:
-                    item.add_allocated_goal(new_goal.id)
-                    new_allocation_list.append([item, new_goal])
+                goal_item[2].add_allocated_goal(new_goal.id)
+                new_allocation_list.append([goal_item[2], new_goal])
             # Else do nothing
 
             # Test if any allocated object is identified in the goal actor or activity
