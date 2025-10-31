@@ -122,7 +122,7 @@ class Activity:
     outgoing exchanges.
     """
 
-    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.ACTIVITY, p_parent=None):
+    def __init__(self, p_id='', p_name='', p_alias='', p_type=BaseType.ACTIVITY):
         """
         @var id
         unique identifier
@@ -137,9 +137,6 @@ class Activity:
         activity type\n
         Could be @ref BaseType .ACTIVITY or a @ref Type based on @ref BaseType .ACTIVITY
 
-        @var parent
-        parent identifier
-
         @var allocated_goal_list
         allocated goal list
         """
@@ -148,8 +145,6 @@ class Activity:
         self.name = p_name
         self.alias = p_alias
         self.type = p_type
-        self.parent = p_parent
-        self.child_list = set()
         self.allocated_goal_list = set()
 
     def set_id(self, p_id):
@@ -184,14 +179,6 @@ class Activity:
         """
         self.type = p_type
 
-    def set_parent(self, p_parent):
-        """Set parent
-        @param[in] self this class instance
-        @param[in] p_parent identifier of the parent
-        @return None
-        """
-        self.parent = p_parent
-
     def add_allocated_goal(self, p_goal):
         """Add allocated goal to allocated_goal_list
         @param[in] self this class instance
@@ -208,7 +195,7 @@ class Activity:
         rep = util.str_type(self) + '\n'
         rep += util.str_alias(self) + '\n'
         # Activity cannot be derived
-        rep += util.str_parent(self)
+        # Activity has no parent
         # Activity has no child
         # Activity has no allocated requirement
         # Activity has no allocated data
@@ -226,7 +213,7 @@ class Activity:
         return {**util.info_type(self),
                 **util.info_alias(self),
                 # Activity cannot be derived
-                **util.info_parent(self),
+                # Activity has no parent
                 # Activity has no child
                 # Activity has no allocated requirement
                 # Activity has no allocated data

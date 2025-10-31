@@ -169,9 +169,6 @@ class XmlParser3SE:
                                            f" is satisfied by "
                                            f"activity [{activity.id}, {activity.name}]")
 
-        # Loop to set parent and child relationship
-        self.update_parental_relationship(parent_list, activity_list)
-
         return activity_list
 
     def parse_function_list(self):

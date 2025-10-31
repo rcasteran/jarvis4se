@@ -53,7 +53,7 @@ def check_add_allocation(allocation_str_list, **kwargs):
         OBJ_ALLOCATION_TO_STATE_RECURSIVELY_IDX: [],  # [State, Function/Requirement]
         OBJ_ALLOCATION_TO_TRANSITION_IDX: [], # [Transition, Requirement]
         OBJ_ALLOCATION_TO_FUN_INTF_IDX: [],  # [FunctionalInterface, Data/Requirement]
-        OBJ_ALLOCATION_TO_PHY_ELEM_IDX: [],  # [PhysicalElement, FunctionalElement/Requirement]
+        OBJ_ALLOCATION_TO_PHY_ELEM_IDX: [],  # [PhysicalElement, Activity/FunctionalElement/Requirement]
         OBJ_ALLOCATION_TO_PHY_INTF_IDX: [],  # [PhysicalInterface, FunctionalInterface/Requirement]
         OBJ_ALLOCATION_TO_VIEW_IDX: [],  # [Function/Functional Element/Data, View]
         OBJ_ALLOCATION_TO_ACTIVITY_IDX: [] # [Activity, Goal]

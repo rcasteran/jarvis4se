@@ -167,9 +167,6 @@ class CsvParser3SE:
                 # Else do nothing
             # Else do nothing
 
-        # Loop to set parent and child relationship
-        util.update_parental_relationship(parent_list, activity_list)
-
         return activity_list
 
     def parse_function_list(self):
