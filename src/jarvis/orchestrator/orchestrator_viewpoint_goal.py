@@ -214,9 +214,9 @@ def detect_goal_pattern(p_str):
     pattern = re.compile(datamodel.GOAL_PATTERN, re.IGNORECASE).split(p_str)
     pattern_actor = re.compile(r'As a (.*?),', re.IGNORECASE).split(pattern[1])
 
-    Logger.set_debug(__name__, f"Goal actor: {pattern_actor[1]}")
-    Logger.set_debug(__name__, f"Goal subject: {pattern[2]}")
-    Logger.set_debug(__name__, f"Goal activity: {"to " + pattern[3]}")
+    Logger.set_debug(__name__, f'Goal actor: {pattern_actor[1]}')
+    Logger.set_debug(__name__, f'Goal subject: {pattern[2]}')
+    Logger.set_debug(__name__, f'Goal activity: {"to " + pattern[3]}')
 
     return pattern_actor[1].strip(), pattern[2].strip(), "to " + pattern[3].strip()
 
