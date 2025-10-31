@@ -186,6 +186,8 @@ def case_context_diagram(**kwargs):
             fun_inter_alloc_inheritance,
             None,
             **kwargs)
+    elif object_str in query_object.query_object_name_in_list(kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST]):
+        plantuml_string = diagram_generator_parch.show_phy_elem_context(object_str, **kwargs)
     else:
         Logger.set_warning(__name__,
                            f"Jarvis does not know the function {object_str} or "
