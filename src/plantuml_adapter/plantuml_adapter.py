@@ -1151,14 +1151,28 @@ def get_exchanged_flows(consumer_function_list, producer_function_list, parent_c
     for producer_flow, producer_function in producer_function_list:
         Logger.set_debug(__name__, f'Producer flow: {producer_flow.name}; '
                                    f'function: {producer_function.id}, {producer_function.name}')
-        if not producer_function.child_list or not parent_child_dict:
+
+        if hasattr(producer_function, "child_list"):
+            is_child_list = producer_function.child_list
+        else:
+            is_child_list = False
+
+        if not is_child_list or not parent_child_dict:
             for cons_flow, consumer_function in consumer_function_list:
                 Logger.set_debug(__name__, f'Consumer flow: {cons_flow.name}; '
                                            f'function: {consumer_function.id}, {consumer_function.name}')
-                if (not consumer_function.child_list or not parent_child_dict) and cons_flow == producer_flow:
+
+                if hasattr(consumer_function, "child_list"):
+                    is_child_list = consumer_function.child_list
+                else:
+                    is_child_list = False
+
+                if (not is_child_list or not parent_child_dict) and cons_flow == producer_flow:
                     output_list.append(
                         [producer_function.name.lower(), consumer_function.name.lower(),
                          producer_flow.name])
+                # Else do nothing
+        # Else do nothing
 
     if concatenate:
         output_list = concatenate_flows(output_list)

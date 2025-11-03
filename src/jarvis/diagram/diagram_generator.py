@@ -878,7 +878,9 @@ def show_functions_sequence(function_name_list, xml_function_list, xml_consumer_
     for function_name in function_name_list:
         fun = query_object.query_object_by_name(function_name, **{XML_DICT_KEY_1_FUNCTION_LIST: xml_function_list})
         if fun:
-            fun.child_list.clear()
+            if hasattr(fun, "child_list"):
+                fun.child_list.clear()
+            # Else do nothing
             new_function_list.add(fun)
         else:
             Logger.set_warning(__name__, f'{function_name} is unknown')
