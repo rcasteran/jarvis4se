@@ -118,8 +118,10 @@ def check_add_specific_obj_by_type(obj_type_str_list, **kwargs):
     object_instance_per_base_type_list = [ObjectInstanceList(idx) for idx in
                                           range(ObjectInstanceList.nb_object_instance_base_type)]
 
+    cleaned_obj_type_str_list = util.cut_tuple_list(obj_type_str_list)
+
     # elem = [object_name, object_type]
-    for elem in obj_type_str_list:
+    for elem in cleaned_obj_type_str_list:
         object_name = elem[0].replace('"', "")
         object_type = elem[1].replace('"', "")
 
