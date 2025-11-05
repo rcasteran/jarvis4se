@@ -24,12 +24,21 @@ def query_object_by_name(p_obj_name_str, **kwargs):
 
 
 def query_object_type(p_object, **kwargs):
-    if isinstance(p_object.type, datamodel.BaseType):
-        object_type = p_object.type
+    if isinstance(p_object, datamodel.BaseType):
+        object_specific_type = None
+        object_base_type = p_object
+    elif isinstance(p_object, datamodel.Type):
+        object_specific_type = datamodel.Type
+        object_base_type = p_object.base
     else:
-        _, object_type = orchestrator_object.retrieve_type(p_object.type.name, True, **kwargs)
+        if isinstance(p_object.type, datamodel.BaseType):
+            # Same specification as orchestrator_object.retrieve_type
+            object_specific_type = None
+            object_base_type = p_object.type
+        else:
+            object_specific_type, object_base_type = orchestrator_object.retrieve_type(p_object.type.name, True, **kwargs)
 
-    return object_type
+    return object_specific_type, object_base_type
 
 
 def query_object_children_recursively(p_object, p_object_list=None, p_parent_child_dict=None, p_level_count=None,

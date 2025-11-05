@@ -12,7 +12,7 @@ from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, 
     XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
     XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
     XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
-from jarvis.query import query_object, question_answer
+from jarvis.query import query_object, query_viewpoint, question_answer
 from tools import Logger
 
 # Global variables
@@ -43,11 +43,16 @@ def list_object(p_str_list, **kwargs):
 
         wanted_object = query_object.query_object_by_name(object_name, **kwargs)
         if wanted_object is None:
-            Logger.set_error(__name__,
-                             f"Object '{object_name}' does not exist")
-        else:
-            object_type = query_object.query_object_type(wanted_object, **kwargs)
-            wanted_list = switch_object_list(type_name, wanted_object, object_type, is_list_transposed, **kwargs)
+            wanted_object = query_viewpoint.query_type_by_name(object_name, **kwargs)
+
+            if wanted_object is None:
+                Logger.set_error(__name__,
+                                 f"Object or type '{object_name}' does not exist")
+            # Else do nothing
+        # Else do nothing
+
+        if wanted_object is not None:
+            wanted_list = switch_object_list(type_name, wanted_object, is_list_transposed, **kwargs)
             if wanted_list:
                 answer_list.append(wanted_list)
             # Else do nothing
@@ -55,74 +60,85 @@ def list_object(p_str_list, **kwargs):
     return answer_list
 
 
-def switch_object_list(type_list_str, wanted_object, object_type, is_list_transposed, **kwargs):
+def switch_object_list(type_list_str, wanted_object, is_list_transposed, **kwargs):
     """Switch depending on list's type and object's type """
     object_list = {}
+    object_specific_type, object_base_type = query_object.query_object_type(wanted_object, **kwargs)
+
     # List child [Function/State/Functional element]
-    if type_list_str == "child" and object_type in (datamodel.BaseType.STATE,
-                       datamodel.BaseType.FUNCTION,
-                       datamodel.BaseType.FUNCTIONAL_ELEMENT):
-        object_list = get_child_list(wanted_object, object_type, is_list_transposed, **kwargs)
+    if (type_list_str == "child"
+            and object_base_type in (datamodel.BaseType.STATE,
+                                     datamodel.BaseType.FUNCTION,
+                                     datamodel.BaseType.FUNCTIONAL_ELEMENT)):
+        object_list = get_child_list(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List input [Activity/Function/Functional element]
-    elif type_list_str == "input" and object_type in (datamodel.BaseType.ACTIVITY,
-                                                      datamodel.BaseType.FUNCTION,
-                                                      datamodel.BaseType.FUNCTIONAL_ELEMENT):
-        object_list = get_input_list(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == "input"
+          and object_base_type in (datamodel.BaseType.ACTIVITY,
+                                   datamodel.BaseType.FUNCTION,
+                                   datamodel.BaseType.FUNCTIONAL_ELEMENT)):
+        object_list = get_input_list(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List output [Activity/Function/Functional element]
-    elif type_list_str == "output" and object_type in (datamodel.BaseType.ACTIVITY,
-                                                       datamodel.BaseType.FUNCTION,
-                                                       datamodel.BaseType.FUNCTIONAL_ELEMENT):
-        object_list = get_output_list(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == "output"
+          and object_base_type in (datamodel.BaseType.ACTIVITY,
+                                   datamodel.BaseType.FUNCTION,
+                                   datamodel.BaseType.FUNCTIONAL_ELEMENT)):
+        object_list = get_output_list(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List function [Functional element / State]
-    elif type_list_str == "function" and object_type in (datamodel.BaseType.STATE,
-                                                         datamodel.BaseType.FUNCTIONAL_ELEMENT):
-        object_list = get_allocated_function_table(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == str(datamodel.BaseType.FUNCTION).lower()
+          and object_base_type in (datamodel.BaseType.STATE, datamodel.BaseType.FUNCTIONAL_ELEMENT)):
+        object_list = get_allocated_function_table(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List transition [State]
-    elif type_list_str == "transition" and object_type == datamodel.BaseType.STATE:
-        object_list = get_state_transition(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == str(datamodel.BaseType.TRANSITION).lower()
+          and object_base_type == datamodel.BaseType.STATE):
+        object_list = get_state_transition(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List interface [Functional element]
-    elif type_list_str == "interface" and object_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
-        object_list = get_fun_elem_interface(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif type_list_str == "interface" and object_base_type == datamodel.BaseType.FUNCTIONAL_ELEMENT:
+        object_list = get_fun_elem_interface(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List activity [Physical element]
-    elif type_list_str == "activity" and object_type == datamodel.BaseType.PHYSICAL_ELEMENT:
-        object_list = get_phy_elem_allocated_activity_table(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == str(datamodel.BaseType.ACTIVITY).lower()
+          and object_base_type == datamodel.BaseType.PHYSICAL_ELEMENT):
+        object_list = get_phy_elem_allocated_activity_table(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
     # List data [Functional interface]
-    elif type_list_str == "data" and object_type == datamodel.BaseType.FUNCTIONAL_INTERFACE:
-        object_list = question_answer.get_fun_intf_data(wanted_object, object_type, is_list_transposed, **kwargs)
+    elif (type_list_str == str(datamodel.BaseType.DATA).lower()
+          and object_base_type == datamodel.BaseType.FUNCTIONAL_INTERFACE):
+        object_list = question_answer.get_fun_intf_data(wanted_object, object_base_type, is_list_transposed, **kwargs)
 
         if not object_list:
             Logger.set_info(__name__, f"Nothing to display for {type_list_str} list of '{wanted_object.name}'")
         # Else do nothing
+    # List all objects of a given type
+    elif type_list_str == 'type':
+        object_list = get_type_list(wanted_object, is_list_transposed, **kwargs)
     else:
-        report_no_list_available(wanted_object, object_type)
+        report_no_list_available(wanted_object, object_base_type)
 
     return object_list
 
@@ -398,6 +414,26 @@ def get_phy_elem_allocated_activity_table(wanted_object, _, is_list_transposed, 
         # Else do nothing
 
     return activity_dict
+
+
+def get_type_list(p_wanted_object, p_is_list_transposed, **kwargs):
+    type_dict = {}
+    type_list = query_viewpoint.query_type_object_name_list(p_wanted_object, **kwargs)
+
+    if type_list:
+        if p_is_list_transposed:
+            type_dict = {'title': f"Object list of type {p_wanted_object.name}:",
+                         'data': type_list,
+                         'columns': ["Object name", "Object type"],
+                         'transpose': 'y'}
+        else:
+            type_dict = {'title': f"Object list of type {p_wanted_object.name}:",
+                         'data': type_list,
+                         'columns': ["Object name", "Object type"]}
+
+    return type_dict
+
+
 
 def report_no_list_available(wanted_object, object_type):
     """Case when there is incompatible list's type with object's type """

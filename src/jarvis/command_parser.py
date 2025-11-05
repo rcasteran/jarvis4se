@@ -65,8 +65,7 @@ class CmdParser:
             (r"([^. |\n][^.|\n]*) is derived into ([^.|\n]*)", orchestrator_viewpoint_requirement.check_add_derived),
             (r"^show ([^.|\n]*)", self.matched_show),
             (r"^(.*?)\?", self.matched_question_mark),
-            (r"^list (input|output|child|data|function|transition|interface|activity|information|requirement|goal) "
-             r"([^.|\n]*)", CmdParser.matched_list),
+            (r"^list (.*?) ([^.|\n]*)", CmdParser.matched_list),
             (r"^import requirement from ([^.|\n]*) in column ([^.|\n]*)", CmdParser.matched_import),
             (r"^import ((?!requirement from)[^.|\n]*)", CmdParser.matched_import),
             (r"^export ([^.|\n]*)", CmdParser.matched_export),

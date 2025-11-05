@@ -5,6 +5,7 @@ Jarvis orchestrator module
 
 # Modules
 import datamodel
+from xml_adapter import XmlDictKeyListForObjects, XmlDictKeyDictForObjectBaseTypes
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
@@ -44,7 +45,7 @@ def check_add_type_extension(extends_str_list, **kwargs):
                             f'"{type_extension_name}" already exists')
             continue
 
-        type_to_extend = check_get_type_to_extend(type_to_extend_name, xml_type_list)
+        type_to_extend = retrieve_type_by_name(type_to_extend_name, **kwargs)
         if not type_to_extend:
             Logger.set_error(__name__,
                              f'Unable to find referenced type "{type_to_extend_name}"')
@@ -77,16 +78,40 @@ def check_add_type_extension(extends_str_list, **kwargs):
     return update
 
 
-def check_get_type_to_extend(type_str, xml_type_list):
+def retrieve_type_by_name(p_type_name, **kwargs):
     """Checks if type_str is within BaseType or xml_type_list, then return Basetype or
     type object"""
-    check = None
-    formatted_type_str = type_str.upper().replace(" ", "_")
+    type_object = None
+
+    formatted_type_str = p_type_name.upper().replace(" ", "_")
     if any(a == formatted_type_str for a in [i.name for i in datamodel.BaseType]):
-        return datamodel.BaseType[formatted_type_str]
+        type_object = datamodel.BaseType[formatted_type_str]
+    elif any(a == p_type_name
+             for a in orchestrator_object.check_object_name_in_list(kwargs[XML_DICT_KEY_14_TYPE_LIST])):
+        type_object = orchestrator_object.retrieve_object_by_name(p_type_name,
+                                                                  **{XML_DICT_KEY_14_TYPE_LIST:
+                                                                         kwargs[XML_DICT_KEY_14_TYPE_LIST]})
+    # Else do nothing
 
-    if any(a == type_str for a in orchestrator_object.check_object_name_in_list(xml_type_list)):
-        check = orchestrator_object.retrieve_object_by_name(type_str, **{XML_DICT_KEY_14_TYPE_LIST: xml_type_list})
-        return check
+    return type_object
 
-    return check
+
+def retrieve_type_object_name_list(p_type_object, **kwargs):
+    object_name_list = []
+
+    if hasattr(p_type_object, 'base'):
+        # Case type is a specific one: need to parse all dictionaries except type one
+        for i in range(len(XmlDictKeyListForObjects)-1):
+            for obj in kwargs[XmlDictKeyListForObjects[i]]:
+                if obj.type == p_type_object:
+                    object_name_list.append([obj.name, p_type_object.name])
+                # Else do nothing
+    else:
+        # Case type is a standard one
+        for obj in kwargs[XmlDictKeyDictForObjectBaseTypes[p_type_object]]:
+            if obj.type:
+                object_name_list.append([obj.name, obj.type.name])
+            else:
+                object_name_list.append([obj.name, str(p_type_object)])
+
+    return object_name_list

@@ -885,4 +885,22 @@ XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
                             util.XML_DICT_KEY_11_INFORMATION_LIST,
                             util.XML_DICT_KEY_12_ATTRIBUTE_LIST,
                             util.XML_DICT_KEY_13_VIEW_LIST,
-                            util.XML_DICT_KEY_14_TYPE_LIST]
+                            util.XML_DICT_KEY_14_TYPE_LIST  # Type dictionary shall be the last one for query
+                            ]
+
+XmlDictKeyDictForObjectBaseTypes = {
+    datamodel.BaseType.DATA: util.XML_DICT_KEY_0_DATA_LIST,
+    datamodel.BaseType.FUNCTION: util.XML_DICT_KEY_1_FUNCTION_LIST,
+    datamodel.BaseType.FUNCTIONAL_ELEMENT: util.XML_DICT_KEY_2_FUN_ELEM_LIST,
+    datamodel.BaseType.FUNCTIONAL_INTERFACE: util.XML_DICT_KEY_3_FUN_INTF_LIST,
+    datamodel.BaseType.PHYSICAL_ELEMENT: util.XML_DICT_KEY_4_PHY_ELEM_LIST,
+    datamodel.BaseType.PHYSICAL_INTERFACE: util.XML_DICT_KEY_5_PHY_INTF_LIST,
+    datamodel.BaseType.STATE: util.XML_DICT_KEY_6_STATE_LIST,
+    datamodel.BaseType.TRANSITION: util.XML_DICT_KEY_7_TRANSITION_LIST,
+    datamodel.BaseType.REQUIREMENT: util.XML_DICT_KEY_8_REQUIREMENT_LIST,
+    datamodel.BaseType.GOAL: util.XML_DICT_KEY_9_GOAL_LIST,
+    datamodel.BaseType.ACTIVITY: util.XML_DICT_KEY_10_ACTIVITY_LIST,
+    datamodel.BaseType.INFORMATION: util.XML_DICT_KEY_11_INFORMATION_LIST,
+    datamodel.BaseType.ATTRIBUTE: util.XML_DICT_KEY_12_ATTRIBUTE_LIST,
+    datamodel.BaseType.VIEW: util.XML_DICT_KEY_13_VIEW_LIST,
+}

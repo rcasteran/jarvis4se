@@ -922,7 +922,7 @@ def retrieve_object_input_name_list(p_object, p_is_sorted=True, **kwargs):
                         check = True
                         if elem[0] == flow:
                             for child in elem[1].child_list:
-                                if [elem[0], child] in XML_DICT_KEY_18_ACT_PROD_LIST:
+                                if [elem[0], child] in kwargs[XML_DICT_KEY_18_ACT_PROD_LIST]:
                                     check = False
                                 # Else do nothing
 
@@ -943,7 +943,7 @@ def retrieve_object_input_name_list(p_object, p_is_sorted=True, **kwargs):
                         check = True
                         if elem[0] == flow:
                             for child in elem[1].child_list:
-                                if [elem[0], child] in XML_DICT_KEY_16_FUN_PROD_LIST:
+                                if [elem[0], child] in kwargs[XML_DICT_KEY_16_FUN_PROD_LIST]:
                                     check = False
                                 # Else do nothing
 
@@ -1012,7 +1012,7 @@ def retrieve_object_output_name_list(p_object, p_is_sorted=True, **kwargs):
                         check = True
                         if elem[0] == flow:
                             for child in elem[1].child_list:
-                                if [elem[0], child] in XML_DICT_KEY_17_ACT_CONS_LIST:
+                                if [elem[0], child] in kwargs[XML_DICT_KEY_17_ACT_CONS_LIST]:
                                     check = False
                                 # Else do nothing
 
@@ -1033,7 +1033,7 @@ def retrieve_object_output_name_list(p_object, p_is_sorted=True, **kwargs):
                         check = True
                         if elem[0] == flow:
                             for child in elem[1].child_list:
-                                if [elem[0], child] in XML_DICT_KEY_15_FUN_CONS_LIST:
+                                if [elem[0], child] in kwargs[XML_DICT_KEY_15_FUN_CONS_LIST]:
                                     check = False
                                 # Else do nothing
 
