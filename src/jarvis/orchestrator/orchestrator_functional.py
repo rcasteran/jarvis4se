@@ -8,7 +8,8 @@ import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
-    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, XML_DICT_KEY_12_ATTRIBUTE_LIST, \
+    XML_DICT_KEY_9_GOAL_LIST, XML_DICT_KEY_10_ACTIVITY_LIST, XML_DICT_KEY_11_INFORMATION_LIST, \
+    XML_DICT_KEY_12_ATTRIBUTE_LIST, \
     XML_DICT_KEY_13_VIEW_LIST, XML_DICT_KEY_14_TYPE_LIST, XML_DICT_KEY_15_FUN_CONS_LIST, \
     XML_DICT_KEY_16_FUN_PROD_LIST, XML_DICT_KEY_17_ACT_CONS_LIST, XML_DICT_KEY_18_ACT_PROD_LIST
 from . import orchestrator_object, orchestrator_object_allocation, orchestrator_viewpoint_requirement
@@ -631,12 +632,16 @@ def check_add_transition_condition(trans_condition_str_list, **kwargs):
         if is_elem_found:
             for transition in xml_transition_list:
                 if transition_name == transition.name or transition_name == transition.alias:
-                    if not condition_str.lstrip(' ') in transition.condition_list:
-                        condition_list.append([transition, condition_str.lstrip(' ')])
-                    else:
+                    if condition_str in transition.condition_list:
                         Logger.set_info(__name__,
-                                        f'Condition "{condition_str.lstrip(" ")}" already exists '
+                                        f'Condition "{condition_str}" already exists '
                                         f'for transition {transition_name}')
+                    else:
+                        if all(s.find(condition_str) == -1 for s in transition.condition_list):
+                            condition_list.append([transition, condition_str])
+                        # Else do nothing : there is already a condition containing the proposed one
+                # Else do nothing
+        # Else do nothing
 
     check_condition_list_requirement(condition_list, **kwargs)
     update = add_transition_condition(condition_list, **kwargs)
