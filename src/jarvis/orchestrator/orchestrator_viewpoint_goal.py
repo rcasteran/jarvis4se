@@ -186,7 +186,7 @@ def check_goal_relationship(p_goal_subject_object, p_desc_actor, p_desc_activity
     # Else do nothing
 
     goal_activity_object, _ = retrieve_goal_proper_noun_activity_object(p_desc_activity, **kwargs)
-    if p_goal_subject_object:
+    if p_goal_subject_object and goal_activity_object is not None:
         if not orchestrator_object.check_object_relationship(p_goal_subject_object,
                                                              goal_activity_object,
                                                              p_desc_activity,

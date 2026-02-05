@@ -301,54 +301,59 @@ def add_producer_consumer_flow_recursively(flow, elem, current_list, opposite_li
         # Check that parent opposite flow is present (if any)
         is_warned, opposite_elem = check_opposite(flow, opposite_list, relationship_str, is_warned)
         if opposite_elem:
-            if opposite_elem == elem.parent:
-                if hasattr(opposite_elem, 'child_list'):
-                    if any([flow, child_f] in opposite_list for child_f in opposite_elem.child_list):
-                        remove_producer_consumer_opposite(flow, opposite_elem, opposite_list, output_xml,
-                                                          relationship_str)
-                    else:
-                        if relationship_str == 'consumer':
-                            Logger.set_error(__name__, f'{opposite_elem.name} is a producer of {flow.name} '
-                                                       f'but one of its child is a {relationship_str}')
+            if hasattr(opposite_elem, "parent"):
+                if opposite_elem == elem.parent:
+                    if hasattr(opposite_elem, 'child_list'):
+                        if any([flow, child_f] in opposite_list for child_f in opposite_elem.child_list):
+                            remove_producer_consumer_opposite(flow, opposite_elem, opposite_list, output_xml,
+                                                              relationship_str)
                         else:
-                            Logger.set_error(__name__, f'{opposite_elem.name} is a consumer of {flow.name} '
-                                                       f'but one of its child is a {relationship_str}')
-                # Else do nothing
-            elif opposite_elem.parent is not None and opposite_elem.parent != elem and \
-                    opposite_elem.parent != elem.parent:
-                if [flow, opposite_elem.parent] not in opposite_list:
-                    add_producer_consumer_opposite(flow, opposite_elem.parent, opposite_list, output_xml,
-                                                   relationship_str)
+                            if relationship_str == 'consumer':
+                                Logger.set_error(__name__, f'{opposite_elem.name} is a producer of {flow.name} '
+                                                           f'but one of its child is a {relationship_str}')
+                            else:
+                                Logger.set_error(__name__, f'{opposite_elem.name} is a consumer of {flow.name} '
+                                                           f'but one of its child is a {relationship_str}')
+                    # Else do nothing
+                elif opposite_elem.parent is not None and opposite_elem.parent != elem and \
+                        opposite_elem.parent != elem.parent:
+                    if [flow, opposite_elem.parent] not in opposite_list:
+                        add_producer_consumer_opposite(flow, opposite_elem.parent, opposite_list, output_xml,
+                                                       relationship_str)
+                    # Else do nothing
                 # Else do nothing
             # Else do nothing
         # Else do nothing
 
-    if elem.parent is not None:
-        parent_child_list, parent_child_dict = orchestrator_object.retrieve_object_children_recursively(elem.parent)
+    if hasattr(elem, "parent"):
+        if elem.parent is not None:
+            parent_child_list, parent_child_dict = orchestrator_object.retrieve_object_children_recursively(elem.parent)
 
-        if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
-            add_producer_consumer_flow_recursively(flow, elem.parent, current_list, opposite_list, new_list,
-                                                   output_xml,
-                                                   relationship_str,
-                                                   is_warned)
-        elif [flow, elem.parent] in opposite_list:
-            # Check that no other function needs the flow before removing it
-            ext_elem_list = []
-            for [current_flow, current_elem] in current_list:
-                if current_flow == flow:
-                    Logger.set_debug(__name__, f"[{current_flow.name}, {current_elem.name}] "
-                                               f"added in external element list")
-                    ext_elem_list.append([current_flow, current_elem])
+            if not any([flow, parent_child] in opposite_list for parent_child in parent_child_list):
+                add_producer_consumer_flow_recursively(flow, elem.parent, current_list, opposite_list, new_list,
+                                                       output_xml,
+                                                       relationship_str,
+                                                       is_warned)
+            elif [flow, elem.parent] in opposite_list:
+                # Check that no other function needs the flow before removing it
+                ext_elem_list = []
+                for [current_flow, current_elem] in current_list:
+                    if current_flow == flow:
+                        Logger.set_debug(__name__, f"[{current_flow.name}, {current_elem.name}] "
+                                                   f"added in external element list")
+                        ext_elem_list.append([current_flow, current_elem])
 
-            for parent_child in parent_child_list:
-                if [flow, parent_child] in ext_elem_list:
-                    ext_elem_list.remove([flow, parent_child])
+                for parent_child in parent_child_list:
+                    if [flow, parent_child] in ext_elem_list:
+                        ext_elem_list.remove([flow, parent_child])
 
-            if len(ext_elem_list) == 0:
-                remove_producer_consumer_opposite(flow, elem.parent, opposite_list, output_xml, relationship_str)
-            else:
-                Logger.set_debug(__name__, f"[{flow.name}, {elem.parent.name}] still needed")
+                if len(ext_elem_list) == 0:
+                    remove_producer_consumer_opposite(flow, elem.parent, opposite_list, output_xml, relationship_str)
+                else:
+                    Logger.set_debug(__name__, f"[{flow.name}, {elem.parent.name}] still needed")
+            # Else do nothing
         # Else do nothing
+    # Else do nothing
 
 
 def check_opposite(flow, opposite_list, relationship_str, is_warned):
@@ -410,8 +415,10 @@ def add_producer_consumer_opposite(flow, elem, flow_elem_list, output_xml, relat
         # Else do nothing
     # Else do nothing
 
-    if elem.parent:
-        add_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+    if hasattr(elem, "parent"):
+        if elem.parent:
+            add_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+        # Else do nothing
     # Else do nothing
 
 
@@ -448,8 +455,10 @@ def remove_producer_consumer_opposite(flow, elem, flow_elem_list, output_xml, re
         # Else do nothing
     # Else do nothing
 
-    if elem.parent and [flow, elem.parent] in flow_elem_list:
-        remove_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+    if hasattr(elem, "parent"):
+        if elem.parent and [flow, elem.parent] in flow_elem_list:
+            remove_producer_consumer_opposite(flow, elem.parent, flow_elem_list, output_xml, relationship_type)
+        # Else do nothing
     # Else do nothing
 
 
