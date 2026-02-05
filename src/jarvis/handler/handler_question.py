@@ -95,18 +95,21 @@ def question_object_info(p_object_str, **kwargs):
             wanted_object_info = wanted_object.info()
             if datamodel.INFO_KEY_REQUIREMENT_LIST in wanted_object.info()[1]:
                 wanted_object_req_list = wanted_object.info()[0][datamodel.INFO_KEY_REQUIREMENT_LIST]
-                wanted_object_req_name_list = ''
-                if '\n' in wanted_object_req_list:
-                    for wanted_object_req_id in wanted_object_req_list.split('\n'):
-                        wanted_object_req = query_object.query_object_by_id(wanted_object_req_id, **kwargs)
-                        if wanted_object_req:
-                            wanted_object_req_name_list += f'{wanted_object_req.name}\n'
-                        # Else do nothing
-                    wanted_object_req_name_list = wanted_object_req_name_list[:-1]
-                else:
-                    wanted_object_req_name_list = query_object.query_object_by_id(wanted_object_req_list, **kwargs)
+                if wanted_object_req_list != 'none':
+                    wanted_object_req_name_list = ''
+                    if '\n' in wanted_object_req_list:
+                        for wanted_object_req_id in wanted_object_req_list.split('\n'):
+                            wanted_object_req = query_object.query_object_by_id(wanted_object_req_id, **kwargs)
+                            if wanted_object_req:
+                                wanted_object_req_name_list += f'{wanted_object_req.name}\n'
+                            # Else do nothing
+                        wanted_object_req_name_list = wanted_object_req_name_list[:-1]
+                    else:
+                        wanted_object_req_name_list = query_object.query_object_by_id(wanted_object_req_list, **kwargs)
 
-                wanted_object_info[0][datamodel.INFO_KEY_REQUIREMENT_LIST] = wanted_object_req_name_list
+                    wanted_object_info[0][datamodel.INFO_KEY_REQUIREMENT_LIST] = wanted_object_req_name_list
+                # Else do nothing
+            # Else do nothing
 
             wanted_object_attribute_dict = {}
             wanted_object_type_requirement_list = query_object.query_object_type_requirement_list(wanted_object,
