@@ -89,6 +89,7 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
                XML_DICT_KEY_3_FUN_INTF_LIST: kwargs[XML_DICT_KEY_3_FUN_INTF_LIST],
                XML_DICT_KEY_4_PHY_ELEM_LIST: kwargs[XML_DICT_KEY_4_PHY_ELEM_LIST],
                XML_DICT_KEY_5_PHY_INTF_LIST: kwargs[XML_DICT_KEY_5_PHY_INTF_LIST],
+               XML_DICT_KEY_11_INFORMATION_LIST: kwargs[XML_DICT_KEY_11_INFORMATION_LIST]
                })
         attribute_wanted = orchestrator_object.retrieve_object_by_name(
             attribute_name,
@@ -96,8 +97,9 @@ def check_add_object_attribute(described_attribute_list, **kwargs):
                })
         if obj_to_set is None or attribute_wanted is None:
             Logger.set_warning(__name__,
-                               f"{attribute_name} do not exist and {object_name} neither or {object_name} is not a:\n"
+                               f"{attribute_name} do not exist and {object_name} neither, or {object_name} is not a:\n"
                                "- Function\n"
+                               "- Information\n"
                                "- Data\n"
                                "- Transition\n"
                                "- Functional element\n"
