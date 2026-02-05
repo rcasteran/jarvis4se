@@ -17,11 +17,6 @@ from . import query_object
 from tools import Logger
 
 
-def get_consumes_produces_info(wanted_object, relationship_list):
-    """Get consumes/produces info"""
-
-
-
 def get_child_name_list(parent_object, object_list):
     """Get child's name list"""
     child_list = set()

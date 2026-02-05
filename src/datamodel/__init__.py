@@ -48,3 +48,5 @@ from .datamodel import ObjectTypePropertyLabel
 from .datamodel import ObjectAliasPropertyLabel
 from .datamodel import ObjectSourcePropertyLabel
 from .datamodel import ObjectDestinationPropertyLabel
+
+from .util import INFO_KEY_REQUIREMENT_LIST

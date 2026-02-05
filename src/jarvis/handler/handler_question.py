@@ -4,6 +4,7 @@ Jarvis handler module
 # Libraries
 
 # Modules
+import datamodel
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
@@ -91,11 +92,23 @@ def question_object_info(p_object_str, **kwargs):
 
             info_obj_format = ANSWER_FORMAT_STRING
         else:
-            wanted_object_attribute_dict = {}
-            wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
-            for wanted_object_attribute in wanted_object_attribute_list:
-                wanted_object_attribute_dict[wanted_object_attribute[0]] = wanted_object_attribute[1]
+            wanted_object_info = wanted_object.info()
+            if datamodel.INFO_KEY_REQUIREMENT_LIST in wanted_object.info()[1]:
+                wanted_object_req_list = wanted_object.info()[0][datamodel.INFO_KEY_REQUIREMENT_LIST]
+                wanted_object_req_name_list = ''
+                if '\n' in wanted_object_req_list:
+                    for wanted_object_req_id in wanted_object_req_list.split('\n'):
+                        wanted_object_req = query_object.query_object_by_id(wanted_object_req_id, **kwargs)
+                        if wanted_object_req:
+                            wanted_object_req_name_list += f'{wanted_object_req.name}\n'
+                        # Else do nothing
+                    wanted_object_req_name_list = wanted_object_req_name_list[:-1]
+                else:
+                    wanted_object_req_name_list = query_object.query_object_by_id(wanted_object_req_list, **kwargs)
 
+                wanted_object_info[0][datamodel.INFO_KEY_REQUIREMENT_LIST] = wanted_object_req_name_list
+
+            wanted_object_attribute_dict = {}
             wanted_object_type_requirement_list = query_object.query_object_type_requirement_list(wanted_object,
                                                                                                   **kwargs)
             if len(wanted_object_type_requirement_list) > 0:
@@ -108,9 +121,13 @@ def question_object_info(p_object_str, **kwargs):
             else:
                 wanted_object_attribute_dict['inherited requirement list'] = 'none'
 
+            wanted_object_attribute_list = query_object.query_object_attribute_properties_list(wanted_object, **kwargs)
+            for wanted_object_attribute in wanted_object_attribute_list:
+                wanted_object_attribute_dict[wanted_object_attribute[0]] = wanted_object_attribute[1]
+
             info_obj = {'title': f"Object {wanted_object.name}:",
-                        'data': {**wanted_object.info()[0], **wanted_object_attribute_dict},
-                        'columns': [*wanted_object.info()[1], *wanted_object_attribute_dict.keys()],
+                        'data': {**wanted_object_info[0], **wanted_object_attribute_dict},
+                        'columns': [*wanted_object_info[1], *wanted_object_attribute_dict.keys()],
                         'index': [0]}
 
             info_obj_format = ANSWER_FORMAT_DICT

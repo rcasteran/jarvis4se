@@ -6,7 +6,7 @@ import re
 
 # Modules
 import datamodel
-from xml_adapter import XmlDictKeyListForObjects
+from xml_adapter import XmlDictKeyListForObjects, XmlDictKeyListForTypeIndex
 from xml_adapter import XML_DICT_KEY_0_DATA_LIST, XML_DICT_KEY_1_FUNCTION_LIST, XML_DICT_KEY_2_FUN_ELEM_LIST, \
     XML_DICT_KEY_3_FUN_INTF_LIST, XML_DICT_KEY_4_PHY_ELEM_LIST, XML_DICT_KEY_5_PHY_INTF_LIST, \
     XML_DICT_KEY_6_STATE_LIST, XML_DICT_KEY_7_TRANSITION_LIST, XML_DICT_KEY_8_REQUIREMENT_LIST, \
@@ -301,6 +301,48 @@ def retrieve_object_parents_recursively(p_object, p_object_list=None):
     return p_object_list
 
 
+def retrieve_object_by_id(p_obj_id, **kwargs):
+    whole_objects_id_list = check_object_id_in_dict(**kwargs)
+
+    result = [False] * len(XmlDictKeyListForObjects)
+    for i in range(len(XmlDictKeyListForObjects)):
+        result[i] = any(a == p_obj_id for a in whole_objects_id_list[i])
+
+    wanted_object = match_object_by_id(p_obj_id, result, p_xml_str_lists=XmlDictKeyListForObjects, **kwargs)
+
+    return wanted_object
+
+
+def match_object_by_id(p_obj_id, p_obj_list_filter, p_obj_list=None, **kwargs):
+    """Returns wanted_object from object_str and result matched from name lists"""
+    if not p_obj_list:
+        p_obj_list = XmlDictKeyListForObjects
+    # Else do nothing
+
+    for i in range(len(p_obj_list)):
+        if p_obj_list_filter[i]:
+            for obj in kwargs[p_obj_list[i]]:
+                if p_obj_id == obj.id:
+                    return obj
+        # Else do nothing
+    return None
+
+
+def check_object_id_in_dict(**kwargs):
+    """Returns lists of objects with their names depending on kwargs"""
+    whole_objects_id_list = [[] for _ in range(len(XmlDictKeyListForObjects))]
+    for i in range(len(XmlDictKeyListForObjects)):
+        if kwargs.get(XmlDictKeyListForObjects[i], False):
+            object_id_list = []
+            for obj in kwargs[XmlDictKeyListForObjects[i]]:
+                object_id_list.append(obj.id)
+
+            whole_objects_id_list[i] = object_id_list
+        # Else do nothing
+
+    return whole_objects_id_list
+
+
 def retrieve_object_by_name(p_obj_name_str, **kwargs):
     """
     Returns the desired object from object's string
@@ -311,37 +353,49 @@ def retrieve_object_by_name(p_obj_name_str, **kwargs):
     Returns:
         wanted_object : Function/State/Data/Fun_Elem/Transition/Fun_Inter
     """
-    wanted_object = None
     whole_objects_name_list = check_object_name_in_dict(**kwargs)
 
-    if any(p_obj_name_str in s for s in whole_objects_name_list):
-        result = [False] * len(XmlDictKeyListForObjects)
-        for i in range(len(XmlDictKeyListForObjects)):
+    result = [False] * len(XmlDictKeyListForObjects)
+    for i in range(len(XmlDictKeyListForObjects)):
+        if i == XmlDictKeyListForTypeIndex:
+            result[i] = any(a.lower() == p_obj_name_str.lower() for a in whole_objects_name_list[i])
+        else:
             result[i] = any(a == p_obj_name_str for a in whole_objects_name_list[i])
 
-        wanted_object = match_object(p_obj_name_str, result, p_xml_str_lists=XmlDictKeyListForObjects, **kwargs)
-    # Else do nothing
+    wanted_object = match_object_by_name(p_obj_name_str, result, p_obj_list=XmlDictKeyListForObjects, **kwargs)
 
     return wanted_object
 
 
-def match_object(object_str, result, p_xml_str_lists=None, **kwargs):
+def match_object_by_name(p_obj_str, p_obj_list_filter, p_obj_list=None, **kwargs):
     """Returns wanted_object from object_str and result matched from name lists"""
-    # Because match_object() called within match_allocated() TBC/TBT if match_allocated()
-    # still needed
-    if not p_xml_str_lists:
-        p_xml_str_lists = XmlDictKeyListForObjects
-    for i in range(len(p_xml_str_lists)):
-        if result[i]:
-            for obj in kwargs[p_xml_str_lists[i]]:
-                if object_str == obj.name:
-                    return obj
-                try:
-                    if object_str == obj.alias:
+    if not p_obj_list:
+        p_obj_list = XmlDictKeyListForObjects
+    # Else do nothing
+
+    for i in range(len(p_obj_list)):
+        if p_obj_list_filter[i]:
+            if i == XmlDictKeyListForTypeIndex:
+                for obj in kwargs[p_obj_list[i]]:
+                    if p_obj_str.lower() == obj.name.lower():
                         return obj
-                except AttributeError:
-                    # To avoid error when there is no alias for the object
-                    pass
+
+                    if hasattr(obj, "alias"):
+                        if p_obj_str.lower() == obj.alias.lower():
+                            return obj
+                        # ELse do nothing
+                    # Else do nothing
+            else:
+                for obj in kwargs[p_obj_list[i]]:
+                    if p_obj_str == obj.name:
+                        return obj
+
+                    if hasattr(obj, "alias"):
+                        if p_obj_str == obj.alias:
+                            return obj
+                        # ELse do nothing
+                    # Else do nothing
+        # Else do nothing
     return None
 
 

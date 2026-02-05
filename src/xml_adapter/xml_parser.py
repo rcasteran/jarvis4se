@@ -887,6 +887,7 @@ XmlDictKeyListForObjects = [util.XML_DICT_KEY_0_DATA_LIST,
                             util.XML_DICT_KEY_13_VIEW_LIST,
                             util.XML_DICT_KEY_14_TYPE_LIST  # Type dictionary shall be the last one for query
                             ]
+XmlDictKeyListForTypeIndex = 14
 
 XmlDictKeyDictForObjectBaseTypes = {
     datamodel.BaseType.DATA: util.XML_DICT_KEY_0_DATA_LIST,

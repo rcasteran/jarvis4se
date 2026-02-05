@@ -4,6 +4,7 @@ Module for 3SE xml parsing and writing
 from .xml_writer import XmlWriter3SE
 from .xml_parser import XmlParser3SE
 from .xml_parser import XmlDictKeyListForObjects
+from .xml_parser import XmlDictKeyListForTypeIndex
 from .xml_parser import XmlDictKeyDictForObjectBaseTypes
 from .util import XML_DICT_KEY_0_DATA_LIST
 from .util import XML_DICT_KEY_1_FUNCTION_LIST

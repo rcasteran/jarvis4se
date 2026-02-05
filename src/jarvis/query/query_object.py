@@ -23,6 +23,10 @@ def query_object_by_name(p_obj_name_str, **kwargs):
     return orchestrator_object.retrieve_object_by_name(p_obj_name_str, **kwargs)
 
 
+def query_object_by_id(p_obj_id, **kwargs):
+    return orchestrator_object.retrieve_object_by_id(p_obj_id, **kwargs)
+
+
 def query_object_type(p_object, **kwargs):
     if isinstance(p_object, datamodel.BaseType):
         object_specific_type = None
